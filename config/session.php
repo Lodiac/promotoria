@@ -64,6 +64,7 @@ function hasRole($rol_requerido) {
  */
 function requireLogin() {
     if (!isLoggedIn()) {
+        // CORREGIDO: redirigir a index.html, no login.html
         header('Location: ../index.html');
         exit;
     }
@@ -86,7 +87,7 @@ function requireRole($rol_requerido) {
     requireLogin();
     
     if (!hasRole($rol_requerido)) {
-        // Redirigir a index con error de permisos
+        // CORREGIDO: Redirigir a index.html con error de permisos
         header('Location: ../index.html?error=sin_permisos');
         exit;
     }

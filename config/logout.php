@@ -36,11 +36,11 @@ try {
         error_log("Logout exitoso - Usuario: {$usuario_info['username']} - IP: " . $_SERVER['REMOTE_ADDR']);
     }
     
-    // Respuesta exitosa
+    // Respuesta exitosa - CORREGIDO: redirigir a index.html
     echo json_encode([
         'success' => true,
         'message' => 'Sesión cerrada correctamente',
-        'redirect' => '../login.html?logout=1'
+        'redirect' => '../index.html?logout=1'
     ]);
     
 } catch (Exception $e) {
@@ -52,7 +52,7 @@ try {
         session_destroy();
     }
     
-    // Respuesta con error pero indicando que se forzó el logout
+    // Respuesta con error pero indicando que se forzó el logout - CORREGIDO
     echo json_encode([
         'success' => true, // Considerar exitoso para que redirija
         'message' => 'Sesión cerrada (con errores)',

@@ -306,13 +306,14 @@
                     if (data.success) {
                         mostrarInfoUsuario(data.usuario);
                     } else {
-                        // Redirigir al login si no hay sesión
-                        window.location.href = '../login.html?error=sin_sesion';
+                        // CORREGIDO: Redirigir a index.html, no login.html
+                        window.location.href = '../index.html?error=sin_sesion';
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    window.location.href = '../login.html?error=error_sesion';
+                    // CORREGIDO: Redirigir a index.html, no login.html  
+                    window.location.href = '../index.html?error=error_sesion';
                 });
         }
 
