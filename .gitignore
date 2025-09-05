@@ -1,0 +1,30 @@
+# Archivos y carpetas específicos del sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode
+# Archivos de entorno con información sensible
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Dependencias
+/node_modules
+/vendor
+
+# Archivos de construcción
+/build
+/dist
+
+# Archivos de caché
+.cache/
+.sass-cache/
+*.log
+
+# Archivos de configuración IDE
+.idea/
+.vscode/
+*.sublime-workspace
+*.sublime-project
