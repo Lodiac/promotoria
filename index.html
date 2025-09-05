@@ -107,17 +107,11 @@
     <script>
         let isSubmitting = false;
         
-        // Inicializar al cargar
+        // Inicializar al cargar - SIMPLIFICADO
         document.addEventListener('DOMContentLoaded', function() {
             handleURLMessages();
             checkConnectionStatus();
             document.getElementById('username').focus();
-            
-            // CORREGIDO: Solo verificar sesión si NO viene de logout
-            const urlParams = new URLSearchParams(window.location.search);
-            if (!urlParams.has('logout')) {
-                checkExistingSession();
-            }
         });
 
         // Manejar envío del formulario
@@ -294,25 +288,6 @@
                 text.textContent = 'Sin conexión';
                 status.className = 'connection-status offline';
             }
-        }
-
-        // Verificar sesión existente (CORREGIDO)
-        function checkExistingSession() {
-            fetch('config/verificar_sesion.php', {
-                cache: 'no-cache'
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        showMessage(`Redirigiendo como ${data.usuario.username}...`, 'success');
-                        setTimeout(() => {
-                            window.location.href = 'pages/dashboard.html';
-                        }, 1500);
-                    }
-                })
-                .catch(() => {
-                    // No hay sesión, continuar normal
-                });
         }
 
         // Verificar conexión cada 30 segundos

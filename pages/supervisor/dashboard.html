@@ -3,373 +3,796 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Sistema</title>
+    <title>Sistema Promotoria - Panel de Control</title>
+    
+    <!-- Fuentes -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
+        /* ===== RESET Y BASE ===== */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
+        
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             color: #333;
+            overflow-x: hidden;
         }
-
-        .dashboard-container {
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-
+        
+        /* ===== HEADER ===== */
         .header {
             background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
             padding: 1rem 2rem;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
         }
-
-        .header h1 {
-            color: #333;
-            font-size: 1.8rem;
-        }
-
-        .user-info {
+        
+        .header-logo {
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 12px;
         }
-
-        .user-details {
-            text-align: right;
-        }
-
-        .user-name {
-            font-weight: 600;
-            color: #333;
-        }
-
-        .user-role {
-            font-size: 0.9rem;
-            color: #666;
-            text-transform: capitalize;
-        }
-
-        .logout-btn {
-            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-
-        .logout-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
-        }
-
-        .main-content {
-            flex: 1;
-            padding: 2rem;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-        }
-
-        .card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 2rem;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-        }
-
-        .card h3 {
-            color: #333;
-            margin-bottom: 1rem;
-            font-size: 1.3rem;
-        }
-
-        .card p {
-            color: #666;
-            line-height: 1.6;
-            margin-bottom: 1rem;
-        }
-
-        .card-icon {
-            width: 50px;
-            height: 50px;
+        
+        .logo-icon {
+            width: 40px;
+            height: 40px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
+            font-size: 1.2rem;
+        }
+        
+        .logo-text {
             font-size: 1.5rem;
-            margin-bottom: 1rem;
+            font-weight: 700;
+            color: #333;
         }
-
-        .welcome-card {
-            grid-column: 1 / -1;
-            text-align: center;
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        
+        .user-header-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
         }
-
-        .welcome-card h2 {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+        
+        .user-name {
+            color: #333;
+            font-weight: 600;
         }
-
-        .role-badge {
-            display: inline-block;
-            padding: 5px 15px;
+        
+        .user-role {
+            padding: 4px 12px;
             border-radius: 20px;
             font-size: 0.8rem;
             font-weight: 600;
             text-transform: uppercase;
-            margin-left: 10px;
+            letter-spacing: 0.5px;
         }
-
-        .role-root {
-            background: #e74c3c;
+        
+        .user-role.root {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
             color: white;
         }
-
-        .role-supervisor {
-            background: #f39c12;
+        
+        .user-role.supervisor {
+            background: linear-gradient(135deg, #f39c12, #d68910);
             color: white;
         }
-
-        .role-usuario {
-            background: #27ae60;
+        
+        .user-role.usuario {
+            background: linear-gradient(135deg, #27ae60, #229954);
             color: white;
         }
-
-        .session-info {
-            background: #f8f9fa;
-            padding: 1rem;
+        
+        .logout-btn {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            border: none;
+            padding: 10px 16px;
             border-radius: 8px;
-            margin-top: 1rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
-
-        .session-info h4 {
-            color: #333;
-            margin-bottom: 0.5rem;
+        
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(231, 76, 60, 0.3);
         }
-
-        .session-info p {
-            font-size: 0.9rem;
+        
+        /* ===== CONTAINER PRINCIPAL ===== */
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+            padding-top: 80px;
+        }
+        
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            width: 280px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 2rem 0;
+            position: fixed;
+            left: 0;
+            top: 80px;
+            bottom: 0;
+            overflow-y: auto;
+            z-index: 100;
+            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .sidebar-menu {
+            list-style: none;
+        }
+        
+        .menu-item {
+            margin: 8px 16px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .menu-item:not(.active):hover {
+            background: rgba(102, 126, 234, 0.1);
+            transform: translateX(4px);
+        }
+        
+        .menu-item.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .menu-item a {
+            display: flex;
+            align-items: center;
+            padding: 16px 20px;
+            text-decoration: none;
+            color: inherit;
+            font-weight: 500;
+        }
+        
+        .menu-icon {
+            width: 20px;
+            text-align: center;
+            margin-right: 12px;
+            font-size: 1.1rem;
+        }
+        
+        .menu-text {
+            flex: 1;
+        }
+        
+        /* ===== CONTENIDO PRINCIPAL ===== */
+        .content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 2rem;
+            min-height: calc(100vh - 80px);
+        }
+        
+        /* ===== LOADING ===== */
+        .loading-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 80px 20px;
+            text-align: center;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(102, 126, 234, 0.1);
+            border-radius: 50%;
+            border-top-color: #667eea;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .loading-content p {
             color: #666;
-            margin: 0.3rem 0;
+            font-size: 1.1rem;
+            margin: 0;
         }
-
+        
+        /* ===== ERROR ===== */
+        .error-content {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            border: 2px solid #e74c3c;
+            box-shadow: 0 10px 30px rgba(231, 76, 60, 0.1);
+        }
+        
+        .error-content h3 {
+            color: #e74c3c;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+        
+        .error-content p {
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        .back-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 1rem;
+            transition: transform 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
             .header {
-                flex-direction: column;
-                gap: 1rem;
-                text-align: center;
-            }
-
-            .user-info {
-                flex-direction: column;
-                gap: 0.5rem;
-            }
-
-            .main-content {
                 padding: 1rem;
-                grid-template-columns: 1fr;
             }
-
-            .welcome-card h2 {
-                font-size: 2rem;
+            
+            .user-header-info {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            
+            .content {
+                margin-left: 0;
+                padding: 1rem;
             }
         }
-
-        .loading {
+        
+        /* ===== ACCESO DENEGADO ===== */
+        .access-denied {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 3rem;
             text-align: center;
-            padding: 2rem;
+            border: 2px solid #f39c12;
+            box-shadow: 0 10px 30px rgba(243, 156, 18, 0.1);
         }
-
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 1rem;
+        
+        .access-denied h2 {
+            color: #f39c12;
+            margin-bottom: 1rem;
+            font-size: 2rem;
         }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        
+        .access-denied p {
+            color: #666;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 1rem;
         }
     </style>
 </head>
 <body>
+    <!-- HEADER -->
+    <header class="header">
+        <div class="header-logo">
+            <div class="logo-icon">
+                <i class="fas fa-store"></i>
+            </div>
+            <div class="logo-text">Sistema Promotoria</div>
+        </div>
+        <div class="user-header-info">
+            <span class="user-name" id="header-user-name">Cargando...</span>
+            <span class="user-role" id="header-user-role">...</span>
+            <button id="logout-btn" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+            </button>
+        </div>
+    </header>
+    
+    <!-- CONTAINER PRINCIPAL -->
     <div class="dashboard-container">
-        <!-- Header -->
-        <header class="header">
-            <h1>📊 Dashboard</h1>
-            <div class="user-info">
-                <div class="user-details">
-                    <div class="user-name" id="userName">Cargando...</div>
-                    <div class="user-role" id="userRole">...</div>
-                </div>
-                <button class="logout-btn" onclick="logout()">
-                    🚪 Cerrar Sesión
-                </button>
-            </div>
-        </header>
-
-        <!-- Contenido principal -->
-        <main class="main-content">
-            <!-- Carta de bienvenida -->
-            <div class="card welcome-card">
-                <h2>¡Bienvenido al Sistema!</h2>
-                <p>Sesión iniciada correctamente. Tu información aparecerá aquí.</p>
-                <div class="session-info" id="sessionInfo">
-                    <div class="loading">
-                        <div class="spinner"></div>
-                        <p>Cargando información de la sesión...</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Cartas de funcionalidades -->
-            <div class="card">
-                <div class="card-icon">👤</div>
-                <h3>Mi Perfil</h3>
-                <p>Gestiona tu información personal y configuración de cuenta.</p>
-            </div>
-
-            <div class="card">
-                <div class="card-icon">📈</div>
-                <h3>Reportes</h3>
-                <p>Visualiza estadísticas y genera reportes del sistema.</p>
-            </div>
-
-            <div class="card" id="adminCard" style="display: none;">
-                <div class="card-icon">⚙️</div>
-                <h3>Administración</h3>
-                <p>Panel administrativo para gestión de usuarios y sistema.</p>
-            </div>
-
-            <div class="card">
-                <div class="card-icon">📋</div>
-                <h3>Tareas</h3>
-                <p>Administra tus tareas y proyectos pendientes.</p>
-            </div>
-
-            <div class="card">
-                <div class="card-icon">💬</div>
-                <h3>Mensajes</h3>
-                <p>Centro de comunicaciones y notificaciones.</p>
-            </div>
-
-            <div class="card">
-                <div class="card-icon">📁</div>
-                <h3>Archivos</h3>
-                <p>Gestiona y organiza tus documentos y archivos.</p>
+        <!-- SIDEBAR -->
+        <nav class="sidebar" id="sidebar">
+            <ul class="sidebar-menu" id="sidebar-menu">
+                <!-- Los elementos del menú se generarán dinámicamente según el rol -->
+            </ul>
+        </nav>
+        
+        <!-- CONTENIDO PRINCIPAL - SOLO CONTENEDOR VACÍO -->
+        <main class="content" id="main-content">
+            <!-- LOADING INICIAL -->
+            <div class="loading-content" id="loading-content">
+                <div class="loading-spinner"></div>
+                <p>Cargando contenido...</p>
             </div>
         </main>
     </div>
 
     <script>
-        // Verificar sesión al cargar la página
-        window.addEventListener('DOMContentLoaded', function() {
-            verificarSesion();
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🚀 Iniciando Dashboard SPA Sistema Promotoria...');
+            
+            // ===== VARIABLES GLOBALES =====
+            let currentUserData = null;
+            let currentModule = null;
+            
+            // ===== ELEMENTOS DOM =====
+            const mainContent = document.getElementById('main-content');
+            const loadingContent = document.getElementById('loading-content');
+            const sidebarMenu = document.getElementById('sidebar-menu');
+            const headerUserName = document.getElementById('header-user-name');
+            const headerUserRole = document.getElementById('header-user-role');
+            const logoutBtn = document.getElementById('logout-btn');
+            
+            // ===== CONFIGURACIÓN DE MÓDULOS POR ROL =====
+            const modulesByRole = {
+                'root': [
+                    { id: 'bienvenida', name: 'Inicio', icon: 'fas fa-home' },
+                    { id: 'cadenas', name: 'Cadenas Comerciales', icon: 'fas fa-link' },
+                    { id: 'promotores', name: 'Promotores', icon: 'fas fa-users' }
+                ],
+                'supervisor': [
+                    { id: 'bienvenida', name: 'Inicio', icon: 'fas fa-home' },
+                    { id: 'cadenas', name: 'Cadenas Comerciales', icon: 'fas fa-link' },
+                    { id: 'promotores', name: 'Promotores', icon: 'fas fa-users' }
+                ],
+                'usuario': [
+                    { id: 'bienvenida', name: 'Inicio', icon: 'fas fa-home' },
+                    { id: 'promotores', name: 'Promotores', icon: 'fas fa-users' }
+                ]
+            };
+            
+            // ===== INICIALIZACIÓN =====
+            init();
+            
+            async function init() {
+                try {
+                    console.log('🔍 Verificando sesión...');
+                    await verificarSesion();
+                    generarMenuPorRol();
+                    configurarEventListeners();
+                    
+                    // CARGAR MÓDULO INICIAL (bienvenida) VIA API
+                    await cargarModuloInicial();
+                    
+                    console.log('✅ Dashboard inicializado correctamente');
+                } catch (error) {
+                    console.error('❌ Error durante la inicialización:', error);
+                    redirigirALogin('Error de inicialización');
+                }
+            }
+            
+            // ===== CARGAR MÓDULO INICIAL =====
+            async function cargarModuloInicial() {
+                try {
+                    console.log('🏠 Cargando módulo inicial: bienvenida');
+                    
+                    // Marcar primer elemento del menú como activo
+                    const firstMenuItem = sidebarMenu.querySelector('.menu-item');
+                    if (firstMenuItem) {
+                        firstMenuItem.classList.add('active');
+                    }
+                    
+                    // Cargar módulo bienvenida via API
+                    await cargarModulo('bienvenida');
+                    
+                } catch (error) {
+                    console.error('❌ Error cargando módulo inicial:', error);
+                    mostrarError('Error al cargar el módulo inicial', error.message);
+                    mostrarLoading(false);
+                }
+            }
+            
+            // ===== VERIFICACIÓN DE SESIÓN =====
+            async function verificarSesion() {
+                try {
+                    const response = await fetch('../../config/verificar_sesion.php', {
+                        method: 'GET',
+                        cache: 'no-cache'
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    
+                    if (!data.success) {
+                        throw new Error(data.message || 'Sesión inválida');
+                    }
+                    
+                    currentUserData = data.usuario;
+                    
+                    // ===== VALIDACIÓN DE ROL PARA ESTA PÁGINA =====
+                    const currentPath = window.location.pathname;
+                    const requiredRole = getCurrentPageRequiredRole(currentPath);
+                    
+                    if (!validateUserRole(currentUserData.rol, requiredRole)) {
+                        mostrarAccesoDenegado(currentUserData.rol, requiredRole);
+                        return;
+                    }
+                    
+                    console.log('✅ Sesión válida:', currentUserData);
+                    actualizarHeaderUsuario();
+                    
+                } catch (error) {
+                    console.error('❌ Error verificando sesión:', error);
+                    throw error;
+                }
+            }
+            
+            // ===== VALIDACIÓN DE ROLES =====
+            function getCurrentPageRequiredRole(path) {
+                if (path.includes('/root/')) return 'root';
+                if (path.includes('/supervisor/')) return 'supervisor';
+                if (path.includes('/usuario/')) return 'usuario';
+                return 'usuario'; // Default
+            }
+            
+            function validateUserRole(userRole, requiredRole) {
+                const roleHierarchy = {
+                    'usuario': 1,
+                    'supervisor': 2,
+                    'root': 3
+                };
+                
+                return roleHierarchy[userRole] >= roleHierarchy[requiredRole];
+            }
+            
+            function mostrarAccesoDenegado(userRole, requiredRole) {
+                mainContent.innerHTML = `
+                    <div class="access-denied">
+                        <h2><i class="fas fa-lock"></i> Acceso Denegado</h2>
+                        <p>Tu rol actual (<strong>${userRole}</strong>) no tiene permisos para acceder a esta página.</p>
+                        <p>Se requiere rol: <strong>${requiredRole}</strong> o superior.</p>
+                        <button class="back-btn" onclick="redirigirAlDashboardCorrecto('${userRole}')">
+                            <i class="fas fa-arrow-left"></i> Ir a mi dashboard
+                        </button>
+                    </div>
+                `;
+            }
+            
+            window.redirigirAlDashboardCorrecto = function(rol) {
+                const dashboards = {
+                    'root': '../../pages/root/dashboard.html',
+                    'supervisor': '../../pages/supervisor/dashboard.html',
+                    'usuario': '../../pages/usuario/dashboard.html'
+                };
+                
+                window.location.href = dashboards[rol] || dashboards['usuario'];
+            };
+            
+            // ===== GENERAR MENÚ SEGÚN ROL =====
+            function generarMenuPorRol() {
+                if (!currentUserData) return;
+                
+                const userRole = currentUserData.rol;
+                const modules = modulesByRole[userRole] || modulesByRole['usuario'];
+                
+                sidebarMenu.innerHTML = '';
+                
+                modules.forEach((module, index) => {
+                    const menuItem = document.createElement('li');
+                    menuItem.className = 'menu-item';
+                    menuItem.dataset.module = module.id;
+                    
+                    menuItem.innerHTML = `
+                        <a href="#" data-module="${module.id}">
+                            <i class="${module.icon} menu-icon"></i>
+                            <span class="menu-text">${module.name}</span>
+                        </a>
+                    `;
+                    
+                    sidebarMenu.appendChild(menuItem);
+                });
+                
+                console.log(`✅ Menú generado para rol: ${userRole} - ${modules.length} módulos`);
+            }
+            
+            // ===== ACTUALIZAR HEADER =====
+            function actualizarHeaderUsuario() {
+                if (!currentUserData) return;
+                
+                headerUserName.textContent = `${currentUserData.nombre} ${currentUserData.apellido}`;
+                headerUserRole.textContent = currentUserData.rol;
+                headerUserRole.className = `user-role ${currentUserData.rol}`;
+            }
+            
+            // ===== CONFIGURAR EVENT LISTENERS =====
+            function configurarEventListeners() {
+                // Logout
+                logoutBtn.addEventListener('click', cerrarSesion);
+                
+                // Navegación del menú - Delegación de eventos
+                sidebarMenu.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    
+                    const menuItem = e.target.closest('.menu-item');
+                    if (!menuItem) return;
+                    
+                    const module = menuItem.dataset.module;
+                    if (module && module !== currentModule) {
+                        navegarAModulo(module, menuItem);
+                    }
+                });
+                
+                // Verificar sesión periódicamente
+                setInterval(verificarSesionSilenciosa, 5 * 60 * 1000); // Cada 5 minutos
+            }
+            
+            // ===== NAVEGACIÓN DE MÓDULOS =====
+            async function navegarAModulo(moduleName, menuItem) {
+                console.log(`📄 Navegando a módulo: ${moduleName}`);
+                
+                try {
+                    // Actualizar menú activo
+                    document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
+                    menuItem.classList.add('active');
+                    
+                    // Mostrar loading
+                    mostrarLoading(true);
+                    
+                    // Limpiar módulo anterior
+                    limpiarModuloAnterior();
+                    
+                    // CARGAR MÓDULO VIA API - SIN EXCEPCIONES
+                    await cargarModulo(moduleName);
+                    
+                    currentModule = moduleName;
+                    
+                } catch (error) {
+                    console.error('❌ Error navegando a módulo:', error);
+                    mostrarError(`Error al cargar el módulo ${moduleName}`, error.message);
+                } finally {
+                    mostrarLoading(false);
+                }
+            }
+            
+            // ===== CARGAR MÓDULO DINÁMICO DESDE API =====
+            async function cargarModulo(moduleName) {
+                console.log(`🌐 Cargando módulo desde API: ${moduleName}`);
+                
+                if (!currentUserData) {
+                    throw new Error('Datos de usuario no disponibles');
+                }
+                
+                const userRole = currentUserData.rol;
+                const userUid = currentUserData.id;
+                
+                // Construir URL de la API
+                const apiUrl = `../../config/get_module.php?name=${encodeURIComponent(moduleName)}&role=${encodeURIComponent(userRole)}&uid=${encodeURIComponent(userUid)}`;
+                
+                console.log(`📡 Solicitando: ${apiUrl}`);
+                
+                const response = await fetch(apiUrl, {
+                    method: 'GET',
+                    cache: 'no-cache'
+                });
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    let errorMessage = 'Error desconocido';
+                    
+                    switch (response.status) {
+                        case 400:
+                            errorMessage = 'Parámetros de solicitud inválidos';
+                            break;
+                        case 403:
+                            errorMessage = `No tienes permisos para acceder al módulo "${moduleName}"`;
+                            break;
+                        case 404:
+                            errorMessage = `El módulo "${moduleName}" no fue encontrado`;
+                            break;
+                        case 500:
+                            errorMessage = 'Error interno del servidor';
+                            break;
+                        default:
+                            errorMessage = `Error HTTP ${response.status}`;
+                    }
+                    
+                    if (errorText) {
+                        console.error('Error detallado del servidor:', errorText);
+                    }
+                    
+                    throw new Error(errorMessage);
+                }
+                
+                const moduleHTML = await response.text();
+                
+                if (!moduleHTML || moduleHTML.trim().length === 0) {
+                    throw new Error('El módulo está vacío');
+                }
+                
+                console.log(`📦 HTML del módulo recibido: ${moduleHTML.length} caracteres`);
+                
+                // Insertar HTML en el contenido
+                mainContent.innerHTML = moduleHTML;
+                
+                // Procesar scripts del módulo
+                await procesarScriptsDelModulo();
+                
+                console.log(`✅ Módulo ${moduleName} cargado exitosamente`);
+            }
+            
+            // ===== PROCESAR SCRIPTS DEL MÓDULO =====
+            async function procesarScriptsDelModulo() {
+                const scripts = mainContent.querySelectorAll('script');
+                
+                if (scripts.length > 0) {
+                    console.log(`⚙️ Procesando ${scripts.length} scripts del módulo`);
+                    
+                    for (let i = 0; i < scripts.length; i++) {
+                        const oldScript = scripts[i];
+                        const newScript = document.createElement('script');
+                        
+                        // Copiar atributos
+                        Array.from(oldScript.attributes).forEach(attr => {
+                            newScript.setAttribute(attr.name, attr.value);
+                        });
+                        
+                        if (oldScript.src) {
+                            // Script externo
+                            console.log(`📥 Cargando script externo: ${oldScript.src}`);
+                            await new Promise((resolve, reject) => {
+                                newScript.onload = () => {
+                                    console.log(`✅ Script externo cargado`);
+                                    resolve();
+                                };
+                                newScript.onerror = (error) => {
+                                    console.error(`❌ Error cargando script externo:`, error);
+                                    reject(error);
+                                };
+                                newScript.src = oldScript.src;
+                                document.head.appendChild(newScript);
+                            });
+                        } else {
+                            // Script inline
+                            try {
+                                console.log(`⚡ Ejecutando script inline`);
+                                newScript.textContent = oldScript.textContent;
+                                oldScript.parentNode.replaceChild(newScript, oldScript);
+                                console.log(`✅ Script inline ejecutado`);
+                            } catch (scriptError) {
+                                console.error(`❌ Error ejecutando script inline:`, scriptError);
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // ===== UTILIDADES =====
+            function mostrarLoading(show) {
+                loadingContent.style.display = show ? 'flex' : 'none';
+            }
+            
+            function limpiarModuloAnterior() {
+                // Ejecutar limpieza si existe
+                if (window.moduleCleanup && typeof window.moduleCleanup === 'function') {
+                    console.log('🧹 Ejecutando limpieza del módulo anterior...');
+                    try {
+                        window.moduleCleanup();
+                    } catch (error) {
+                        console.warn('⚠️ Error durante limpieza:', error);
+                    }
+                    window.moduleCleanup = null;
+                }
+                
+                // Limpiar contenido (excepto loading)
+                Array.from(mainContent.children).forEach(element => {
+                    if (element.id !== 'loading-content') {
+                        element.remove();
+                    }
+                });
+            }
+            
+            function mostrarError(titulo, mensaje) {
+                mainContent.innerHTML = `
+                    <div class="loading-content" id="loading-content" style="display: none;">
+                        <div class="loading-spinner"></div>
+                        <p>Cargando contenido...</p>
+                    </div>
+                    <div class="error-content">
+                        <h3><i class="fas fa-exclamation-triangle"></i> ${titulo}</h3>
+                        <p>${mensaje}</p>
+                        <button class="back-btn" onclick="location.reload()">
+                            <i class="fas fa-redo"></i> Intentar de nuevo
+                        </button>
+                    </div>
+                `;
+            }
+            
+            function redirigirALogin(motivo = 'Sesión expirada') {
+                console.log('🔄 Redirigiendo al login:', motivo);
+                window.location.href = `../../index.html?error=sin_sesion&motivo=${encodeURIComponent(motivo)}`;
+            }
+            
+            // ===== VERIFICACIÓN SILENCIOSA =====
+            async function verificarSesionSilenciosa() {
+                try {
+                    const response = await fetch('../../config/verificar_sesion.php', {
+                        method: 'GET',
+                        cache: 'no-cache'
+                    });
+                    
+                    if (!response.ok || !(await response.json()).success) {
+                        redirigirALogin('Sesión expirada');
+                    }
+                } catch (error) {
+                    console.warn('⚠️ Error en verificación silenciosa:', error);
+                }
+            }
+            
+            // ===== CERRAR SESIÓN =====
+            async function cerrarSesion() {
+                if (!confirm('¿Estás seguro que deseas cerrar sesión?')) return;
+                
+                try {
+                    limpiarModuloAnterior();
+                    
+                    const response = await fetch('../../config/logout.php', {
+                        method: 'POST'
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        window.location.href = '../../index.html?logout=1';
+                    } else {
+                        throw new Error('Error al cerrar sesión');
+                    }
+                } catch (error) {
+                    console.error('❌ Error cerrando sesión:', error);
+                    // Forzar redirección aunque haya error
+                    window.location.href = '../../index.html?logout=1';
+                }
+            }
         });
-
-        function verificarSesion() {
-            fetch('../config/verificar_sesion.php')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        mostrarInfoUsuario(data.usuario);
-                    } else {
-                        // CORREGIDO: Redirigir a index.html, no login.html
-                        window.location.href = '../index.html?error=sin_sesion';
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    // CORREGIDO: Redirigir a index.html, no login.html  
-                    window.location.href = '../index.html?error=error_sesion';
-                });
-        }
-
-        function mostrarInfoUsuario(usuario) {
-            // Actualizar header
-            document.getElementById('userName').textContent = 
-                `${usuario.nombre} ${usuario.apellido}`;
-            
-            const roleElement = document.getElementById('userRole');
-            roleElement.innerHTML = `
-                ${usuario.username} 
-                <span class="role-badge role-${usuario.rol}">${usuario.rol}</span>
-            `;
-
-            // Actualizar información de sesión
-            const sessionInfo = document.getElementById('sessionInfo');
-            const loginTime = new Date(usuario.login_time * 1000).toLocaleString('es-ES');
-            
-            sessionInfo.innerHTML = `
-                <h4>Información de Sesión</h4>
-                <p><strong>Usuario:</strong> ${usuario.username}</p>
-                <p><strong>Email:</strong> ${usuario.email}</p>
-                <p><strong>Rol:</strong> ${usuario.rol}</p>
-                <p><strong>Inicio de sesión:</strong> ${loginTime}</p>
-                <p><strong>ID de sesión:</strong> ${usuario.id}</p>
-            `;
-
-            // Mostrar panel de admin si es root o supervisor
-            if (usuario.rol === 'root' || usuario.rol === 'supervisor') {
-                document.getElementById('adminCard').style.display = 'block';
-            }
-        }
-
-        function logout() {
-            if (confirm('¿Estás seguro que deseas cerrar sesión?')) {
-                fetch('../config/logout.php', {
-                    method: 'POST'
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        window.location.href = '../index.html?logout=1';
-                    } else {
-                        alert('Error al cerrar sesión');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    // Forzar logout aunque haya error
-                    window.location.href = '../index.html?logout=1';
-                });
-            }
-        }
-
-        // Verificar sesión cada 5 minutos
-        setInterval(verificarSesion, 300000);
     </script>
 </body>
 </html>
