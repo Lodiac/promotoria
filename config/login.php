@@ -97,8 +97,23 @@ try {
     // Log de login exitoso
     error_log("Login exitoso - Usuario: {$usuario['username']} - Rol: {$usuario['rol']} - IP: " . $_SERVER['REMOTE_ADDR']);
     
-    // Redirigir al dashboard
-    header('Location: ../pages/dashboard.html');
+    // 🚀 REDIRIGIR SEGÚN EL ROL DEL USUARIO
+    switch($usuario['rol']) {
+        case 'root':
+            header('Location: ../pages/root/dashboard.html');
+            break;
+        case 'supervisor':
+            header('Location: ../pages/supervisor/dashboard.html');
+            break;
+        case 'usuario':
+            header('Location: ../pages/usuario/dashboard.html');
+            break;
+        default:
+            // Rol desconocido - por seguridad redirigir al dashboard de usuario
+            error_log("Login con rol desconocido: {$usuario['rol']} - Usuario: {$usuario['username']} - IP: " . $_SERVER['REMOTE_ADDR']);
+            header('Location: ../pages/usuario/dashboard.html');
+            break;
+    }
     exit;
     
 } catch (Exception $e) {
