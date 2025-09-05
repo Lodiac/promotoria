@@ -193,7 +193,8 @@ class Database {
                 return filter_var($input, FILTER_VALIDATE_EMAIL) !== false;
                 
             case 'username':
-                return preg_match('/^[a-zA-Z0-9_]{3,50}$/', $input);
+                // ACTUALIZADO: Permite letras, números, _, @, . y -
+                return preg_match('/^[a-zA-Z0-9_@.-]{3,50}$/', $input);
                 
             case 'password':
                 return strlen($input) >= 6 && strlen($input) <= 255;

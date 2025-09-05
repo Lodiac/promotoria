@@ -28,21 +28,21 @@ try {
     $username = Database::sanitize($username);
     $password = Database::sanitize($password);
     
-    // Validar formato de entrada
-    if (!Database::validate($username, 'username') && !Database::validate($username, 'email')) {
-        header('Location: ../index.html?error=credenciales');
+    // Validar formato de username únicamente
+    if (!Database::validate($username, 'username')) {
+        header('Location: ../index.html?error=formato_username');
         exit;
     }
     
     if (!Database::validate($password, 'password')) {
-        header('Location: ../index.html?error=credenciales');
+        header('Location: ../index.html?error=formato_password');
         exit;
     }
     
-    // Buscar usuario en la base de datos
+    // Buscar usuario en la base de datos - SOLO POR USERNAME
     $sql = "SELECT id, username, email, password, nombre, apellido, rol, activo 
             FROM usuarios 
-            WHERE (username = :username OR email = :username) 
+            WHERE username = :username 
             AND activo = 1 
             LIMIT 1";
     
