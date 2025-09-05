@@ -3,145 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Sistema Promotoria</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f5f5f5;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-        
-        .login-container {
-            background: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            width: 100%;
-            max-width: 350px;
-        }
-        
-        h1 {
-            text-align: center;
-            margin-bottom: 30px;
-            color: #333;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: #555;
-        }
-        
-        input[type="text"], input[type="password"] {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 16px;
-            box-sizing: border-box;
-        }
-        
-        input:focus {
-            border-color: #007cba;
-            outline: none;
-        }
-        
-        .login-btn {
-            width: 100%;
-            padding: 12px;
-            background: #007cba;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-        
-        .login-btn:hover {
-            background: #005a87;
-        }
-        
-        .login-btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-        }
-        
-        .mensaje {
-            margin-bottom: 20px;
-            padding: 10px;
-            border-radius: 4px;
-            text-align: center;
-        }
-        
-        .error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        
-        .success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        
-        .connection-status {
-            text-align: center;
-            margin-bottom: 15px;
-            font-size: 14px;
-        }
-        
-        .status-online { color: #28a745; }
-        .status-offline { color: #dc3545; }
-    </style>
+    <title>Sistema Promotoria - Iniciar Sesión</title>
+    <link rel="stylesheet" href="css/login.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="login-container">
-        <h1>Sistema Promotoria</h1>
-        
-        <!-- Estado de conexión -->
-        <div class="connection-status" id="connectionStatus">
-            <span class="status-online">Conectado</span>
+    <!-- Partículas de fondo -->
+    <div class="background-animation">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+
+    <div class="login-wrapper">
+        <div class="login-container">
+            <!-- Header con logo -->
+            <div class="login-header">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h1>Sistema Promotoria</h1>
+                </div>
+                <p class="subtitle">Accede a tu cuenta para continuar</p>
+            </div>
+
+            <!-- Estado de conexión -->
+            <div class="connection-status" id="connectionStatus">
+                <div class="status-indicator"></div>
+                <span class="status-text">Verificando conexión...</span>
+            </div>
+
+            <!-- Mensajes -->
+            <div id="mensaje" class="message-container" style="display: none;">
+                <div class="message-content">
+                    <div class="message-icon"></div>
+                    <span class="message-text"></span>
+                </div>
+            </div>
+
+            <!-- Formulario de login -->
+            <form id="loginForm" action="config/login.php" method="POST" class="login-form">
+                <div class="form-group">
+                    <label for="username" class="form-label">Usuario</label>
+                    <div class="input-container">
+                        <div class="input-icon">
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                        </div>
+                        <input 
+                            type="text" 
+                            id="username" 
+                            name="username" 
+                            class="form-input"
+                            placeholder="Ingrese su nombre de usuario"
+                            required
+                            autocomplete="username">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password" class="form-label">Contraseña</label>
+                    <div class="input-container">
+                        <div class="input-icon">
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" stroke="currentColor" stroke-width="2"/>
+                                <circle cx="12" cy="16" r="1" fill="currentColor"/>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                        </div>
+                        <input 
+                            type="password" 
+                            id="password" 
+                            name="password" 
+                            class="form-input"
+                            placeholder="Ingrese su contraseña"
+                            required
+                            autocomplete="current-password">
+                    </div>
+                </div>
+
+                <button type="submit" class="login-btn" id="loginBtn">
+                    <span class="btn-text">Iniciar Sesión</span>
+                    <div class="btn-loader" style="display: none;">
+                        <div class="loader-spinner"></div>
+                    </div>
+                </button>
+            </form>
+
+            <!-- Footer -->
+            <div class="login-footer">
+                <p>&copy; 2025 Sistema Promotoria Evonet. Todos los derechos reservados.</p>
+            </div>
         </div>
-
-        <!-- Mensajes -->
-        <div id="mensaje" class="mensaje" style="display: none;"></div>
-
-        <form id="loginForm" action="config/login.php" method="POST">
-            <div class="form-group">
-                <label for="username">Usuario:</label>
-                <input type="text" 
-                       id="username" 
-                       name="username" 
-                       placeholder="Ingrese su nombre de usuario"
-                       required
-                       autocomplete="username">
-            </div>
-
-            <div class="form-group">
-                <label for="password">Contraseña:</label>
-                <input type="password" 
-                       id="password" 
-                       name="password" 
-                       placeholder="Ingrese su contraseña"
-                       required
-                       autocomplete="current-password">
-            </div>
-
-            <button type="submit" class="login-btn" id="loginBtn">
-                Iniciar Sesión
-            </button>
-        </form>
     </div>
 
     <script>
@@ -153,8 +113,11 @@
             checkConnectionStatus();
             document.getElementById('username').focus();
             
-            // Verificar si ya hay sesión activa
-            checkExistingSession();
+            // CORREGIDO: Solo verificar sesión si NO viene de logout
+            const urlParams = new URLSearchParams(window.location.search);
+            if (!urlParams.has('logout')) {
+                checkExistingSession();
+            }
         });
 
         // Manejar envío del formulario
@@ -186,11 +149,32 @@
             }
             
             // Mostrar estado de carga
+            startLoading();
+        });
+
+        function startLoading() {
             isSubmitting = true;
             const btn = document.getElementById('loginBtn');
+            const btnText = btn.querySelector('.btn-text');
+            const btnLoader = btn.querySelector('.btn-loader');
+            
             btn.disabled = true;
-            btn.textContent = 'Iniciando sesión...';
-        });
+            btn.classList.add('loading');
+            btnText.style.display = 'none';
+            btnLoader.style.display = 'flex';
+        }
+
+        function stopLoading() {
+            isSubmitting = false;
+            const btn = document.getElementById('loginBtn');
+            const btnText = btn.querySelector('.btn-text');
+            const btnLoader = btn.querySelector('.btn-loader');
+            
+            btn.disabled = false;
+            btn.classList.remove('loading');
+            btnText.style.display = 'block';
+            btnLoader.style.display = 'none';
+        }
 
         // Manejar mensajes de URL
         function handleURLMessages() {
@@ -242,24 +226,46 @@
                 showMessage('Sesión cerrada correctamente', 'success');
             }
             
-            // Limpiar URL después de 3 segundos
+            // Limpiar URL después de 5 segundos
             if (urlParams.toString()) {
                 setTimeout(() => {
                     window.history.replaceState({}, document.title, window.location.pathname);
-                }, 3000);
+                }, 5000);
             }
         }
 
-        // Mostrar mensaje
+        // Mostrar mensaje mejorado
         function showMessage(text, type) {
             const mensaje = document.getElementById('mensaje');
-            mensaje.className = `mensaje ${type}`;
-            mensaje.textContent = text;
+            const messageText = mensaje.querySelector('.message-text');
+            const messageIcon = mensaje.querySelector('.message-icon');
+            
+            // Configurar icono según tipo
+            if (type === 'error') {
+                messageIcon.innerHTML = `
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                        <line x1="15" y1="9" x2="9" y2="15" stroke="currentColor" stroke-width="2"/>
+                        <line x1="9" y1="9" x2="15" y2="15" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                `;
+            } else {
+                messageIcon.innerHTML = `
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                        <path d="m9 12 2 2 4-4" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                `;
+            }
+            
+            mensaje.className = `message-container ${type}`;
+            messageText.textContent = text;
             mensaje.style.display = 'block';
             
+            // Auto-ocultar después de 6 segundos
             setTimeout(() => {
                 mensaje.style.display = 'none';
-            }, 5000);
+            }, 6000);
         }
 
         // Verificar conexión
@@ -276,20 +282,29 @@
 
         function updateConnectionStatus(isOnline) {
             const status = document.getElementById('connectionStatus');
+            const indicator = status.querySelector('.status-indicator');
+            const text = status.querySelector('.status-text');
+            
             if (isOnline) {
-                status.innerHTML = '<span class="status-online">Conectado</span>';
+                indicator.className = 'status-indicator online';
+                text.textContent = 'Conectado';
+                status.className = 'connection-status online';
             } else {
-                status.innerHTML = '<span class="status-offline">Sin conexión</span>';
+                indicator.className = 'status-indicator offline';
+                text.textContent = 'Sin conexión';
+                status.className = 'connection-status offline';
             }
         }
 
-        // Verificar sesión existente
+        // Verificar sesión existente (CORREGIDO)
         function checkExistingSession() {
-            fetch('config/verificar_sesion.php')
+            fetch('config/verificar_sesion.php', {
+                cache: 'no-cache'
+            })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        showMessage(`Sesión activa: ${data.usuario.username}`, 'success');
+                        showMessage(`Redirigiendo como ${data.usuario.username}...`, 'success');
                         setTimeout(() => {
                             window.location.href = 'pages/dashboard.html';
                         }, 1500);
@@ -302,6 +317,11 @@
 
         // Verificar conexión cada 30 segundos
         setInterval(checkConnectionStatus, 30000);
+
+        // Animaciones de entrada
+        window.addEventListener('load', function() {
+            document.body.classList.add('loaded');
+        });
     </script>
 </body>
 </html>
