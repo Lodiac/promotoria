@@ -4,8 +4,6 @@
  * Devuelve JSON con información del usuario
  */
 
-// Definir constante de acceso
-define('APP_ACCESS', true);
 
 // Headers para JSON
 header('Content-Type: application/json');
