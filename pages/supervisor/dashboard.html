@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema Promotoria - Panel de Control</title>
+    <title>Sistema Promotoria - Panel SUPERVISOR</title>
     
     <!-- Fuentes -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -55,7 +55,7 @@
         .logo-icon {
             width: 40px;
             height: 40px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #f39c12 0%, #d68910 100%);
             border-radius: 12px;
             display: flex;
             align-items: center;
@@ -160,14 +160,14 @@
         }
         
         .menu-item:not(.active):hover {
-            background: rgba(102, 126, 234, 0.1);
+            background: rgba(243, 156, 18, 0.1);
             transform: translateX(4px);
         }
         
         .menu-item.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #f39c12 0%, #d68910 100%);
             color: white;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 4px 15px rgba(243, 156, 18, 0.3);
         }
         
         .menu-item a {
@@ -211,9 +211,9 @@
         .loading-spinner {
             width: 50px;
             height: 50px;
-            border: 4px solid rgba(102, 126, 234, 0.1);
+            border: 4px solid rgba(243, 156, 18, 0.1);
             border-radius: 50%;
-            border-top-color: #667eea;
+            border-top-color: #f39c12;
             animation: spin 1s linear infinite;
             margin-bottom: 20px;
         }
@@ -251,7 +251,7 @@
         }
         
         .back-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #f39c12 0%, #d68910 100%);
             color: white;
             border: none;
             padding: 12px 24px;
@@ -264,32 +264,6 @@
         
         .back-btn:hover {
             transform: translateY(-2px);
-        }
-        
-        /* ===== RESPONSIVE ===== */
-        @media (max-width: 768px) {
-            .header {
-                padding: 1rem;
-            }
-            
-            .user-header-info {
-                flex-direction: column;
-                gap: 8px;
-            }
-            
-            .sidebar {
-                transform: translateX(-100%);
-                transition: transform 0.3s ease;
-            }
-            
-            .sidebar.open {
-                transform: translateX(0);
-            }
-            
-            .content {
-                margin-left: 0;
-                padding: 1rem;
-            }
         }
         
         /* ===== ACCESO DENEGADO ===== */
@@ -315,6 +289,32 @@
             line-height: 1.6;
             margin-bottom: 1rem;
         }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .header {
+                padding: 1rem;
+            }
+            
+            .user-header-info {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            
+            .content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -322,13 +322,13 @@
     <header class="header">
         <div class="header-logo">
             <div class="logo-icon">
-                <i class="fas fa-store"></i>
+                <i class="fas fa-user-tie"></i>
             </div>
-            <div class="logo-text">Sistema Promotoria</div>
+            <div class="logo-text">Sistema Promotoria - SUPERVISOR</div>
         </div>
         <div class="user-header-info">
             <span class="user-name" id="header-user-name">Cargando...</span>
-            <span class="user-role" id="header-user-role">...</span>
+            <span class="user-role" id="header-user-role">SUPERVISOR</span>
             <button id="logout-btn" class="logout-btn">
                 <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
             </button>
@@ -340,23 +340,23 @@
         <!-- SIDEBAR -->
         <nav class="sidebar" id="sidebar">
             <ul class="sidebar-menu" id="sidebar-menu">
-                <!-- Los elementos del menú se generarán dinámicamente según el rol -->
+                <!-- Los elementos del menú se generarán dinámicamente -->
             </ul>
         </nav>
         
-        <!-- CONTENIDO PRINCIPAL - SOLO CONTENEDOR VACÍO -->
+        <!-- CONTENIDO PRINCIPAL -->
         <main class="content" id="main-content">
             <!-- LOADING INICIAL -->
             <div class="loading-content" id="loading-content">
                 <div class="loading-spinner"></div>
-                <p>Cargando contenido...</p>
+                <p>Cargando contenido SUPERVISOR...</p>
             </div>
         </main>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('🚀 Iniciando Dashboard SPA Sistema Promotoria...');
+            console.log('🚀 Iniciando Dashboard SUPERVISOR Sistema Promotoria...');
             
             // ===== VARIABLES GLOBALES =====
             let currentUserData = null;
@@ -370,66 +370,34 @@
             const headerUserRole = document.getElementById('header-user-role');
             const logoutBtn = document.getElementById('logout-btn');
             
-            // ===== CONFIGURACIÓN DE MÓDULOS POR ROL =====
-            const modulesByRole = {
-                'root': [
-                    { id: 'bienvenida', name: 'Inicio', icon: 'fas fa-home' },
-                    { id: 'cadenas', name: 'Cadenas Comerciales', icon: 'fas fa-link' },
-                    { id: 'promotores', name: 'Promotores', icon: 'fas fa-users' }
-                ],
-                'supervisor': [
-                    { id: 'bienvenida', name: 'Inicio', icon: 'fas fa-home' },
-                    { id: 'cadenas', name: 'Cadenas Comerciales', icon: 'fas fa-link' },
-                    { id: 'promotores', name: 'Promotores', icon: 'fas fa-users' }
-                ],
-                'usuario': [
-                    { id: 'bienvenida', name: 'Inicio', icon: 'fas fa-home' },
-                    { id: 'promotores', name: 'Promotores', icon: 'fas fa-users' }
-                ]
-            };
+            // ===== MÓDULOS ESPECÍFICOS PARA SUPERVISOR - SOLO 3 OPCIONES =====
+            const supervisorModules = [
+                { id: 'bienvenida', name: 'Inicio', icon: 'fas fa-home' },
+                { id: 'promotores', name: 'Promotoria', icon: 'fas fa-users' },
+                { id: 'cadenas', name: 'Cadenas Comerciales', icon: 'fas fa-link' }
+            ];
             
             // ===== INICIALIZACIÓN =====
             init();
             
             async function init() {
                 try {
-                    console.log('🔍 Verificando sesión...');
+                    console.log('🔍 Verificando sesión SUPERVISOR...');
                     await verificarSesion();
-                    generarMenuPorRol();
+                    generarMenuSupervisor();
                     configurarEventListeners();
                     
-                    // CARGAR MÓDULO INICIAL (bienvenida) VIA API
+                    // CARGAR MÓDULO INICIAL
                     await cargarModuloInicial();
                     
-                    console.log('✅ Dashboard inicializado correctamente');
+                    console.log('✅ Dashboard SUPERVISOR inicializado correctamente');
                 } catch (error) {
                     console.error('❌ Error durante la inicialización:', error);
                     redirigirALogin('Error de inicialización');
                 }
             }
             
-            // ===== CARGAR MÓDULO INICIAL =====
-            async function cargarModuloInicial() {
-                try {
-                    console.log('🏠 Cargando módulo inicial: bienvenida');
-                    
-                    // Marcar primer elemento del menú como activo
-                    const firstMenuItem = sidebarMenu.querySelector('.menu-item');
-                    if (firstMenuItem) {
-                        firstMenuItem.classList.add('active');
-                    }
-                    
-                    // Cargar módulo bienvenida via API
-                    await cargarModulo('bienvenida');
-                    
-                } catch (error) {
-                    console.error('❌ Error cargando módulo inicial:', error);
-                    mostrarError('Error al cargar el módulo inicial', error.message);
-                    mostrarLoading(false);
-                }
-            }
-            
-            // ===== VERIFICACIÓN DE SESIÓN =====
+            // ===== VERIFICACIÓN DE SESIÓN Y ROL =====
             async function verificarSesion() {
                 try {
                     const response = await fetch('../../config/verificar_sesion.php', {
@@ -449,16 +417,13 @@
                     
                     currentUserData = data.usuario;
                     
-                    // ===== VALIDACIÓN DE ROL PARA ESTA PÁGINA =====
-                    const currentPath = window.location.pathname;
-                    const requiredRole = getCurrentPageRequiredRole(currentPath);
-                    
-                    if (!validateUserRole(currentUserData.rol, requiredRole)) {
-                        mostrarAccesoDenegado(currentUserData.rol, requiredRole);
+                    // ===== VALIDACIÓN ESPECÍFICA PARA SUPERVISOR =====
+                    if (currentUserData.rol !== 'supervisor' && currentUserData.rol !== 'root') {
+                        mostrarAccesoDenegado(currentUserData.rol, 'supervisor');
                         return;
                     }
                     
-                    console.log('✅ Sesión válida:', currentUserData);
+                    console.log('✅ Sesión SUPERVISOR válida:', currentUserData);
                     actualizarHeaderUsuario();
                     
                 } catch (error) {
@@ -467,29 +432,11 @@
                 }
             }
             
-            // ===== VALIDACIÓN DE ROLES =====
-            function getCurrentPageRequiredRole(path) {
-                if (path.includes('/root/')) return 'root';
-                if (path.includes('/supervisor/')) return 'supervisor';
-                if (path.includes('/usuario/')) return 'usuario';
-                return 'usuario'; // Default
-            }
-            
-            function validateUserRole(userRole, requiredRole) {
-                const roleHierarchy = {
-                    'usuario': 1,
-                    'supervisor': 2,
-                    'root': 3
-                };
-                
-                return roleHierarchy[userRole] >= roleHierarchy[requiredRole];
-            }
-            
             function mostrarAccesoDenegado(userRole, requiredRole) {
                 mainContent.innerHTML = `
                     <div class="access-denied">
                         <h2><i class="fas fa-lock"></i> Acceso Denegado</h2>
-                        <p>Tu rol actual (<strong>${userRole}</strong>) no tiene permisos para acceder a esta página.</p>
+                        <p>Tu rol actual (<strong>${userRole}</strong>) no tiene permisos para acceder al panel SUPERVISOR.</p>
                         <p>Se requiere rol: <strong>${requiredRole}</strong> o superior.</p>
                         <button class="back-btn" onclick="redirigirAlDashboardCorrecto('${userRole}')">
                             <i class="fas fa-arrow-left"></i> Ir a mi dashboard
@@ -501,23 +448,17 @@
             window.redirigirAlDashboardCorrecto = function(rol) {
                 const dashboards = {
                     'root': '../../pages/root/dashboard.html',
-                    'supervisor': '../../pages/supervisor/dashboard.html',
                     'usuario': '../../pages/usuario/dashboard.html'
                 };
                 
-                window.location.href = dashboards[rol] || dashboards['usuario'];
+                window.location.href = dashboards[rol] || '../../pages/usuario/dashboard.html';
             };
             
-            // ===== GENERAR MENÚ SEGÚN ROL =====
-            function generarMenuPorRol() {
-                if (!currentUserData) return;
-                
-                const userRole = currentUserData.rol;
-                const modules = modulesByRole[userRole] || modulesByRole['usuario'];
-                
+            // ===== GENERAR MENÚ SUPERVISOR =====
+            function generarMenuSupervisor() {
                 sidebarMenu.innerHTML = '';
                 
-                modules.forEach((module, index) => {
+                supervisorModules.forEach((module, index) => {
                     const menuItem = document.createElement('li');
                     menuItem.className = 'menu-item';
                     menuItem.dataset.module = module.id;
@@ -532,7 +473,28 @@
                     sidebarMenu.appendChild(menuItem);
                 });
                 
-                console.log(`✅ Menú generado para rol: ${userRole} - ${modules.length} módulos`);
+                console.log(`✅ Menú SUPERVISOR generado - ${supervisorModules.length} módulos`);
+            }
+            
+            // ===== CARGAR MÓDULO INICIAL =====
+            async function cargarModuloInicial() {
+                try {
+                    console.log('🏠 Cargando módulo inicial SUPERVISOR: bienvenida');
+                    
+                    // Marcar primer elemento del menú como activo
+                    const firstMenuItem = sidebarMenu.querySelector('.menu-item');
+                    if (firstMenuItem) {
+                        firstMenuItem.classList.add('active');
+                    }
+                    
+                    // Cargar módulo bienvenida via API
+                    await cargarModulo('bienvenida');
+                    
+                } catch (error) {
+                    console.error('❌ Error cargando módulo inicial:', error);
+                    mostrarError('Error al cargar el módulo inicial', error.message);
+                    mostrarLoading(false);
+                }
             }
             
             // ===== ACTUALIZAR HEADER =====
@@ -540,8 +502,8 @@
                 if (!currentUserData) return;
                 
                 headerUserName.textContent = `${currentUserData.nombre} ${currentUserData.apellido}`;
-                headerUserRole.textContent = currentUserData.rol;
-                headerUserRole.className = `user-role ${currentUserData.rol}`;
+                headerUserRole.textContent = 'SUPERVISOR';
+                headerUserRole.className = 'user-role supervisor';
             }
             
             // ===== CONFIGURAR EVENT LISTENERS =====
@@ -549,7 +511,7 @@
                 // Logout
                 logoutBtn.addEventListener('click', cerrarSesion);
                 
-                // Navegación del menú - Delegación de eventos
+                // Navegación del menú
                 sidebarMenu.addEventListener('click', (e) => {
                     e.preventDefault();
                     
@@ -563,12 +525,12 @@
                 });
                 
                 // Verificar sesión periódicamente
-                setInterval(verificarSesionSilenciosa, 5 * 60 * 1000); // Cada 5 minutos
+                setInterval(verificarSesionSilenciosa, 5 * 60 * 1000);
             }
             
             // ===== NAVEGACIÓN DE MÓDULOS =====
             async function navegarAModulo(moduleName, menuItem) {
-                console.log(`📄 Navegando a módulo: ${moduleName}`);
+                console.log(`📄 Navegando a módulo SUPERVISOR: ${moduleName}`);
                 
                 try {
                     // Actualizar menú activo
@@ -581,7 +543,7 @@
                     // Limpiar módulo anterior
                     limpiarModuloAnterior();
                     
-                    // CARGAR MÓDULO VIA API - SIN EXCEPCIONES
+                    // CARGAR MÓDULO VIA API
                     await cargarModulo(moduleName);
                     
                     currentModule = moduleName;
@@ -594,19 +556,15 @@
                 }
             }
             
-            // ===== CARGAR MÓDULO DINÁMICO DESDE API =====
+            // ===== CARGAR MÓDULO DINÁMICO =====
             async function cargarModulo(moduleName) {
-                console.log(`🌐 Cargando módulo desde API: ${moduleName}`);
+                console.log(`🌐 Cargando módulo SUPERVISOR desde API: ${moduleName}`);
                 
                 if (!currentUserData) {
                     throw new Error('Datos de usuario no disponibles');
                 }
                 
-                const userRole = currentUserData.rol;
-                const userUid = currentUserData.id;
-                
-                // Construir URL de la API
-                const apiUrl = `../../config/get_module.php?name=${encodeURIComponent(moduleName)}&role=${encodeURIComponent(userRole)}&uid=${encodeURIComponent(userUid)}`;
+                const apiUrl = `../../config/get_module.php?name=${encodeURIComponent(moduleName)}&role=supervisor&uid=${encodeURIComponent(currentUserData.id)}`;
                 
                 console.log(`📡 Solicitando: ${apiUrl}`);
                 
@@ -624,10 +582,10 @@
                             errorMessage = 'Parámetros de solicitud inválidos';
                             break;
                         case 403:
-                            errorMessage = `No tienes permisos para acceder al módulo "${moduleName}"`;
+                            errorMessage = `No tienes permisos SUPERVISOR para acceder al módulo "${moduleName}"`;
                             break;
                         case 404:
-                            errorMessage = `El módulo "${moduleName}" no fue encontrado`;
+                            errorMessage = `El módulo SUPERVISOR "${moduleName}" no fue encontrado`;
                             break;
                         case 500:
                             errorMessage = 'Error interno del servidor';
@@ -649,7 +607,7 @@
                     throw new Error('El módulo está vacío');
                 }
                 
-                console.log(`📦 HTML del módulo recibido: ${moduleHTML.length} caracteres`);
+                console.log(`📦 HTML del módulo SUPERVISOR recibido: ${moduleHTML.length} caracteres`);
                 
                 // Insertar HTML en el contenido
                 mainContent.innerHTML = moduleHTML;
@@ -657,7 +615,7 @@
                 // Procesar scripts del módulo
                 await procesarScriptsDelModulo();
                 
-                console.log(`✅ Módulo ${moduleName} cargado exitosamente`);
+                console.log(`✅ Módulo SUPERVISOR ${moduleName} cargado exitosamente`);
             }
             
             // ===== PROCESAR SCRIPTS DEL MÓDULO =====
@@ -712,7 +670,6 @@
             }
             
             function limpiarModuloAnterior() {
-                // Ejecutar limpieza si existe
                 if (window.moduleCleanup && typeof window.moduleCleanup === 'function') {
                     console.log('🧹 Ejecutando limpieza del módulo anterior...');
                     try {
@@ -723,7 +680,6 @@
                     window.moduleCleanup = null;
                 }
                 
-                // Limpiar contenido (excepto loading)
                 Array.from(mainContent.children).forEach(element => {
                     if (element.id !== 'loading-content') {
                         element.remove();
@@ -788,7 +744,6 @@
                     }
                 } catch (error) {
                     console.error('❌ Error cerrando sesión:', error);
-                    // Forzar redirección aunque haya error
                     window.location.href = '../../index.html?logout=1';
                 }
             }

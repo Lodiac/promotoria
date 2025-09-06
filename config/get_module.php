@@ -1,7 +1,7 @@
 <?php
 /**
- * API para cargar módulos dinámicos por rol
- * Sistema Promotoria - Acceso controlado por roles
+ * API para cargar módulos dinámicos por rol - RUTA CORREGIDA
+ * Sistema Promotoria - Busca en pages/modules/
  */
 
 // Definir constante de acceso
@@ -22,30 +22,34 @@ $requestedRole = isset($_GET['role']) ? trim($_GET['role']) : '';
 $userUid = isset($_GET['uid']) ? trim($_GET['uid']) : '';
 
 // Registrar solicitud para depuración
-error_log("Solicitud de módulo - Módulo: '$requestedModule', Rol: '$requestedRole', UID: '$userUid'");
+error_log("=== SOLICITUD DE MÓDULO ===");
+error_log("Módulo solicitado: '$requestedModule'");
+error_log("Rol del usuario: '$requestedRole'");
+error_log("UID del usuario: '$userUid'");
 
 // Validar parámetros básicos
 if (empty($requestedModule)) {
     header('HTTP/1.1 400 Bad Request');
+    error_log("ERROR: Falta el nombre del módulo");
     exit('Se requiere el nombre del módulo');
 }
 
 if (empty($requestedRole)) {
     header('HTTP/1.1 400 Bad Request');
+    error_log("ERROR: Falta el rol del usuario");
     exit('Se requiere el rol del usuario');
 }
 
-// Mapeo de roles a módulos permitidos - SISTEMA PROMOTORIA
+// ===== MAPEO DE MÓDULOS POR ROL =====
 $allowedModules = [
     'root' => [
-        'bienvenida',
-        'cadenas', 
-        'promotores'
+        'bienvenida'
     ],
     'supervisor' => [
         'bienvenida',
         'cadenas',
-        'promotores'
+        'promotores',
+        'reportes'
     ],
     'usuario' => [
         'bienvenida',
@@ -53,64 +57,102 @@ $allowedModules = [
     ]
 ];
 
-// Verificar si el rol existe en nuestra configuración
+// Verificar si el rol existe
 if (!isset($allowedModules[$requestedRole])) {
     header('HTTP/1.1 403 Forbidden');
+    error_log("ERROR: Rol no reconocido: '$requestedRole'");
     exit("Rol '$requestedRole' no reconocido en Sistema Promotoria");
 }
 
 // Verificar si el módulo está permitido para este rol
 if (!in_array($requestedModule, $allowedModules[$requestedRole])) {
     header('HTTP/1.1 403 Forbidden');
+    error_log("ERROR: Acceso denegado - Módulo: '$requestedModule' no permitido para rol: '$requestedRole'");
     exit("Acceso denegado: el módulo '$requestedModule' no está disponible para el rol '$requestedRole'");
 }
 
-// Construir ruta del módulo
-$basePath = dirname(__DIR__); // Desde config/ subir un nivel
-$filePath = "{$basePath}/modules/modules_{$requestedRole}/{$requestedModule}.html";
+// ===== CONSTRUCCIÓN DE RUTA CORREGIDA =====
+$basePath = dirname(__DIR__); // Desde config/ subir un nivel a la raíz del proyecto
 
-// Log de la ruta que se va a verificar
-error_log("Verificando ruta del módulo: $filePath");
+// CORREGIDO: Buscar en pages/modules/ en lugar de modules/
+$modulePath = "pages/modules/module_{$requestedRole}";
+$filePath = "{$basePath}/{$modulePath}/{$requestedModule}.html";
+
+// Log detallado de rutas para depuración
+error_log("=== VERIFICACIÓN DE RUTAS ===");
+error_log("Base path: $basePath");
+error_log("Module path: $modulePath");
+error_log("Archivo buscado: $filePath");
+error_log("Directorio padre existe: " . (is_dir(dirname($filePath)) ? 'SÍ' : 'NO'));
+
+// Verificar si existe el directorio del módulo
+if (!is_dir(dirname($filePath))) {
+    header('HTTP/1.1 404 Not Found');
+    $errorMsg = "El directorio de módulos no existe: " . dirname($filePath);
+    $errorMsg .= "\nDebes crear la estructura: /pages/modules/module_{$requestedRole}/";
+    error_log("ERROR: $errorMsg");
+    exit($errorMsg);
+}
 
 // Verificar si existe el archivo del módulo
 if (!file_exists($filePath)) {
     header('HTTP/1.1 404 Not Found');
     
-    // Información detallada para depuración
-    $errorMessage = "No se encontró el módulo en la ruta: $filePath";
-    $errorMessage .= "\nEstructura esperada: /modules/modules_{$requestedRole}/{$requestedModule}.html";
+    // Listar archivos disponibles para depuración
+    $moduleDir = dirname($filePath);
+    $availableFiles = [];
+    if (is_dir($moduleDir)) {
+        $availableFiles = array_diff(scandir($moduleDir), array('.', '..'));
+    }
     
-    error_log($errorMessage);
-    exit("No se encontró el módulo '$requestedModule' para el rol '$requestedRole'. Verifica la estructura de directorios.");
+    $errorMessage = "No se encontró el módulo en la ruta: $filePath";
+    $errorMessage .= "\nEstructura esperada: /pages/modules/module_{$requestedRole}/{$requestedModule}.html";
+    $errorMessage .= "\nArchivos disponibles en el directorio: " . implode(', ', $availableFiles);
+    
+    error_log("ERROR: $errorMessage");
+    exit("No se encontró el módulo '$requestedModule' para el rol '$requestedRole'.\n\n$errorMessage");
 }
 
 // Verificar que el archivo es legible
 if (!is_readable($filePath)) {
     header('HTTP/1.1 500 Internal Server Error');
-    error_log("El archivo del módulo existe pero no es legible: $filePath");
+    error_log("ERROR: El archivo del módulo existe pero no es legible: $filePath");
     exit("Error: No se puede leer el módulo solicitado");
 }
 
-// Log de éxito
-error_log("Módulo encontrado y accesible: $filePath");
-
-// Validación adicional: verificar que el archivo contiene HTML válido (opcional)
+// Leer contenido del archivo
 $fileContent = file_get_contents($filePath);
 if ($fileContent === false) {
     header('HTTP/1.1 500 Internal Server Error');
-    error_log("Error al leer el contenido del módulo: $filePath");
+    error_log("ERROR: No se pudo leer el contenido del módulo: $filePath");
     exit("Error: No se pudo cargar el contenido del módulo");
 }
 
 // Verificar que no esté vacío
 if (empty(trim($fileContent))) {
     header('HTTP/1.1 404 Not Found');
-    error_log("El módulo existe pero está vacío: $filePath");
+    error_log("ERROR: El módulo existe pero está vacío: $filePath");
     exit("Error: El módulo está vacío");
 }
 
+// ===== SEGURIDAD ADICIONAL =====
+// Verificar que no se esté intentando acceder a archivos fuera del directorio permitido
+$realPath = realpath($filePath);
+$allowedBasePath = realpath($basePath . '/pages/modules/');
+
+if (strpos($realPath, $allowedBasePath) !== 0) {
+    header('HTTP/1.1 403 Forbidden');
+    error_log("ERROR: Intento de acceso fuera del directorio permitido: $realPath");
+    exit("Error: Acceso denegado por seguridad");
+}
+
 // Log de carga exitosa
-error_log("Módulo '$requestedModule' cargado exitosamente para rol '$requestedRole' - Tamaño: " . strlen($fileContent) . " bytes");
+error_log("=== CARGA EXITOSA ===");
+error_log("✅ Módulo cargado: '$requestedModule'");
+error_log("✅ Para rol: '$requestedRole'");
+error_log("✅ Usuario: '$userUid'");
+error_log("✅ Archivo: $filePath");
+error_log("✅ Tamaño: " . strlen($fileContent) . " bytes");
 
 // Devolver el contenido del módulo
 echo $fileContent;
