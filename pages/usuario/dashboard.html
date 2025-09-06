@@ -14,6 +14,54 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
+        /* ===== SEGURIDAD: OCULTAR CONTENIDO HASTA VERIFICACIÓN ===== */
+        body {
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        body.authorized {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        /* ===== LOADING SEGURIDAD ===== */
+        .security-loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            color: white;
+        }
+        
+        .security-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        .security-loading h2 {
+            margin: 0 0 10px 0;
+            font-size: 1.5rem;
+        }
+        
+        .security-loading p {
+            margin: 0;
+            opacity: 0.8;
+        }
+        
         /* ===== RESET Y BASE ===== */
         * {
             margin: 0;
@@ -23,7 +71,7 @@
         
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
             min-height: 100vh;
             color: #333;
             overflow-x: hidden;
@@ -219,7 +267,8 @@
         }
         
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
         
         .loading-content p {
@@ -273,12 +322,12 @@
             border-radius: 16px;
             padding: 3rem;
             text-align: center;
-            border: 2px solid #f39c12;
-            box-shadow: 0 10px 30px rgba(243, 156, 18, 0.1);
+            border: 2px solid #e74c3c;
+            box-shadow: 0 10px 30px rgba(231, 76, 60, 0.1);
         }
         
         .access-denied h2 {
-            color: #f39c12;
+            color: #e74c3c;
             margin-bottom: 1rem;
             font-size: 2rem;
         }
@@ -318,6 +367,13 @@
     </style>
 </head>
 <body>
+    <!-- LOADING DE SEGURIDAD -->
+    <div class="security-loading" id="security-loading">
+        <div class="security-spinner"></div>
+        <h2><i class="fas fa-user"></i> Verificando acceso USUARIO</h2>
+        <p>Validando credenciales y permisos...</p>
+    </div>
+
     <!-- HEADER -->
     <header class="header">
         <div class="header-logo">
@@ -362,10 +418,11 @@
             let currentUserData = null;
             let currentModule = null;
             let previousActiveMenuItem = null;
-            let loadedScripts = new Set(); // Tracking de scripts cargados
-            let moduleScripts = []; // Scripts del módulo actual
+            let loadedScripts = new Set();
+            let moduleScripts = [];
             
             // ===== ELEMENTOS DOM =====
+            const securityLoading = document.getElementById('security-loading');
             const mainContent = document.getElementById('main-content');
             const loadingContent = document.getElementById('loading-content');
             const sidebarMenu = document.getElementById('sidebar-menu');
@@ -386,89 +443,133 @@
                 role: 'usuario'
             };
             
-            // ===== INICIALIZACIÓN =====
+            // ===== INICIALIZACIÓN CON SEGURIDAD ESTRICTA =====
             init();
             
             async function init() {
                 try {
-                    console.log('🔍 Verificando sesión USUARIO...');
-                    await verificarSesion();
+                    console.log('🔒 Verificando acceso USUARIO con seguridad estricta...');
+                    
+                    // ===== VERIFICACIÓN ESTRICTA BLOQUEANTE =====
+                    await verificarAccesoUsuario();
+                    
+                    // Solo continuar si la verificación fue exitosa
+                    console.log('✅ Acceso USUARIO autorizado');
+                    
+                    // Ocultar loading de seguridad y mostrar dashboard
+                    ocultarLoadingSeguridad();
+                    
+                    // Continuar con inicialización normal
                     generarMenuUsuario();
                     configurarEventListeners();
-                    
-                    // CARGAR MÓDULO INICIAL
                     await cargarModuloInicial();
                     
                     console.log('✅ Dashboard USUARIO inicializado correctamente');
+                    
                 } catch (error) {
-                    console.error('❌ Error durante la inicialización:', error);
-                    redirigirALogin('Error de inicialización');
+                    console.error('❌ Error crítico durante verificación:', error);
+                    // La función verificarAccesoUsuario ya maneja redirecciones
                 }
             }
             
-            // ===== VERIFICACIÓN DE SESIÓN Y ROL =====
-            async function verificarSesion() {
+            // ===== VERIFICACIÓN ESTRICTA DE ACCESO USUARIO =====
+            async function verificarAccesoUsuario() {
                 try {
-                    const response = await fetch('../../config/verificar_sesion.php', {
+                    console.log('🔍 Verificando sesión y acceso USUARIO...');
+                    
+                    const response = await fetch('../../config/verificar_sesion.php?dashboard=usuario', {
                         method: 'GET',
-                        cache: 'no-cache'
+                        cache: 'no-cache',
+                        headers: {
+                            'Accept': 'application/json'
+                        }
                     });
                     
                     if (!response.ok) {
-                        throw new Error(`HTTP ${response.status}`);
+                        throw new Error(`HTTP ${response.status}: Error del servidor`);
                     }
                     
                     const data = await response.json();
+                    console.log('📋 Respuesta de verificación:', data);
                     
+                    // ===== VERIFICAR RESPUESTA EXITOSA =====
                     if (!data.success) {
-                        throw new Error(data.message || 'Sesión inválida');
-                    }
-                    
-                    currentUserData = data.usuario;
-                    
-                    // Actualizar datos globales para módulos
-                    window.SessionData.user = currentUserData;
-                    window.SessionData.role = currentUserData.rol;
-                    
-                    // ===== VALIDACIÓN ESPECÍFICA PARA USUARIO =====
-                    // Permite cualquier rol (usuario, supervisor, root) - todos pueden usar este dashboard
-                    if (!['usuario', 'supervisor', 'root'].includes(currentUserData.rol)) {
-                        mostrarAccesoDenegado(currentUserData.rol, 'usuario');
+                        console.error('❌ Verificación fallida:', data.message);
+                        redirigirConError(data.redirect || '../../index.html?error=sin_sesion', data.message);
                         return;
                     }
                     
-                    console.log('✅ Sesión USUARIO válida:', currentUserData);
+                    // ===== VERIFICAR ACCESO ESPECÍFICO =====
+                    if (!data.access || !data.access.has_access) {
+                        console.error('❌ Acceso USUARIO denegado:', data.access?.access_message);
+                        
+                        if (data.access?.should_redirect && data.access?.redirect_url) {
+                            console.log('🔄 Redirigiendo a dashboard correcto:', data.access.redirect_url);
+                            window.location.href = data.access.redirect_url;
+                        } else {
+                            redirigirConError('../../index.html?error=sin_permisos', 'Sin permisos USUARIO');
+                        }
+                        return;
+                    }
+                    
+                    // ===== VERIFICAR ROL ESPECÍFICO =====
+                    if (data.usuario?.rol !== 'usuario') {
+                        console.error('❌ Rol incorrecto para USUARIO:', data.usuario?.rol);
+                        
+                        if (data.dashboard?.dashboard_url) {
+                            console.log('🔄 Redirigiendo a dashboard del usuario:', data.dashboard.dashboard_url);
+                            window.location.href = data.dashboard.dashboard_url;
+                        } else {
+                            redirigirConError('../../index.html?error=rol_incorrecto', 'Rol incorrecto');
+                        }
+                        return;
+                    }
+                    
+                    // ===== VERIFICAR DASHBOARD CORRECTO =====
+                    if (data.dashboard?.allowed_dashboard !== 'usuario') {
+                        console.error('❌ Dashboard incorrecto para usuario USUARIO');
+                        redirigirConError('../../index.html?error=dashboard_incorrecto', 'Dashboard incorrecto');
+                        return;
+                    }
+                    
+                    // ===== ÉXITO: GUARDAR DATOS =====
+                    currentUserData = data.usuario;
+                    window.SessionData.user = currentUserData;
+                    window.SessionData.role = currentUserData.rol;
+                    
+                    console.log('✅ Verificación USUARIO exitosa:', currentUserData);
                     actualizarHeaderUsuario();
                     
                 } catch (error) {
-                    console.error('❌ Error verificando sesión:', error);
+                    console.error('❌ Error en verificación USUARIO:', error);
+                    redirigirConError('../../index.html?error=verificacion_fallida', 'Error de verificación');
                     throw error;
                 }
             }
             
-            function mostrarAccesoDenegado(userRole, requiredRole) {
-                mainContent.innerHTML = `
-                    <div class="access-denied">
-                        <h2><i class="fas fa-lock"></i> Acceso Denegado</h2>
-                        <p>Tu rol actual (<strong>${userRole}</strong>) no tiene permisos para acceder al panel USUARIO.</p>
-                        <p>Se requiere rol: <strong>${requiredRole}</strong> o superior.</p>
-                        <button class="back-btn" onclick="redirigirAlDashboardCorrecto('${userRole}')">
-                            <i class="fas fa-arrow-left"></i> Ir a mi dashboard
-                        </button>
-                    </div>
-                `;
+            // ===== FUNCIONES DE SEGURIDAD =====
+            function ocultarLoadingSeguridad() {
+                securityLoading.style.display = 'none';
+                document.body.classList.add('authorized');
             }
             
-            window.redirigirAlDashboardCorrecto = function(rol) {
-                const dashboards = {
-                    'root': '../../pages/root/dashboard.html',
-                    'supervisor': '../../pages/supervisor/dashboard.html'
-                };
+            function redirigirConError(url, mensaje) {
+                console.log('🔄 Redirigiendo con error:', mensaje, 'a:', url);
                 
-                window.location.href = dashboards[rol] || '../../pages/usuario/dashboard.html';
-            };
+                // Mostrar mensaje temporal antes de redireccionar
+                securityLoading.innerHTML = `
+                    <div class="security-spinner"></div>
+                    <h2><i class="fas fa-exclamation-triangle"></i> Acceso Denegado</h2>
+                    <p>${mensaje}</p>
+                    <p>Redirigiendo...</p>
+                `;
+                
+                setTimeout(() => {
+                    window.location.href = url;
+                }, 2000);
+            }
             
-            // ===== GENERAR MENÚ USUARIO =====
+            // ===== RESTO DE FUNCIONES (ADAPTADAS PARA USUARIO) =====
             function generarMenuUsuario() {
                 sidebarMenu.innerHTML = '';
                 
@@ -490,22 +591,17 @@
                 console.log(`✅ Menú USUARIO generado - ${usuarioModules.length} módulos`);
             }
             
-            // ===== CARGAR MÓDULO INICIAL =====
             async function cargarModuloInicial() {
                 try {
                     console.log('🏠 Cargando módulo inicial USUARIO: bienvenida');
                     
-                    // Marcar primer elemento del menú como activo
                     const firstMenuItem = sidebarMenu.querySelector('.menu-item');
                     if (firstMenuItem) {
                         firstMenuItem.classList.add('active');
                         previousActiveMenuItem = firstMenuItem;
                     }
                     
-                    // Cargar módulo bienvenida via API
                     await cargarModulo('bienvenida');
-                    
-                    // Solo actualizar currentModule después del éxito
                     currentModule = 'bienvenida';
                     window.SessionData.currentModule = currentModule;
                     
@@ -516,7 +612,6 @@
                 }
             }
             
-            // ===== ACTUALIZAR HEADER =====
             function actualizarHeaderUsuario() {
                 if (!currentUserData) return;
                 
@@ -525,39 +620,28 @@
                 headerUserRole.className = 'user-role usuario';
             }
             
-            // ===== CONFIGURAR EVENT LISTENERS =====
             function configurarEventListeners() {
-                // Logout
                 logoutBtn.addEventListener('click', cerrarSesion);
                 
-                // ===== NAVEGACIÓN DEL MENÚ - MEJORADO =====
                 sidebarMenu.addEventListener('click', (e) => {
                     e.preventDefault();
                     
-                    // Buscar el elemento clickeado y obtener el módulo
                     let module = null;
                     let menuItem = null;
                     
-                    // Si hizo click en el enlace o sus hijos
                     const linkElement = e.target.closest('a[data-module]');
                     if (linkElement) {
                         module = linkElement.getAttribute('data-module');
                         menuItem = linkElement.closest('.menu-item');
                     } else {
-                        // Si hizo click directamente en el li
                         menuItem = e.target.closest('.menu-item');
                         if (menuItem) {
                             module = menuItem.dataset.module;
                         }
                     }
                     
-                    console.log(`🖱️ Click detectado - Módulo: ${module}, currentModule: ${currentModule}`);
-                    
                     if (module && menuItem) {
-                        // SIEMPRE navegar al módulo, incluso si es el mismo (para forzar refresh)
                         navegarAModulo(module, menuItem);
-                    } else {
-                        console.warn('⚠️ No se pudo determinar el módulo');
                     }
                 });
                 
@@ -565,178 +649,109 @@
                 setInterval(verificarSesionSilenciosa, 5 * 60 * 1000);
             }
             
-            // ===== NAVEGACIÓN DE MÓDULOS - CORREGIDO =====
             async function navegarAModulo(moduleName, menuItem) {
-                console.log(`📄 Navegando a módulo USUARIO: ${moduleName}`);
-                
-                // Guardar estado anterior para rollback
                 const previousModule = currentModule;
                 const previousActiveItem = previousActiveMenuItem;
                 
                 try {
-                    // 1. Mostrar loading ANTES de cambios visuales
                     mostrarLoading(true);
-                    
-                    // 2. Limpiar módulo anterior COMPLETAMENTE
                     await limpiarModuloAnterior();
                     
-                    // 3. Actualizar interfaz visual
                     document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
                     menuItem.classList.add('active');
                     previousActiveMenuItem = menuItem;
                     
-                    // 4. CARGAR MÓDULO VIA API (puede fallar)
                     await cargarModulo(moduleName);
-                    
-                    // 5. Solo actualizar currentModule DESPUÉS del éxito
                     currentModule = moduleName;
                     window.SessionData.currentModule = currentModule;
-                    
-                    console.log(`✅ Módulo ${moduleName} cargado exitosamente`);
                     
                 } catch (error) {
                     console.error('❌ Error navegando a módulo:', error);
                     
-                    // ROLLBACK: Revertir cambios visuales
                     document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
                     if (previousActiveItem) {
                         previousActiveItem.classList.add('active');
                         previousActiveMenuItem = previousActiveItem;
                     }
                     
-                    // Mostrar error pero mantener navegación funcional
                     mostrarError(`Error al cargar el módulo ${moduleName}`, error.message);
-                    
-                    // currentModule se mantiene con el valor anterior
-                    console.log(`🔄 Estado revertido a: ${previousModule}`);
-                    
                 } finally {
                     mostrarLoading(false);
                 }
             }
             
-            // ===== CARGAR MÓDULO DINÁMICO =====
             async function cargarModulo(moduleName) {
-                console.log(`🌐 Cargando módulo USUARIO desde API: ${moduleName}`);
-                
                 if (!currentUserData) {
                     throw new Error('Datos de usuario no disponibles');
                 }
                 
                 const apiUrl = `../../config/get_module.php?name=${encodeURIComponent(moduleName)}&role=usuario&uid=${encodeURIComponent(currentUserData.id)}`;
                 
-                console.log(`📡 Solicitando: ${apiUrl}`);
+                const response = await fetch(apiUrl, {
+                    method: 'GET',
+                    cache: 'no-cache',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
                 
-                try {
-                    const response = await fetch(apiUrl, {
-                        method: 'GET',
-                        cache: 'no-cache',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-Requested-With': 'XMLHttpRequest'
-                        }
-                    });
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    let errorMessage = 'Error desconocido';
                     
-                    if (!response.ok) {
-                        const errorText = await response.text();
-                        let errorMessage = 'Error desconocido';
-                        
-                        switch (response.status) {
-                            case 400:
-                                errorMessage = 'Parámetros de solicitud inválidos';
-                                break;
-                            case 403:
-                                errorMessage = `No tienes permisos USUARIO para acceder al módulo "${moduleName}"`;
-                                break;
-                            case 404:
-                                errorMessage = `El módulo USUARIO "${moduleName}" no fue encontrado`;
-                                break;
-                            case 500:
-                                errorMessage = 'Error interno del servidor';
-                                break;
-                            default:
-                                errorMessage = `Error HTTP ${response.status}`;
-                        }
-                        
-                        if (errorText) {
-                            console.error('Error detallado del servidor:', errorText);
-                            // Incluir detalles del servidor si están disponibles
-                            if (errorText.length < 500) {
-                                errorMessage += '\n\nDetalles: ' + errorText;
-                            }
-                        }
-                        
-                        throw new Error(errorMessage);
+                    switch (response.status) {
+                        case 400: errorMessage = 'Parámetros de solicitud inválidos'; break;
+                        case 403: errorMessage = `No tienes permisos USUARIO para acceder al módulo "${moduleName}"`; break;
+                        case 404: errorMessage = `El módulo USUARIO "${moduleName}" no fue encontrado`; break;
+                        case 500: errorMessage = 'Error interno del servidor'; break;
+                        default: errorMessage = `Error HTTP ${response.status}`;
                     }
                     
-                    const moduleHTML = await response.text();
-                    
-                    if (!moduleHTML || moduleHTML.trim().length === 0) {
-                        throw new Error('El módulo está vacío');
+                    if (errorText && errorText.length < 500) {
+                        errorMessage += '\n\nDetalles: ' + errorText;
                     }
                     
-                    console.log(`📦 HTML del módulo USUARIO recibido: ${moduleHTML.length} caracteres`);
-                    
-                    // Insertar HTML en el contenido
-                    mainContent.innerHTML = moduleHTML;
-                    
-                    // Procesar scripts del módulo
-                    await procesarScriptsDelModulo();
-                    
-                    console.log(`✅ Módulo USUARIO ${moduleName} cargado exitosamente`);
-                    
-                } catch (fetchError) {
-                    console.error('❌ Error en la petición fetch:', fetchError);
-                    throw fetchError;
+                    throw new Error(errorMessage);
                 }
+                
+                const moduleHTML = await response.text();
+                
+                if (!moduleHTML || moduleHTML.trim().length === 0) {
+                    throw new Error('El módulo está vacío');
+                }
+                
+                mainContent.innerHTML = moduleHTML;
+                await procesarScriptsDelModulo();
             }
             
-            // ===== PROCESAR SCRIPTS DEL MÓDULO - MEJORADO =====
             async function procesarScriptsDelModulo() {
                 const scripts = mainContent.querySelectorAll('script');
-                moduleScripts = []; // Resetear scripts del módulo
+                moduleScripts = [];
                 
                 if (scripts.length > 0) {
-                    console.log(`⚙️ Procesando ${scripts.length} scripts del módulo`);
-                    
                     for (let i = 0; i < scripts.length; i++) {
                         const oldScript = scripts[i];
                         
                         if (oldScript.src) {
-                            // Script externo - verificar si ya fue cargado
                             if (!loadedScripts.has(oldScript.src)) {
-                                console.log(`📥 Cargando script externo: ${oldScript.src}`);
-                                
                                 const newScript = document.createElement('script');
-                                
-                                // Copiar atributos
                                 Array.from(oldScript.attributes).forEach(attr => {
                                     newScript.setAttribute(attr.name, attr.value);
                                 });
                                 
                                 await new Promise((resolve, reject) => {
                                     newScript.onload = () => {
-                                        console.log(`✅ Script externo cargado`);
                                         loadedScripts.add(oldScript.src);
                                         moduleScripts.push(newScript);
                                         resolve();
                                     };
-                                    newScript.onerror = (error) => {
-                                        console.error(`❌ Error cargando script externo:`, error);
-                                        reject(error);
-                                    };
-                                    
+                                    newScript.onerror = reject;
                                     document.head.appendChild(newScript);
                                 });
-                            } else {
-                                console.log(`⚡ Script externo ya cargado: ${oldScript.src}`);
                             }
                         } else {
-                            // Script inline - ejecutar en contexto limpio
                             try {
-                                console.log(`⚡ Ejecutando script inline`);
-                                
-                                // Crear nuevo script con namespace único
                                 const newScript = document.createElement('script');
                                 newScript.textContent = `
                                     (function() {
@@ -744,26 +759,18 @@
                                         ${oldScript.textContent}
                                     })();
                                 `;
-                                
                                 oldScript.parentNode.replaceChild(newScript, oldScript);
                                 moduleScripts.push(newScript);
-                                
-                                console.log(`✅ Script inline ejecutado`);
                             } catch (scriptError) {
-                                console.error(`❌ Error ejecutando script inline:`, scriptError);
+                                console.error('❌ Error ejecutando script inline:', scriptError);
                             }
                         }
                     }
                 }
             }
             
-            // ===== LIMPIEZA MEJORADA DE MÓDULOS =====
             async function limpiarModuloAnterior() {
-                console.log('🧹 Iniciando limpieza completa del módulo anterior...');
-                
-                // 1. Ejecutar función de limpieza del módulo si existe
                 if (window.moduleCleanup && typeof window.moduleCleanup === 'function') {
-                    console.log('🧹 Ejecutando limpieza específica del módulo...');
                     try {
                         await window.moduleCleanup();
                     } catch (error) {
@@ -772,9 +779,7 @@
                     delete window.moduleCleanup;
                 }
                 
-                // 2. Limpiar event listeners específicos de módulos
                 if (window.moduleEventListeners && Array.isArray(window.moduleEventListeners)) {
-                    console.log('🧹 Limpiando event listeners del módulo...');
                     window.moduleEventListeners.forEach(cleanup => {
                         try {
                             if (typeof cleanup === 'function') cleanup();
@@ -785,9 +790,7 @@
                     window.moduleEventListeners = [];
                 }
                 
-                // 3. Limpiar variables globales del módulo
                 if (window.moduleGlobalVars && Array.isArray(window.moduleGlobalVars)) {
-                    console.log('🧹 Limpiando variables globales del módulo...');
                     window.moduleGlobalVars.forEach(varName => {
                         try {
                             if (window.hasOwnProperty(varName)) {
@@ -800,7 +803,6 @@
                     window.moduleGlobalVars = [];
                 }
                 
-                // 4. Remover scripts inline del módulo anterior
                 moduleScripts.forEach(script => {
                     try {
                         if (script.parentNode && !script.src) {
@@ -812,9 +814,7 @@
                 });
                 moduleScripts = [];
                 
-                // 5. Limpiar timers/intervals del módulo
                 if (window.moduleTimers && Array.isArray(window.moduleTimers)) {
-                    console.log('🧹 Limpiando timers del módulo...');
                     window.moduleTimers.forEach(timer => {
                         try {
                             if (timer.type === 'timeout') {
@@ -829,14 +829,12 @@
                     window.moduleTimers = [];
                 }
                 
-                // 6. Limpiar contenido excepto loading
                 Array.from(mainContent.children).forEach(element => {
                     if (element.id !== 'loading-content') {
                         element.remove();
                     }
                 });
                 
-                // 7. Forzar recolección de basura (si está disponible)
                 if (window.gc && typeof window.gc === 'function') {
                     try {
                         window.gc();
@@ -844,11 +842,8 @@
                         // Ignorar si no está disponible
                     }
                 }
-                
-                console.log('✅ Limpieza completa del módulo finalizada');
             }
             
-            // ===== UTILIDADES =====
             function mostrarLoading(show) {
                 if (loadingContent) {
                     loadingContent.style.display = show ? 'flex' : 'none';
@@ -871,28 +866,31 @@
                 `;
             }
             
-            function redirigirALogin(motivo = 'Sesión expirada') {
-                console.log('🔄 Redirigiendo al login:', motivo);
-                window.location.href = `../../index.html?error=sin_sesion&motivo=${encodeURIComponent(motivo)}`;
-            }
-            
-            // ===== VERIFICACIÓN SILENCIOSA =====
             async function verificarSesionSilenciosa() {
                 try {
-                    const response = await fetch('../../config/verificar_sesion.php', {
+                    const response = await fetch('../../config/verificar_sesion.php?dashboard=usuario', {
                         method: 'GET',
                         cache: 'no-cache'
                     });
                     
-                    if (!response.ok || !(await response.json()).success) {
-                        redirigirALogin('Sesión expirada');
+                    if (!response.ok) {
+                        redirigirConError('../../index.html?error=sin_sesion', 'Sesión expirada');
+                        return;
+                    }
+                    
+                    const data = await response.json();
+                    if (!data.success || !data.access?.has_access) {
+                        if (data.access?.redirect_url) {
+                            window.location.href = data.access.redirect_url;
+                        } else {
+                            redirigirConError('../../index.html?error=sin_sesion', 'Sesión expirada');
+                        }
                     }
                 } catch (error) {
                     console.warn('⚠️ Error en verificación silenciosa:', error);
                 }
             }
             
-            // ===== CERRAR SESIÓN =====
             async function cerrarSesion() {
                 if (!confirm('¿Estás seguro que deseas cerrar sesión?')) return;
                 
@@ -917,13 +915,10 @@
             }
             
             // ===== HELPER FUNCTIONS PARA MÓDULOS =====
-            
-            // Función para que los módulos registren funciones de limpieza
             window.registerModuleCleanup = function(cleanupFn) {
                 window.moduleCleanup = cleanupFn;
             };
             
-            // Función para que los módulos registren event listeners
             window.registerModuleEventListener = function(cleanupFn) {
                 if (!window.moduleEventListeners) {
                     window.moduleEventListeners = [];
@@ -931,7 +926,6 @@
                 window.moduleEventListeners.push(cleanupFn);
             };
             
-            // Función para que los módulos registren variables globales
             window.registerModuleGlobalVar = function(varName) {
                 if (!window.moduleGlobalVars) {
                     window.moduleGlobalVars = [];
@@ -939,7 +933,6 @@
                 window.moduleGlobalVars.push(varName);
             };
             
-            // Función para que los módulos registren timers
             window.registerModuleTimer = function(id, type) {
                 if (!window.moduleTimers) {
                     window.moduleTimers = [];

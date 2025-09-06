@@ -1,8 +1,4 @@
 <?php
-/**
- * API para obtener tiendas - VERSIÓN CORREGIDA CON MEJOR MANEJO DE ERRORES
- * Reemplazar el archivo: api/get_tiendas.php
- */
 
 // Habilitar logging de errores para debugging
 ini_set('display_errors', 1);
