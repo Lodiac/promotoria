@@ -43,7 +43,8 @@ if (empty($requestedRole)) {
 // ===== MAPEO DE MÓDULOS POR ROL =====
 $allowedModules = [
     'root' => [
-        'bienvenida'
+        'bienvenida',
+        
     ],
     'supervisor' => [
         'bienvenida',

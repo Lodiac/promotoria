@@ -485,6 +485,7 @@
                     const firstMenuItem = sidebarMenu.querySelector('.menu-item');
                     if (firstMenuItem) {
                         firstMenuItem.classList.add('active');
+                        currentModule = firstMenuItem.dataset.module;
                     }
                     
                     // Cargar módulo bienvenida via API
@@ -511,16 +512,35 @@
                 // Logout
                 logoutBtn.addEventListener('click', cerrarSesion);
                 
-                // Navegación del menú
+                // ===== NAVEGACIÓN DEL MENÚ - CORREGIDO =====
                 sidebarMenu.addEventListener('click', (e) => {
                     e.preventDefault();
                     
-                    const menuItem = e.target.closest('.menu-item');
-                    if (!menuItem) return;
+                    // Buscar el elemento clickeado y obtener el módulo
+                    let module = null;
+                    let menuItem = null;
                     
-                    const module = menuItem.dataset.module;
-                    if (module && module !== currentModule) {
+                    // Si hizo click en el enlace o sus hijos
+                    const linkElement = e.target.closest('a[data-module]');
+                    if (linkElement) {
+                        module = linkElement.getAttribute('data-module');
+                        menuItem = linkElement.closest('.menu-item');
+                    } else {
+                        // Si hizo click directamente en el li
+                        menuItem = e.target.closest('.menu-item');
+                        if (menuItem) {
+                            module = menuItem.dataset.module;
+                        }
+                    }
+                    
+                    console.log(`🖱️ Click detectado - Módulo: ${module}, currentModule: ${currentModule}`);
+                    
+                    if (module && menuItem && module !== currentModule) {
                         navegarAModulo(module, menuItem);
+                    } else if (module === currentModule) {
+                        console.log('📌 Ya estás en este módulo');
+                    } else {
+                        console.warn('⚠️ No se pudo determinar el módulo');
                     }
                 });
                 
@@ -546,7 +566,9 @@
                     // CARGAR MÓDULO VIA API
                     await cargarModulo(moduleName);
                     
+                    // Actualizar módulo actual
                     currentModule = moduleName;
+                    console.log(`✅ Módulo actual actualizado a: ${currentModule}`);
                     
                 } catch (error) {
                     console.error('❌ Error navegando a módulo:', error);
@@ -568,54 +590,64 @@
                 
                 console.log(`📡 Solicitando: ${apiUrl}`);
                 
-                const response = await fetch(apiUrl, {
-                    method: 'GET',
-                    cache: 'no-cache'
-                });
-                
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    let errorMessage = 'Error desconocido';
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'GET',
+                        cache: 'no-cache',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
                     
-                    switch (response.status) {
-                        case 400:
-                            errorMessage = 'Parámetros de solicitud inválidos';
-                            break;
-                        case 403:
-                            errorMessage = `No tienes permisos USUARIO para acceder al módulo "${moduleName}"`;
-                            break;
-                        case 404:
-                            errorMessage = `El módulo USUARIO "${moduleName}" no fue encontrado`;
-                            break;
-                        case 500:
-                            errorMessage = 'Error interno del servidor';
-                            break;
-                        default:
-                            errorMessage = `Error HTTP ${response.status}`;
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        let errorMessage = 'Error desconocido';
+                        
+                        switch (response.status) {
+                            case 400:
+                                errorMessage = 'Parámetros de solicitud inválidos';
+                                break;
+                            case 403:
+                                errorMessage = `No tienes permisos USUARIO para acceder al módulo "${moduleName}"`;
+                                break;
+                            case 404:
+                                errorMessage = `El módulo USUARIO "${moduleName}" no fue encontrado`;
+                                break;
+                            case 500:
+                                errorMessage = 'Error interno del servidor';
+                                break;
+                            default:
+                                errorMessage = `Error HTTP ${response.status}`;
+                        }
+                        
+                        if (errorText) {
+                            console.error('Error detallado del servidor:', errorText);
+                        }
+                        
+                        throw new Error(errorMessage);
                     }
                     
-                    if (errorText) {
-                        console.error('Error detallado del servidor:', errorText);
+                    const moduleHTML = await response.text();
+                    
+                    if (!moduleHTML || moduleHTML.trim().length === 0) {
+                        throw new Error('El módulo está vacío');
                     }
                     
-                    throw new Error(errorMessage);
+                    console.log(`📦 HTML del módulo USUARIO recibido: ${moduleHTML.length} caracteres`);
+                    
+                    // Insertar HTML en el contenido
+                    mainContent.innerHTML = moduleHTML;
+                    
+                    // Procesar scripts del módulo
+                    await procesarScriptsDelModulo();
+                    
+                    console.log(`✅ Módulo USUARIO ${moduleName} cargado exitosamente`);
+                    
+                } catch (fetchError) {
+                    console.error('❌ Error en la petición fetch:', fetchError);
+                    throw fetchError;
                 }
-                
-                const moduleHTML = await response.text();
-                
-                if (!moduleHTML || moduleHTML.trim().length === 0) {
-                    throw new Error('El módulo está vacío');
-                }
-                
-                console.log(`📦 HTML del módulo USUARIO recibido: ${moduleHTML.length} caracteres`);
-                
-                // Insertar HTML en el contenido
-                mainContent.innerHTML = moduleHTML;
-                
-                // Procesar scripts del módulo
-                await procesarScriptsDelModulo();
-                
-                console.log(`✅ Módulo USUARIO ${moduleName} cargado exitosamente`);
             }
             
             // ===== PROCESAR SCRIPTS DEL MÓDULO =====
