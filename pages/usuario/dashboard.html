@@ -362,6 +362,8 @@
             let currentUserData = null;
             let currentModule = null;
             let previousActiveMenuItem = null;
+            let loadedScripts = new Set(); // Tracking de scripts cargados
+            let moduleScripts = []; // Scripts del módulo actual
             
             // ===== ELEMENTOS DOM =====
             const mainContent = document.getElementById('main-content');
@@ -528,7 +530,7 @@
                 // Logout
                 logoutBtn.addEventListener('click', cerrarSesion);
                 
-                // ===== NAVEGACIÓN DEL MENÚ - CORREGIDO =====
+                // ===== NAVEGACIÓN DEL MENÚ - MEJORADO =====
                 sidebarMenu.addEventListener('click', (e) => {
                     e.preventDefault();
                     
@@ -552,14 +554,8 @@
                     console.log(`🖱️ Click detectado - Módulo: ${module}, currentModule: ${currentModule}`);
                     
                     if (module && menuItem) {
-                        if (module !== currentModule) {
-                            // Navegar a módulo diferente
-                            navegarAModulo(module, menuItem);
-                        } else {
-                            // Permitir re-click en el mismo módulo como refresh
-                            console.log('🔄 Refrescando módulo actual');
-                            navegarAModulo(module, menuItem, true);
-                        }
+                        // SIEMPRE navegar al módulo, incluso si es el mismo (para forzar refresh)
+                        navegarAModulo(module, menuItem);
                     } else {
                         console.warn('⚠️ No se pudo determinar el módulo');
                     }
@@ -570,24 +566,24 @@
             }
             
             // ===== NAVEGACIÓN DE MÓDULOS - CORREGIDO =====
-            async function navegarAModulo(moduleName, menuItem, isRefresh = false) {
-                console.log(`📄 ${isRefresh ? 'Refrescando' : 'Navegando a'} módulo USUARIO: ${moduleName}`);
+            async function navegarAModulo(moduleName, menuItem) {
+                console.log(`📄 Navegando a módulo USUARIO: ${moduleName}`);
                 
                 // Guardar estado anterior para rollback
                 const previousModule = currentModule;
                 const previousActiveItem = previousActiveMenuItem;
                 
                 try {
-                    // 1. Actualizar interfaz visual temporalmente
+                    // 1. Mostrar loading ANTES de cambios visuales
+                    mostrarLoading(true);
+                    
+                    // 2. Limpiar módulo anterior COMPLETAMENTE
+                    await limpiarModuloAnterior();
+                    
+                    // 3. Actualizar interfaz visual
                     document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
                     menuItem.classList.add('active');
                     previousActiveMenuItem = menuItem;
-                    
-                    // 2. Mostrar loading
-                    mostrarLoading(true);
-                    
-                    // 3. Limpiar módulo anterior
-                    limpiarModuloAnterior();
                     
                     // 4. CARGAR MÓDULO VIA API (puede fallar)
                     await cargarModulo(moduleName);
@@ -695,43 +691,63 @@
                 }
             }
             
-            // ===== PROCESAR SCRIPTS DEL MÓDULO =====
+            // ===== PROCESAR SCRIPTS DEL MÓDULO - MEJORADO =====
             async function procesarScriptsDelModulo() {
                 const scripts = mainContent.querySelectorAll('script');
+                moduleScripts = []; // Resetear scripts del módulo
                 
                 if (scripts.length > 0) {
                     console.log(`⚙️ Procesando ${scripts.length} scripts del módulo`);
                     
                     for (let i = 0; i < scripts.length; i++) {
                         const oldScript = scripts[i];
-                        const newScript = document.createElement('script');
-                        
-                        // Copiar atributos
-                        Array.from(oldScript.attributes).forEach(attr => {
-                            newScript.setAttribute(attr.name, attr.value);
-                        });
                         
                         if (oldScript.src) {
-                            // Script externo
-                            console.log(`📥 Cargando script externo: ${oldScript.src}`);
-                            await new Promise((resolve, reject) => {
-                                newScript.onload = () => {
-                                    console.log(`✅ Script externo cargado`);
-                                    resolve();
-                                };
-                                newScript.onerror = (error) => {
-                                    console.error(`❌ Error cargando script externo:`, error);
-                                    reject(error);
-                                };
-                                newScript.src = oldScript.src;
-                                document.head.appendChild(newScript);
-                            });
+                            // Script externo - verificar si ya fue cargado
+                            if (!loadedScripts.has(oldScript.src)) {
+                                console.log(`📥 Cargando script externo: ${oldScript.src}`);
+                                
+                                const newScript = document.createElement('script');
+                                
+                                // Copiar atributos
+                                Array.from(oldScript.attributes).forEach(attr => {
+                                    newScript.setAttribute(attr.name, attr.value);
+                                });
+                                
+                                await new Promise((resolve, reject) => {
+                                    newScript.onload = () => {
+                                        console.log(`✅ Script externo cargado`);
+                                        loadedScripts.add(oldScript.src);
+                                        moduleScripts.push(newScript);
+                                        resolve();
+                                    };
+                                    newScript.onerror = (error) => {
+                                        console.error(`❌ Error cargando script externo:`, error);
+                                        reject(error);
+                                    };
+                                    
+                                    document.head.appendChild(newScript);
+                                });
+                            } else {
+                                console.log(`⚡ Script externo ya cargado: ${oldScript.src}`);
+                            }
                         } else {
-                            // Script inline
+                            // Script inline - ejecutar en contexto limpio
                             try {
                                 console.log(`⚡ Ejecutando script inline`);
-                                newScript.textContent = oldScript.textContent;
+                                
+                                // Crear nuevo script con namespace único
+                                const newScript = document.createElement('script');
+                                newScript.textContent = `
+                                    (function() {
+                                        'use strict';
+                                        ${oldScript.textContent}
+                                    })();
+                                `;
+                                
                                 oldScript.parentNode.replaceChild(newScript, oldScript);
+                                moduleScripts.push(newScript);
+                                
                                 console.log(`✅ Script inline ejecutado`);
                             } catch (scriptError) {
                                 console.error(`❌ Error ejecutando script inline:`, scriptError);
@@ -741,26 +757,22 @@
                 }
             }
             
-            // ===== UTILIDADES =====
-            function mostrarLoading(show) {
-                if (loadingContent) {
-                    loadingContent.style.display = show ? 'flex' : 'none';
-                }
-            }
-            
-            function limpiarModuloAnterior() {
-                // Ejecutar función de limpieza si existe
+            // ===== LIMPIEZA MEJORADA DE MÓDULOS =====
+            async function limpiarModuloAnterior() {
+                console.log('🧹 Iniciando limpieza completa del módulo anterior...');
+                
+                // 1. Ejecutar función de limpieza del módulo si existe
                 if (window.moduleCleanup && typeof window.moduleCleanup === 'function') {
-                    console.log('🧹 Ejecutando limpieza del módulo anterior...');
+                    console.log('🧹 Ejecutando limpieza específica del módulo...');
                     try {
-                        window.moduleCleanup();
+                        await window.moduleCleanup();
                     } catch (error) {
-                        console.warn('⚠️ Error durante limpieza:', error);
+                        console.warn('⚠️ Error durante limpieza específica:', error);
                     }
-                    window.moduleCleanup = null;
+                    delete window.moduleCleanup;
                 }
                 
-                // Limpiar event listeners específicos de módulos
+                // 2. Limpiar event listeners específicos de módulos
                 if (window.moduleEventListeners && Array.isArray(window.moduleEventListeners)) {
                     console.log('🧹 Limpiando event listeners del módulo...');
                     window.moduleEventListeners.forEach(cleanup => {
@@ -773,12 +785,74 @@
                     window.moduleEventListeners = [];
                 }
                 
-                // Limpiar contenido excepto loading
+                // 3. Limpiar variables globales del módulo
+                if (window.moduleGlobalVars && Array.isArray(window.moduleGlobalVars)) {
+                    console.log('🧹 Limpiando variables globales del módulo...');
+                    window.moduleGlobalVars.forEach(varName => {
+                        try {
+                            if (window.hasOwnProperty(varName)) {
+                                delete window[varName];
+                            }
+                        } catch (error) {
+                            console.warn(`⚠️ Error limpiando variable global ${varName}:`, error);
+                        }
+                    });
+                    window.moduleGlobalVars = [];
+                }
+                
+                // 4. Remover scripts inline del módulo anterior
+                moduleScripts.forEach(script => {
+                    try {
+                        if (script.parentNode && !script.src) {
+                            script.parentNode.removeChild(script);
+                        }
+                    } catch (error) {
+                        console.warn('⚠️ Error removiendo script:', error);
+                    }
+                });
+                moduleScripts = [];
+                
+                // 5. Limpiar timers/intervals del módulo
+                if (window.moduleTimers && Array.isArray(window.moduleTimers)) {
+                    console.log('🧹 Limpiando timers del módulo...');
+                    window.moduleTimers.forEach(timer => {
+                        try {
+                            if (timer.type === 'timeout') {
+                                clearTimeout(timer.id);
+                            } else if (timer.type === 'interval') {
+                                clearInterval(timer.id);
+                            }
+                        } catch (error) {
+                            console.warn('⚠️ Error limpiando timer:', error);
+                        }
+                    });
+                    window.moduleTimers = [];
+                }
+                
+                // 6. Limpiar contenido excepto loading
                 Array.from(mainContent.children).forEach(element => {
                     if (element.id !== 'loading-content') {
                         element.remove();
                     }
                 });
+                
+                // 7. Forzar recolección de basura (si está disponible)
+                if (window.gc && typeof window.gc === 'function') {
+                    try {
+                        window.gc();
+                    } catch (error) {
+                        // Ignorar si no está disponible
+                    }
+                }
+                
+                console.log('✅ Limpieza completa del módulo finalizada');
+            }
+            
+            // ===== UTILIDADES =====
+            function mostrarLoading(show) {
+                if (loadingContent) {
+                    loadingContent.style.display = show ? 'flex' : 'none';
+                }
             }
             
             function mostrarError(titulo, mensaje) {
@@ -823,7 +897,7 @@
                 if (!confirm('¿Estás seguro que deseas cerrar sesión?')) return;
                 
                 try {
-                    limpiarModuloAnterior();
+                    await limpiarModuloAnterior();
                     
                     const response = await fetch('../../config/logout.php', {
                         method: 'POST'
@@ -841,6 +915,37 @@
                     window.location.href = '../../index.html?logout=1';
                 }
             }
+            
+            // ===== HELPER FUNCTIONS PARA MÓDULOS =====
+            
+            // Función para que los módulos registren funciones de limpieza
+            window.registerModuleCleanup = function(cleanupFn) {
+                window.moduleCleanup = cleanupFn;
+            };
+            
+            // Función para que los módulos registren event listeners
+            window.registerModuleEventListener = function(cleanupFn) {
+                if (!window.moduleEventListeners) {
+                    window.moduleEventListeners = [];
+                }
+                window.moduleEventListeners.push(cleanupFn);
+            };
+            
+            // Función para que los módulos registren variables globales
+            window.registerModuleGlobalVar = function(varName) {
+                if (!window.moduleGlobalVars) {
+                    window.moduleGlobalVars = [];
+                }
+                window.moduleGlobalVars.push(varName);
+            };
+            
+            // Función para que los módulos registren timers
+            window.registerModuleTimer = function(id, type) {
+                if (!window.moduleTimers) {
+                    window.moduleTimers = [];
+                }
+                window.moduleTimers.push({ id, type });
+            };
         });
     </script>
 </body>
