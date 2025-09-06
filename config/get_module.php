@@ -1,6 +1,6 @@
 <?php
 /**
- * API para cargar módulos dinámicos por rol - RUTA CORREGIDA
+ * API para cargar módulos dinámicos por rol - CORREGIDO
  * Sistema Promotoria - Busca en pages/modules/
  */
 
@@ -40,17 +40,17 @@ if (empty($requestedRole)) {
     exit('Se requiere el rol del usuario');
 }
 
-// ===== MAPEO DE MÓDULOS POR ROL =====
+// ===== MAPEO DE MÓDULOS POR ROL - CORREGIDO =====
 $allowedModules = [
     'root' => [
         'bienvenida',
-        
+        'promotores',
+        'cadenas'
     ],
     'supervisor' => [
         'bienvenida',
         'cadenas',
-        'promotores',
-        'reportes'
+        'promotores'
     ],
     'usuario' => [
         'bienvenida',
@@ -68,14 +68,14 @@ if (!isset($allowedModules[$requestedRole])) {
 // Verificar si el módulo está permitido para este rol
 if (!in_array($requestedModule, $allowedModules[$requestedRole])) {
     header('HTTP/1.1 403 Forbidden');
+    $availableModules = implode(', ', $allowedModules[$requestedRole]);
     error_log("ERROR: Acceso denegado - Módulo: '$requestedModule' no permitido para rol: '$requestedRole'");
-    exit("Acceso denegado: el módulo '$requestedModule' no está disponible para el rol '$requestedRole'");
+    error_log("Módulos disponibles para '$requestedRole': $availableModules");
+    exit("Acceso denegado: el módulo '$requestedModule' no está disponible para el rol '$requestedRole'. Módulos disponibles: $availableModules");
 }
 
-// ===== CONSTRUCCIÓN DE RUTA CORREGIDA =====
+// ===== CONSTRUCCIÓN DE RUTA =====
 $basePath = dirname(__DIR__); // Desde config/ subir un nivel a la raíz del proyecto
-
-// CORREGIDO: Buscar en pages/modules/ en lugar de modules/
 $modulePath = "pages/modules/module_{$requestedRole}";
 $filePath = "{$basePath}/{$modulePath}/{$requestedModule}.html";
 
@@ -104,14 +104,23 @@ if (!file_exists($filePath)) {
     $availableFiles = [];
     if (is_dir($moduleDir)) {
         $availableFiles = array_diff(scandir($moduleDir), array('.', '..'));
+        $availableFiles = array_filter($availableFiles, function($file) {
+            return pathinfo($file, PATHINFO_EXTENSION) === 'html';
+        });
     }
     
-    $errorMessage = "No se encontró el módulo en la ruta: $filePath";
+    $errorMessage = "No se encontró el módulo '$requestedModule' para el rol '$requestedRole'";
+    $errorMessage .= "\nRuta esperada: $filePath";
     $errorMessage .= "\nEstructura esperada: /pages/modules/module_{$requestedRole}/{$requestedModule}.html";
-    $errorMessage .= "\nArchivos disponibles en el directorio: " . implode(', ', $availableFiles);
+    
+    if (!empty($availableFiles)) {
+        $errorMessage .= "\nMódulos disponibles en el directorio: " . implode(', ', $availableFiles);
+    } else {
+        $errorMessage .= "\nNo hay módulos disponibles en el directorio.";
+    }
     
     error_log("ERROR: $errorMessage");
-    exit("No se encontró el módulo '$requestedModule' para el rol '$requestedRole'.\n\n$errorMessage");
+    exit($errorMessage);
 }
 
 // Verificar que el archivo es legible

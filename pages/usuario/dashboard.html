@@ -361,6 +361,7 @@
             // ===== VARIABLES GLOBALES =====
             let currentUserData = null;
             let currentModule = null;
+            let previousActiveMenuItem = null;
             
             // ===== ELEMENTOS DOM =====
             const mainContent = document.getElementById('main-content');
@@ -370,11 +371,18 @@
             const headerUserRole = document.getElementById('header-user-role');
             const logoutBtn = document.getElementById('logout-btn');
             
-            // ===== MÓDULOS ESPECÍFICOS PARA USUARIO - SOLO 2 OPCIONES =====
+            // ===== MÓDULOS ESPECÍFICOS PARA USUARIO =====
             const usuarioModules = [
                 { id: 'bienvenida', name: 'Inicio', icon: 'fas fa-home' },
                 { id: 'promotores', name: 'Promotores', icon: 'fas fa-users' }
             ];
+            
+            // ===== EXPONER DATOS DE SESIÓN GLOBALMENTE =====
+            window.SessionData = {
+                user: null,
+                currentModule: null,
+                role: 'usuario'
+            };
             
             // ===== INICIALIZACIÓN =====
             init();
@@ -415,6 +423,10 @@
                     }
                     
                     currentUserData = data.usuario;
+                    
+                    // Actualizar datos globales para módulos
+                    window.SessionData.user = currentUserData;
+                    window.SessionData.role = currentUserData.rol;
                     
                     // ===== VALIDACIÓN ESPECÍFICA PARA USUARIO =====
                     // Permite cualquier rol (usuario, supervisor, root) - todos pueden usar este dashboard
@@ -485,11 +497,15 @@
                     const firstMenuItem = sidebarMenu.querySelector('.menu-item');
                     if (firstMenuItem) {
                         firstMenuItem.classList.add('active');
-                        currentModule = firstMenuItem.dataset.module;
+                        previousActiveMenuItem = firstMenuItem;
                     }
                     
                     // Cargar módulo bienvenida via API
                     await cargarModulo('bienvenida');
+                    
+                    // Solo actualizar currentModule después del éxito
+                    currentModule = 'bienvenida';
+                    window.SessionData.currentModule = currentModule;
                     
                 } catch (error) {
                     console.error('❌ Error cargando módulo inicial:', error);
@@ -535,10 +551,15 @@
                     
                     console.log(`🖱️ Click detectado - Módulo: ${module}, currentModule: ${currentModule}`);
                     
-                    if (module && menuItem && module !== currentModule) {
-                        navegarAModulo(module, menuItem);
-                    } else if (module === currentModule) {
-                        console.log('📌 Ya estás en este módulo');
+                    if (module && menuItem) {
+                        if (module !== currentModule) {
+                            // Navegar a módulo diferente
+                            navegarAModulo(module, menuItem);
+                        } else {
+                            // Permitir re-click en el mismo módulo como refresh
+                            console.log('🔄 Refrescando módulo actual');
+                            navegarAModulo(module, menuItem, true);
+                        }
                     } else {
                         console.warn('⚠️ No se pudo determinar el módulo');
                     }
@@ -548,31 +569,51 @@
                 setInterval(verificarSesionSilenciosa, 5 * 60 * 1000);
             }
             
-            // ===== NAVEGACIÓN DE MÓDULOS =====
-            async function navegarAModulo(moduleName, menuItem) {
-                console.log(`📄 Navegando a módulo USUARIO: ${moduleName}`);
+            // ===== NAVEGACIÓN DE MÓDULOS - CORREGIDO =====
+            async function navegarAModulo(moduleName, menuItem, isRefresh = false) {
+                console.log(`📄 ${isRefresh ? 'Refrescando' : 'Navegando a'} módulo USUARIO: ${moduleName}`);
+                
+                // Guardar estado anterior para rollback
+                const previousModule = currentModule;
+                const previousActiveItem = previousActiveMenuItem;
                 
                 try {
-                    // Actualizar menú activo
+                    // 1. Actualizar interfaz visual temporalmente
                     document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
                     menuItem.classList.add('active');
+                    previousActiveMenuItem = menuItem;
                     
-                    // Mostrar loading
+                    // 2. Mostrar loading
                     mostrarLoading(true);
                     
-                    // Limpiar módulo anterior
+                    // 3. Limpiar módulo anterior
                     limpiarModuloAnterior();
                     
-                    // CARGAR MÓDULO VIA API
+                    // 4. CARGAR MÓDULO VIA API (puede fallar)
                     await cargarModulo(moduleName);
                     
-                    // Actualizar módulo actual
+                    // 5. Solo actualizar currentModule DESPUÉS del éxito
                     currentModule = moduleName;
-                    console.log(`✅ Módulo actual actualizado a: ${currentModule}`);
+                    window.SessionData.currentModule = currentModule;
+                    
+                    console.log(`✅ Módulo ${moduleName} cargado exitosamente`);
                     
                 } catch (error) {
                     console.error('❌ Error navegando a módulo:', error);
+                    
+                    // ROLLBACK: Revertir cambios visuales
+                    document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
+                    if (previousActiveItem) {
+                        previousActiveItem.classList.add('active');
+                        previousActiveMenuItem = previousActiveItem;
+                    }
+                    
+                    // Mostrar error pero mantener navegación funcional
                     mostrarError(`Error al cargar el módulo ${moduleName}`, error.message);
+                    
+                    // currentModule se mantiene con el valor anterior
+                    console.log(`🔄 Estado revertido a: ${previousModule}`);
+                    
                 } finally {
                     mostrarLoading(false);
                 }
@@ -623,6 +664,10 @@
                         
                         if (errorText) {
                             console.error('Error detallado del servidor:', errorText);
+                            // Incluir detalles del servidor si están disponibles
+                            if (errorText.length < 500) {
+                                errorMessage += '\n\nDetalles: ' + errorText;
+                            }
                         }
                         
                         throw new Error(errorMessage);
@@ -698,10 +743,13 @@
             
             // ===== UTILIDADES =====
             function mostrarLoading(show) {
-                loadingContent.style.display = show ? 'flex' : 'none';
+                if (loadingContent) {
+                    loadingContent.style.display = show ? 'flex' : 'none';
+                }
             }
             
             function limpiarModuloAnterior() {
+                // Ejecutar función de limpieza si existe
                 if (window.moduleCleanup && typeof window.moduleCleanup === 'function') {
                     console.log('🧹 Ejecutando limpieza del módulo anterior...');
                     try {
@@ -712,6 +760,20 @@
                     window.moduleCleanup = null;
                 }
                 
+                // Limpiar event listeners específicos de módulos
+                if (window.moduleEventListeners && Array.isArray(window.moduleEventListeners)) {
+                    console.log('🧹 Limpiando event listeners del módulo...');
+                    window.moduleEventListeners.forEach(cleanup => {
+                        try {
+                            if (typeof cleanup === 'function') cleanup();
+                        } catch (error) {
+                            console.warn('⚠️ Error limpiando event listener:', error);
+                        }
+                    });
+                    window.moduleEventListeners = [];
+                }
+                
+                // Limpiar contenido excepto loading
                 Array.from(mainContent.children).forEach(element => {
                     if (element.id !== 'loading-content') {
                         element.remove();
@@ -723,11 +785,11 @@
                 mainContent.innerHTML = `
                     <div class="loading-content" id="loading-content" style="display: none;">
                         <div class="loading-spinner"></div>
-                        <p>Cargando contenido...</p>
+                        <p>Cargando contenido USUARIO...</p>
                     </div>
                     <div class="error-content">
                         <h3><i class="fas fa-exclamation-triangle"></i> ${titulo}</h3>
-                        <p>${mensaje}</p>
+                        <p style="white-space: pre-line;">${mensaje}</p>
                         <button class="back-btn" onclick="location.reload()">
                             <i class="fas fa-redo"></i> Intentar de nuevo
                         </button>
