@@ -1,0 +1,1360 @@
+<!-- ===== MÓDULO CADENAS COMERCIALES ===== -->
+<div class="cadenas-module">
+    <!-- HEADER DEL MÓDULO -->
+    <div class="module-header">
+        <div class="header-content">
+            <div class="header-title">
+                <i class="fas fa-link header-icon"></i>
+                <h1>Gestión de Cadenas Comerciales</h1>
+            </div>
+            <button class="btn-primary" id="btn-nueva-tienda">
+                <i class="fas fa-plus"></i> Nueva Tienda
+            </button>
+        </div>
+    </div>
+
+    <!-- CONTROLES DE BÚSQUEDA -->
+    <div class="search-controls">
+        <div class="search-box">
+            <select id="search-field" class="search-select">
+                <option value="">Seleccionar campo...</option>
+                <option value="region">Región</option>
+                <option value="cadena">Cadena</option>
+                <option value="num_tienda">Número de Tienda</option>
+                <option value="nombre_tienda">Nombre de Tienda</option>
+                <option value="ciudad">Ciudad</option>
+                <option value="estado">Estado</option>
+            </select>
+            <input type="text" id="search-value" placeholder="Valor a buscar..." class="search-input" disabled>
+            <button id="btn-buscar" class="btn-search" disabled>
+                <i class="fas fa-search"></i>
+            </button>
+            <button id="btn-limpiar" class="btn-clear">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- TABLA DE TIENDAS -->
+    <div class="table-container">
+        <div class="table-wrapper">
+            <table class="tiendas-table" id="tiendas-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Región</th>
+                        <th>Cadena</th>
+                        <th>Núm. Tienda</th>
+                        <th>Nombre</th>
+                        <th>Ciudad</th>
+                        <th>Estado</th>
+                        <th>Fecha Modificación</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tiendas-tbody">
+                    <!-- Los datos se cargarán dinámicamente -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- LOADING TABLA -->
+        <div class="table-loading" id="table-loading">
+            <div class="loading-spinner"></div>
+            <p>Cargando tiendas...</p>
+        </div>
+
+        <!-- EMPTY STATE -->
+        <div class="empty-state" id="empty-state" style="display: none;">
+            <i class="fas fa-store-slash"></i>
+            <h3>No se encontraron tiendas</h3>
+            <p>No hay tiendas que coincidan con los criterios de búsqueda.</p>
+        </div>
+    </div>
+
+    <!-- PAGINACIÓN -->
+    <div class="pagination-container" id="pagination-container">
+        <div class="pagination-info">
+            <span id="pagination-info">Cargando...</span>
+        </div>
+        <div class="pagination-controls">
+            <button id="btn-prev" class="btn-pagination" disabled>
+                <i class="fas fa-chevron-left"></i> Anterior
+            </button>
+            <span class="pagination-pages" id="pagination-pages"></span>
+            <button id="btn-next" class="btn-pagination" disabled>
+                Siguiente <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== MODAL CREAR/EDITAR TIENDA ===== -->
+<div class="modal-overlay" id="modal-tienda">
+    <div class="modal-container">
+        <div class="modal-header">
+            <h2 id="modal-title">
+                <i class="fas fa-store"></i> Nueva Tienda
+            </h2>
+            <button class="modal-close" id="modal-close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <form class="modal-form" id="form-tienda">
+            <input type="hidden" id="tienda-id">
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="tienda-region">Región *</label>
+                    <input type="number" id="tienda-region" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="tienda-num">Número de Tienda *</label>
+                    <input type="number" id="tienda-num" min="1" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="tienda-cadena">Cadena Comercial *</label>
+                <input type="text" id="tienda-cadena" maxlength="100" required>
+            </div>
+
+            <div class="form-group">
+                <label for="tienda-nombre">Nombre de la Tienda *</label>
+                <input type="text" id="tienda-nombre" maxlength="100" required>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="tienda-ciudad">Ciudad *</label>
+                    <input type="text" id="tienda-ciudad" maxlength="100" required>
+                </div>
+                <div class="form-group">
+                    <label for="tienda-estado">Estado *</label>
+                    <input type="text" id="tienda-estado" maxlength="100" required>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn-secondary" id="btn-cancelar">
+                    Cancelar
+                </button>
+                <button type="submit" class="btn-primary" id="btn-guardar">
+                    <i class="fas fa-save"></i> Guardar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ===== MODAL CONFIRMAR ELIMINACIÓN ===== -->
+<div class="modal-overlay" id="modal-confirmar">
+    <div class="modal-container modal-small">
+        <div class="modal-header">
+            <h2>
+                <i class="fas fa-exclamation-triangle text-warning"></i> 
+                Confirmar Eliminación
+            </h2>
+        </div>
+        
+        <div class="modal-body">
+            <p>¿Estás seguro que deseas eliminar esta tienda?</p>
+            <div class="delete-details" id="delete-details"></div>
+            <p class="text-warning">
+                <strong>Esta acción no se puede deshacer.</strong>
+            </p>
+        </div>
+
+        <div class="modal-actions">
+            <button type="button" class="btn-secondary" id="btn-cancelar-delete">
+                Cancelar
+            </button>
+            <button type="button" class="btn-danger" id="btn-confirmar-delete">
+                <i class="fas fa-trash"></i> Eliminar
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== SISTEMA DE NOTIFICACIONES ===== -->
+<div class="notifications-container" id="notifications-container"></div>
+
+<style>
+/* ===== ESTILOS CADENAS MODULE ===== */
+.cadenas-module {
+    padding: 0;
+    max-width: 100%;
+}
+
+/* ===== HEADER DEL MÓDULO ===== */
+.module-header {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.header-title {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.header-icon {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+}
+
+.header-title h1 {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #333;
+}
+
+/* ===== CONTROLES DE BÚSQUEDA ===== */
+.search-controls {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.search-box {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.search-select {
+    min-width: 200px;
+    padding: 12px 15px;
+    border: 2px solid #e0e6ed;
+    border-radius: 8px;
+    background: white;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+.search-select:focus {
+    border-color: #667eea;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.search-input {
+    flex: 1;
+    min-width: 250px;
+    padding: 12px 15px;
+    border: 2px solid #e0e6ed;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+.search-input:focus {
+    border-color: #667eea;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.search-input:disabled {
+    background: #f8f9fa;
+    color: #666;
+    cursor: not-allowed;
+}
+
+/* ===== BOTONES ===== */
+.btn-primary, .btn-secondary, .btn-danger, .btn-search, .btn-clear, .btn-action, .btn-pagination {
+    border: none;
+    border-radius: 8px;
+    padding: 12px 20px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover:not(:disabled) {
+    background: #5a6268;
+    transform: translateY(-2px);
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    color: white;
+}
+
+.btn-danger:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(231, 76, 60, 0.3);
+}
+
+.btn-search {
+    background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+    color: white;
+    padding: 12px 16px;
+}
+
+.btn-search:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(39, 174, 96, 0.3);
+}
+
+.btn-clear {
+    background: #6c757d;
+    color: white;
+    padding: 12px 16px;
+}
+
+.btn-clear:hover {
+    background: #5a6268;
+    transform: translateY(-2px);
+}
+
+.btn-action {
+    padding: 8px 12px;
+    font-size: 0.8rem;
+    margin: 0 2px;
+}
+
+.btn-action.edit {
+    background: linear-gradient(135deg, #f39c12 0%, #d68910 100%);
+    color: white;
+}
+
+.btn-action.delete {
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    color: white;
+}
+
+.btn-pagination {
+    background: rgba(255, 255, 255, 0.9);
+    color: #333;
+    border: 2px solid #e0e6ed;
+}
+
+.btn-pagination:hover:not(:disabled) {
+    background: #667eea;
+    color: white;
+    border-color: #667eea;
+    transform: translateY(-2px);
+}
+
+.btn-pagination:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ===== TABLA ===== */
+.table-container {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+.tiendas-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0;
+}
+
+.tiendas-table th {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 15px 12px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+.tiendas-table th:first-child {
+    border-radius: 8px 0 0 0;
+}
+
+.tiendas-table th:last-child {
+    border-radius: 0 8px 0 0;
+}
+
+.tiendas-table td {
+    padding: 15px 12px;
+    border-bottom: 1px solid #e0e6ed;
+    font-size: 0.9rem;
+    vertical-align: middle;
+}
+
+.tiendas-table tbody tr {
+    transition: all 0.3s ease;
+}
+
+.tiendas-table tbody tr:hover {
+    background: rgba(102, 126, 234, 0.05);
+}
+
+.tiendas-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* ===== LOADING Y EMPTY STATES ===== */
+.table-loading, .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #666;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(102, 126, 234, 0.1);
+    border-radius: 50%;
+    border-top-color: #667eea;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.empty-state i {
+    font-size: 4rem;
+    color: #dee2e6;
+    margin-bottom: 1rem;
+}
+
+.empty-state h3 {
+    margin: 0 0 0.5rem 0;
+    color: #495057;
+}
+
+/* ===== PAGINACIÓN ===== */
+.pagination-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 16px;
+    padding: 1rem 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.pagination-info {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.pagination-pages {
+    color: #333;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+/* ===== MODALES ===== */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    padding: 20px;
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal-container {
+    background: white;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: modalSlideIn 0.3s ease;
+}
+
+.modal-container.modal-small {
+    max-width: 400px;
+}
+
+@keyframes modalSlideIn {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-header {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid #e0e6ed;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #666;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.modal-close:hover {
+    background: #f8f9fa;
+    color: #333;
+}
+
+.modal-body {
+    padding: 2rem;
+}
+
+.modal-form {
+    padding: 2rem;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.form-group input, .form-group select, .form-group textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #e0e6ed;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    border-color: #667eea;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.modal-actions {
+    padding: 1.5rem 2rem;
+    border-top: 1px solid #e0e6ed;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+}
+
+.delete-details {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1rem 0;
+    border-left: 4px solid #f39c12;
+}
+
+.text-warning {
+    color: #f39c12;
+}
+
+/* ===== NOTIFICACIONES ===== */
+.notifications-container {
+    position: fixed;
+    top: 100px;
+    right: 20px;
+    z-index: 3000;
+    max-width: 400px;
+}
+
+.notification {
+    background: white;
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    margin-bottom: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    border-left: 4px solid;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    animation: notificationSlideIn 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.notification.success {
+    border-left-color: #27ae60;
+}
+
+.notification.error {
+    border-left-color: #e74c3c;
+}
+
+.notification.warning {
+    border-left-color: #f39c12;
+}
+
+.notification.info {
+    border-left-color: #3498db;
+}
+
+@keyframes notificationSlideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.notification-icon {
+    font-size: 1.2rem;
+}
+
+.notification.success .notification-icon {
+    color: #27ae60;
+}
+
+.notification.error .notification-icon {
+    color: #e74c3c;
+}
+
+.notification.warning .notification-icon {
+    color: #f39c12;
+}
+
+.notification.info .notification-icon {
+    color: #3498db;
+}
+
+.notification-content h4 {
+    margin: 0 0 5px 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.notification-content p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.notification-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 1rem;
+    color: #999;
+    cursor: pointer;
+    padding: 2px;
+}
+
+.notification-close:hover {
+    color: #333;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .header-content {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .search-box {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .search-select, .search-input {
+        min-width: auto;
+        width: 100%;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .modal-container {
+        margin: 10px;
+        max-width: calc(100% - 20px);
+    }
+
+    .pagination-container {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .table-wrapper {
+        font-size: 0.8rem;
+    }
+
+    .tiendas-table th, .tiendas-table td {
+        padding: 10px 8px;
+    }
+}
+
+@media (max-width: 480px) {
+    .modal-form, .modal-body {
+        padding: 1rem;
+    }
+
+    .modal-header {
+        padding: 1rem;
+    }
+
+    .modal-actions {
+        padding: 1rem;
+        flex-direction: column;
+    }
+}
+</style>
+
+<script>
+// ===== VARIABLES GLOBALES =====
+let currentPage = 1;
+let totalPages = 1;
+let currentSearch = { field: '', value: '' };
+let isEditing = false;
+let editingId = null;
+let allTiendas = [];
+let filteredTiendas = [];
+
+// ===== ELEMENTOS DOM =====
+const loadingElement = document.getElementById('table-loading');
+const errorElement = document.getElementById('error-element'); // Lo crearemos si no existe
+const tableContainer = document.getElementById('tiendas-table');
+const emptyState = document.getElementById('empty-state');
+const searchField = document.getElementById('search-field');
+const searchValue = document.getElementById('search-value');
+const btnBuscar = document.getElementById('btn-buscar');
+const btnLimpiar = document.getElementById('btn-limpiar');
+const btnNuevaTienda = document.getElementById('btn-nueva-tienda');
+const tiendasTbody = document.getElementById('tiendas-tbody');
+const paginationContainer = document.getElementById('pagination-container');
+const paginationInfo = document.getElementById('pagination-info');
+const paginationPages = document.getElementById('pagination-pages');
+const btnPrev = document.getElementById('btn-prev');
+const btnNext = document.getElementById('btn-next');
+
+// Modales
+const modalTienda = document.getElementById('modal-tienda');
+const modalConfirmar = document.getElementById('modal-confirmar');
+const modalTitle = document.getElementById('modal-title');
+const formTienda = document.getElementById('form-tienda');
+const btnGuardar = document.getElementById('btn-guardar');
+
+// ===== FUNCIONES DE ESTADO DE UI =====
+function showLoading() {
+    console.log('🔄 Mostrando loader...');
+    loadingElement.style.display = 'block';
+    tableContainer.style.display = 'none';
+    emptyState.style.display = 'none';
+    paginationContainer.style.display = 'none';
+}
+
+function showContent() {
+    console.log('📊 Mostrando contenido...');
+    loadingElement.style.display = 'none';
+    tableContainer.style.display = 'table';
+    emptyState.style.display = 'none';
+    paginationContainer.style.display = 'flex';
+}
+
+function showEmptyState(message = 'No se encontraron tiendas') {
+    console.log('📭 Mostrando estado vacío...');
+    loadingElement.style.display = 'none';
+    tableContainer.style.display = 'none';
+    emptyState.style.display = 'block';
+    paginationContainer.style.display = 'none';
+    
+    const emptyTitle = emptyState.querySelector('h3');
+    if (emptyTitle) emptyTitle.textContent = message;
+}
+
+function showError(message) {
+    console.log('❌ Mostrando error:', message);
+    loadingElement.style.display = 'none';
+    tableContainer.style.display = 'none';
+    emptyState.style.display = 'none';
+    paginationContainer.style.display = 'none';
+    
+    mostrarNotificacion('Error: ' + message, 'error');
+}
+
+// ===== INICIALIZACIÓN =====
+function init() {
+    console.log('🚀 Inicializando módulo cadenas...');
+    configurarEventListeners();
+}
+
+// ===== EVENT LISTENERS =====
+function configurarEventListeners() {
+    // Búsqueda
+    searchField.addEventListener('change', handleSearchFieldChange);
+    searchValue.addEventListener('keypress', handleSearchKeypress);
+    btnBuscar.addEventListener('click', realizarBusqueda);
+    btnLimpiar.addEventListener('click', limpiarBusqueda);
+    
+    // Botones principales
+    btnNuevaTienda.addEventListener('click', abrirModalNueva);
+    
+    // Paginación
+    btnPrev.addEventListener('click', () => cambiarPagina(currentPage - 1));
+    btnNext.addEventListener('click', () => cambiarPagina(currentPage + 1));
+    
+    // Modales
+    document.getElementById('modal-close').addEventListener('click', cerrarModalTienda);
+    document.getElementById('btn-cancelar').addEventListener('click', cerrarModalTienda);
+    document.getElementById('btn-cancelar-delete').addEventListener('click', cerrarModalConfirmar);
+    document.getElementById('btn-confirmar-delete').addEventListener('click', confirmarEliminacion);
+    
+    // Formulario
+    formTienda.addEventListener('submit', guardarTienda);
+    
+    // Cerrar modales con ESC
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            cerrarModalTienda();
+            cerrarModalConfirmar();
+        }
+    });
+    
+    // Cerrar modales clicking fuera
+    modalTienda.addEventListener('click', (e) => {
+        if (e.target === modalTienda) cerrarModalTienda();
+    });
+    
+    modalConfirmar.addEventListener('click', (e) => {
+        if (e.target === modalConfirmar) cerrarModalConfirmar();
+    });
+}
+
+// ===== CARGA DE DATOS (MEJORADA) =====
+async function cargarTiendas() {
+    console.log('🔄 Iniciando carga de tiendas...');
+    
+    try {
+        showLoading();
+        
+        const params = new URLSearchParams({
+            page: currentPage,
+            limit: 10
+        });
+        
+        if (currentSearch.field && currentSearch.value) {
+            params.append('search_field', currentSearch.field);
+            params.append('search_value', currentSearch.value);
+        }
+        
+        const apiUrl = `../../../api/get_tiendas.php?${params}`;
+        console.log('📡 Llamando API:', apiUrl);
+        
+        const response = await fetch(apiUrl, {
+            method: 'GET',
+            cache: 'no-cache',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        console.log('📥 Respuesta recibida - Status:', response.status);
+        
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('❌ Error HTTP:', response.status, errorText);
+            throw new Error(`Error HTTP ${response.status}: ${errorText}`);
+        }
+        
+        // MANEJO ROBUSTO DE RESPUESTA (como en el módulo que funciona)
+        const responseText = await response.text();
+        console.log('📄 Respuesta en texto (primeros 200 chars):', responseText.substring(0, 200));
+        
+        let data;
+        try {
+            data = JSON.parse(responseText);
+        } catch (jsonError) {
+            console.error('❌ Error parsing JSON:', jsonError);
+            console.error('❌ Respuesta completa:', responseText);
+            throw new Error('Respuesta inválida del servidor. Verifique que la API esté funcionando correctamente.');
+        }
+        
+        console.log('✅ Datos parseados exitosamente:', data);
+        
+        if (!data.success) {
+            console.error('❌ API reporta error:', data.message);
+            throw new Error(data.message || 'Error al cargar tiendas');
+        }
+        
+        console.log(`📊 ${data.data ? data.data.length : 0} tiendas recibidas`);
+        
+        // Actualizar datos globales
+        allTiendas = data.data || [];
+        
+        renderizarTiendas(allTiendas);
+        actualizarPaginacion(data.pagination);
+        
+        if (allTiendas.length === 0) {
+            showEmptyState('No se encontraron tiendas');
+        } else {
+            showContent();
+        }
+        
+    } catch (error) {
+        console.error('❌ Error completo cargando tiendas:', error);
+        showError(error.message);
+    }
+}
+
+// ===== BÚSQUEDA =====
+function handleSearchFieldChange() {
+    const hasField = searchField.value !== '';
+    searchValue.disabled = !hasField;
+    btnBuscar.disabled = !hasField;
+    
+    if (!hasField) {
+        searchValue.value = '';
+    } else {
+        searchValue.focus();
+    }
+}
+
+function handleSearchKeypress(e) {
+    if (e.key === 'Enter' && !btnBuscar.disabled) {
+        realizarBusqueda();
+    }
+}
+
+function realizarBusqueda() {
+    const field = searchField.value;
+    const value = searchValue.value.trim();
+    
+    if (!field || !value) {
+        mostrarNotificacion('Selecciona un campo y escribe un valor para buscar', 'warning');
+        return;
+    }
+    
+    currentSearch = { field, value };
+    currentPage = 1;
+    cargarTiendas();
+}
+
+function limpiarBusqueda() {
+    searchField.value = '';
+    searchValue.value = '';
+    searchValue.disabled = true;
+    btnBuscar.disabled = true;
+    currentSearch = { field: '', value: '' };
+    currentPage = 1;
+    cargarTiendas();
+}
+
+// ===== RENDERIZADO =====
+function renderizarTiendas(tiendas) {
+    console.log('🎨 Renderizando', tiendas.length, 'tiendas');
+    tiendasTbody.innerHTML = '';
+    
+    if (tiendas.length === 0) {
+        showEmptyState('No se encontraron tiendas con los criterios de búsqueda');
+        return;
+    }
+    
+    tiendas.forEach(tienda => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${tienda.id_tienda}</td>
+            <td>${tienda.region}</td>
+            <td>${tienda.cadena}</td>
+            <td>${tienda.num_tienda}</td>
+            <td>${tienda.nombre_tienda}</td>
+            <td>${tienda.ciudad}</td>
+            <td>${tienda.estado}</td>
+            <td>${tienda.fecha_modificacion_formatted || 'N/A'}</td>
+            <td>
+                <button class="btn-action edit" onclick="editarTienda(${tienda.id_tienda})">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn-action delete" onclick="eliminarTienda(${tienda.id_tienda}, '${tienda.nombre_tienda}', '${tienda.cadena}')">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </td>
+        `;
+        tiendasTbody.appendChild(row);
+    });
+}
+
+function actualizarPaginacion(pagination) {
+    if (!pagination) {
+        console.warn('⚠️ Sin datos de paginación');
+        return;
+    }
+    
+    currentPage = pagination.current_page || 1;
+    totalPages = pagination.total_pages || 1;
+    
+    paginationInfo.textContent = `Mostrando ${pagination.per_page || 0} de ${pagination.total_records || 0} registros`;
+    paginationPages.textContent = `Página ${currentPage} de ${totalPages}`;
+    
+    btnPrev.disabled = !pagination.has_prev;
+    btnNext.disabled = !pagination.has_next;
+}
+
+function cambiarPagina(page) {
+    if (page < 1 || page > totalPages) return;
+    currentPage = page;
+    cargarTiendas();
+}
+
+// ===== MODAL NUEVA/EDITAR =====
+function abrirModalNueva() {
+    isEditing = false;
+    editingId = null;
+    modalTitle.innerHTML = '<i class="fas fa-store"></i> Nueva Tienda';
+    btnGuardar.innerHTML = '<i class="fas fa-save"></i> Crear';
+    limpiarFormulario();
+    abrirModal(modalTienda);
+}
+
+async function editarTienda(id) {
+    console.log('✏️ Editando tienda ID:', id);
+    
+    try {
+        // Buscar la tienda en los datos actuales
+        const tiendaData = allTiendas.find(t => t.id_tienda == id);
+        
+        if (!tiendaData) {
+            throw new Error('No se encontraron los datos de la tienda');
+        }
+        
+        // Configurar modal para edición
+        isEditing = true;
+        editingId = id;
+        modalTitle.innerHTML = '<i class="fas fa-edit"></i> Editar Tienda';
+        btnGuardar.innerHTML = '<i class="fas fa-save"></i> Actualizar';
+        
+        // Llenar formulario
+        document.getElementById('tienda-id').value = tiendaData.id_tienda;
+        document.getElementById('tienda-region').value = tiendaData.region;
+        document.getElementById('tienda-cadena').value = tiendaData.cadena;
+        document.getElementById('tienda-num').value = tiendaData.num_tienda;
+        document.getElementById('tienda-nombre').value = tiendaData.nombre_tienda;
+        document.getElementById('tienda-ciudad').value = tiendaData.ciudad;
+        document.getElementById('tienda-estado').value = tiendaData.estado;
+        
+        abrirModal(modalTienda);
+        
+    } catch (error) {
+        console.error('❌ Error preparando edición:', error);
+        mostrarNotificacion('Error al cargar datos para edición: ' + error.message, 'error');
+    }
+}
+
+function limpiarFormulario() {
+    formTienda.reset();
+    document.getElementById('tienda-id').value = '';
+}
+
+function abrirModal(modal) {
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function cerrarModalTienda() {
+    modalTienda.classList.remove('active');
+    document.body.style.overflow = 'auto';
+    limpiarFormulario();
+}
+
+// ===== GUARDAR TIENDA =====
+async function guardarTienda(e) {
+    e.preventDefault();
+    
+    const formData = {
+        region: parseInt(document.getElementById('tienda-region').value),
+        cadena: document.getElementById('tienda-cadena').value.trim(),
+        num_tienda: parseInt(document.getElementById('tienda-num').value),
+        nombre_tienda: document.getElementById('tienda-nombre').value.trim(),
+        ciudad: document.getElementById('tienda-ciudad').value.trim(),
+        estado: document.getElementById('tienda-estado').value.trim()
+    };
+    
+    if (isEditing) {
+        formData.id_tienda = editingId;
+    }
+    
+    // Validaciones básicas
+    if (!formData.region || !formData.num_tienda || !formData.cadena || !formData.nombre_tienda || !formData.ciudad || !formData.estado) {
+        mostrarNotificacion('Todos los campos son requeridos', 'warning');
+        return;
+    }
+    
+    btnGuardar.disabled = true;
+    btnGuardar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+    
+    try {
+        const url = isEditing ? '../../../api/update_tienda.php' : '../../../api/create_tienda.php';
+        
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData)
+        });
+        
+        const responseText = await response.text();
+        console.log('Respuesta guardar:', responseText);
+        
+        let data;
+        try {
+            data = JSON.parse(responseText);
+        } catch (jsonError) {
+            throw new Error('Respuesta inválida del servidor');
+        }
+        
+        if (!data.success) {
+            throw new Error(data.message || 'Error al guardar tienda');
+        }
+        
+        const accion = isEditing ? 'actualizada' : 'creada';
+        mostrarNotificacion(`Tienda ${accion} correctamente`, 'success');
+        
+        cerrarModalTienda();
+        cargarTiendas(); // Recargar datos
+        
+    } catch (error) {
+        console.error(`❌ Error ${isEditing ? 'actualizando' : 'creando'} tienda:`, error);
+        mostrarNotificacion(`Error al ${isEditing ? 'actualizar' : 'crear'} tienda: ` + error.message, 'error');
+    } finally {
+        btnGuardar.disabled = false;
+        btnGuardar.innerHTML = isEditing ? '<i class="fas fa-save"></i> Actualizar' : '<i class="fas fa-save"></i> Crear';
+    }
+}
+
+// ===== ELIMINAR TIENDA =====
+let tiendaAEliminar = null;
+
+function eliminarTienda(id, nombre, cadena) {
+    tiendaAEliminar = { id, nombre, cadena };
+    
+    document.getElementById('delete-details').innerHTML = `
+        <strong>ID:</strong> ${id}<br>
+        <strong>Nombre:</strong> ${nombre}<br>
+        <strong>Cadena:</strong> ${cadena}
+    `;
+    
+    abrirModal(modalConfirmar);
+}
+
+function cerrarModalConfirmar() {
+    modalConfirmar.classList.remove('active');
+    document.body.style.overflow = 'auto';
+    tiendaAEliminar = null;
+}
+
+async function confirmarEliminacion() {
+    if (!tiendaAEliminar) return;
+    
+    const btnConfirmar = document.getElementById('btn-confirmar-delete');
+    btnConfirmar.disabled = true;
+    btnConfirmar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Eliminando...';
+    
+    try {
+        const response = await fetch('../../api/delete_tienda.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                id_tienda: tiendaAEliminar.id
+            })
+        });
+        
+        const responseText = await response.text();
+        let data;
+        try {
+            data = JSON.parse(responseText);
+        } catch (jsonError) {
+            throw new Error('Respuesta inválida del servidor');
+        }
+        
+        if (!data.success) {
+            throw new Error(data.message || 'Error al eliminar tienda');
+        }
+        
+        mostrarNotificacion('Tienda eliminada correctamente', 'success');
+        
+        cerrarModalConfirmar();
+        cargarTiendas(); // Recargar datos
+        
+    } catch (error) {
+        console.error('❌ Error eliminando tienda:', error);
+        mostrarNotificacion('Error al eliminar tienda: ' + error.message, 'error');
+    } finally {
+        btnConfirmar.disabled = false;
+        btnConfirmar.innerHTML = '<i class="fas fa-trash"></i> Eliminar';
+    }
+}
+
+// ===== NOTIFICACIONES =====
+function mostrarNotificacion(mensaje, tipo = 'info') {
+    const notificacion = document.createElement('div');
+    notificacion.className = `notification ${tipo}`;
+    
+    const iconos = {
+        success: 'fas fa-check-circle',
+        error: 'fas fa-exclamation-circle',
+        warning: 'fas fa-exclamation-triangle',
+        info: 'fas fa-info-circle'
+    };
+    
+    const titulos = {
+        success: 'Éxito',
+        error: 'Error',
+        warning: 'Advertencia',
+        info: 'Información'
+    };
+    
+    notificacion.innerHTML = `
+        <i class="${iconos[tipo]} notification-icon"></i>
+        <div class="notification-content">
+            <h4>${titulos[tipo]}</h4>
+            <p>${mensaje}</p>
+        </div>
+        <button class="notification-close">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+    
+    // Event listener para cerrar
+    notificacion.querySelector('.notification-close').addEventListener('click', () => {
+        notificacion.remove();
+    });
+    
+    // Auto-remover después de 5 segundos
+    setTimeout(() => {
+        if (notificacion.parentNode) {
+            notificacion.remove();
+        }
+    }, 5000);
+    
+    document.getElementById('notifications-container').appendChild(notificacion);
+}
+
+// ===== EXPONER FUNCIONES GLOBALES =====
+window.editarTienda = editarTienda;
+window.eliminarTienda = eliminarTienda;
+
+// ===== INICIALIZACIÓN (MEJORADA) =====
+// Inicializar inmediatamente, sin esperar DOMContentLoaded
+console.log('🏪 Iniciando módulo Cadenas Comerciales...');
+init();
+
+// Cargar datos después de un pequeño delay para asegurar que el DOM esté listo
+setTimeout(() => {
+    console.log('⏰ Iniciando carga de datos...');
+    cargarTiendas();
+}, 100);
+
+console.log('✅ Módulo cadenas inicializado correctamente');
+</script>
