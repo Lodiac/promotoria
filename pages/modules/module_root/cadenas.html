@@ -1,4 +1,4 @@
-<!-- ===== MÓDULO CADENAS COMERCIALES ===== -->
+<!-- ===== MÓDULO CADENAS COMERCIALES - RUTAS CORREGIDAS ===== -->
 <div class="cadenas-module">
     <!-- HEADER DEL MÓDULO -->
     <div class="module-header">
@@ -929,7 +929,7 @@ function configurarEventListeners() {
     });
 }
 
-// ===== CARGA DE DATOS (MEJORADA) =====
+// ===== CARGA DE DATOS (MEJORADA CON RUTAS CORREGIDAS) =====
 async function cargarTiendas() {
     console.log('🔄 Iniciando carga de tiendas...');
     
@@ -946,7 +946,8 @@ async function cargarTiendas() {
             params.append('search_value', currentSearch.value);
         }
         
-        const apiUrl = `../../../api/get_tiendas.php?${params}`;
+        // ✅ RUTA CORREGIDA: Solo 2 niveles arriba desde pages/root/
+        const apiUrl = `../../api/get_tiendas.php?${params}`;
         console.log('📡 Llamando API:', apiUrl);
         
         const response = await fetch(apiUrl, {
@@ -966,7 +967,7 @@ async function cargarTiendas() {
             throw new Error(`Error HTTP ${response.status}: ${errorText}`);
         }
         
-        // MANEJO ROBUSTO DE RESPUESTA (como en el módulo que funciona)
+        // MANEJO ROBUSTO DE RESPUESTA
         const responseText = await response.text();
         console.log('📄 Respuesta en texto (primeros 200 chars):', responseText.substring(0, 200));
         
@@ -1165,7 +1166,7 @@ function cerrarModalTienda() {
     limpiarFormulario();
 }
 
-// ===== GUARDAR TIENDA =====
+// ===== GUARDAR TIENDA (RUTA CORREGIDA) =====
 async function guardarTienda(e) {
     e.preventDefault();
     
@@ -1192,7 +1193,8 @@ async function guardarTienda(e) {
     btnGuardar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
     
     try {
-        const url = isEditing ? '../../../api/update_tienda.php' : '../../../api/create_tienda.php';
+        // ✅ RUTAS CORREGIDAS: Solo 2 niveles arriba desde pages/root/
+        const url = isEditing ? '../../api/update_tienda.php' : '../../api/create_tienda.php';
         
         const response = await fetch(url, {
             method: 'POST',
@@ -1231,7 +1233,7 @@ async function guardarTienda(e) {
     }
 }
 
-// ===== ELIMINAR TIENDA =====
+// ===== ELIMINAR TIENDA (RUTA CORREGIDA) =====
 let tiendaAEliminar = null;
 
 function eliminarTienda(id, nombre, cadena) {
@@ -1260,6 +1262,7 @@ async function confirmarEliminacion() {
     btnConfirmar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Eliminando...';
     
     try {
+        // ✅ RUTA CORREGIDA: Solo 2 niveles arriba desde pages/root/
         const response = await fetch('../../api/delete_tienda.php', {
             method: 'POST',
             headers: {
@@ -1345,8 +1348,7 @@ function mostrarNotificacion(mensaje, tipo = 'info') {
 window.editarTienda = editarTienda;
 window.eliminarTienda = eliminarTienda;
 
-// ===== INICIALIZACIÓN (MEJORADA) =====
-// Inicializar inmediatamente, sin esperar DOMContentLoaded
+// ===== INICIALIZACIÓN =====
 console.log('🏪 Iniciando módulo Cadenas Comerciales...');
 init();
 

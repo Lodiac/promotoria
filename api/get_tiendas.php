@@ -1,11 +1,18 @@
 <?php
+/**
+ * API para obtener tiendas - VERSIÓN CORREGIDA CON MEJOR MANEJO DE ERRORES
+ * Reemplazar el archivo: api/get_tiendas.php
+ */
+
+// Habilitar logging de errores para debugging
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 session_start();
 
 // 🔑 DEFINIR CONSTANTE ANTES DE INCLUIR DB_CONNECT
 define('APP_ACCESS', true);
-
-// Incluir la API de base de datos
-require_once __DIR__ . '/../config/db_connect.php';
 
 // Headers de seguridad y CORS
 header('Content-Type: application/json; charset=utf-8');
@@ -24,21 +31,64 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 }
 
 try {
-    // ===== VERIFICAR SESIÓN Y ROL ROOT =====
-    if (!isset($_SESSION['user_id']) || !isset($_SESSION['rol']) || $_SESSION['rol'] !== 'root') {
+    // ===== LOG PARA DEBUGGING =====
+    $debug_info = [
+        'timestamp' => date('Y-m-d H:i:s'),
+        'method' => $_SERVER['REQUEST_METHOD'],
+        'query_string' => $_SERVER['QUERY_STRING'] ?? '',
+        'session_status' => session_status(),
+        'session_id' => session_id()
+    ];
+    error_log('GET_TIENDAS: Iniciando - ' . json_encode($debug_info));
+
+    // ===== VERIFICAR SESIÓN BÁSICA =====
+    if (!isset($_SESSION['user_id']) || empty($_SESSION['user_id'])) {
+        error_log('GET_TIENDAS: Sin sesión - user_id no encontrado');
         http_response_code(403);
         echo json_encode([
             'success' => false,
-            'message' => 'Acceso denegado. Se requiere rol ROOT.'
+            'message' => 'No hay sesión activa',
+            'error' => 'no_session'
         ]);
         exit;
+    }
+
+    // ===== VERIFICAR ROL =====
+    if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'root') {
+        error_log('GET_TIENDAS: Rol incorrecto - ' . ($_SESSION['rol'] ?? 'NO_SET'));
+        http_response_code(403);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Acceso denegado. Se requiere rol ROOT.',
+            'error' => 'insufficient_permissions'
+        ]);
+        exit;
+    }
+
+    error_log('GET_TIENDAS: Sesión válida - Usuario: ' . ($_SESSION['username'] ?? 'NO_USERNAME') . ', Rol: ' . $_SESSION['rol']);
+
+    // ===== INCLUIR CONEXIÓN DB =====
+    $db_path = __DIR__ . '/../config/db_connect.php';
+    if (!file_exists($db_path)) {
+        error_log('GET_TIENDAS: Archivo db_connect.php no encontrado en: ' . $db_path);
+        throw new Exception('Configuración de base de datos no encontrada');
+    }
+
+    require_once $db_path;
+
+    // ===== VERIFICAR CLASE DATABASE =====
+    if (!class_exists('Database')) {
+        error_log('GET_TIENDAS: Clase Database no encontrada');
+        throw new Exception('Clase Database no disponible');
     }
 
     // ===== OBTENER PARÁMETROS =====
     $search_field = $_GET['search_field'] ?? '';
     $search_value = $_GET['search_value'] ?? '';
     $page = max(1, intval($_GET['page'] ?? 1));
-    $limit = max(1, min(100, intval($_GET['limit'] ?? 10))); // Límite máximo de 100
+    $limit = max(1, min(100, intval($_GET['limit'] ?? 10)));
+
+    error_log('GET_TIENDAS: Parámetros - page: ' . $page . ', limit: ' . $limit . ', search: ' . $search_field . '=' . $search_value);
 
     // ===== CAMPOS VÁLIDOS PARA BÚSQUEDA =====
     $valid_search_fields = [
@@ -49,6 +99,31 @@ try {
         'ciudad',
         'estado'
     ];
+
+    // ===== VERIFICAR CONEXIÓN DB =====
+    try {
+        $test_connection = Database::connect();
+        if (!$test_connection) {
+            throw new Exception('No se pudo establecer conexión con la base de datos');
+        }
+        error_log('GET_TIENDAS: Conexión DB exitosa');
+    } catch (Exception $conn_error) {
+        error_log('GET_TIENDAS: Error de conexión DB - ' . $conn_error->getMessage());
+        throw new Exception('Error de conexión a la base de datos: ' . $conn_error->getMessage());
+    }
+
+    // ===== VERIFICAR SI EXISTE LA TABLA TIENDAS =====
+    try {
+        $table_check = Database::selectOne("SHOW TABLES LIKE 'tiendas'");
+        if (!$table_check) {
+            error_log('GET_TIENDAS: Tabla tiendas no existe');
+            throw new Exception('La tabla de tiendas no existe en la base de datos');
+        }
+        error_log('GET_TIENDAS: Tabla tiendas verificada');
+    } catch (Exception $table_error) {
+        error_log('GET_TIENDAS: Error verificando tabla - ' . $table_error->getMessage());
+        throw new Exception('Error verificando tabla tiendas: ' . $table_error->getMessage());
+    }
 
     // ===== CONSTRUIR CONSULTA BASE =====
     $sql_base = "FROM tiendas WHERE estado_reg = 1";
@@ -69,14 +144,26 @@ try {
                 $sql_base .= " AND {$search_field} LIKE :search_value";
                 $params[':search_value'] = '%' . $search_value . '%';
             }
+            error_log('GET_TIENDAS: Filtro aplicado - ' . $search_field . ' = ' . $search_value);
+        } else {
+            error_log('GET_TIENDAS: Campo de búsqueda inválido - ' . $search_field);
         }
     }
 
     // ===== OBTENER TOTAL DE REGISTROS =====
-    $sql_count = "SELECT COUNT(*) as total " . $sql_base;
-    $count_result = Database::selectOne($sql_count, $params);
-    $total_records = $count_result['total'];
-    $total_pages = ceil($total_records / $limit);
+    try {
+        $sql_count = "SELECT COUNT(*) as total " . $sql_base;
+        error_log('GET_TIENDAS: Query count - ' . $sql_count . ' | Params: ' . json_encode($params));
+        
+        $count_result = Database::selectOne($sql_count, $params);
+        $total_records = $count_result['total'] ?? 0;
+        $total_pages = ceil($total_records / $limit);
+        
+        error_log('GET_TIENDAS: Count exitoso - Total: ' . $total_records . ', Páginas: ' . $total_pages);
+    } catch (Exception $count_error) {
+        error_log('GET_TIENDAS: Error en count - ' . $count_error->getMessage());
+        throw new Exception('Error contando registros: ' . $count_error->getMessage());
+    }
 
     // ===== OBTENER REGISTROS CON PAGINACIÓN =====
     $offset = ($page - 1) * $limit;
@@ -97,8 +184,17 @@ try {
     
     $params[':limit'] = $limit;
     $params[':offset'] = $offset;
-    
-    $tiendas = Database::select($sql_data, $params);
+
+    try {
+        error_log('GET_TIENDAS: Query data - ' . $sql_data . ' | Params: ' . json_encode($params));
+        
+        $tiendas = Database::select($sql_data, $params);
+        
+        error_log('GET_TIENDAS: Select exitoso - ' . count($tiendas) . ' registros obtenidos');
+    } catch (Exception $select_error) {
+        error_log('GET_TIENDAS: Error en select - ' . $select_error->getMessage());
+        throw new Exception('Error obteniendo datos: ' . $select_error->getMessage());
+    }
 
     // ===== FORMATEAR FECHAS =====
     foreach ($tiendas as &$tienda) {
@@ -110,8 +206,10 @@ try {
         }
     }
 
+    error_log('GET_TIENDAS: Formateo exitoso - Preparando respuesta');
+
     // ===== RESPUESTA EXITOSA =====
-    echo json_encode([
+    $response = [
         'success' => true,
         'data' => $tiendas,
         'pagination' => [
@@ -127,16 +225,35 @@ try {
             'value' => $search_value,
             'applied' => !empty($search_field) && !empty($search_value)
         ]
-    ]);
+    ];
+
+    error_log('GET_TIENDAS: Respuesta preparada - Enviando JSON');
+    echo json_encode($response);
 
 } catch (Exception $e) {
-    // Log del error
-    error_log("Error en get_tiendas.php: " . $e->getMessage() . " - Usuario: " . ($_SESSION['username'] ?? 'desconocido'));
+    // ===== LOG DEL ERROR COMPLETO =====
+    $error_details = [
+        'message' => $e->getMessage(),
+        'file' => $e->getFile(),
+        'line' => $e->getLine(),
+        'trace' => $e->getTraceAsString(),
+        'user' => $_SESSION['username'] ?? 'NO_USER',
+        'timestamp' => date('Y-m-d H:i:s')
+    ];
     
+    error_log('GET_TIENDAS: ERROR CRÍTICO - ' . json_encode($error_details));
+    
+    // ===== RESPUESTA DE ERROR =====
     http_response_code(500);
     echo json_encode([
         'success' => false,
-        'message' => 'Error interno del servidor'
+        'message' => 'Error interno del servidor',
+        'error' => $e->getMessage(),
+        'debug' => [
+            'file' => basename($e->getFile()),
+            'line' => $e->getLine(),
+            'timestamp' => date('Y-m-d H:i:s')
+        ]
     ]);
 }
 ?>
