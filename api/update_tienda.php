@@ -79,7 +79,7 @@ try {
         exit;
     }
 
-    // ===== VERIFICAR QUE LA TIENDA EXISTE Y ESTÁ ACTIVA =====
+    // ===== VERIFICAR QUE LA TIENDA EXISTE Y ESTÁ ACTIVA (INCLUYE NUEVOS CAMPOS) =====
     $sql_check = "SELECT 
                       id_tienda,
                       region,
@@ -88,6 +88,8 @@ try {
                       nombre_tienda,
                       ciudad,
                       estado,
+                      promotorio_ideal,
+                      tipo,
                       estado_reg
                   FROM tiendas 
                   WHERE id_tienda = :id_tienda 
@@ -133,13 +135,17 @@ try {
         exit;
     }
 
-    // ===== SANITIZAR Y VALIDAR DATOS =====
+    // ===== SANITIZAR Y VALIDAR DATOS (INCLUYE NUEVOS CAMPOS) =====
     $region = intval($input['region']);
     $cadena = Database::sanitize(trim($input['cadena']));
     $num_tienda = intval($input['num_tienda']);
     $nombre_tienda = Database::sanitize(trim($input['nombre_tienda']));
     $ciudad = Database::sanitize(trim($input['ciudad']));
     $estado = Database::sanitize(trim($input['estado']));
+    
+    // NUEVOS CAMPOS (OPCIONALES)
+    $tipo = Database::sanitize(trim($input['tipo'] ?? ''));
+    $promotorio_ideal = !empty($input['promotorio_ideal']) ? intval($input['promotorio_ideal']) : null;
 
     // Validaciones básicas
     if ($region <= 0) {
@@ -169,6 +175,25 @@ try {
         exit;
     }
 
+    // Validaciones para nuevos campos
+    if (!empty($tipo) && strlen($tipo) > 100) {
+        http_response_code(400);
+        echo json_encode([
+            'success' => false,
+            'message' => 'El campo tipo no puede exceder 100 caracteres'
+        ]);
+        exit;
+    }
+
+    if ($promotorio_ideal !== null && ($promotorio_ideal < 1 || $promotorio_ideal > 20)) {
+        http_response_code(400);
+        echo json_encode([
+            'success' => false,
+            'message' => 'El promotorio ideal debe ser un número entre 1 y 20'
+        ]);
+        exit;
+    }
+
     // ===== VERIFICAR DUPLICADOS (EXCLUYENDO LA TIENDA ACTUAL) =====
     $sql_duplicate = "SELECT id_tienda 
                       FROM tiendas 
@@ -193,7 +218,7 @@ try {
         exit;
     }
 
-    // ===== ACTUALIZAR TIENDA =====
+    // ===== ACTUALIZAR TIENDA (INCLUYE NUEVOS CAMPOS) =====
     $sql_update = "UPDATE tiendas SET
                        region = :region,
                        cadena = :cadena,
@@ -201,6 +226,8 @@ try {
                        nombre_tienda = :nombre_tienda,
                        ciudad = :ciudad,
                        estado = :estado,
+                       promotorio_ideal = :promotorio_ideal,
+                       tipo = :tipo,
                        fecha_modificacion = NOW()
                    WHERE id_tienda = :id_tienda 
                    AND estado_reg = 1";
@@ -212,6 +239,8 @@ try {
         ':nombre_tienda' => $nombre_tienda,
         ':ciudad' => $ciudad,
         ':estado' => $estado,
+        ':promotorio_ideal' => $promotorio_ideal,
+        ':tipo' => !empty($tipo) ? $tipo : null,
         ':id_tienda' => $id_tienda
     ];
 
@@ -226,7 +255,7 @@ try {
         exit;
     }
 
-    // ===== OBTENER LA TIENDA ACTUALIZADA =====
+    // ===== OBTENER LA TIENDA ACTUALIZADA (INCLUYE NUEVOS CAMPOS) =====
     $sql_get = "SELECT 
                     id_tienda,
                     region,
@@ -235,6 +264,8 @@ try {
                     nombre_tienda,
                     ciudad,
                     estado,
+                    promotorio_ideal,
+                    tipo,
                     fecha_alta,
                     fecha_modificacion
                 FROM tiendas 
@@ -251,9 +282,9 @@ try {
     }
 
     // ===== LOG DE AUDITORÍA =====
-    error_log("Tienda actualizada - ID: {$id_tienda} - Nombre: {$nombre_tienda} - Cadena: {$cadena} - Usuario: " . $_SESSION['username'] . " - IP: " . $_SERVER['REMOTE_ADDR']);
+    error_log("Tienda actualizada - ID: {$id_tienda} - Nombre: {$nombre_tienda} - Cadena: {$cadena} - Tipo: " . ($tipo ?: 'N/A') . " - Promotorio: " . ($promotorio_ideal ?: 'N/A') . " - Usuario: " . $_SESSION['username'] . " - IP: " . $_SERVER['REMOTE_ADDR']);
 
-    // ===== RESPUESTA EXITOSA =====
+    // ===== RESPUESTA EXITOSA (INCLUYE NUEVOS CAMPOS EN CHANGES) =====
     echo json_encode([
         'success' => true,
         'message' => 'Tienda actualizada correctamente',
@@ -264,7 +295,9 @@ try {
             'num_tienda' => $tienda_actual['num_tienda'] !== $num_tienda,
             'nombre_tienda' => $tienda_actual['nombre_tienda'] !== $nombre_tienda,
             'ciudad' => $tienda_actual['ciudad'] !== $ciudad,
-            'estado' => $tienda_actual['estado'] !== $estado
+            'estado' => $tienda_actual['estado'] !== $estado,
+            'promotorio_ideal' => $tienda_actual['promotorio_ideal'] !== $promotorio_ideal,
+            'tipo' => $tienda_actual['tipo'] !== (!empty($tipo) ? $tipo : null)
         ]
     ]);
 

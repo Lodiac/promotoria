@@ -112,7 +112,7 @@ try {
         throw new Exception('Error verificando tabla tiendas: ' . $table_error->getMessage());
     }
 
-    // ===== CONSTRUIR CONSULTA BASE =====
+    // ===== CONSTRUIR CONSULTA BASE (INCLUYE NUEVOS CAMPOS) =====
     $sql = "SELECT 
                 t.id_tienda,
                 t.region,
@@ -121,6 +121,8 @@ try {
                 t.nombre_tienda,
                 t.ciudad,
                 t.estado,
+                t.promotorio_ideal,
+                t.tipo,
                 
                 COUNT(pta.id_asignacion) as total_promotores,
                 GROUP_CONCAT(
@@ -155,7 +157,7 @@ try {
     
     // Filtro por número de promotores
     if ($solo_sin_promotores) {
-        $sql = "SELECT t.id_tienda, t.region, t.cadena, t.num_tienda, t.nombre_tienda, t.ciudad, t.estado,
+        $sql = "SELECT t.id_tienda, t.region, t.cadena, t.num_tienda, t.nombre_tienda, t.ciudad, t.estado, t.promotorio_ideal, t.tipo,
                 0 as total_promotores, NULL as promotores_info, NULL as promotores_ids, NULL as promotores_nombres
                 FROM tiendas t
                 WHERE t.estado_reg = 1
@@ -179,21 +181,23 @@ try {
         $params[':cadena'] = '%' . $cadena . '%';
     }
 
-    // Filtro de búsqueda general
+    // Filtro de búsqueda general (INCLUYE NUEVOS CAMPOS)
     if (!empty($search)) {
         $sql .= " AND (
                     t.nombre_tienda LIKE :search 
                     OR t.cadena LIKE :search
                     OR t.ciudad LIKE :search
                     OR t.estado LIKE :search
+                    OR t.tipo LIKE :search
                     OR CAST(t.num_tienda AS CHAR) LIKE :search
+                    OR CAST(t.promotorio_ideal AS CHAR) LIKE :search
                     OR CONCAT(t.cadena, ' #', t.num_tienda) LIKE :search
                   )";
         $params[':search'] = '%' . $search . '%';
     }
 
     if (!$solo_sin_promotores) {
-        $sql .= " GROUP BY t.id_tienda, t.region, t.cadena, t.num_tienda, t.nombre_tienda, t.ciudad, t.estado";
+        $sql .= " GROUP BY t.id_tienda, t.region, t.cadena, t.num_tienda, t.nombre_tienda, t.ciudad, t.estado, t.promotorio_ideal, t.tipo";
         
         // Filtro por número máximo de promotores DESPUÉS del GROUP BY
         if ($max_promotores > 0) {
@@ -322,6 +326,30 @@ try {
             }
         }
 
+        // ===== ANÁLISIS DE PROMOTORIO IDEAL (NUEVO) =====
+        $promocorio_status = 'sin_definir';
+        $promocorio_diferencia = null;
+        $promocorio_mensaje = 'Promotorio ideal no definido';
+        
+        if ($tienda['promotorio_ideal']) {
+            $ideal = intval($tienda['promotorio_ideal']);
+            $actual = $num_promotores;
+            $promocorio_diferencia = $actual - $ideal;
+            
+            if ($actual == $ideal) {
+                $promocorio_status = 'ideal';
+                $promocorio_mensaje = "Cobertura ideal ({$ideal} promotores)";
+            } elseif ($actual < $ideal) {
+                $promocorio_status = 'por_debajo';
+                $faltantes = abs($promocorio_diferencia);
+                $promocorio_mensaje = "Necesita {$faltantes} promotor" . ($faltantes > 1 ? 'es' : '') . " más";
+            } else {
+                $promocorio_status = 'por_encima';
+                $sobrantes = $promocorio_diferencia;
+                $promocorio_mensaje = "Tiene {$sobrantes} promotor" . ($sobrantes > 1 ? 'es' : '') . " de más";
+            }
+        }
+
         $item = [
             'id_tienda' => intval($tienda['id_tienda']),
             'region' => intval($tienda['region']),
@@ -330,6 +358,8 @@ try {
             'nombre_tienda' => $tienda['nombre_tienda'],
             'ciudad' => $tienda['ciudad'],
             'estado' => $tienda['estado'],
+            'tipo' => $tienda['tipo'], // NUEVO CAMPO
+            'promotorio_ideal' => $tienda['promotorio_ideal'] ? intval($tienda['promotorio_ideal']) : null, // NUEVO CAMPO
             'identificador' => $tienda['cadena'] . ' #' . $tienda['num_tienda'] . ' - ' . $tienda['nombre_tienda'],
             'identificador_corto' => $tienda['cadena'] . ' #' . $tienda['num_tienda'],
             
@@ -339,6 +369,11 @@ try {
             'con_promotores' => $num_promotores > 0,
             'puede_asignar_mas' => true, // Siempre se pueden asignar más promotores
             'promotores_actuales' => $promotores_actuales,
+            
+            // ===== ANÁLISIS DE PROMOTORIO IDEAL (NUEVOS CAMPOS) =====
+            'promocorio_status' => $promocorio_status,
+            'promocorio_diferencia' => $promocorio_diferencia,
+            'promocorio_mensaje' => $promocorio_mensaje,
             
             // Resumen de cobertura
             'estado_cobertura' => $num_promotores == 0 ? 'sin_cobertura' : ($num_promotores == 1 ? 'cobertura_basica' : 'cobertura_multiple'),
@@ -351,7 +386,7 @@ try {
         $tiendas_formateadas[] = $item;
     }
 
-    // ===== OBTENER LISTAS DE VALORES ÚNICOS =====
+    // ===== OBTENER LISTAS DE VALORES ÚNICOS (INCLUYE NUEVOS CAMPOS) =====
     $sql_regiones = "SELECT DISTINCT region FROM tiendas WHERE estado_reg = 1 ORDER BY region";
     $regiones = Database::select($sql_regiones);
     $regiones_list = array_map('intval', array_column($regiones, 'region'));
@@ -359,6 +394,11 @@ try {
     $sql_cadenas = "SELECT DISTINCT cadena FROM tiendas WHERE estado_reg = 1 ORDER BY cadena";
     $cadenas = Database::select($sql_cadenas);
     $cadenas_list = array_column($cadenas, 'cadena');
+
+    // ===== OBTENER TIPOS ÚNICOS (NUEVO) =====
+    $sql_tipos = "SELECT DISTINCT tipo FROM tiendas WHERE estado_reg = 1 AND tipo IS NOT NULL AND tipo != '' ORDER BY tipo";
+    $tipos = Database::select($sql_tipos);
+    $tipos_list = array_column($tipos, 'tipo');
 
     // ===== PREPARAR RESPUESTA =====
     $response = [
@@ -377,7 +417,8 @@ try {
         ],
         'listas' => [
             'regiones' => $regiones_list,
-            'cadenas' => $cadenas_list
+            'cadenas' => $cadenas_list,
+            'tipos' => $tipos_list // NUEVA LISTA
         ],
         'filtros' => [
             'solo_sin_promotores' => $solo_sin_promotores,
@@ -389,7 +430,8 @@ try {
         'metadata' => [
             'total_encontradas' => count($tiendas_formateadas),
             'timestamp' => date('Y-m-d H:i:s'),
-            'soporte_multiples_promotores' => true
+            'soporte_multiples_promotores' => true,
+            'nuevos_campos_incluidos' => ['tipo', 'promotorio_ideal'] // METADATOS NUEVOS
         ]
     ];
 

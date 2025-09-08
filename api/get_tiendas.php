@@ -86,14 +86,16 @@ try {
 
     error_log('GET_TIENDAS: Parámetros - page: ' . $page . ', limit: ' . $limit . ', search: ' . $search_field . '=' . $search_value);
 
-    // ===== CAMPOS VÁLIDOS PARA BÚSQUEDA =====
+    // ===== CAMPOS VÁLIDOS PARA BÚSQUEDA (INCLUYE NUEVOS CAMPOS) =====
     $valid_search_fields = [
         'region',
         'cadena', 
         'num_tienda',
         'nombre_tienda',
         'ciudad',
-        'estado'
+        'estado',
+        'tipo',
+        'promotorio_ideal'
     ];
 
     // ===== VERIFICAR CONEXIÓN DB =====
@@ -131,7 +133,7 @@ try {
         $search_value = Database::sanitize($search_value);
         
         if (in_array($search_field, $valid_search_fields)) {
-            if ($search_field === 'num_tienda' || $search_field === 'region') {
+            if ($search_field === 'num_tienda' || $search_field === 'region' || $search_field === 'promotorio_ideal') {
                 // Búsqueda exacta para campos numéricos
                 $sql_base .= " AND {$search_field} = :search_value";
                 $params[':search_value'] = intval($search_value);
@@ -161,7 +163,7 @@ try {
         throw new Exception('Error contando registros: ' . $count_error->getMessage());
     }
 
-    // ===== OBTENER REGISTROS CON PAGINACIÓN =====
+    // ===== OBTENER REGISTROS CON PAGINACIÓN (INCLUYE NUEVOS CAMPOS) =====
     $offset = ($page - 1) * $limit;
     
     $sql_data = "SELECT 
@@ -172,6 +174,8 @@ try {
                     nombre_tienda,
                     ciudad,
                     estado,
+                    promotorio_ideal,
+                    tipo,
                     fecha_alta,
                     fecha_modificacion
                  " . $sql_base . "

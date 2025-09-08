@@ -1,4 +1,4 @@
-<!-- ===== MÓDULO CADENAS COMERCIALES - RUTAS CORREGIDAS ===== -->
+<!-- ===== MÓDULO CADENAS COMERCIALES - ACTUALIZADO ===== -->
 <div class="cadenas-module">
     <!-- HEADER DEL MÓDULO -->
     <div class="module-header">
@@ -24,6 +24,8 @@
                 <option value="nombre_tienda">Nombre de Tienda</option>
                 <option value="ciudad">Ciudad</option>
                 <option value="estado">Estado</option>
+                <option value="tipo">Tipo</option>
+                <option value="promotorio_ideal">Promotorio Ideal</option>
             </select>
             <input type="text" id="search-value" placeholder="Valor a buscar..." class="search-input" disabled>
             <button id="btn-buscar" class="btn-search" disabled>
@@ -48,6 +50,8 @@
                         <th>Nombre</th>
                         <th>Ciudad</th>
                         <th>Estado</th>
+                        <th>Tipo</th>
+                        <th>Promotorio Ideal</th>
                         <th>Fecha Modificación</th>
                         <th>Acciones</th>
                     </tr>
@@ -136,6 +140,17 @@
                 </div>
             </div>
 
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="tienda-tipo">Tipo</label>
+                    <input type="text" id="tienda-tipo" maxlength="100" placeholder="Ej: Supermercado, Mini súper, etc.">
+                </div>
+                <div class="form-group">
+                    <label for="tienda-promotorio">Promotorio Ideal</label>
+                    <input type="number" id="tienda-promotorio" min="1" max="20" placeholder="Número ideal de promotores">
+                </div>
+            </div>
+
             <div class="modal-actions">
                 <button type="button" class="btn-secondary" id="btn-cancelar">
                     Cancelar
@@ -215,7 +230,7 @@
 .header-icon {
     width: 50px;
     height: 50px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #7c3aed; /* Color morado sólido */
     border-radius: 12px;
     display: flex;
     align-items: center;
@@ -260,9 +275,9 @@
 }
 
 .search-select:focus {
-    border-color: #667eea;
+    border-color: #7c3aed; /* Color morado sólido */
     outline: none;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
 }
 
 .search-input {
@@ -276,9 +291,9 @@
 }
 
 .search-input:focus {
-    border-color: #667eea;
+    border-color: #7c3aed; /* Color morado sólido */
     outline: none;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
 }
 
 .search-input:disabled {
@@ -303,13 +318,14 @@
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #7c3aed; /* Color morado sólido */
     color: white;
 }
 
 .btn-primary:hover:not(:disabled) {
+    background: #6d28d9; /* Morado más oscuro en hover */
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 8px 25px rgba(124, 58, 237, 0.3);
 }
 
 .btn-secondary {
@@ -377,9 +393,9 @@
 }
 
 .btn-pagination:hover:not(:disabled) {
-    background: #667eea;
+    background: #7c3aed; /* Color morado sólido */
     color: white;
-    border-color: #667eea;
+    border-color: #7c3aed; /* Color morado sólido */
     transform: translateY(-2px);
 }
 
@@ -412,7 +428,7 @@
 }
 
 .tiendas-table th {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #7c3aed; /* Color morado sólido */
     color: white;
     padding: 15px 12px;
     text-align: left;
@@ -441,7 +457,7 @@
 }
 
 .tiendas-table tbody tr:hover {
-    background: rgba(102, 126, 234, 0.05);
+    background: rgba(124, 58, 237, 0.05); /* Hover morado sólido con transparencia */
 }
 
 .tiendas-table tbody tr:last-child td {
@@ -458,9 +474,9 @@
 .loading-spinner {
     width: 40px;
     height: 40px;
-    border: 4px solid rgba(102, 126, 234, 0.1);
+    border: 4px solid rgba(124, 58, 237, 0.1);
     border-radius: 50%;
-    border-top-color: #667eea;
+    border-top-color: #7c3aed; /* Color morado sólido */
     animation: spin 1s linear infinite;
     margin: 0 auto 20px;
 }
@@ -629,9 +645,9 @@
 }
 
 .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
-    border-color: #667eea;
+    border-color: #7c3aed; /* Color morado sólido */
     outline: none;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
 }
 
 .modal-actions {
@@ -929,7 +945,7 @@ function configurarEventListeners() {
     });
 }
 
-// ===== CARGA DE DATOS (MEJORADA CON RUTAS CORREGIDAS) =====
+// ===== CARGA DE DATOS =====
 async function cargarTiendas() {
     console.log('🔄 Iniciando carga de tiendas...');
     
@@ -946,7 +962,6 @@ async function cargarTiendas() {
             params.append('search_value', currentSearch.value);
         }
         
-        // ✅ RUTA CORREGIDA: Solo 2 niveles arriba desde pages/root/
         const apiUrl = `../../api/get_tiendas.php?${params}`;
         console.log('📡 Llamando API:', apiUrl);
         
@@ -967,7 +982,6 @@ async function cargarTiendas() {
             throw new Error(`Error HTTP ${response.status}: ${errorText}`);
         }
         
-        // MANEJO ROBUSTO DE RESPUESTA
         const responseText = await response.text();
         console.log('📄 Respuesta en texto (primeros 200 chars):', responseText.substring(0, 200));
         
@@ -989,7 +1003,6 @@ async function cargarTiendas() {
         
         console.log(`📊 ${data.data ? data.data.length : 0} tiendas recibidas`);
         
-        // Actualizar datos globales
         allTiendas = data.data || [];
         
         renderizarTiendas(allTiendas);
@@ -1070,6 +1083,8 @@ function renderizarTiendas(tiendas) {
             <td>${tienda.nombre_tienda}</td>
             <td>${tienda.ciudad}</td>
             <td>${tienda.estado}</td>
+            <td>${tienda.tipo || 'N/A'}</td>
+            <td>${tienda.promotorio_ideal || 'N/A'}</td>
             <td>${tienda.fecha_modificacion_formatted || 'N/A'}</td>
             <td>
                 <button class="btn-action edit" onclick="editarTienda(${tienda.id_tienda})">
@@ -1120,20 +1135,18 @@ async function editarTienda(id) {
     console.log('✏️ Editando tienda ID:', id);
     
     try {
-        // Buscar la tienda en los datos actuales
         const tiendaData = allTiendas.find(t => t.id_tienda == id);
         
         if (!tiendaData) {
             throw new Error('No se encontraron los datos de la tienda');
         }
         
-        // Configurar modal para edición
         isEditing = true;
         editingId = id;
         modalTitle.innerHTML = '<i class="fas fa-edit"></i> Editar Tienda';
         btnGuardar.innerHTML = '<i class="fas fa-save"></i> Actualizar';
         
-        // Llenar formulario
+        // Llenar formulario incluyendo nuevos campos
         document.getElementById('tienda-id').value = tiendaData.id_tienda;
         document.getElementById('tienda-region').value = tiendaData.region;
         document.getElementById('tienda-cadena').value = tiendaData.cadena;
@@ -1141,6 +1154,8 @@ async function editarTienda(id) {
         document.getElementById('tienda-nombre').value = tiendaData.nombre_tienda;
         document.getElementById('tienda-ciudad').value = tiendaData.ciudad;
         document.getElementById('tienda-estado').value = tiendaData.estado;
+        document.getElementById('tienda-tipo').value = tiendaData.tipo || '';
+        document.getElementById('tienda-promotorio').value = tiendaData.promotorio_ideal || '';
         
         abrirModal(modalTienda);
         
@@ -1166,7 +1181,7 @@ function cerrarModalTienda() {
     limpiarFormulario();
 }
 
-// ===== GUARDAR TIENDA (RUTA CORREGIDA) =====
+// ===== GUARDAR TIENDA =====
 async function guardarTienda(e) {
     e.preventDefault();
     
@@ -1176,7 +1191,9 @@ async function guardarTienda(e) {
         num_tienda: parseInt(document.getElementById('tienda-num').value),
         nombre_tienda: document.getElementById('tienda-nombre').value.trim(),
         ciudad: document.getElementById('tienda-ciudad').value.trim(),
-        estado: document.getElementById('tienda-estado').value.trim()
+        estado: document.getElementById('tienda-estado').value.trim(),
+        tipo: document.getElementById('tienda-tipo').value.trim() || null,
+        promotorio_ideal: document.getElementById('tienda-promotorio').value ? parseInt(document.getElementById('tienda-promotorio').value) : null
     };
     
     if (isEditing) {
@@ -1185,7 +1202,7 @@ async function guardarTienda(e) {
     
     // Validaciones básicas
     if (!formData.region || !formData.num_tienda || !formData.cadena || !formData.nombre_tienda || !formData.ciudad || !formData.estado) {
-        mostrarNotificacion('Todos los campos son requeridos', 'warning');
+        mostrarNotificacion('Los campos marcados con * son requeridos', 'warning');
         return;
     }
     
@@ -1193,7 +1210,6 @@ async function guardarTienda(e) {
     btnGuardar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
     
     try {
-        // ✅ RUTAS CORREGIDAS: Solo 2 niveles arriba desde pages/root/
         const url = isEditing ? '../../api/update_tienda.php' : '../../api/create_tienda.php';
         
         const response = await fetch(url, {
@@ -1222,7 +1238,7 @@ async function guardarTienda(e) {
         mostrarNotificacion(`Tienda ${accion} correctamente`, 'success');
         
         cerrarModalTienda();
-        cargarTiendas(); // Recargar datos
+        cargarTiendas();
         
     } catch (error) {
         console.error(`❌ Error ${isEditing ? 'actualizando' : 'creando'} tienda:`, error);
@@ -1233,7 +1249,7 @@ async function guardarTienda(e) {
     }
 }
 
-// ===== ELIMINAR TIENDA (RUTA CORREGIDA) =====
+// ===== ELIMINAR TIENDA =====
 let tiendaAEliminar = null;
 
 function eliminarTienda(id, nombre, cadena) {
@@ -1262,7 +1278,6 @@ async function confirmarEliminacion() {
     btnConfirmar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Eliminando...';
     
     try {
-        // ✅ RUTA CORREGIDA: Solo 2 niveles arriba desde pages/root/
         const response = await fetch('../../api/delete_tienda.php', {
             method: 'POST',
             headers: {
@@ -1288,7 +1303,7 @@ async function confirmarEliminacion() {
         mostrarNotificacion('Tienda eliminada correctamente', 'success');
         
         cerrarModalConfirmar();
-        cargarTiendas(); // Recargar datos
+        cargarTiendas();
         
     } catch (error) {
         console.error('❌ Error eliminando tienda:', error);
@@ -1329,12 +1344,10 @@ function mostrarNotificacion(mensaje, tipo = 'info') {
         </button>
     `;
     
-    // Event listener para cerrar
     notificacion.querySelector('.notification-close').addEventListener('click', () => {
         notificacion.remove();
     });
     
-    // Auto-remover después de 5 segundos
     setTimeout(() => {
         if (notificacion.parentNode) {
             notificacion.remove();
@@ -1352,7 +1365,6 @@ window.eliminarTienda = eliminarTienda;
 console.log('🏪 Iniciando módulo Cadenas Comerciales...');
 init();
 
-// Cargar datos después de un pequeño delay para asegurar que el DOM esté listo
 setTimeout(() => {
     console.log('⏰ Iniciando carga de datos...');
     cargarTiendas();
