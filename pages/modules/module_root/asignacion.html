@@ -1,10 +1,10 @@
-<!-- ===== MÓDULO GESTIÓN DE ASIGNACIONES - DISEÑO MODERNO ===== -->
+<!-- ===== MÓDULO GESTIÓN DE ASIGNACIONES - VERSIÓN COMPLETA MEJORADA ===== -->
 <div class="asignaciones-module">
     <!-- HEADER DEL MÓDULO -->
     <div class="module-header">
         <div class="header-content">
             <div class="header-title">
-                <i class="fas fa-users-cog header-icon"></i>
+                <i class="fas fa-tasks header-icon"></i>
                 <h1>Gestión de Asignaciones</h1>
             </div>
             <div class="header-actions">
@@ -29,7 +29,7 @@
                 <div class="stat-content">
                     <h3 id="stat-asignaciones-activas">0</h3>
                     <p>Asignaciones Activas</p>
-                    <div class="stat-trend" id="trend-asignaciones">+0% vs anterior</div>
+                    <div class="stat-trend" id="trend-asignaciones">Cargando...</div>
                 </div>
             </div>
             
@@ -105,6 +105,7 @@
                     <option value="">Seleccionar campo...</option>
                     <option value="cadena">Cadena</option>
                     <option value="nombre_tienda">Nombre Tienda</option>
+                    <option value="num_tienda">Número Tienda</option>
                     <option value="region">Región</option>
                     <option value="ciudad">Ciudad</option>
                     <option value="estado">Estado</option>
@@ -135,14 +136,15 @@
                 <table class="tiendas-table" id="tiendas-table">
                     <thead>
                         <tr>
+                            <th width="40"></th>
                             <th>ID</th>
                             <th>Región</th>
                             <th>Cadena</th>
-                            <th>Núm. Tienda</th>
+                            <th>Núm.</th>
                             <th>Nombre</th>
                             <th>Ciudad</th>
                             <th>Estado</th>
-                            <th>Promotores</th>
+                            <th>Total</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
@@ -348,21 +350,42 @@
 <div class="notifications-container" id="notifications-container"></div>
 
 <style>
-/* ===== ESTILOS ASIGNACIONES MODULE ===== */
+/* ===== ESTILOS ASIGNACIONES MODULE - VERSIÓN COMPLETA MEJORADA ===== */
 .asignaciones-module {
     padding: 0;
     max-width: 100%;
+    min-height: 100vh;
+}
+
+/* ===== VARIABLES CSS (NUEVA PALETA NARANJA) ===== */
+:root {
+    --primary-color: #f97316;
+    --primary-hover: #ea580c;
+    --primary-light: #fed7aa;
+    --secondary-color: #6c757d;
+    --success-color: #10b981;
+    --warning-color: #f59e0b;
+    --danger-color: #ef4444;
+    --info-color: #3b82f6;
+    --background: #f8fafc;
+    --surface: rgba(255, 255, 255, 0.95);
+    --text-primary: #2d3748;
+    --text-secondary: #718096;
+    --border-color: #e2e8f0;
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    --shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.15);
+    --radius: 12px;
 }
 
 /* ===== HEADER DEL MÓDULO ===== */
 .module-header {
-    background: rgba(255, 255, 255, 0.95);
+    background: var(--surface);
     backdrop-filter: blur(20px);
-    border-radius: 16px;
+    border-radius: var(--radius);
     padding: 2rem;
     margin-bottom: 2rem;
     border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow);
 }
 
 .header-content {
@@ -382,20 +405,31 @@
 .header-icon {
     width: 50px;
     height: 50px;
-    background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
-    border-radius: 12px;
+    background: var(--primary-color);
+    border-radius: var(--radius);
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
     font-size: 1.5rem;
+    box-shadow: 0 8px 20px rgba(249, 115, 22, 0.3);
 }
 
 .header-title h1 {
     margin: 0;
     font-size: 2rem;
     font-weight: 700;
-    color: #333;
+    color: var(--text-primary);
+}
+
+.module-version {
+    background: var(--primary-light);
+    color: var(--primary-color);
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-left: 10px;
 }
 
 .header-actions {
@@ -404,63 +438,7 @@
     align-items: center;
 }
 
-/* ===== CONTROLES DE BÚSQUEDA ===== */
-.search-controls {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(20px);
-    border-radius: 16px;
-    padding: 1.5rem;
-    margin-bottom: 2rem;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-}
-
-.search-box {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    flex-wrap: wrap;
-}
-
-.search-select {
-    min-width: 200px;
-    padding: 12px 15px;
-    border: 2px solid #e0e6ed;
-    border-radius: 8px;
-    background: white;
-    font-size: 0.95rem;
-    transition: all 0.3s ease;
-}
-
-.search-select:focus {
-    border-color: #a855f7;
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1);
-}
-
-.search-input {
-    flex: 1;
-    min-width: 250px;
-    padding: 12px 15px;
-    border: 2px solid #e0e6ed;
-    border-radius: 8px;
-    font-size: 0.95rem;
-    transition: all 0.3s ease;
-}
-
-.search-input:focus {
-    border-color: #a855f7;
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1);
-}
-
-.search-input:disabled {
-    background: #f8f9fa;
-    color: #666;
-    cursor: not-allowed;
-}
-
-/* ===== BOTONES ===== */
+/* ===== BOTONES MEJORADOS (SIN DEGRADADOS) ===== */
 .btn-primary, .btn-secondary, .btn-danger, .btn-warning, .btn-search, .btn-clear, .btn-action, .btn-pagination {
     border: none;
     border-radius: 8px;
@@ -473,20 +451,22 @@
     gap: 8px;
     text-decoration: none;
     font-size: 0.9rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+    background: var(--primary-color);
     color: white;
 }
 
 .btn-primary:hover:not(:disabled) {
+    background: var(--primary-hover);
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(168, 85, 247, 0.3);
+    box-shadow: 0 8px 25px rgba(249, 115, 22, 0.3);
 }
 
 .btn-secondary {
-    background: #6c757d;
+    background: var(--secondary-color);
     color: white;
 }
 
@@ -496,38 +476,40 @@
 }
 
 .btn-warning {
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    background: var(--warning-color);
     color: white;
 }
 
 .btn-warning:hover:not(:disabled) {
+    background: #d97706;
     transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba(245, 158, 11, 0.3);
 }
 
 .btn-danger {
-    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    background: var(--danger-color);
     color: white;
 }
 
 .btn-danger:hover:not(:disabled) {
+    background: #dc2626;
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(231, 76, 60, 0.3);
+    box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3);
 }
 
 .btn-search {
-    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+    background: var(--info-color);
     color: white;
     padding: 12px 16px;
 }
 
 .btn-search:hover:not(:disabled) {
+    background: #2563eb;
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(52, 152, 219, 0.3);
 }
 
 .btn-clear {
-    background: #6c757d;
+    background: var(--secondary-color);
     color: white;
     padding: 12px 16px;
 }
@@ -537,37 +519,77 @@
     transform: translateY(-2px);
 }
 
-.btn-action {
-    padding: 8px 12px;
-    font-size: 0.8rem;
-    margin: 0 2px;
-}
-
-.btn-action.edit {
-    background: linear-gradient(135deg, #f39c12 0%, #d68910 100%);
-    color: white;
-}
-
-.btn-action.delete {
-    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
-    color: white;
-}
-
 .btn-pagination {
-    background: rgba(255, 255, 255, 0.9);
-    color: #333;
-    border: 2px solid #e0e6ed;
+    background: white;
+    color: var(--text-primary);
+    border: 2px solid var(--border-color);
 }
 
 .btn-pagination:hover:not(:disabled) {
-    background: #a855f7;
+    background: var(--primary-color);
     color: white;
-    border-color: #a855f7;
+    border-color: var(--primary-color);
     transform: translateY(-2px);
 }
 
 .btn-pagination:disabled {
     opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ===== CONTROLES DE BÚSQUEDA ===== */
+.search-controls {
+    background: var(--surface);
+    backdrop-filter: blur(20px);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: var(--shadow);
+}
+
+.search-box {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.search-select {
+    min-width: 200px;
+    padding: 12px 15px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    background: white;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+.search-select:focus {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+}
+
+.search-input {
+    flex: 1;
+    min-width: 250px;
+    padding: 12px 15px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+.search-input:focus {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+}
+
+.search-input:disabled {
+    background: #f8f9fa;
+    color: #666;
     cursor: not-allowed;
 }
 
@@ -584,40 +606,32 @@
 }
 
 .stat-card {
-    background: rgba(255, 255, 255, 0.95);
+    background: var(--surface);
     backdrop-filter: blur(20px);
-    border-radius: 16px;
+    border-radius: var(--radius);
     padding: 2rem;
     display: flex;
     align-items: center;
     gap: 1.5rem;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow);
     border: 1px solid rgba(255, 255, 255, 0.8);
     transition: all 0.3s ease;
 }
 
 .stat-card:hover {
     transform: translateY(-8px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--shadow-hover);
 }
 
-.stat-card.primary .stat-icon { 
-    background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%); 
-}
-.stat-card.success .stat-icon { 
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%); 
-}
-.stat-card.warning .stat-icon { 
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); 
-}
-.stat-card.info .stat-icon { 
-    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); 
-}
+.stat-card.primary .stat-icon { background: var(--primary-color); }
+.stat-card.success .stat-icon { background: var(--success-color); }
+.stat-card.warning .stat-icon { background: var(--warning-color); }
+.stat-card.info .stat-icon { background: var(--info-color); }
 
 .stat-icon {
     width: 70px;
     height: 70px;
-    border-radius: 16px;
+    border-radius: var(--radius);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -630,37 +644,37 @@
     margin: 0 0 0.5rem 0;
     font-size: 2.5rem;
     font-weight: 800;
-    color: #2d3748;
+    color: var(--text-primary);
 }
 
 .stat-content p {
     margin: 0;
-    color: #718096;
+    color: var(--text-secondary);
     font-weight: 600;
     font-size: 0.95rem;
 }
 
 .stat-trend {
     font-size: 0.8rem;
-    color: #10b981;
+    color: var(--success-color);
     font-weight: 600;
     margin-top: 0.25rem;
 }
 
 /* ===== DISTRIBUCIÓN ===== */
 .distribution-container {
-    background: rgba(255, 255, 255, 0.95);
+    background: var(--surface);
     backdrop-filter: blur(20px);
-    border-radius: 16px;
+    border-radius: var(--radius);
     padding: 2rem;
     margin-bottom: 2rem;
     border: 1px solid rgba(255, 255, 255, 0.8);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow);
 }
 
 .distribution-container h3 {
     margin: 0 0 1.5rem 0;
-    color: #2d3748;
+    color: var(--text-primary);
     font-size: 1.25rem;
     font-weight: 700;
 }
@@ -673,15 +687,15 @@
 
 .distribution-card {
     background: #f8fafc;
-    border-radius: 12px;
+    border-radius: var(--radius);
     padding: 1.5rem;
     text-align: center;
-    border: 2px solid #e2e8f0;
+    border: 2px solid var(--border-color);
     transition: all 0.3s ease;
 }
 
 .distribution-card:hover {
-    border-color: #a855f7;
+    border-color: var(--primary-color);
     background: white;
     transform: translateY(-2px);
 }
@@ -689,13 +703,13 @@
 .distribution-number {
     font-size: 2rem;
     font-weight: 800;
-    color: #a855f7;
+    color: var(--primary-color);
     margin-bottom: 0.5rem;
 }
 
 .distribution-label {
     font-size: 0.875rem;
-    color: #718096;
+    color: var(--text-secondary);
     font-weight: 600;
 }
 
@@ -705,9 +719,9 @@
 }
 
 .alert {
-    background: rgba(255, 255, 255, 0.95);
+    background: var(--surface);
     backdrop-filter: blur(20px);
-    border-radius: 16px;
+    border-radius: var(--radius);
     padding: 1.25rem 1.75rem;
     margin-bottom: 1rem;
     display: flex;
@@ -718,9 +732,9 @@
     animation: slideInLeft 0.5s ease-out;
 }
 
-.alert.alert-info { --alert-color: #3b82f6; }
-.alert.alert-warning { --alert-color: #f59e0b; }
-.alert.alert-success { --alert-color: #10b981; }
+.alert.alert-info { --alert-color: var(--info-color); }
+.alert.alert-warning { --alert-color: var(--warning-color); }
+.alert.alert-success { --alert-color: var(--success-color); }
 
 .alert i {
     font-size: 1.5rem;
@@ -733,24 +747,24 @@
 
 .alert-title {
     font-weight: 700;
-    color: #2d3748;
+    color: var(--text-primary);
     margin-bottom: 0.25rem;
 }
 
 .alert-message {
-    color: #718096;
+    color: var(--text-secondary);
     margin: 0;
 }
 
-/* ===== TABLA ===== */
+/* ===== TABLA EXPANDIBLE MEJORADA ===== */
 .table-container {
-    background: rgba(255, 255, 255, 0.95);
+    background: var(--surface);
     backdrop-filter: blur(20px);
-    border-radius: 16px;
+    border-radius: var(--radius);
     padding: 1.5rem;
     margin-bottom: 2rem;
     border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow);
     position: relative;
     overflow: hidden;
 }
@@ -766,7 +780,7 @@
 }
 
 .tiendas-table th {
-    background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+    background: var(--primary-color);
     color: white;
     padding: 15px 12px;
     text-align: left;
@@ -785,156 +799,205 @@
 
 .tiendas-table td {
     padding: 15px 12px;
-    border-bottom: 1px solid #e0e6ed;
+    border-bottom: 1px solid var(--border-color);
     font-size: 0.9rem;
     vertical-align: middle;
 }
 
-.tiendas-table tbody tr {
+/* ===== FILAS PRINCIPALES DE TIENDAS ===== */
+.tienda-row {
     transition: all 0.3s ease;
+    cursor: pointer;
 }
 
-.tiendas-table tbody tr:hover {
-    background: rgba(168, 85, 247, 0.05);
+.tienda-row:hover {
+    background: rgba(249, 115, 22, 0.05);
 }
 
-.tiendas-table tbody tr:last-child td {
-    border-bottom: none;
+.tienda-row.expanded {
+    background: rgba(249, 115, 22, 0.08);
 }
 
-/* ===== COLUMNA PROMOTORES ===== */
-.promotores-cell {
-    max-width: 300px;
+.expand-btn {
+    background: none;
+    border: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
 }
 
-.promotores-list {
+.expand-btn:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: scale(1.1);
+}
+
+.expand-btn.expanded {
+    background: var(--primary-color);
+    color: white;
+    transform: rotate(90deg);
+}
+
+/* ===== FILAS DE PROMOTORES (EXPANDIBLES) ===== */
+.promotores-row {
+    display: none;
+    background: #f8fafc;
+    border-left: 4px solid var(--primary-color);
+}
+
+.promotores-row.show {
+    display: table-row;
+    animation: expandRow 0.3s ease-out;
+}
+
+@keyframes expandRow {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.promotores-row td {
+    padding: 8px 12px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.promotores-content {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 8px;
+    padding: 10px;
 }
 
-.promotor-badge {
+.promotor-item {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
+    background: white;
+    border: 1px solid var(--border-color);
     border-radius: 8px;
-    padding: 0.5rem 0.75rem;
+    padding: 10px 15px;
     transition: all 0.3s ease;
 }
 
-.promotor-badge:hover {
-    background: white;
-    border-color: #a855f7;
+.promotor-item:hover {
+    border-color: var(--primary-color);
     transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.promotor-info {
+.promotor-details {
     flex: 1;
     min-width: 0;
 }
 
 .promotor-name {
     font-weight: 600;
-    color: #2d3748;
-    font-size: 0.85rem;
-    margin-bottom: 0.125rem;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    margin-bottom: 4px;
 }
 
-.promotor-date {
-    font-size: 0.75rem;
-    color: #718096;
+.promotor-meta {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    display: flex;
+    gap: 15px;
+    align-items: center;
 }
 
 .promotor-actions {
     display: flex;
-    gap: 0.25rem;
-    margin-left: 0.5rem;
+    gap: 4px;
+    margin-left: 15px;
 }
 
 .btn-micro {
-    width: 24px;
-    height: 24px;
+    width: 28px;
+    height: 28px;
     border: none;
-    border-radius: 4px;
+    border-radius: 6px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     transition: all 0.3s ease;
 }
 
 .btn-micro.view {
-    background: #e2e8f0;
-    color: #4a5568;
-}
-
-.btn-micro.move {
-    background: #fef5e7;
-    color: #d69e2e;
-}
-
-.btn-micro.remove {
-    background: #fed7d7;
-    color: #c53030;
-}
-
-.btn-micro:hover {
-    transform: scale(1.2);
-}
-
-.sin-promotores {
-    text-align: center;
-    color: #a0aec0;
-    font-style: italic;
-    padding: 1rem;
-}
-
-/* ===== ACCIONES ===== */
-.acciones-cell {
-    text-align: center;
-    white-space: nowrap;
-}
-
-.btn-tabla {
-    padding: 0.5rem 1rem;
-    border: none;
-    border-radius: 8px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    text-decoration: none;
-}
-
-.btn-tabla.primary {
-    background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+    background: var(--info-color);
     color: white;
 }
 
-.btn-tabla:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+.btn-micro.move {
+    background: var(--warning-color);
+    color: white;
+}
+
+.btn-micro.remove {
+    background: var(--danger-color);
+    color: white;
+}
+
+.btn-micro:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* ===== BADGES Y CONTADORES ===== */
+.total-promotores {
+    background: var(--primary-color);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.8rem;
+    display: inline-block;
+    min-width: 30px;
+    text-align: center;
+}
+
+.total-promotores.zero {
+    background: var(--text-secondary);
+}
+
+.num-tienda-badge {
+    background: var(--primary-color);
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.8rem;
+    display: inline-block;
+    min-width: 40px;
+    text-align: center;
 }
 
 /* ===== LOADING Y EMPTY STATES ===== */
 .table-loading, .empty-state {
     text-align: center;
     padding: 60px 20px;
-    color: #666;
+    color: var(--text-secondary);
 }
 
 .loading-spinner {
     width: 40px;
     height: 40px;
-    border: 4px solid rgba(168, 85, 247, 0.1);
+    border: 4px solid rgba(249, 115, 22, 0.1);
     border-radius: 50%;
-    border-top-color: #a855f7;
+    border-top-color: var(--primary-color);
     animation: spin 1s linear infinite;
     margin: 0 auto 20px;
 }
@@ -945,13 +1008,13 @@
 
 .empty-state i {
     font-size: 4rem;
-    color: #dee2e6;
+    color: var(--border-color);
     margin-bottom: 1rem;
 }
 
 .empty-state h3 {
     margin: 0 0 0.5rem 0;
-    color: #495057;
+    color: var(--text-primary);
 }
 
 /* ===== PAGINACIÓN ===== */
@@ -959,18 +1022,18 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: rgba(255, 255, 255, 0.95);
+    background: var(--surface);
     backdrop-filter: blur(20px);
-    border-radius: 16px;
+    border-radius: var(--radius);
     padding: 1rem 1.5rem;
     border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow);
     flex-wrap: wrap;
     gap: 1rem;
 }
 
 .pagination-info {
-    color: #666;
+    color: var(--text-secondary);
     font-size: 0.9rem;
 }
 
@@ -981,7 +1044,7 @@
 }
 
 .pagination-pages {
-    color: #333;
+    color: var(--text-primary);
     font-weight: 600;
     font-size: 0.9rem;
 }
@@ -1008,7 +1071,7 @@
 
 .modal-container {
     background: white;
-    border-radius: 16px;
+    border-radius: var(--radius);
     width: 100%;
     max-width: 600px;
     max-height: 90vh;
@@ -1033,10 +1096,10 @@
 }
 
 .modal-header {
-    background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+    background: var(--primary-color);
     color: white;
     padding: 1.5rem 2rem;
-    border-radius: 16px 16px 0 0;
+    border-radius: var(--radius) var(--radius) 0 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -1072,27 +1135,27 @@
 
 .current-assignment {
     background: #f8fafc;
-    border-radius: 12px;
+    border-radius: var(--radius);
     padding: 1.5rem;
     margin-bottom: 2rem;
-    border-left: 4px solid #a855f7;
+    border-left: 4px solid var(--primary-color);
 }
 
 .current-assignment h4 {
     margin: 0 0 1rem 0;
-    color: #333;
+    color: var(--text-primary);
     font-size: 1.1rem;
     font-weight: 600;
 }
 
 .current-assignment p {
     margin: 0.5rem 0;
-    color: #666;
+    color: var(--text-secondary);
     font-size: 0.9rem;
 }
 
 .current-assignment strong {
-    color: #333;
+    color: var(--text-primary);
     font-weight: 600;
 }
 
@@ -1112,13 +1175,13 @@
     display: block;
     margin-bottom: 0.5rem;
     font-weight: 600;
-    color: #333;
+    color: var(--text-primary);
 }
 
 .form-group input, .form-group select, .form-group textarea {
     width: 100%;
     padding: 12px 15px;
-    border: 2px solid #e0e6ed;
+    border: 2px solid var(--border-color);
     border-radius: 8px;
     font-size: 0.95rem;
     transition: all 0.3s ease;
@@ -1126,20 +1189,20 @@
 }
 
 .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
-    border-color: #a855f7;
+    border-color: var(--primary-color);
     outline: none;
-    box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1);
+    box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
 }
 
 .form-help {
     font-size: 0.8rem;
-    color: #666;
+    color: var(--text-secondary);
     margin-top: 0.5rem;
 }
 
 .modal-actions {
     padding: 1.5rem 2rem;
-    border-top: 1px solid #e0e6ed;
+    border-top: 1px solid var(--border-color);
     display: flex;
     justify-content: flex-end;
     gap: 1rem;
@@ -1148,15 +1211,15 @@
 /* ===== HISTORIAL TIMELINE ===== */
 .promotor-info {
     background: #f8fafc;
-    border-radius: 12px;
+    border-radius: var(--radius);
     padding: 1.5rem;
     margin-bottom: 2rem;
-    border-left: 4px solid #a855f7;
+    border-left: 4px solid var(--primary-color);
 }
 
 .promotor-info h4 {
     margin: 0 0 1rem 0;
-    color: #333;
+    color: var(--text-primary);
     font-size: 1.1rem;
     font-weight: 600;
 }
@@ -1173,26 +1236,26 @@
     border-radius: 8px;
     padding: 1rem;
     text-align: center;
-    border: 2px solid #e2e8f0;
+    border: 2px solid var(--border-color);
     transition: all 0.3s ease;
 }
 
 .stat-mini:hover {
-    border-color: #a855f7;
+    border-color: var(--primary-color);
     transform: translateY(-2px);
 }
 
 .stat-mini h5 {
     font-size: 1.5rem;
     font-weight: 700;
-    color: #a855f7;
+    color: var(--primary-color);
     margin: 0 0 0.5rem 0;
 }
 
 .stat-mini p {
     margin: 0;
     font-size: 0.8rem;
-    color: #666;
+    color: var(--text-secondary);
     font-weight: 600;
 }
 
@@ -1208,7 +1271,7 @@
     top: 0;
     bottom: 0;
     width: 3px;
-    background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+    background: var(--primary-color);
     border-radius: 2px;
 }
 
@@ -1216,11 +1279,11 @@
     position: relative;
     margin-bottom: 2rem;
     background: white;
-    border-radius: 12px;
+    border-radius: var(--radius);
     padding: 1.5rem;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
     margin-left: 1.5rem;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--border-color);
 }
 
 .timeline-item::before {
@@ -1230,15 +1293,15 @@
     top: 1.5rem;
     width: 12px;
     height: 12px;
-    background: #a855f7;
+    background: var(--primary-color);
     border-radius: 50%;
     border: 3px solid white;
-    box-shadow: 0 0 0 3px #a855f7;
+    box-shadow: 0 0 0 3px var(--primary-color);
 }
 
 .timeline-item.active::before {
-    background: #10b981;
-    box-shadow: 0 0 0 3px #10b981;
+    background: var(--success-color);
+    box-shadow: 0 0 0 3px var(--success-color);
 }
 
 /* ===== NOTIFICACIONES ===== */
@@ -1252,7 +1315,7 @@
 
 .notification {
     background: white;
-    border-radius: 12px;
+    border-radius: var(--radius);
     padding: 1rem 1.5rem;
     margin-bottom: 10px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
@@ -1265,21 +1328,10 @@
     overflow: hidden;
 }
 
-.notification.success {
-    border-left-color: #10b981;
-}
-
-.notification.error {
-    border-left-color: #e74c3c;
-}
-
-.notification.warning {
-    border-left-color: #f59e0b;
-}
-
-.notification.info {
-    border-left-color: #3b82f6;
-}
+.notification.success { border-left-color: var(--success-color); }
+.notification.error { border-left-color: var(--danger-color); }
+.notification.warning { border-left-color: var(--warning-color); }
+.notification.info { border-left-color: var(--info-color); }
 
 @keyframes notificationSlideIn {
     from {
@@ -1296,21 +1348,10 @@
     font-size: 1.2rem;
 }
 
-.notification.success .notification-icon {
-    color: #10b981;
-}
-
-.notification.error .notification-icon {
-    color: #e74c3c;
-}
-
-.notification.warning .notification-icon {
-    color: #f59e0b;
-}
-
-.notification.info .notification-icon {
-    color: #3b82f6;
-}
+.notification.success .notification-icon { color: var(--success-color); }
+.notification.error .notification-icon { color: var(--danger-color); }
+.notification.warning .notification-icon { color: var(--warning-color); }
+.notification.info .notification-icon { color: var(--info-color); }
 
 .notification-content h4 {
     margin: 0 0 5px 0;
@@ -1321,7 +1362,7 @@
 .notification-content p {
     margin: 0;
     font-size: 0.85rem;
-    color: #666;
+    color: var(--text-secondary);
 }
 
 .notification-close {
@@ -1337,7 +1378,7 @@
 }
 
 .notification-close:hover {
-    color: #333;
+    color: var(--text-primary);
 }
 
 /* ===== RESPONSIVE ===== */
@@ -1386,6 +1427,12 @@
     .stats-grid {
         grid-template-columns: 1fr;
     }
+
+    .promotor-meta {
+        flex-direction: column;
+        gap: 4px;
+        align-items: flex-start;
+    }
 }
 
 @media (max-width: 480px) {
@@ -1400,6 +1447,17 @@
     .modal-actions {
         padding: 1rem;
         flex-direction: column;
+    }
+
+    .promotor-item {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .promotor-actions {
+        margin-left: 0;
+        justify-content: center;
     }
 }
 
@@ -1417,6 +1475,19 @@
     from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
 }
+
+/* ===== UTILIDADES ===== */
+.text-center { text-align: center; }
+.text-muted { color: var(--text-secondary); }
+.fw-bold { font-weight: 700; }
+.mb-0 { margin-bottom: 0; }
+.mt-1 { margin-top: 0.25rem; }
+.d-none { display: none; }
+.d-flex { display: flex; }
+.align-items-center { align-items: center; }
+.justify-content-between { justify-content: space-between; }
+.gap-2 { gap: 0.5rem; }
+.gap-3 { gap: 1rem; }
 </style>
 
 <script>
@@ -1427,6 +1498,7 @@ let allTiendas = [];
 let allAsignaciones = [];
 let currentView = 'main'; // 'main' o 'dashboard'
 let currentSearch = { field: '', value: '', coverage: '' };
+let expandedRows = new Set(); // Para mantener estado de filas expandidas
 
 // ===== ELEMENTOS DOM =====
 const dashboardSection = document.getElementById('dashboard-section');
@@ -1495,7 +1567,7 @@ function showError(message) {
 
 // ===== INICIALIZACIÓN =====
 function init() {
-    console.log('🚀 Inicializando módulo asignaciones...');
+    console.log('🚀 Inicializando módulo asignaciones v2.0...');
     configurarEventListeners();
 }
 
@@ -1593,10 +1665,7 @@ async function cargarTiendasConPromotores() {
         
         console.log('📡 Cargando tiendas con parámetros:', searchParams.toString());
         
-        // Usar la API correcta según disponibilidad
-        let apiUrl = '../../api/get_tiendas.php';
-        
-        const response = await fetch(`${apiUrl}?${searchParams}`);
+        const response = await fetch(`../../api/get_tiendas.php?${searchParams}`);
         
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -1617,11 +1686,14 @@ async function cargarTiendasConPromotores() {
         
         allTiendas = data.data || [];
         
-        // Filtrar por cobertura después de cargar
+        // Cargar asignaciones primero
+        await cargarAsignaciones();
+        
+        // Filtrar por cobertura después de cargar asignaciones
         if (currentSearch.coverage) {
-            await aplicarFiltroCoberturaLocalmenteConAsignaciones();
+            aplicarFiltroCoberturaLocalmentConAsignaciones();
         } else {
-            renderTabla(allTiendas);
+            renderTablaExpandible(allTiendas);
         }
         
         actualizarPaginacion(data.pagination);
@@ -1635,38 +1707,44 @@ async function cargarTiendasConPromotores() {
     }
 }
 
-async function aplicarFiltroCoberturaLocalmenteConAsignaciones() {
+async function cargarAsignaciones() {
     try {
-        // Cargar asignaciones activas
         const response = await fetch('../../api/get_asignaciones.php?estatus=activo&limit=1000');
         const data = await response.json();
         
-        let tiendasFiltradas = allTiendas;
-        
         if (data.success) {
-            // Crear mapa de tiendas con promotores
-            const tiendasConPromotores = new Set();
-            data.data.forEach(asignacion => {
-                tiendasConPromotores.add(asignacion.id_tienda);
-            });
-            
-            // Filtrar según cobertura
-            if (currentSearch.coverage === 'sin_promotores') {
-                tiendasFiltradas = allTiendas.filter(tienda => !tiendasConPromotores.has(tienda.id_tienda));
-            } else if (currentSearch.coverage === 'con_promotores') {
-                tiendasFiltradas = allTiendas.filter(tienda => tiendasConPromotores.has(tienda.id_tienda));
-            }
+            allAsignaciones = data.data || [];
+            console.log('✅ Asignaciones cargadas:', allAsignaciones.length);
+        } else {
+            console.warn('⚠️ Error cargando asignaciones:', data.message);
+            allAsignaciones = [];
         }
-        
-        renderTabla(tiendasFiltradas);
-        
     } catch (error) {
-        console.error('Error aplicando filtro de cobertura:', error);
-        renderTabla(allTiendas); // Fallback a mostrar todas
+        console.error('❌ Error cargando asignaciones:', error);
+        allAsignaciones = [];
     }
 }
 
-function renderTabla(tiendas) {
+function aplicarFiltroCoberturaLocalmentConAsignaciones() {
+    // Crear mapa de tiendas con promotores
+    const tiendasConPromotores = new Set();
+    allAsignaciones.forEach(asignacion => {
+        tiendasConPromotores.add(asignacion.id_tienda);
+    });
+    
+    let tiendasFiltradas = allTiendas;
+    
+    // Filtrar según cobertura
+    if (currentSearch.coverage === 'sin_promotores') {
+        tiendasFiltradas = allTiendas.filter(tienda => !tiendasConPromotores.has(tienda.id_tienda));
+    } else if (currentSearch.coverage === 'con_promotores') {
+        tiendasFiltradas = allTiendas.filter(tienda => tiendasConPromotores.has(tienda.id_tienda));
+    }
+    
+    renderTablaExpandible(tiendasFiltradas);
+}
+
+function renderTablaExpandible(tiendas) {
     tiendasTbody.innerHTML = '';
     
     if (!tiendas || tiendas.length === 0) {
@@ -1674,115 +1752,113 @@ function renderTabla(tiendas) {
         return;
     }
     
+    // Crear mapa de promotores por tienda
+    const promotoresPorTienda = {};
+    allAsignaciones.forEach(asignacion => {
+        const idTienda = asignacion.id_tienda;
+        if (!promotoresPorTienda[idTienda]) {
+            promotoresPorTienda[idTienda] = [];
+        }
+        promotoresPorTienda[idTienda].push(asignacion);
+    });
+    
     tiendas.forEach(tienda => {
-        const row = document.createElement('tr');
-        row.className = 'fade-in';
+        const promotores = promotoresPorTienda[tienda.id_tienda] || [];
+        const totalPromotores = promotores.length;
+        const isExpanded = expandedRows.has(tienda.id_tienda);
         
-        row.innerHTML = `
-            <td style="font-weight: 700; color: #a855f7;">${tienda.id_tienda}</td>
-            <td style="color: #4a5568;">${tienda.region}</td>
-            <td style="font-weight: 600; color: #2d3748;">${tienda.cadena}</td>
-            <td><span style="background: #a855f7; color: white; padding: 0.25rem 0.5rem; border-radius: 6px; font-weight: 600; font-size: 0.8rem; display: inline-block; min-width: 40px; text-align: center;">${tienda.num_tienda}</span></td>
-            <td style="font-weight: 600; color: #2d3748; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${tienda.nombre_tienda}">${tienda.nombre_tienda}</td>
-            <td style="color: #718096; font-size: 0.85rem;">${tienda.ciudad}</td>
-            <td style="color: #718096; font-size: 0.85rem;">${tienda.estado}</td>
-            <td class="promotores-cell">
-                <div id="promotores-${tienda.id_tienda}">
-                    <div class="sin-promotores">
-                        <i class="fas fa-spinner fa-spin"></i> Cargando...
-                    </div>
-                </div>
+        // Fila principal de tienda
+        const tiendaRow = document.createElement('tr');
+        tiendaRow.className = `tienda-row fade-in ${isExpanded ? 'expanded' : ''}`;
+        tiendaRow.dataset.tiendaId = tienda.id_tienda;
+        
+        tiendaRow.innerHTML = `
+            <td>
+                <button class="expand-btn ${isExpanded ? 'expanded' : ''}" onclick="toggleTiendaRow(${tienda.id_tienda})" 
+                        ${totalPromotores === 0 ? 'disabled style="opacity: 0.3;"' : ''}>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
             </td>
+            <td style="font-weight: 700; color: var(--primary-color);">${tienda.id_tienda}</td>
+            <td style="color: var(--text-primary);">${tienda.region}</td>
+            <td style="font-weight: 600; color: var(--text-primary);">${tienda.cadena}</td>
+            <td><span class="num-tienda-badge">${tienda.num_tienda}</span></td>
+            <td style="font-weight: 600; color: var(--text-primary); max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${tienda.nombre_tienda}">${tienda.nombre_tienda}</td>
+            <td style="color: var(--text-secondary); font-size: 0.85rem;">${tienda.ciudad}</td>
+            <td style="color: var(--text-secondary); font-size: 0.85rem;">${tienda.estado}</td>
+            <td><span class="total-promotores ${totalPromotores === 0 ? 'zero' : ''}">${totalPromotores}</span></td>
             <td class="acciones-cell">
-                <button class="btn-tabla primary" onclick="agregarPromotorATienda(${tienda.id_tienda}, '${tienda.cadena} #${tienda.num_tienda}')">
+                <button class="btn-primary" onclick="agregarPromotorATienda(${tienda.id_tienda}, '${tienda.cadena} #${tienda.num_tienda}')">
                     <i class="fas fa-user-plus"></i> Agregar
                 </button>
             </td>
         `;
         
-        tiendasTbody.appendChild(row);
+        tiendasTbody.appendChild(tiendaRow);
+        
+        // Fila de promotores (expandible)
+        if (totalPromotores > 0) {
+            const promotoresRow = document.createElement('tr');
+            promotoresRow.className = `promotores-row ${isExpanded ? 'show' : ''}`;
+            promotoresRow.dataset.parentId = tienda.id_tienda;
+            
+            promotoresRow.innerHTML = `
+                <td colspan="10">
+                    <div class="promotores-content">
+                        ${promotores.map(promotor => `
+                            <div class="promotor-item">
+                                <div class="promotor-details">
+                                    <div class="promotor-name">${promotor.promotor_nombre_completo}</div>
+                                    <div class="promotor-meta">
+                                        <span><i class="fas fa-calendar"></i> ${promotor.fecha_inicio_formatted}</span>
+                                        <span><i class="fas fa-clock"></i> ${promotor.duracion_dias} días</span>
+                                        <span><i class="fas fa-info-circle"></i> ${promotor.motivo_asignacion}</span>
+                                    </div>
+                                </div>
+                                <div class="promotor-actions">
+                                    <button class="btn-micro view" onclick="verHistorialPromotor(${promotor.id_promotor})" title="Ver Historial">
+                                        <i class="fas fa-history"></i>
+                                    </button>
+                                    <button class="btn-micro move" onclick="reasignarPromotor(${promotor.id_asignacion})" title="Reasignar">
+                                        <i class="fas fa-exchange-alt"></i>
+                                    </button>
+                                    <button class="btn-micro remove" onclick="quitarPromotor(${promotor.id_asignacion})" title="Quitar">
+                                        <i class="fas fa-user-minus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </td>
+            `;
+            
+            tiendasTbody.appendChild(promotoresRow);
+        }
     });
-    
-    // Cargar promotores después de renderizar la tabla
-    cargarPromotoresPorTienda();
 }
 
-async function cargarPromotoresPorTienda() {
-    try {
-        // Cargar asignaciones activas
-        const response = await fetch('../../api/get_asignaciones.php?estatus=activo&limit=1000');
-        const data = await response.json();
-        
-        if (data.success) {
-            const asignacionesPorTienda = {};
-            allAsignaciones = data.data;
-            
-            // Agrupar asignaciones por tienda
-            data.data.forEach(asignacion => {
-                const idTienda = asignacion.id_tienda;
-                if (!asignacionesPorTienda[idTienda]) {
-                    asignacionesPorTienda[idTienda] = [];
-                }
-                asignacionesPorTienda[idTienda].push(asignacion);
-            });
-            
-            // Actualizar cada celda de promotores
-            allTiendas.forEach(tienda => {
-                const promotoresContainer = document.getElementById(`promotores-${tienda.id_tienda}`);
-                if (promotoresContainer) {
-                    const promotores = asignacionesPorTienda[tienda.id_tienda] || [];
-                    
-                    if (promotores.length === 0) {
-                        promotoresContainer.innerHTML = `
-                            <div class="sin-promotores">
-                                <i class="fas fa-user-slash"></i> Sin promotores
-                            </div>
-                        `;
-                    } else {
-                        promotoresContainer.innerHTML = `
-                            <div class="promotores-list">
-                                ${promotores.map(promotor => `
-                                    <div class="promotor-badge">
-                                        <div class="promotor-info">
-                                            <div class="promotor-name">${promotor.promotor_nombre_completo}</div>
-                                            <div class="promotor-date">
-                                                <i class="fas fa-calendar"></i> ${promotor.fecha_inicio_formatted} 
-                                                (${promotor.duracion_dias} días)
-                                            </div>
-                                        </div>
-                                        <div class="promotor-actions">
-                                            <button class="btn-micro view" onclick="verHistorialPromotor(${promotor.id_promotor})" title="Ver Historial">
-                                                <i class="fas fa-history"></i>
-                                            </button>
-                                            <button class="btn-micro move" onclick="reasignarPromotor(${promotor.id_asignacion})" title="Reasignar">
-                                                <i class="fas fa-exchange-alt"></i>
-                                            </button>
-                                            <button class="btn-micro remove" onclick="quitarPromotor(${promotor.id_asignacion})" title="Quitar">
-                                                <i class="fas fa-user-minus"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        `;
-                    }
-                }
-            });
+// ===== FUNCIONES DE EXPANSIÓN DE TABLA =====
+function toggleTiendaRow(idTienda) {
+    const tiendaRow = document.querySelector(`tr[data-tienda-id="${idTienda}"]`);
+    const promotoresRow = document.querySelector(`tr[data-parent-id="${idTienda}"]`);
+    const expandBtn = tiendaRow.querySelector('.expand-btn');
+    
+    if (expandedRows.has(idTienda)) {
+        // Contraer
+        expandedRows.delete(idTienda);
+        tiendaRow.classList.remove('expanded');
+        expandBtn.classList.remove('expanded');
+        if (promotoresRow) {
+            promotoresRow.classList.remove('show');
         }
-        
-    } catch (error) {
-        console.error('❌ Error cargando promotores por tienda:', error);
-        // Mostrar error en las celdas de promotores
-        allTiendas.forEach(tienda => {
-            const promotoresContainer = document.getElementById(`promotores-${tienda.id_tienda}`);
-            if (promotoresContainer) {
-                promotoresContainer.innerHTML = `
-                    <div class="sin-promotores">
-                        <i class="fas fa-exclamation-triangle"></i> Error cargando
-                    </div>
-                `;
-            }
-        });
+    } else {
+        // Expandir
+        expandedRows.add(idTienda);
+        tiendaRow.classList.add('expanded');
+        expandBtn.classList.add('expanded');
+        if (promotoresRow) {
+            promotoresRow.classList.add('show');
+        }
     }
 }
 
@@ -1806,6 +1882,7 @@ function actualizarPaginacion(pagination) {
 function cambiarPagina(page) {
     if (page < 1 || page > totalPages) return;
     currentPage = page;
+    expandedRows.clear(); // Limpiar filas expandidas al cambiar página
     cargarTiendasConPromotores();
 }
 
@@ -1816,6 +1893,7 @@ function realizarBusqueda() {
         coverage: coverageFilter.value
     };
     currentPage = 1;
+    expandedRows.clear(); // Limpiar filas expandidas al buscar
     cargarTiendasConPromotores();
 }
 
@@ -1827,10 +1905,11 @@ function limpiarBusqueda() {
     btnBuscar.disabled = true;
     currentSearch = { field: '', value: '', coverage: '' };
     currentPage = 1;
+    expandedRows.clear(); // Limpiar filas expandidas al limpiar
     cargarTiendasConPromotores();
 }
 
-// ===== FUNCIONES DASHBOARD =====
+// ===== FUNCIONES DASHBOARD (CORREGIDAS) =====
 function toggleDashboard() {
     if (currentView === 'main') {
         currentView = 'dashboard';
@@ -1849,43 +1928,109 @@ function toggleDashboard() {
 async function cargarDashboardStats() {
     try {
         console.log('📊 Cargando estadísticas dashboard...');
+        
+        // Mostrar indicadores de carga
+        document.getElementById('stat-asignaciones-activas').textContent = '...';
+        document.getElementById('stat-promotores-asignados').textContent = '...';
+        document.getElementById('stat-tiendas-cubiertas').textContent = '...';
+        document.getElementById('stat-promedio-promotores').textContent = '...';
+        
         const response = await fetch('../../api/get_dashboard_stats.php');
-        const data = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const responseText = await response.text();
+        console.log('📊 Respuesta dashboard raw:', responseText);
+        
+        let data;
+        try {
+            data = JSON.parse(responseText);
+        } catch (jsonError) {
+            console.error('JSON Error:', jsonError);
+            console.error('Respuesta del servidor:', responseText);
+            throw new Error('Respuesta inválida del servidor');
+        }
         
         if (data.success) {
             actualizarDashboardStats(data);
+            console.log('✅ Dashboard stats actualizadas');
+        } else {
+            throw new Error(data.message || 'Error en respuesta del dashboard');
         }
+        
     } catch (error) {
         console.error('❌ Error cargando estadísticas dashboard:', error);
-        mostrarNotificacion('Error al cargar estadísticas del dashboard', 'error');
+        mostrarNotificacion('Error al cargar estadísticas: ' + error.message, 'error');
+        
+        // Mostrar error en los contadores
+        document.getElementById('stat-asignaciones-activas').textContent = '0';
+        document.getElementById('stat-promotores-asignados').textContent = '0';
+        document.getElementById('stat-tiendas-cubiertas').textContent = '0';
+        document.getElementById('stat-promedio-promotores').textContent = '0.0';
+        
+        // Mostrar mensaje de error en trends
+        document.getElementById('trend-asignaciones').textContent = 'Error al cargar';
+        document.getElementById('trend-promotores').textContent = 'Error al cargar';
+        document.getElementById('trend-tiendas').textContent = 'Error al cargar';
+        document.getElementById('trend-promedio').textContent = 'Error al cargar';
     }
 }
 
 function actualizarDashboardStats(data) {
-    // Actualizar contadores principales
-    document.getElementById('stat-asignaciones-activas').textContent = data.resumen_general.asignaciones.activas;
-    document.getElementById('stat-promotores-asignados').textContent = data.resumen_general.promotores.con_asignacion;
-    document.getElementById('stat-tiendas-cubiertas').textContent = data.resumen_general.tiendas.con_promotor;
-    document.getElementById('stat-promedio-promotores').textContent = data.resumen_general.distribucion_promotores.promedio_promotores_por_tienda.toFixed(1);
-    
-    // Actualizar trends
-    document.getElementById('trend-promotores').textContent = `${data.resumen_general.promotores.porcentaje_asignados}% de cobertura`;
-    document.getElementById('trend-tiendas').textContent = `${data.resumen_general.tiendas.porcentaje_cubiertas}% del total`;
-    document.getElementById('trend-promedio').textContent = `Max: ${data.resumen_general.distribucion_promotores.max_promotores_en_tienda} en una tienda`;
-    
-    // Actualizar distribución
-    document.getElementById('dist-0').textContent = data.resumen_general.distribucion_promotores.tiendas_sin_promotores;
-    document.getElementById('dist-1').textContent = data.resumen_general.distribucion_promotores.tiendas_con_1_promotor;
-    document.getElementById('dist-2').textContent = data.resumen_general.distribucion_promotores.tiendas_con_2_promotores;
-    document.getElementById('dist-3').textContent = data.resumen_general.distribucion_promotores.tiendas_con_3_mas_promotores;
-    
-    // Actualizar alertas
-    actualizarAlertas(data.alertas);
+    try {
+        console.log('📊 Actualizando dashboard con data:', data);
+        
+        // Verificar estructura de datos
+        if (!data.resumen_general) {
+            console.error('❌ Estructura de datos inválida:', data);
+            throw new Error('Estructura de datos del dashboard inválida');
+        }
+        
+        // Actualizar contadores principales
+        const asignaciones = data.resumen_general.asignaciones || {};
+        const promotores = data.resumen_general.promotores || {};
+        const tiendas = data.resumen_general.tiendas || {};
+        const distribucion = data.resumen_general.distribucion_promotores || {};
+        
+        document.getElementById('stat-asignaciones-activas').textContent = asignaciones.activas || 0;
+        document.getElementById('stat-promotores-asignados').textContent = promotores.con_asignacion || 0;
+        document.getElementById('stat-tiendas-cubiertas').textContent = tiendas.con_promotor || 0;
+        document.getElementById('stat-promedio-promotores').textContent = (distribucion.promedio_promotores_por_tienda || 0).toFixed(1);
+        
+        // Actualizar trends
+        document.getElementById('trend-asignaciones').textContent = `${asignaciones.total || 0} total`;
+        document.getElementById('trend-promotores').textContent = `${promotores.porcentaje_asignados || 0}% de cobertura`;
+        document.getElementById('trend-tiendas').textContent = `${tiendas.porcentaje_cubiertas || 0}% del total`;
+        document.getElementById('trend-promedio').textContent = `Max: ${distribucion.max_promotores_en_tienda || 0} en una tienda`;
+        
+        // Actualizar distribución
+        document.getElementById('dist-0').textContent = distribucion.tiendas_sin_promotores || 0;
+        document.getElementById('dist-1').textContent = distribucion.tiendas_con_1_promotor || 0;
+        document.getElementById('dist-2').textContent = distribucion.tiendas_con_2_promotores || 0;
+        document.getElementById('dist-3').textContent = distribucion.tiendas_con_3_mas_promotores || 0;
+        
+        // Actualizar alertas
+        const alertas = data.alertas || {};
+        actualizarAlertas(alertas);
+        
+        console.log('✅ Dashboard actualizado correctamente');
+        
+    } catch (error) {
+        console.error('❌ Error actualizando dashboard stats:', error);
+        mostrarNotificacion('Error procesando estadísticas del dashboard', 'error');
+    }
 }
 
 function actualizarAlertas(alertas) {
     const alertsContainer = document.getElementById('alerts-container');
     alertsContainer.innerHTML = '';
+    
+    if (!alertas) {
+        console.warn('⚠️ No hay datos de alertas');
+        return;
+    }
     
     if (alertas.promotores_disponibles > 0) {
         alertsContainer.innerHTML += `
@@ -1922,6 +2067,18 @@ function actualizarAlertas(alertas) {
             </div>
         `;
     }
+    
+    if (alertas.promotores_en_vacaciones > 0) {
+        alertsContainer.innerHTML += `
+            <div class="alert alert-warning">
+                <i class="fas fa-umbrella-beach"></i>
+                <div class="alert-content">
+                    <div class="alert-title">Promotores en Vacaciones</div>
+                    <div class="alert-message">${alertas.promotores_en_vacaciones} promotores están actualmente en vacaciones</div>
+                </div>
+            </div>
+        `;
+    }
 }
 
 // ===== MODAL AGREGAR =====
@@ -1929,8 +2086,8 @@ async function abrirModalAgregar() {
     try {
         console.log('🔄 Abriendo modal agregar promotor...');
         
-        // Cargar promotores activos
-        const promResponse = await fetch('../../api/get_promotores_disponibles.php?solo_activos=true');
+        // Cargar promotores disponibles (incluir todos para ver disponibilidad)
+        const promResponse = await fetch('../../api/get_promotores_disponibles.php?incluir_asignados=true&solo_activos=true');
         const promData = await promResponse.json();
         
         // Cargar todas las tiendas
@@ -1947,9 +2104,26 @@ async function abrirModalAgregar() {
         if (promData.success) {
             promData.data.forEach(promotor => {
                 if (promotor.activo) {
-                    const info = promotor.tiene_asignacion ? 
-                        ` (Ya asignado)` : ' (Disponible)';
-                    promotorSelect.innerHTML += `<option value="${promotor.id_promotor}">${promotor.nombre_completo}${info}</option>`;
+                    let status = '';
+                    if (promotor.tiene_asignacion) {
+                        status = ' (Ya asignado)';
+                    } else if (promotor.en_vacaciones) {
+                        status = ' (En vacaciones)';
+                    } else {
+                        status = ' (Disponible)';
+                    }
+                    
+                    const option = document.createElement('option');
+                    option.value = promotor.id_promotor;
+                    option.textContent = promotor.nombre_completo + status;
+                    
+                    // Deshabilitar si no puede asignar
+                    if (!promotor.puede_asignar) {
+                        option.disabled = true;
+                        option.style.color = '#999';
+                    }
+                    
+                    promotorSelect.appendChild(option);
                 }
             });
         }
@@ -1966,24 +2140,31 @@ async function abrirModalAgregar() {
             });
         }
         
-        // Establecer fecha por defecto
+        // Establecer fecha por defecto (hoy)
         document.getElementById('agregar-fecha-inicio').value = new Date().toISOString().split('T')[0];
+        document.getElementById('agregar-motivo').value = '';
         
         modalAgregar.classList.add('active');
         
     } catch (error) {
         console.error('❌ Error abriendo modal agregar:', error);
-        mostrarNotificacion('Error al cargar datos para agregar promotor', 'error');
+        mostrarNotificacion('Error al cargar datos para agregar promotor: ' + error.message, 'error');
     }
 }
 
 function agregarPromotorATienda(idTienda, nombreTienda) {
     // Pre-seleccionar la tienda en el modal
     abrirModalAgregar().then(() => {
-        document.getElementById('agregar-tienda').value = idTienda;
-    }).catch(() => {
-        // Modal ya está abierto, solo seleccionar tienda
-        document.getElementById('agregar-tienda').value = idTienda;
+        const tiendaSelect = document.getElementById('agregar-tienda');
+        if (tiendaSelect) {
+            tiendaSelect.value = idTienda;
+        }
+    }).catch((error) => {
+        console.log('Modal ya abierto, seleccionando tienda...');
+        const tiendaSelect = document.getElementById('agregar-tienda');
+        if (tiendaSelect) {
+            tiendaSelect.value = idTienda;
+        }
     });
 }
 
@@ -2005,6 +2186,12 @@ async function guardarAgregarPromotor(e) {
         motivo_asignacion: document.getElementById('agregar-motivo').value
     };
     
+    // Validaciones básicas del lado cliente
+    if (!data.id_promotor || !data.id_tienda || !data.fecha_inicio || !data.motivo_asignacion) {
+        mostrarNotificacion('Todos los campos son requeridos', 'warning');
+        return;
+    }
+    
     try {
         btnGuardar.disabled = true;
         btnGuardar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Agregando...';
@@ -2024,6 +2211,7 @@ async function guardarAgregarPromotor(e) {
         try {
             result = JSON.parse(responseText);
         } catch (jsonError) {
+            console.error('Respuesta del servidor:', responseText);
             throw new Error('Respuesta inválida del servidor');
         }
         
@@ -2088,6 +2276,7 @@ async function reasignarPromotor(idAsignacion) {
         // Establecer ID y fecha por defecto
         document.getElementById('reasignar-id-asignacion').value = idAsignacion;
         document.getElementById('reasignar-fecha-cambio').value = new Date().toISOString().split('T')[0];
+        document.getElementById('reasignar-motivo-cambio').value = '';
         
         modalReasignar.classList.add('active');
         
@@ -2116,6 +2305,12 @@ async function confirmarReasignar(e) {
         motivo_nueva_asignacion: 'Reasignación desde otra tienda'
     };
     
+    // Validaciones básicas
+    if (!data.id_tienda_nueva || !data.fecha_cambio || !data.motivo_cambio) {
+        mostrarNotificacion('Todos los campos son requeridos', 'warning');
+        return;
+    }
+    
     try {
         btnConfirmar.disabled = true;
         btnConfirmar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Reasignando...';
@@ -2135,6 +2330,7 @@ async function confirmarReasignar(e) {
         try {
             result = JSON.parse(responseText);
         } catch (jsonError) {
+            console.error('Respuesta del servidor:', responseText);
             throw new Error('Respuesta inválida del servidor');
         }
         
@@ -2180,6 +2376,7 @@ async function quitarPromotor(idAsignacion) {
         // Establecer ID y fecha por defecto
         document.getElementById('quitar-id-asignacion').value = idAsignacion;
         document.getElementById('quitar-fecha-fin').value = new Date().toISOString().split('T')[0];
+        document.getElementById('quitar-motivo').value = '';
         
         modalQuitar.classList.add('active');
         
@@ -2207,6 +2404,12 @@ async function confirmarQuitar(e) {
         desactivar: 'true'
     };
     
+    // Validaciones básicas
+    if (!data.fecha_fin || !data.motivo_finalizacion) {
+        mostrarNotificacion('Todos los campos son requeridos', 'warning');
+        return;
+    }
+    
     try {
         btnConfirmar.disabled = true;
         btnConfirmar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Quitando...';
@@ -2226,6 +2429,7 @@ async function confirmarQuitar(e) {
         try {
             result = JSON.parse(responseText);
         } catch (jsonError) {
+            console.error('Respuesta del servidor:', responseText);
             throw new Error('Respuesta inválida del servidor');
         }
         
@@ -2298,7 +2502,7 @@ async function verHistorialPromotor(idPromotor) {
         
     } catch (error) {
         console.error('❌ Error cargando historial:', error);
-        mostrarNotificacion('Error al cargar historial del promotor', 'error');
+        mostrarNotificacion('Error al cargar historial del promotor: ' + error.message, 'error');
     }
 }
 
@@ -2307,7 +2511,7 @@ function renderHistorialTimeline(historial) {
     timeline.innerHTML = '<h4><i class="fas fa-history"></i> Historial de Asignaciones</h4>';
     
     if (historial.length === 0) {
-        timeline.innerHTML += '<p style="text-align: center; color: #666;">No hay historial de asignaciones</p>';
+        timeline.innerHTML += '<p style="text-align: center; color: var(--text-secondary);">No hay historial de asignaciones</p>';
         return;
     }
     
@@ -2316,8 +2520,8 @@ function renderHistorialTimeline(historial) {
         timeline.innerHTML += `
             <div class="timeline-item ${isActive ? 'active' : ''}">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                    <div style="font-weight: 700; color: #2d3748; font-size: 1.1rem;">${item.tienda_identificador}</div>
-                    <div style="color: #718096; font-size: 0.85rem; font-weight: 600;">${item.fecha_inicio_formatted}</div>
+                    <div style="font-weight: 700; color: var(--text-primary); font-size: 1.1rem;">${item.tienda_identificador}</div>
+                    <div style="color: var(--text-secondary); font-size: 0.85rem; font-weight: 600;">${item.fecha_inicio_formatted}</div>
                 </div>
                 <div>
                     <p><strong>Duración:</strong> ${item.dias_asignado} días ${isActive ? '(activa)' : ''}</p>
@@ -2334,7 +2538,7 @@ function cerrarModalHistorial() {
     modalHistorial.classList.remove('active');
 }
 
-// ===== NOTIFICACIONES =====
+// ===== NOTIFICACIONES MEJORADAS =====
 function mostrarNotificacion(mensaje, tipo = 'info') {
     const notificacion = document.createElement('div');
     notificacion.className = `notification ${tipo}`;
@@ -2378,6 +2582,7 @@ function mostrarNotificacion(mensaje, tipo = 'info') {
 }
 
 // ===== EXPONER FUNCIONES GLOBALES =====
+window.toggleTiendaRow = toggleTiendaRow;
 window.verHistorialPromotor = verHistorialPromotor;
 window.reasignarPromotor = reasignarPromotor;
 window.quitarPromotor = quitarPromotor;
@@ -2385,16 +2590,14 @@ window.agregarPromotorATienda = agregarPromotorATienda;
 window.limpiarBusqueda = limpiarBusqueda;
 
 // ===== INICIALIZACIÓN =====
-console.log('🚀 Iniciando módulo Gestión de Asignaciones...');
-console.log('Características:');
-console.log('✅ Soporte para múltiples promotores por tienda');
-console.log('✅ Vista de tabla organizada y escalable');
-console.log('✅ Dashboard avanzado con distribución');
-console.log('✅ Búsqueda y filtros funcionales');
-console.log('✅ CRUD completo de asignaciones');
-console.log('✅ Modales conectados a APIs');
-console.log('✅ Notificaciones modernas');
-console.log('🎨 Esquema de color distintivo: Púrpura-Rosa');
+console.log('🚀 Iniciando módulo Gestión de Asignaciones v2.0...');
+console.log('✨ Características nuevas:');
+console.log('🎨 Nueva paleta naranja sin degradados');
+console.log('📋 Tabla expandible con filas de promotores');
+console.log('🔍 Búsqueda por número de tienda');
+console.log('📊 Dashboard corregido con manejo de errores');
+console.log('💫 Animaciones suaves y responsive mejorado');
+console.log('🎯 UX optimizada para múltiples promotores');
 
 init();
 
@@ -2404,5 +2607,5 @@ setTimeout(() => {
     cargarTiendasConPromotores();
 }, 100);
 
-console.log('✅ Módulo asignaciones inicializado correctamente');
+console.log('✅ Módulo asignaciones v2.0 inicializado correctamente');
 </script>
