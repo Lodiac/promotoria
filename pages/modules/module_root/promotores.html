@@ -230,7 +230,7 @@ document.getElementById("formNuevo").addEventListener("submit", async (e) => {
   e.preventDefault();
   try {
     const formData = new FormData(e.target);
-    const response = await fetch("../../api/save_promotor.php", { method: "POST", body: formData });
+    const response = await fetch("../../api/create_promotor.php", { method: "POST", body: formData });
     const res = await response.json();
 
     if (!res.error) {
