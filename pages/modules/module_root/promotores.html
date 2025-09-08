@@ -1,252 +1,1529 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <title>Gestión de Promotores</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light">
-
-<div class="container py-5">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>Gestión de Promotores</h2>
-    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNuevo">
-      ➕ Nuevo Promotor
-    </button>
-  </div>
-
-  <!-- Buscador -->
-  <div class="input-group mb-4">
-    <select id="filtro" class="form-select" style="max-width: 200px;">
-      <option value="nombre">Nombre</option>
-      <option value="apellido">Apellido</option>
-      <option value="rfc">RFC</option>
-    </select>
-    <input type="text" id="busqueda" class="form-control" placeholder="Buscar...">
-  </div>
-
-  <!-- Tabla -->
-  <div class="table-responsive">
-    <table class="table table-striped align-middle">
-      <thead class="table-dark">
-        <tr>
-          <th>ID</th>
-          <th>Nombre</th>
-          <th>Apellido</th>
-          <th>Teléfono</th>
-          <th>Correo</th>
-          <th>RFC</th>
-          <th>Estatus</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody id="tablaPromotores"></tbody>
-    </table>
-  </div>
-</div>
-
-<!-- Modal Nuevo -->
-<div class="modal fade" id="modalNuevo" tabindex="-1">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <form id="formNuevo">
-        <div class="modal-header">
-          <h5 class="modal-title">Nuevo Promotor</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+<!-- ===== MÓDULO GESTIÓN DE PROMOTORES - DISEÑO MODERNO ===== -->
+<div class="promotores-module">
+    <!-- HEADER DEL MÓDULO -->
+    <div class="module-header">
+        <div class="header-content">
+            <div class="header-title">
+                <i class="fas fa-users header-icon"></i>
+                <h1>Gestión de Promotores</h1>
+            </div>
+            <div class="header-actions">
+                <button class="btn-primary" id="btn-nuevo-promotor">
+                    <i class="fas fa-plus"></i> Nuevo Promotor
+                </button>
+            </div>
         </div>
-        <div class="modal-body row g-3">
-          <div class="col-md-6"><label class="form-label">Nombre</label><input type="text" class="form-control" name="nombre" required></div>
-          <div class="col-md-6"><label class="form-label">Apellido</label><input type="text" class="form-control" name="apellido" required></div>
-          <div class="col-md-6"><label class="form-label">Teléfono</label><input type="text" class="form-control" name="telefono" required></div>
-          <div class="col-md-6"><label class="form-label">Correo</label><input type="email" class="form-control" name="correo" required></div>
-          <div class="col-md-6"><label class="form-label">RFC</label><input type="text" class="form-control" name="rfc" required></div>
-          <div class="col-md-6"><label class="form-label">NSS</label><input type="text" class="form-control" name="nss" required></div>
-          <div class="col-md-6"><label class="form-label">Clave Asistencia</label><input type="text" class="form-control" name="clave_asistencia" required></div>
-          <div class="col-md-6"><label class="form-label">Banco</label><input type="text" class="form-control" name="banco"></div>
-          <div class="col-md-6"><label class="form-label">Cuenta</label><input type="text" class="form-control" name="numero_cuenta"></div>
-          <div class="col-md-6"><label class="form-label">Estatus</label>
-            <select class="form-select" name="estatus" required>
-              <option value="ACTIVO">ACTIVO</option>
-              <option value="BAJA">BAJA</option>
-            </select>
-          </div>
-          <div class="col-md-6"><label class="form-label">Vacaciones</label>
-            <select class="form-select" name="vacaciones" required>
-              <option value="0">No</option>
-              <option value="1">Sí</option>
-            </select>
-          </div>
-          <div class="col-md-6"><label class="form-label">Estado</label>
-            <select class="form-select" name="estado" required>
-              <option value="1">Activo</option>
-              <option value="0">Inactivo</option>
-            </select>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="submit" class="btn btn-success">Crear</button>
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        </div>
-      </form>
     </div>
-  </div>
-</div>
 
-<!-- Modal Editar -->
-<div class="modal fade" id="modalEditar" tabindex="-1">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <form id="formEditar">
-        <input type="hidden" name="id_promotor" id="edit_id_promotor">
-        <div class="modal-header">
-          <h5 class="modal-title">Editar Promotor</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body row g-3">
-          <div class="col-md-6"><label class="form-label">Nombre</label><input type="text" class="form-control" id="edit_nombre" name="nombre" required></div>
-          <div class="col-md-6"><label class="form-label">Apellido</label><input type="text" class="form-control" id="edit_apellido" name="apellido" required></div>
-          <div class="col-md-6"><label class="form-label">Teléfono</label><input type="text" class="form-control" id="edit_telefono" name="telefono" required></div>
-          <div class="col-md-6"><label class="form-label">Correo</label><input type="email" class="form-control" id="edit_correo" name="correo" required></div>
-          <div class="col-md-6"><label class="form-label">RFC</label><input type="text" class="form-control" id="edit_rfc" name="rfc" required></div>
-          <div class="col-md-6"><label class="form-label">NSS</label><input type="text" class="form-control" id="edit_nss" name="nss" required></div>
-          <div class="col-md-6"><label class="form-label">Clave Asistencia</label><input type="text" class="form-control" id="edit_clave_asistencia" name="clave_asistencia" required></div>
-          <div class="col-md-6"><label class="form-label">Banco</label><input type="text" class="form-control" id="edit_banco" name="banco"></div>
-          <div class="col-md-6"><label class="form-label">Cuenta</label><input type="text" class="form-control" id="edit_numero_cuenta" name="numero_cuenta"></div>
-          <div class="col-md-6"><label class="form-label">Estatus</label>
-            <select class="form-select" id="edit_estatus" name="estatus" required>
-              <option value="ACTIVO">ACTIVO</option>
-              <option value="BAJA">BAJA</option>
+    <!-- CONTROLES DE BÚSQUEDA -->
+    <div class="search-controls">
+        <div class="search-box">
+            <select id="search-field" class="search-select">
+                <option value="">Seleccionar campo...</option>
+                <option value="nombre">Nombre</option>
+                <option value="apellido">Apellido</option>
+                <option value="telefono">Teléfono</option>
+                <option value="correo">Correo</option>
+                <option value="rfc">RFC</option>
+                <option value="nss">NSS</option>
+                <option value="clave_asistencia">Clave Asistencia</option>
+                <option value="banco">Banco</option>
+                <option value="numero_cuenta">Número Cuenta</option>
+                <option value="estatus">Estatus</option>
             </select>
-          </div>
-          <div class="col-md-6"><label class="form-label">Vacaciones</label>
-            <select class="form-select" id="edit_vacaciones" name="vacaciones" required>
-              <option value="0">No</option>
-              <option value="1">Sí</option>
-            </select>
-          </div>
-          <div class="col-md-6"><label class="form-label">Estado</label>
-            <select class="form-select" id="edit_estado" name="estado" required>
-              <option value="1">Activo</option>
-              <option value="0">Inactivo</option>
-            </select>
-          </div>
+            <input type="text" id="search-value" placeholder="Valor a buscar..." class="search-input" disabled>
+            <button id="btn-buscar" class="btn-search" disabled>
+                <i class="fas fa-search"></i>
+            </button>
+            <button id="btn-limpiar" class="btn-clear">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
-        <div class="modal-footer">
-          <button type="submit" class="btn btn-warning">Actualizar</button>
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        </div>
-      </form>
     </div>
-  </div>
+
+    <!-- TABLA DE PROMOTORES -->
+    <div class="table-container">
+        <div class="table-wrapper">
+            <table class="promotores-table" id="promotores-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre Completo</th>
+                        <th>Teléfono</th>
+                        <th>Correo</th>
+                        <th>RFC</th>
+                        <th>Clave Asistencia</th>
+                        <th>Estatus</th>
+                        <th>Vacaciones</th>
+                        <th>Fecha Modificación</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="promotores-tbody">
+                    <!-- Los datos se cargarán dinámicamente -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- LOADING TABLA -->
+        <div class="table-loading" id="table-loading">
+            <div class="loading-spinner"></div>
+            <p>Cargando promotores...</p>
+        </div>
+
+        <!-- EMPTY STATE -->
+        <div class="empty-state" id="empty-state" style="display: none;">
+            <i class="fas fa-user-slash"></i>
+            <h3>No se encontraron promotores</h3>
+            <p>No hay promotores que coincidan con los criterios de búsqueda.</p>
+        </div>
+    </div>
+
+    <!-- PAGINACIÓN -->
+    <div class="pagination-container" id="pagination-container">
+        <div class="pagination-info">
+            <span id="pagination-info">Cargando...</span>
+        </div>
+        <div class="pagination-controls">
+            <button id="btn-prev" class="btn-pagination" disabled>
+                <i class="fas fa-chevron-left"></i> Anterior
+            </button>
+            <span class="pagination-pages" id="pagination-pages"></span>
+            <button id="btn-next" class="btn-pagination" disabled>
+                Siguiente <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<!-- ===== MODAL CREAR/EDITAR PROMOTOR ===== -->
+<div class="modal-overlay" id="modal-promotor">
+    <div class="modal-container modal-large">
+        <div class="modal-header">
+            <h2 id="modal-title">
+                <i class="fas fa-user"></i> Nuevo Promotor
+            </h2>
+            <button class="modal-close" id="modal-close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <form class="modal-form" id="form-promotor">
+            <input type="hidden" id="promotor-id">
+            
+            <!-- INFORMACIÓN PERSONAL -->
+            <div class="form-section">
+                <h3><i class="fas fa-user"></i> Información Personal</h3>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="promotor-nombre">Nombre *</label>
+                        <input type="text" id="promotor-nombre" maxlength="100" required
+                               placeholder="Nombre del promotor">
+                    </div>
+                    <div class="form-group">
+                        <label for="promotor-apellido">Apellido *</label>
+                        <input type="text" id="promotor-apellido" maxlength="100" required
+                               placeholder="Apellido del promotor">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="promotor-telefono">Teléfono *</label>
+                        <input type="tel" id="promotor-telefono" maxlength="20" required
+                               placeholder="Ej: 5551234567">
+                    </div>
+                    <div class="form-group">
+                        <label for="promotor-correo">Correo Electrónico *</label>
+                        <input type="email" id="promotor-correo" maxlength="100" required
+                               placeholder="promotor@empresa.com">
+                    </div>
+                </div>
+            </div>
+
+            <!-- INFORMACIÓN FISCAL -->
+            <div class="form-section">
+                <h3><i class="fas fa-file-invoice"></i> Información Fiscal</h3>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="promotor-rfc">RFC *</label>
+                        <input type="text" id="promotor-rfc" maxlength="13" required
+                               placeholder="PEXJ850101XXX" style="text-transform: uppercase;">
+                    </div>
+                    <div class="form-group">
+                        <label for="promotor-nss">NSS *</label>
+                        <input type="text" id="promotor-nss" maxlength="20" required
+                               placeholder="12345678901">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="promotor-clave">Clave de Asistencia *</label>
+                    <input type="text" id="promotor-clave" maxlength="50" required
+                           placeholder="Ej: EMP001, PROM123">
+                </div>
+            </div>
+
+            <!-- INFORMACIÓN BANCARIA -->
+            <div class="form-section">
+                <h3><i class="fas fa-university"></i> Información Bancaria</h3>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="promotor-banco">Banco</label>
+                        <input type="text" id="promotor-banco" maxlength="100"
+                               placeholder="Ej: BBVA, Santander, Banorte">
+                    </div>
+                    <div class="form-group">
+                        <label for="promotor-cuenta">Número de Cuenta</label>
+                        <input type="text" id="promotor-cuenta" maxlength="50"
+                               placeholder="1234567890">
+                    </div>
+                </div>
+            </div>
+
+            <!-- CONFIGURACIÓN -->
+            <div class="form-section">
+                <h3><i class="fas fa-cogs"></i> Configuración</h3>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="promotor-estatus">Estatus *</label>
+                        <select id="promotor-estatus" required>
+                            <option value="ACTIVO">Activo</option>
+                            <option value="BAJA">Baja</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="promotor-vacaciones">Vacaciones</label>
+                        <select id="promotor-vacaciones">
+                            <option value="0">No</option>
+                            <option value="1">Sí</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn-secondary" id="btn-cancelar">
+                    Cancelar
+                </button>
+                <button type="submit" class="btn-primary" id="btn-guardar">
+                    <i class="fas fa-save"></i> Guardar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ===== MODAL CONFIRMAR ELIMINACIÓN ===== -->
+<div class="modal-overlay" id="modal-confirmar">
+    <div class="modal-container modal-small">
+        <div class="modal-header">
+            <h2>
+                <i class="fas fa-exclamation-triangle text-warning"></i> 
+                Confirmar Eliminación
+            </h2>
+        </div>
+        
+        <div class="modal-body">
+            <p>¿Estás seguro que deseas eliminar este promotor?</p>
+            <div class="delete-details" id="delete-details"></div>
+            <p class="text-warning">
+                <strong>Esta acción no se puede deshacer.</strong>
+            </p>
+        </div>
+
+        <div class="modal-actions">
+            <button type="button" class="btn-secondary" id="btn-cancelar-delete">
+                Cancelar
+            </button>
+            <button type="button" class="btn-danger" id="btn-confirmar-delete">
+                <i class="fas fa-trash"></i> Eliminar
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== SISTEMA DE NOTIFICACIONES ===== -->
+<div class="notifications-container" id="notifications-container"></div>
+
+<style>
+/* ===== ESTILOS PROMOTORES MODULE ===== */
+.promotores-module {
+    padding: 0;
+    max-width: 100%;
+}
+
+/* ===== HEADER DEL MÓDULO ===== */
+.module-header {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.header-title {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.header-icon {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+}
+
+.header-title h1 {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #333;
+}
+
+.header-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+/* ===== CONTROLES DE BÚSQUEDA ===== */
+.search-controls {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.search-box {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.search-select {
+    min-width: 200px;
+    padding: 12px 15px;
+    border: 2px solid #e0e6ed;
+    border-radius: 8px;
+    background: white;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+.search-select:focus {
+    border-color: #27ae60;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.1);
+}
+
+.search-input {
+    flex: 1;
+    min-width: 250px;
+    padding: 12px 15px;
+    border: 2px solid #e0e6ed;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+.search-input:focus {
+    border-color: #27ae60;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.1);
+}
+
+.search-input:disabled {
+    background: #f8f9fa;
+    color: #666;
+    cursor: not-allowed;
+}
+
+/* ===== BOTONES ===== */
+.btn-primary, .btn-secondary, .btn-danger, .btn-search, .btn-clear, .btn-action, .btn-pagination {
+    border: none;
+    border-radius: 8px;
+    padding: 12px 20px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+    color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(39, 174, 96, 0.3);
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover:not(:disabled) {
+    background: #5a6268;
+    transform: translateY(-2px);
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    color: white;
+}
+
+.btn-danger:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(231, 76, 60, 0.3);
+}
+
+.btn-search {
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+    color: white;
+    padding: 12px 16px;
+}
+
+.btn-search:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(52, 152, 219, 0.3);
+}
+
+.btn-clear {
+    background: #6c757d;
+    color: white;
+    padding: 12px 16px;
+}
+
+.btn-clear:hover {
+    background: #5a6268;
+    transform: translateY(-2px);
+}
+
+.btn-action {
+    padding: 8px 12px;
+    font-size: 0.8rem;
+    margin: 0 2px;
+}
+
+.btn-action.edit {
+    background: linear-gradient(135deg, #f39c12 0%, #d68910 100%);
+    color: white;
+}
+
+.btn-action.delete {
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    color: white;
+}
+
+.btn-pagination {
+    background: rgba(255, 255, 255, 0.9);
+    color: #333;
+    border: 2px solid #e0e6ed;
+}
+
+.btn-pagination:hover:not(:disabled) {
+    background: #27ae60;
+    color: white;
+    border-color: #27ae60;
+    transform: translateY(-2px);
+}
+
+.btn-pagination:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ===== TABLA ===== */
+.table-container {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+.promotores-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0;
+}
+
+.promotores-table th {
+    background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+    color: white;
+    padding: 15px 12px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+.promotores-table th:first-child {
+    border-radius: 8px 0 0 0;
+}
+
+.promotores-table th:last-child {
+    border-radius: 0 8px 0 0;
+}
+
+.promotores-table td {
+    padding: 15px 12px;
+    border-bottom: 1px solid #e0e6ed;
+    font-size: 0.9rem;
+    vertical-align: middle;
+}
+
+.promotores-table tbody tr {
+    transition: all 0.3s ease;
+}
+
+.promotores-table tbody tr:hover {
+    background: rgba(39, 174, 96, 0.05);
+}
+
+.promotores-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* ===== BADGES Y ESTADOS ===== */
+.status-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-badge.activo {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.status-badge.baja {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.vacaciones-badge {
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.vacaciones-badge.si {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+.vacaciones-badge.no {
+    background: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+}
+
+/* ===== LOADING Y EMPTY STATES ===== */
+.table-loading, .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #666;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(39, 174, 96, 0.1);
+    border-radius: 50%;
+    border-top-color: #27ae60;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.empty-state i {
+    font-size: 4rem;
+    color: #dee2e6;
+    margin-bottom: 1rem;
+}
+
+.empty-state h3 {
+    margin: 0 0 0.5rem 0;
+    color: #495057;
+}
+
+/* ===== PAGINACIÓN ===== */
+.pagination-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 16px;
+    padding: 1rem 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.pagination-info {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.pagination-pages {
+    color: #333;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+/* ===== MODALES ===== */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    padding: 20px;
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal-container {
+    background: white;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: modalSlideIn 0.3s ease;
+}
+
+.modal-container.modal-large {
+    max-width: 800px;
+}
+
+.modal-container.modal-small {
+    max-width: 400px;
+}
+
+@keyframes modalSlideIn {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-header {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid #e0e6ed;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #666;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.modal-close:hover {
+    background: #f8f9fa;
+    color: #333;
+}
+
+.modal-body {
+    padding: 2rem;
+}
+
+.modal-form {
+    padding: 2rem;
+}
+
+.form-section {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-radius: 12px;
+    border-left: 4px solid #27ae60;
+}
+
+.form-section h3 {
+    margin: 0 0 1rem 0;
+    font-size: 1.1rem;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.form-group input, .form-group select, .form-group textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #e0e6ed;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    border-color: #27ae60;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.1);
+}
+
+.modal-actions {
+    padding: 1.5rem 2rem;
+    border-top: 1px solid #e0e6ed;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+}
+
+.delete-details {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1rem 0;
+    border-left: 4px solid #f39c12;
+}
+
+.text-warning {
+    color: #f39c12;
+}
+
+/* ===== NOTIFICACIONES ===== */
+.notifications-container {
+    position: fixed;
+    top: 100px;
+    right: 20px;
+    z-index: 3000;
+    max-width: 400px;
+}
+
+.notification {
+    background: white;
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    margin-bottom: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    border-left: 4px solid;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    animation: notificationSlideIn 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.notification.success {
+    border-left-color: #27ae60;
+}
+
+.notification.error {
+    border-left-color: #e74c3c;
+}
+
+.notification.warning {
+    border-left-color: #f39c12;
+}
+
+.notification.info {
+    border-left-color: #3498db;
+}
+
+@keyframes notificationSlideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.notification-icon {
+    font-size: 1.2rem;
+}
+
+.notification.success .notification-icon {
+    color: #27ae60;
+}
+
+.notification.error .notification-icon {
+    color: #e74c3c;
+}
+
+.notification.warning .notification-icon {
+    color: #f39c12;
+}
+
+.notification.info .notification-icon {
+    color: #3498db;
+}
+
+.notification-content h4 {
+    margin: 0 0 5px 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.notification-content p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.notification-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 1rem;
+    color: #999;
+    cursor: pointer;
+    padding: 2px;
+}
+
+.notification-close:hover {
+    color: #333;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .header-content {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .header-actions {
+        width: 100%;
+    }
+
+    .search-box {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .search-select, .search-input {
+        min-width: auto;
+        width: 100%;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .modal-container {
+        margin: 10px;
+        max-width: calc(100% - 20px);
+    }
+
+    .pagination-container {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .table-wrapper {
+        font-size: 0.8rem;
+    }
+
+    .promotores-table th, .promotores-table td {
+        padding: 10px 8px;
+    }
+}
+
+@media (max-width: 480px) {
+    .modal-form, .modal-body {
+        padding: 1rem;
+    }
+
+    .modal-header {
+        padding: 1rem;
+    }
+
+    .modal-actions {
+        padding: 1rem;
+        flex-direction: column;
+    }
+
+    .form-section {
+        padding: 1rem;
+    }
+}
+</style>
+
 <script>
+// ===== VARIABLES GLOBALES =====
+let currentPage = 1;
+let totalPages = 1;
+let currentSearch = { field: '', value: '' };
+let isEditing = false;
+let editingId = null;
+let allPromotores = [];
+
+// ===== ELEMENTOS DOM =====
+const loadingElement = document.getElementById('table-loading');
+const tableContainer = document.getElementById('promotores-table');
+const emptyState = document.getElementById('empty-state');
+const searchField = document.getElementById('search-field');
+const searchValue = document.getElementById('search-value');
+const btnBuscar = document.getElementById('btn-buscar');
+const btnLimpiar = document.getElementById('btn-limpiar');
+const btnNuevoPromotor = document.getElementById('btn-nuevo-promotor');
+const promotoresTbody = document.getElementById('promotores-tbody');
+const paginationContainer = document.getElementById('pagination-container');
+const paginationInfo = document.getElementById('pagination-info');
+const paginationPages = document.getElementById('pagination-pages');
+const btnPrev = document.getElementById('btn-prev');
+const btnNext = document.getElementById('btn-next');
+
+// Modales
+const modalPromotor = document.getElementById('modal-promotor');
+const modalConfirmar = document.getElementById('modal-confirmar');
+const modalTitle = document.getElementById('modal-title');
+const formPromotor = document.getElementById('form-promotor');
+const btnGuardar = document.getElementById('btn-guardar');
+
+// ===== FUNCIONES DE ESTADO DE UI =====
+function showLoading() {
+    console.log('🔄 Mostrando loader...');
+    loadingElement.style.display = 'block';
+    tableContainer.style.display = 'none';
+    emptyState.style.display = 'none';
+    paginationContainer.style.display = 'none';
+}
+
+function showContent() {
+    console.log('📊 Mostrando contenido...');
+    loadingElement.style.display = 'none';
+    tableContainer.style.display = 'table';
+    emptyState.style.display = 'none';
+    paginationContainer.style.display = 'flex';
+}
+
+function showEmptyState(message = 'No se encontraron promotores') {
+    console.log('📭 Mostrando estado vacío...');
+    loadingElement.style.display = 'none';
+    tableContainer.style.display = 'none';
+    emptyState.style.display = 'block';
+    paginationContainer.style.display = 'none';
+    
+    const emptyTitle = emptyState.querySelector('h3');
+    if (emptyTitle) emptyTitle.textContent = message;
+}
+
+function showError(message) {
+    console.log('❌ Mostrando error:', message);
+    loadingElement.style.display = 'none';
+    tableContainer.style.display = 'none';
+    emptyState.style.display = 'none';
+    paginationContainer.style.display = 'none';
+    
+    mostrarNotificacion('Error: ' + message, 'error');
+}
+
+// ===== INICIALIZACIÓN =====
+function init() {
+    console.log('🚀 Inicializando módulo promotores...');
+    configurarEventListeners();
+}
+
+// ===== EVENT LISTENERS =====
+function configurarEventListeners() {
+    // Búsqueda
+    searchField.addEventListener('change', handleSearchFieldChange);
+    searchValue.addEventListener('keypress', handleSearchKeypress);
+    btnBuscar.addEventListener('click', realizarBusqueda);
+    btnLimpiar.addEventListener('click', limpiarBusqueda);
+    
+    // Botones principales
+    btnNuevoPromotor.addEventListener('click', abrirModalNuevo);
+    
+    // Paginación
+    btnPrev.addEventListener('click', () => cambiarPagina(currentPage - 1));
+    btnNext.addEventListener('click', () => cambiarPagina(currentPage + 1));
+    
+    // Modales
+    document.getElementById('modal-close').addEventListener('click', cerrarModalPromotor);
+    document.getElementById('btn-cancelar').addEventListener('click', cerrarModalPromotor);
+    document.getElementById('btn-cancelar-delete').addEventListener('click', cerrarModalConfirmar);
+    document.getElementById('btn-confirmar-delete').addEventListener('click', confirmarEliminacion);
+    
+    // Formulario
+    formPromotor.addEventListener('submit', guardarPromotor);
+    
+    // Formateo automático RFC
+    document.getElementById('promotor-rfc').addEventListener('input', function(e) {
+        e.target.value = e.target.value.toUpperCase();
+    });
+    
+    // Cerrar modales con ESC
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            cerrarModalPromotor();
+            cerrarModalConfirmar();
+        }
+    });
+    
+    // Cerrar modales clicking fuera
+    modalPromotor.addEventListener('click', (e) => {
+        if (e.target === modalPromotor) cerrarModalPromotor();
+    });
+    
+    modalConfirmar.addEventListener('click', (e) => {
+        if (e.target === modalConfirmar) cerrarModalConfirmar();
+    });
+}
+
+// ===== CARGA DE DATOS =====
 async function cargarPromotores() {
-  try {
-    const res = await fetch("../../api/get_promotores.php");
-    const json = await res.json();
-
-    if (!json.error && Array.isArray(json.data)) {
-      const tbody = document.getElementById("tablaPromotores");
-      tbody.innerHTML = "";
-
-      json.data.forEach(p => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${p.id}</td>
-          <td>${p.nombre}</td>
-          <td>${p.apellido}</td>
-          <td>${p.telefono}</td>
-          <td>${p.correo}</td>
-          <td>${p.rfc}</td>
-          <td>${p.estatus}</td>
-          <td>
-            <button class="btn btn-sm btn-warning btn-editar">Editar</button>
-            <button class="btn btn-sm btn-danger btn-eliminar">Eliminar</button>
-          </td>`;
-
-        // Asignar eventos de manera segura
-        tr.querySelector(".btn-editar").addEventListener("click", () => abrirEditar(p));
-        tr.querySelector(".btn-eliminar").addEventListener("click", () => eliminarPromotor(p.id));
-
-        tbody.appendChild(tr);
-      });
-    } else {
-      console.warn("⚠️ El servidor no devolvió un array:", json);
+    console.log('🔄 Iniciando carga de promotores...');
+    
+    try {
+        showLoading();
+        
+        const params = new URLSearchParams({
+            page: currentPage,
+            limit: 10
+        });
+        
+        if (currentSearch.field && currentSearch.value) {
+            params.append('search_field', currentSearch.field);
+            params.append('search_value', currentSearch.value);
+        }
+        
+        const apiUrl = `../../api/get_promotores.php?${params}`;
+        console.log('📡 Llamando API:', apiUrl);
+        
+        const response = await fetch(apiUrl, {
+            method: 'GET',
+            cache: 'no-cache',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        console.log('📥 Respuesta recibida - Status:', response.status);
+        
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('❌ Error HTTP:', response.status, errorText);
+            throw new Error(`Error HTTP ${response.status}: ${errorText}`);
+        }
+        
+        const responseText = await response.text();
+        console.log('📄 Respuesta en texto (primeros 200 chars):', responseText.substring(0, 200));
+        
+        let data;
+        try {
+            data = JSON.parse(responseText);
+        } catch (jsonError) {
+            console.error('❌ Error parsing JSON:', jsonError);
+            console.error('❌ Respuesta completa:', responseText);
+            throw new Error('Respuesta inválida del servidor. Verifique que la API esté funcionando correctamente.');
+        }
+        
+        console.log('✅ Datos parseados exitosamente:', data);
+        
+        if (!data.success) {
+            console.error('❌ API reporta error:', data.message);
+            throw new Error(data.message || 'Error al cargar promotores');
+        }
+        
+        console.log(`📊 ${data.data ? data.data.length : 0} promotores recibidos`);
+        
+        // Actualizar datos globales
+        allPromotores = data.data || [];
+        
+        renderizarPromotores(allPromotores);
+        actualizarPaginacion(data.pagination);
+        
+        if (allPromotores.length === 0) {
+            showEmptyState('No se encontraron promotores');
+        } else {
+            showContent();
+        }
+        
+    } catch (error) {
+        console.error('❌ Error completo cargando promotores:', error);
+        showError(error.message);
     }
-  } catch (error) {
-    console.error("Error cargando promotores:", error);
-  }
 }
 
-
-// Abre el modal de edición con los datos del promotor
-function abrirEditar(p) {
-  document.getElementById("edit_id_promotor").value = p.id;
-  document.getElementById("edit_nombre").value = p.nombre;
-  document.getElementById("edit_apellido").value = p.apellido;
-  document.getElementById("edit_telefono").value = p.telefono;
-  document.getElementById("edit_correo").value = p.correo;
-  document.getElementById("edit_rfc").value = p.rfc;
-  document.getElementById("edit_nss").value = p.nss;
-  document.getElementById("edit_clave_asistencia").value = p.clave_asistencia;
-  document.getElementById("edit_banco").value = p.banco;
-  document.getElementById("edit_numero_cuenta").value = p.numero_cuenta;
-  document.getElementById("edit_estatus").value = p.estatus;
-  document.getElementById("edit_vacaciones").value = p.vacaciones;
-  document.getElementById("edit_estado").value = p.estado;
-
-  const modal = new bootstrap.Modal(document.getElementById("modalEditar"));
-  modal.show();
+// ===== BÚSQUEDA =====
+function handleSearchFieldChange() {
+    const hasField = searchField.value !== '';
+    searchValue.disabled = !hasField;
+    btnBuscar.disabled = !hasField;
+    
+    if (!hasField) {
+        searchValue.value = '';
+    } else {
+        searchValue.focus();
+    }
 }
 
-// Guardar cambios en edición
-document.getElementById("formEditar").addEventListener("submit", async e => {
-  e.preventDefault();
-  const formData = new FormData(e.target);
-  const res = await fetch("../../api/update_promotor.php", { method:"POST", body: formData });
-  const result = await res.json();
-  alert(result.message);
-  if(result.success){
-    bootstrap.Modal.getInstance(document.getElementById("modalEditar")).hide();
+function handleSearchKeypress(e) {
+    if (e.key === 'Enter' && !btnBuscar.disabled) {
+        realizarBusqueda();
+    }
+}
+
+function realizarBusqueda() {
+    const field = searchField.value;
+    const value = searchValue.value.trim();
+    
+    if (!field || !value) {
+        mostrarNotificacion('Selecciona un campo y escribe un valor para buscar', 'warning');
+        return;
+    }
+    
+    currentSearch = { field, value };
+    currentPage = 1;
     cargarPromotores();
-  }
-});
-
-// Eliminar promotor
-async function eliminarPromotor(id){
-  if(!confirm("¿Seguro que deseas eliminar este promotor?")) return;
-  const formData = new FormData();
-  formData.append("id", id);
-  const res = await fetch("../../api/delete_promotor.php", { method:"POST", body: formData });
-  const result = await res.json();
-  alert(result.message);
-  if(result.success) cargarPromotores();
 }
 
-// Crear nuevo promotor
-document.getElementById("formNuevo").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  try {
-    const formData = new FormData(e.target);
-    const response = await fetch("../../api/create_promotor.php", { method: "POST", body: formData });
-    const res = await response.json();
+function limpiarBusqueda() {
+    searchField.value = '';
+    searchValue.value = '';
+    searchValue.disabled = true;
+    btnBuscar.disabled = true;
+    currentSearch = { field: '', value: '' };
+    currentPage = 1;
+    cargarPromotores();
+}
 
-    if (!res.error) {
-      alert("✅ " + res.message);
-      cargarPromotores();
-      e.target.reset();
-      bootstrap.Modal.getInstance(document.getElementById("modalNuevo")).hide();
-    } else {
-      alert("⚠️ " + res.message);
+// ===== RENDERIZADO =====
+function renderizarPromotores(promotores) {
+    console.log('🎨 Renderizando', promotores.length, 'promotores');
+    promotoresTbody.innerHTML = '';
+    
+    if (promotores.length === 0) {
+        showEmptyState('No se encontraron promotores con los criterios de búsqueda');
+        return;
     }
-  } catch (error) {
-    console.error("Error en fetch:", error);
-    alert("❌ Error al guardar el promotor.");
-  }
-});
+    
+    promotores.forEach(promotor => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${promotor.id_promotor}</td>
+            <td><strong>${promotor.nombre_completo}</strong></td>
+            <td>${promotor.telefono}</td>
+            <td>${promotor.correo}</td>
+            <td>${promotor.rfc}</td>
+            <td>${promotor.clave_asistencia}</td>
+            <td><span class="status-badge ${promotor.estatus.toLowerCase()}">${promotor.estatus}</span></td>
+            <td><span class="vacaciones-badge ${promotor.vacaciones ? 'si' : 'no'}">${promotor.vacaciones ? 'Sí' : 'No'}</span></td>
+            <td>${promotor.fecha_modificacion_formatted || 'N/A'}</td>
+            <td>
+                <button class="btn-action edit" onclick="editarPromotor(${promotor.id_promotor})" title="Editar">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn-action delete" onclick="eliminarPromotor(${promotor.id_promotor}, '${promotor.nombre_completo}', '${promotor.correo}')" title="Eliminar">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </td>
+        `;
+        promotoresTbody.appendChild(row);
+    });
+}
 
-// Cargar lista al abrir
-cargarPromotores();
+function actualizarPaginacion(pagination) {
+    if (!pagination) {
+        console.warn('⚠️ Sin datos de paginación');
+        return;
+    }
+    
+    currentPage = pagination.current_page || 1;
+    totalPages = pagination.total_pages || 1;
+    
+    paginationInfo.textContent = `Mostrando ${pagination.per_page || 0} de ${pagination.total_records || 0} registros`;
+    paginationPages.textContent = `Página ${currentPage} de ${totalPages}`;
+    
+    btnPrev.disabled = !pagination.has_prev;
+    btnNext.disabled = !pagination.has_next;
+}
+
+function cambiarPagina(page) {
+    if (page < 1 || page > totalPages) return;
+    currentPage = page;
+    cargarPromotores();
+}
+
+// ===== MODAL NUEVO/EDITAR =====
+function abrirModalNuevo() {
+    isEditing = false;
+    editingId = null;
+    modalTitle.innerHTML = '<i class="fas fa-user"></i> Nuevo Promotor';
+    btnGuardar.innerHTML = '<i class="fas fa-save"></i> Crear';
+    
+    limpiarFormulario();
+    abrirModal(modalPromotor);
+}
+
+async function editarPromotor(id) {
+    console.log('✏️ Editando promotor ID:', id);
+    
+    try {
+        const promotorData = allPromotores.find(p => p.id_promotor == id);
+        
+        if (!promotorData) {
+            throw new Error('No se encontraron los datos del promotor');
+        }
+        
+        isEditing = true;
+        editingId = id;
+        modalTitle.innerHTML = '<i class="fas fa-edit"></i> Editar Promotor';
+        btnGuardar.innerHTML = '<i class="fas fa-save"></i> Actualizar';
+        
+        // Llenar formulario
+        document.getElementById('promotor-id').value = promotorData.id_promotor;
+        document.getElementById('promotor-nombre').value = promotorData.nombre;
+        document.getElementById('promotor-apellido').value = promotorData.apellido;
+        document.getElementById('promotor-telefono').value = promotorData.telefono;
+        document.getElementById('promotor-correo').value = promotorData.correo;
+        document.getElementById('promotor-rfc').value = promotorData.rfc;
+        document.getElementById('promotor-nss').value = promotorData.nss;
+        document.getElementById('promotor-clave').value = promotorData.clave_asistencia;
+        document.getElementById('promotor-banco').value = promotorData.banco || '';
+        document.getElementById('promotor-cuenta').value = promotorData.numero_cuenta || '';
+        document.getElementById('promotor-estatus').value = promotorData.estatus;
+        document.getElementById('promotor-vacaciones').value = promotorData.vacaciones ? '1' : '0';
+        
+        abrirModal(modalPromotor);
+        
+    } catch (error) {
+        console.error('❌ Error preparando edición:', error);
+        mostrarNotificacion('Error al cargar datos para edición: ' + error.message, 'error');
+    }
+}
+
+function limpiarFormulario() {
+    formPromotor.reset();
+    document.getElementById('promotor-id').value = '';
+    document.getElementById('promotor-estatus').value = 'ACTIVO';
+    document.getElementById('promotor-vacaciones').value = '0';
+}
+
+function abrirModal(modal) {
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function cerrarModalPromotor() {
+    modalPromotor.classList.remove('active');
+    document.body.style.overflow = 'auto';
+    limpiarFormulario();
+}
+
+// ===== GUARDAR PROMOTOR =====
+async function guardarPromotor(e) {
+    e.preventDefault();
+    
+    const formData = {
+        nombre: document.getElementById('promotor-nombre').value.trim(),
+        apellido: document.getElementById('promotor-apellido').value.trim(),
+        telefono: document.getElementById('promotor-telefono').value.trim(),
+        correo: document.getElementById('promotor-correo').value.trim(),
+        rfc: document.getElementById('promotor-rfc').value.trim(),
+        nss: document.getElementById('promotor-nss').value.trim(),
+        clave_asistencia: document.getElementById('promotor-clave').value.trim(),
+        banco: document.getElementById('promotor-banco').value.trim(),
+        numero_cuenta: document.getElementById('promotor-cuenta').value.trim(),
+        estatus: document.getElementById('promotor-estatus').value,
+        vacaciones: parseInt(document.getElementById('promotor-vacaciones').value)
+    };
+    
+    if (isEditing) {
+        formData.id_promotor = editingId;
+    }
+    
+    // Validaciones básicas
+    const required = ['nombre', 'apellido', 'telefono', 'correo', 'rfc', 'nss', 'clave_asistencia'];
+    for (const field of required) {
+        if (!formData[field]) {
+            mostrarNotificacion(`El campo '${field}' es requerido`, 'warning');
+            return;
+        }
+    }
+    
+    // Validaciones específicas
+    if (formData.rfc.length < 10) {
+        mostrarNotificacion('RFC inválido', 'warning');
+        return;
+    }
+    
+    if (!formData.correo.includes('@')) {
+        mostrarNotificacion('Email inválido', 'warning');
+        return;
+    }
+    
+    btnGuardar.disabled = true;
+    btnGuardar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+    
+    try {
+        const url = isEditing ? '../../api/update_promotor.php' : '../../api/create_promotor.php';
+        
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData)
+        });
+        
+        const responseText = await response.text();
+        console.log('Respuesta guardar:', responseText);
+        
+        let data;
+        try {
+            data = JSON.parse(responseText);
+        } catch (jsonError) {
+            throw new Error('Respuesta inválida del servidor');
+        }
+        
+        if (!data.success) {
+            throw new Error(data.message || 'Error al guardar promotor');
+        }
+        
+        const accion = isEditing ? 'actualizado' : 'creado';
+        mostrarNotificacion(`Promotor ${accion} correctamente`, 'success');
+        
+        cerrarModalPromotor();
+        cargarPromotores();
+        
+    } catch (error) {
+        console.error(`❌ Error ${isEditing ? 'actualizando' : 'creando'} promotor:`, error);
+        mostrarNotificacion(`Error al ${isEditing ? 'actualizar' : 'crear'} promotor: ` + error.message, 'error');
+    } finally {
+        btnGuardar.disabled = false;
+        btnGuardar.innerHTML = isEditing ? '<i class="fas fa-save"></i> Actualizar' : '<i class="fas fa-save"></i> Crear';
+    }
+}
+
+// ===== ELIMINAR PROMOTOR =====
+let promotorAEliminar = null;
+
+function eliminarPromotor(id, nombre, correo) {
+    promotorAEliminar = { id, nombre, correo };
+    
+    document.getElementById('delete-details').innerHTML = `
+        <strong>ID:</strong> ${id}<br>
+        <strong>Nombre:</strong> ${nombre}<br>
+        <strong>Correo:</strong> ${correo}
+    `;
+    
+    abrirModal(modalConfirmar);
+}
+
+function cerrarModalConfirmar() {
+    modalConfirmar.classList.remove('active');
+    document.body.style.overflow = 'auto';
+    promotorAEliminar = null;
+}
+
+async function confirmarEliminacion() {
+    if (!promotorAEliminar) return;
+    
+    const btnConfirmar = document.getElementById('btn-confirmar-delete');
+    btnConfirmar.disabled = true;
+    btnConfirmar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Eliminando...';
+    
+    try {
+        const response = await fetch('../../api/delete_promotor.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                id_promotor: promotorAEliminar.id
+            })
+        });
+        
+        const responseText = await response.text();
+        let data;
+        try {
+            data = JSON.parse(responseText);
+        } catch (jsonError) {
+            throw new Error('Respuesta inválida del servidor');
+        }
+        
+        if (!data.success) {
+            throw new Error(data.message || 'Error al eliminar promotor');
+        }
+        
+        mostrarNotificacion('Promotor eliminado correctamente', 'success');
+        
+        cerrarModalConfirmar();
+        cargarPromotores();
+        
+    } catch (error) {
+        console.error('❌ Error eliminando promotor:', error);
+        mostrarNotificacion('Error al eliminar promotor: ' + error.message, 'error');
+    } finally {
+        btnConfirmar.disabled = false;
+        btnConfirmar.innerHTML = '<i class="fas fa-trash"></i> Eliminar';
+    }
+}
+
+// ===== NOTIFICACIONES =====
+function mostrarNotificacion(mensaje, tipo = 'info') {
+    const notificacion = document.createElement('div');
+    notificacion.className = `notification ${tipo}`;
+    
+    const iconos = {
+        success: 'fas fa-check-circle',
+        error: 'fas fa-exclamation-circle',
+        warning: 'fas fa-exclamation-triangle',
+        info: 'fas fa-info-circle'
+    };
+    
+    const titulos = {
+        success: 'Éxito',
+        error: 'Error',
+        warning: 'Advertencia',
+        info: 'Información'
+    };
+    
+    notificacion.innerHTML = `
+        <i class="${iconos[tipo]} notification-icon"></i>
+        <div class="notification-content">
+            <h4>${titulos[tipo]}</h4>
+            <p>${mensaje}</p>
+        </div>
+        <button class="notification-close">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+    
+    notificacion.querySelector('.notification-close').addEventListener('click', () => {
+        notificacion.remove();
+    });
+    
+    setTimeout(() => {
+        if (notificacion.parentNode) {
+            notificacion.remove();
+        }
+    }, 5000);
+    
+    document.getElementById('notifications-container').appendChild(notificacion);
+}
+
+// ===== EXPONER FUNCIONES GLOBALES =====
+window.editarPromotor = editarPromotor;
+window.eliminarPromotor = eliminarPromotor;
+
+// ===== INICIALIZACIÓN =====
+console.log('👥 Iniciando módulo Gestión de Promotores...');
+init();
+
+setTimeout(() => {
+    console.log('⏰ Iniciando carga de datos...');
+    cargarPromotores();
+}, 100);
+
+console.log('✅ Módulo promotores inicializado correctamente');
 </script>
