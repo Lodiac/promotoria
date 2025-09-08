@@ -102,7 +102,7 @@
     </div>
 
     <!-- TABLA DE ASIGNACIONES -->
-    <div class="table-container" id="table-section">
+    <div class="table-container" id="table-container">
         <div class="table-wrapper">
             <table class="asignaciones-table" id="asignaciones-table">
                 <thead>
@@ -130,59 +130,59 @@
             <p>Cargando asignaciones...</p>
         </div>
 
-        <!-- EMPTY STATE -->
+        <!-- ESTADO VACÍO -->
         <div class="empty-state" id="empty-state" style="display: none;">
-            <i class="fas fa-tasks"></i>
-            <h3>No se encontraron asignaciones</h3>
-            <p>No hay asignaciones que coincidan con los criterios de búsqueda.</p>
+            <div class="empty-icon">
+                <i class="fas fa-tasks"></i>
+            </div>
+            <h3>No hay asignaciones</h3>
+            <p>No se encontraron asignaciones con los criterios seleccionados</p>
+            <button class="btn-primary" onclick="limpiarBusqueda()">
+                <i class="fas fa-refresh"></i> Limpiar Filtros
+            </button>
         </div>
     </div>
 
     <!-- PAGINACIÓN -->
     <div class="pagination-container" id="pagination-container">
         <div class="pagination-info">
-            <span id="pagination-info">Cargando...</span>
+            <span id="pagination-info">Mostrando 0 de 0 registros</span>
         </div>
         <div class="pagination-controls">
-            <button id="btn-prev" class="btn-pagination" disabled>
-                <i class="fas fa-chevron-left"></i> Anterior
+            <button class="pagination-btn" id="btn-prev">
+                <i class="fas fa-chevron-left"></i>
             </button>
-            <span class="pagination-pages" id="pagination-pages"></span>
-            <button id="btn-next" class="btn-pagination" disabled>
-                Siguiente <i class="fas fa-chevron-right"></i>
+            <span class="pagination-pages" id="pagination-pages">Página 1 de 1</span>
+            <button class="pagination-btn" id="btn-next">
+                <i class="fas fa-chevron-right"></i>
             </button>
         </div>
     </div>
 </div>
 
-<!-- CONTAINER DE NOTIFICACIONES -->
-<div id="notifications-container" class="notifications-container"></div>
-
 <!-- ===== MODAL NUEVA ASIGNACIÓN ===== -->
-<div class="modal-overlay" id="modal-nueva-asignacion">
-    <div class="modal-container large">
+<div class="modal-overlay" id="modal-asignacion">
+    <div class="modal-container">
         <div class="modal-header">
-            <h2><i class="fas fa-plus"></i> Nueva Asignación</h2>
-            <button class="modal-close" id="modal-close-nueva">
+            <h2 id="modal-title"><i class="fas fa-plus"></i> Nueva Asignación</h2>
+            <button class="modal-close" id="modal-close">
                 <i class="fas fa-times"></i>
             </button>
         </div>
         
-        <form class="modal-form" id="form-nueva-asignacion">
+        <form class="modal-form" id="form-asignacion">
             <div class="form-row">
                 <div class="form-group">
-                    <label for="select-promotor">Promotor *</label>
-                    <select id="select-promotor" required>
+                    <label for="nueva-promotor">Promotor *</label>
+                    <select id="nueva-promotor" required>
                         <option value="">Seleccionar promotor...</option>
                     </select>
-                    <div class="form-help">Solo se muestran promotores disponibles</div>
                 </div>
                 <div class="form-group">
-                    <label for="select-tienda">Tienda *</label>
-                    <select id="select-tienda" required>
+                    <label for="nueva-tienda">Tienda *</label>
+                    <select id="nueva-tienda" required>
                         <option value="">Seleccionar tienda...</option>
                     </select>
-                    <div class="form-help">Solo se muestran tiendas sin promotor</div>
                 </div>
             </div>
             
@@ -197,15 +197,111 @@
                 </div>
             </div>
             
-            <div class="form-actions">
-                <button type="button" class="btn-secondary" id="btn-cancelar-nueva">
-                    <i class="fas fa-times"></i> Cancelar
+            <div class="modal-actions">
+                <button type="button" class="btn-secondary" id="btn-cancelar">
+                    Cancelar
                 </button>
-                <button type="submit" class="btn-primary" id="btn-guardar-nueva">
-                    <i class="fas fa-save"></i> Crear Asignación
+                <button type="submit" class="btn-primary" id="btn-guardar">
+                    <i class="fas fa-save"></i> Guardar
                 </button>
             </div>
         </form>
+    </div>
+</div>
+
+<!-- ===== MODAL FINALIZAR ASIGNACIÓN ===== -->
+<div class="modal-overlay" id="modal-finalizar">
+    <div class="modal-container">
+        <div class="modal-header">
+            <h2><i class="fas fa-stop-circle"></i> Finalizar Asignación</h2>
+            <button class="modal-close" id="modal-close-finalizar">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="modal-content">
+            <div class="asignacion-details" id="finalizar-details">
+                <!-- Se llenará dinámicamente -->
+            </div>
+            
+            <form class="modal-form" id="form-finalizar">
+                <input type="hidden" id="finalizar-id-asignacion">
+                
+                <div class="form-group">
+                    <label for="fecha-fin">Fecha de Finalización *</label>
+                    <input type="date" id="fecha-fin" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="motivo-finalizacion">Motivo de Finalización *</label>
+                    <textarea id="motivo-finalizacion" rows="3" placeholder="Ej: Cambio de promotor, cierre de tienda..." maxlength="255" required></textarea>
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" id="btn-cancelar-finalizar">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn-danger" id="btn-confirmar-finalizar">
+                        <i class="fas fa-stop-circle"></i> Finalizar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ===== MODAL REASIGNAR PROMOTOR ===== -->
+<div class="modal-overlay" id="modal-reasignar">
+    <div class="modal-container">
+        <div class="modal-header">
+            <h2><i class="fas fa-exchange-alt"></i> Reasignar Promotor</h2>
+            <button class="modal-close" id="modal-close-reasignar">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="modal-content">
+            <div class="asignacion-details" id="reasignar-details">
+                <!-- Se llenará dinámicamente -->
+            </div>
+            
+            <form class="modal-form" id="form-reasignar">
+                <input type="hidden" id="reasignar-id-asignacion">
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="nuevo-promotor">Nuevo Promotor *</label>
+                        <select id="nuevo-promotor" required>
+                            <option value="">Seleccionar promotor...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="fecha-cambio">Fecha de Cambio *</label>
+                        <input type="date" id="fecha-cambio" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="motivo-cambio">Motivo del Cambio *</label>
+                    <textarea id="motivo-cambio" rows="3" placeholder="Ej: Reestructuración de zona, mejor cobertura..." maxlength="255" required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="motivo-nueva-asignacion">Motivo Nueva Asignación</label>
+                    <input type="text" id="motivo-nueva-asignacion" placeholder="Se rellenará automáticamente..." maxlength="255">
+                    <div class="form-help">Si se deja vacío, se usará: "Reasignación de promotor"</div>
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" id="btn-cancelar-reasignar">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn-warning" id="btn-confirmar-reasignar">
+                        <i class="fas fa-exchange-alt"></i> Reasignar
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
@@ -220,17 +316,9 @@
         </div>
         
         <div class="modal-content">
-            <!-- INFORMACIÓN DEL PROMOTOR -->
             <div class="promotor-info" id="promotor-info">
                 <!-- Se llenará dinámicamente -->
             </div>
-
-            <!-- ESTADÍSTICAS DEL HISTORIAL -->
-            <div class="historial-stats" id="historial-stats">
-                <!-- Se llenará dinámicamente -->
-            </div>
-
-            <!-- HISTORIAL DE ASIGNACIONES -->
             <div class="historial-timeline" id="historial-timeline">
                 <!-- Se llenará dinámicamente -->
             </div>
@@ -238,987 +326,1663 @@
     </div>
 </div>
 
-<!-- ===== MODAL FINALIZAR ASIGNACIÓN ===== -->
-<div class="modal-overlay" id="modal-finalizar">
-    <div class="modal-container">
-        <div class="modal-header">
-            <h2><i class="fas fa-stop-circle"></i> Finalizar Asignación</h2>
-            <button class="modal-close" id="modal-close-finalizar">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        
-        <form class="modal-form" id="form-finalizar">
-            <input type="hidden" id="finalizar-id-asignacion">
-            
-            <div class="asignacion-details" id="finalizar-details">
-                <!-- Se llenará con los detalles de la asignación -->
-            </div>
-            
-            <div class="form-group">
-                <label for="fecha-fin">Fecha de Finalización *</label>
-                <input type="date" id="fecha-fin" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="motivo-finalizacion">Motivo de Finalización *</label>
-                <textarea id="motivo-finalizacion" rows="3" placeholder="Ej: Término de contrato, cambio de zona..." maxlength="255" required></textarea>
-            </div>
-            
-            <div class="form-group">
-                <label class="checkbox-container">
-                    <input type="checkbox" id="desactivar-asignacion" checked>
-                    <span class="checkmark"></span>
-                    Desactivar asignación al finalizar
-                </label>
-            </div>
-            
-            <div class="form-actions">
-                <button type="button" class="btn-secondary" id="btn-cancelar-finalizar">
-                    <i class="fas fa-times"></i> Cancelar
-                </button>
-                <button type="submit" class="btn-danger" id="btn-confirmar-finalizar">
-                    <i class="fas fa-stop-circle"></i> Finalizar Asignación
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- ===== MODAL REASIGNAR ===== -->
-<div class="modal-overlay" id="modal-reasignar">
-    <div class="modal-container large">
-        <div class="modal-header">
-            <h2><i class="fas fa-exchange-alt"></i> Reasignar Promotor</h2>
-            <button class="modal-close" id="modal-close-reasignar">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        
-        <form class="modal-form" id="form-reasignar">
-            <input type="hidden" id="reasignar-id-asignacion">
-            
-            <div class="reasignacion-details" id="reasignar-details">
-                <!-- Se llenará con los detalles actuales -->
-            </div>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="nueva-tienda">Nueva Tienda *</label>
-                    <select id="nueva-tienda" required>
-                        <option value="">Seleccionar nueva tienda...</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="fecha-cambio">Fecha de Cambio *</label>
-                    <input type="date" id="fecha-cambio" required>
-                </div>
-            </div>
-            
-            <div class="form-group">
-                <label for="motivo-cambio">Motivo del Cambio *</label>
-                <textarea id="motivo-cambio" rows="3" placeholder="Ej: Reestructuración de zona, mejor cobertura..." maxlength="255" required></textarea>
-            </div>
-            
-            <div class="form-group">
-                <label for="motivo-nueva-asignacion">Motivo Nueva Asignación</label>
-                <input type="text" id="motivo-nueva-asignacion" placeholder="Se rellenará automáticamente..." maxlength="255">
-                <div class="form-help">Si se deja vacío, se usará: "Reasignación desde otra tienda"</div>
-            </div>
-            
-            <div class="form-actions">
-                <button type="button" class="btn-secondary" id="btn-cancelar-reasignar">
-                    <i class="fas fa-times"></i> Cancelar
-                </button>
-                <button type="submit" class="btn-warning" id="btn-confirmar-reasignar">
-                    <i class="fas fa-exchange-alt"></i> Reasignar
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
+<!-- ===== SISTEMA DE NOTIFICACIONES ===== -->
+<div class="notifications-container" id="notifications-container"></div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 Iniciando módulo de asignaciones...');
+// ===== VARIABLES GLOBALES =====
+let currentPage = 1;
+let totalPages = 1;
+let allAsignaciones = [];
+let currentView = 'table'; // 'table' o 'dashboard'
+let isEditing = false;
+let editingId = null;
+
+// ===== ELEMENTOS DOM =====
+const dashboardSection = document.getElementById('dashboard-section');
+const searchSection = document.getElementById('search-section');
+const tableContainer = document.getElementById('table-container');
+const paginationContainer = document.getElementById('pagination-container');
+
+const loadingElement = document.getElementById('table-loading');
+const emptyState = document.getElementById('empty-state');
+const asignacionesTbody = document.getElementById('asignaciones-tbody');
+
+const searchField = document.getElementById('search-field');
+const searchValue = document.getElementById('search-value');
+const estatusFilter = document.getElementById('estatus-filter');
+const btnBuscar = document.getElementById('btn-buscar');
+const btnLimpiar = document.getElementById('btn-limpiar');
+
+const paginationInfo = document.getElementById('pagination-info');
+const paginationPages = document.getElementById('pagination-pages');
+const btnPrev = document.getElementById('btn-prev');
+const btnNext = document.getElementById('btn-next');
+
+// Botones principales
+const btnDashboard = document.getElementById('btn-dashboard');
+const btnNuevaAsignacion = document.getElementById('btn-nueva-asignacion');
+
+// Modales
+const modalAsignacion = document.getElementById('modal-asignacion');
+const modalFinalizar = document.getElementById('modal-finalizar');
+const modalReasignar = document.getElementById('modal-reasignar');
+const modalHistorial = document.getElementById('modal-historial');
+const modalTitle = document.getElementById('modal-title');
+const formAsignacion = document.getElementById('form-asignacion');
+const btnGuardar = document.getElementById('btn-guardar');
+
+// ===== FUNCIONES DE ESTADO DE UI =====
+function showLoading() {
+    console.log('🔄 Mostrando loader...');
+    loadingElement.style.display = 'block';
+    tableContainer.style.display = 'none';
+    emptyState.style.display = 'none';
+    paginationContainer.style.display = 'none';
+}
+
+function showContent() {
+    console.log('📊 Mostrando contenido...');
+    loadingElement.style.display = 'none';
+    tableContainer.style.display = 'table';
+    emptyState.style.display = 'none';
+    paginationContainer.style.display = 'flex';
+}
+
+function showEmptyState(message = 'No se encontraron asignaciones') {
+    console.log('📭 Mostrando estado vacío...');
+    loadingElement.style.display = 'none';
+    tableContainer.style.display = 'none';
+    emptyState.style.display = 'block';
+    paginationContainer.style.display = 'none';
     
-    // ===== VARIABLES GLOBALES =====
-    let currentPage = 1;
-    let totalPages = 1;
-    let allAsignaciones = [];
-    let currentView = 'table'; // 'table' o 'dashboard'
-    let isEditing = false;
-    let editingId = null;
+    const emptyTitle = emptyState.querySelector('h3');
+    if (emptyTitle) emptyTitle.textContent = message;
+}
+
+function showError(message) {
+    console.log('❌ Mostrando error:', message);
+    loadingElement.style.display = 'none';
+    tableContainer.style.display = 'none';
+    emptyState.style.display = 'none';
+    paginationContainer.style.display = 'none';
     
-    // ===== ELEMENTOS DOM =====
-    const dashboardSection = document.getElementById('dashboard-section');
-    const searchSection = document.getElementById('search-section');
-    const tableSection = document.getElementById('table-section');
-    const paginationContainer = document.getElementById('pagination-container');
+    mostrarNotificacion('Error: ' + message, 'error');
+}
+
+// ===== INICIALIZACIÓN =====
+function init() {
+    console.log('🚀 Inicializando módulo asignaciones...');
+    configurarEventListeners();
+}
+
+// ===== EVENT LISTENERS =====
+function configurarEventListeners() {
+    console.log('🔧 Configurando event listeners...');
     
-    const loadingElement = document.getElementById('table-loading');
-    const emptyState = document.getElementById('empty-state');
-    const asignacionesTbody = document.getElementById('asignaciones-tbody');
-    
-    const searchField = document.getElementById('search-field');
-    const searchValue = document.getElementById('search-value');
-    const estatusFilter = document.getElementById('estatus-filter');
-    const btnBuscar = document.getElementById('btn-buscar');
-    const btnLimpiar = document.getElementById('btn-limpiar');
-    
-    const paginationInfo = document.getElementById('pagination-info');
-    const paginationPages = document.getElementById('pagination-pages');
-    const btnPrev = document.getElementById('btn-prev');
-    const btnNext = document.getElementById('btn-next');
+    // Búsqueda
+    searchField.addEventListener('change', handleSearchFieldChange);
+    searchValue.addEventListener('keypress', handleSearchKeypress);
+    estatusFilter.addEventListener('change', realizarBusqueda);
+    btnBuscar.addEventListener('click', realizarBusqueda);
+    btnLimpiar.addEventListener('click', limpiarBusqueda);
     
     // Botones principales
-    const btnDashboard = document.getElementById('btn-dashboard');
-    const btnNuevaAsignacion = document.getElementById('btn-nueva-asignacion');
+    btnDashboard.addEventListener('click', toggleDashboard);
+    btnNuevaAsignacion.addEventListener('click', abrirModalNueva);
     
-    // ===== INICIALIZACIÓN =====
-    function init() {
-        console.log('🚀 Inicializando módulo asignaciones...');
-        configurarEventListeners();
-        cargarAsignaciones();
-    }
+    // Paginación
+    btnPrev.addEventListener('click', () => cambiarPagina(currentPage - 1));
+    btnNext.addEventListener('click', () => cambiarPagina(currentPage + 1));
     
-    // ===== EVENT LISTENERS =====
-    function configurarEventListeners() {
-        // Vista dashboard vs tabla
-        btnDashboard.addEventListener('click', toggleDashboard);
-        
-        // Búsqueda
-        searchField.addEventListener('change', handleSearchFieldChange);
-        searchValue.addEventListener('keypress', handleSearchKeypress);
-        estatusFilter.addEventListener('change', realizarBusqueda);
-        btnBuscar.addEventListener('click', realizarBusqueda);
-        btnLimpiar.addEventListener('click', limpiarBusqueda);
-        
-        // Paginación
-        btnPrev.addEventListener('click', () => cambiarPagina(currentPage - 1));
-        btnNext.addEventListener('click', () => cambiarPagina(currentPage + 1));
-        
-        // Modales
-        btnNuevaAsignacion.addEventListener('click', abrirModalNuevaAsignacion);
-        configurarModales();
-    }
+    // Modales
+    document.getElementById('modal-close').addEventListener('click', cerrarModalAsignacion);
+    document.getElementById('btn-cancelar').addEventListener('click', cerrarModalAsignacion);
+    document.getElementById('modal-close-finalizar').addEventListener('click', cerrarModalFinalizar);
+    document.getElementById('btn-cancelar-finalizar').addEventListener('click', cerrarModalFinalizar);
+    document.getElementById('modal-close-reasignar').addEventListener('click', cerrarModalReasignar);
+    document.getElementById('btn-cancelar-reasignar').addEventListener('click', cerrarModalReasignar);
+    document.getElementById('modal-close-historial').addEventListener('click', cerrarModalHistorial);
     
-    function handleSearchFieldChange() {
-        const isFieldSelected = searchField.value !== '';
-        searchValue.disabled = !isFieldSelected;
-        btnBuscar.disabled = !isFieldSelected;
-        
-        if (!isFieldSelected) {
-            searchValue.value = '';
-            realizarBusqueda();
-        }
-    }
+    // Formularios
+    formAsignacion.addEventListener('submit', guardarAsignacion);
+    document.getElementById('form-finalizar').addEventListener('submit', confirmarFinalizar);
+    document.getElementById('form-reasignar').addEventListener('submit', confirmarReasignar);
+}
+
+function handleSearchFieldChange() {
+    const isFieldSelected = searchField.value !== '';
+    searchValue.disabled = !isFieldSelected;
+    btnBuscar.disabled = !isFieldSelected;
     
-    function handleSearchKeypress(e) {
-        if (e.key === 'Enter') {
-            realizarBusqueda();
-        }
-    }
-    
-    // ===== FUNCIONES PRINCIPALES =====
-    async function cargarAsignaciones() {
-        try {
-            showLoading();
-            
-            const searchParams = new URLSearchParams({
-                page: currentPage,
-                limit: 10,
-                search_field: searchField.value || '',
-                search_value: searchValue.value || '',
-                estatus: estatusFilter.value || ''
-            });
-            
-            console.log('🔍 Cargando asignaciones con parámetros:', searchParams.toString());
-            
-            const response = await fetch(`../../api/get_asignaciones.php?${searchParams}`);
-            const data = await response.json();
-            
-            if (!response.ok) {
-                throw new Error(data.message || 'Error al cargar asignaciones');
-            }
-            
-            if (data.success) {
-                allAsignaciones = data.data;
-                renderAsignaciones(data.data);
-                actualizarPaginacion(data.pagination);
-                showContent();
-            } else {
-                throw new Error(data.message);
-            }
-            
-        } catch (error) {
-            console.error('❌ Error cargando asignaciones:', error);
-            showError(error.message);
-        }
-    }
-    
-    function renderAsignaciones(asignaciones) {
-        asignacionesTbody.innerHTML = '';
-        
-        if (!asignaciones || asignaciones.length === 0) {
-            showEmptyState();
-            return;
-        }
-        
-        asignaciones.forEach(asignacion => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${asignacion.id_asignacion}</td>
-                <td>
-                    <div class="promotor-cell">
-                        <strong>${asignacion.promotor_nombre_completo}</strong>
-                        <small>${asignacion.promotor_correo}</small>
-                    </div>
-                </td>
-                <td>
-                    <div class="tienda-cell">
-                        <strong>${asignacion.tienda_identificador}</strong>
-                        <small>${asignacion.tienda_ciudad}, ${asignacion.tienda_estado}</small>
-                    </div>
-                </td>
-                <td>
-                    <span class="badge badge-region">Región ${asignacion.tienda_region}</span>
-                </td>
-                <td>${asignacion.fecha_inicio_formatted}</td>
-                <td>${asignacion.fecha_fin_formatted || '<em>Activa</em>'}</td>
-                <td>
-                    <span class="badge badge-days">${asignacion.duracion_dias} días</span>
-                </td>
-                <td>
-                    <span class="badge badge-${asignacion.estatus_texto.toLowerCase()}">${asignacion.estatus_texto}</span>
-                </td>
-                <td>
-                    <div class="action-buttons">
-                        <button class="btn-action view" onclick="verHistorialPromotor(${asignacion.id_promotor})" title="Ver Historial">
-                            <i class="fas fa-history"></i>
-                        </button>
-                        ${asignacion.activo && !asignacion.fecha_fin ? `
-                            <button class="btn-action edit" onclick="reasignarPromotor(${asignacion.id_asignacion})" title="Reasignar">
-                                <i class="fas fa-exchange-alt"></i>
-                            </button>
-                            <button class="btn-action delete" onclick="finalizarAsignacion(${asignacion.id_asignacion})" title="Finalizar">
-                                <i class="fas fa-stop-circle"></i>
-                            </button>
-                        ` : ''}
-                    </div>
-                </td>
-            `;
-            asignacionesTbody.appendChild(row);
-        });
-    }
-    
-    function actualizarPaginacion(pagination) {
-        if (!pagination) {
-            console.warn('⚠️ Sin datos de paginación');
-            return;
-        }
-        
-        currentPage = pagination.current_page || 1;
-        totalPages = pagination.total_pages || 1;
-        
-        paginationInfo.textContent = `Mostrando ${pagination.per_page || 0} de ${pagination.total_records || 0} registros`;
-        paginationPages.textContent = `Página ${currentPage} de ${totalPages}`;
-        
-        btnPrev.disabled = !pagination.has_prev;
-        btnNext.disabled = !pagination.has_next;
-    }
-    
-    function cambiarPagina(page) {
-        if (page < 1 || page > totalPages) return;
-        currentPage = page;
-        cargarAsignaciones();
-    }
-    
-    function realizarBusqueda() {
-        currentPage = 1;
-        cargarAsignaciones();
-    }
-    
-    function limpiarBusqueda() {
-        searchField.value = '';
+    if (!isFieldSelected) {
         searchValue.value = '';
-        estatusFilter.value = '';
-        searchValue.disabled = true;
-        btnBuscar.disabled = true;
         realizarBusqueda();
     }
-    
-    // ===== FUNCIONES DE ESTADO UI =====
-    function showLoading() {
-        loadingElement.style.display = 'block';
-        tableSection.querySelector('.table-wrapper').style.display = 'none';
-        emptyState.style.display = 'none';
-        paginationContainer.style.display = 'none';
+}
+
+function handleSearchKeypress(e) {
+    if (e.key === 'Enter') {
+        realizarBusqueda();
     }
-    
-    function showContent() {
-        loadingElement.style.display = 'none';
-        tableSection.querySelector('.table-wrapper').style.display = 'block';
-        emptyState.style.display = 'none';
-        paginationContainer.style.display = 'flex';
-    }
-    
-    function showEmptyState(message = 'No se encontraron asignaciones') {
-        loadingElement.style.display = 'none';
-        tableSection.querySelector('.table-wrapper').style.display = 'none';
-        emptyState.style.display = 'block';
-        paginationContainer.style.display = 'none';
+}
+
+// ===== FUNCIONES PRINCIPALES =====
+async function cargarAsignaciones() {
+    try {
+        showLoading();
         
-        const emptyTitle = emptyState.querySelector('h3');
-        if (emptyTitle) emptyTitle.textContent = message;
-    }
-    
-    function showError(message) {
-        console.error('❌ Error:', message);
-        showEmptyState('Error: ' + message);
-        mostrarNotificacion('Error: ' + message, 'error');
-    }
-    
-    // ===== DASHBOARD =====
-    async function toggleDashboard() {
-        if (currentView === 'dashboard') {
-            // Cambiar a vista tabla
-            currentView = 'table';
-            dashboardSection.style.display = 'none';
-            searchSection.style.display = 'block';
-            tableSection.style.display = 'block';
-            paginationContainer.style.display = 'flex';
-            btnDashboard.innerHTML = '<i class="fas fa-chart-pie"></i> Dashboard';
-        } else {
-            // Cambiar a vista dashboard
-            currentView = 'dashboard';
-            await cargarDashboard();
-            dashboardSection.style.display = 'block';
-            searchSection.style.display = 'none';
-            tableSection.style.display = 'none';
-            paginationContainer.style.display = 'none';
-            btnDashboard.innerHTML = '<i class="fas fa-table"></i> Ver Tabla';
-        }
-    }
-    
-    async function cargarDashboard() {
-        try {
-            console.log('📊 Cargando dashboard...');
-            
-            const response = await fetch('../../api/get_dashboard_stats.php');
-            const data = await response.json();
-            
-            if (!response.ok || !data.success) {
-                throw new Error(data.message || 'Error al cargar estadísticas');
-            }
-            
-            renderDashboard(data);
-            
-        } catch (error) {
-            console.error('❌ Error cargando dashboard:', error);
-            mostrarNotificacion('Error cargando dashboard: ' + error.message, 'error');
-        }
-    }
-    
-    function renderDashboard(data) {
-        // Actualizar estadísticas principales
-        document.getElementById('stat-asignaciones-activas').textContent = data.resumen_general.asignaciones.activas;
-        document.getElementById('stat-promotores-asignados').textContent = data.resumen_general.promotores.con_asignacion;
-        document.getElementById('stat-tiendas-cubiertas').textContent = data.resumen_general.tiendas.con_promotor;
-        document.getElementById('stat-cobertura').textContent = data.resumen_general.tiendas.porcentaje_cubiertas + '%';
-        
-        // Renderizar alertas
-        renderAlertas(data.alertas);
-        
-        // Renderizar actividad reciente
-        renderActividadReciente(data.asignaciones_recientes);
-    }
-    
-    function renderAlertas(alertas) {
-        const container = document.getElementById('alerts-container');
-        container.innerHTML = '';
-        
-        if (!alertas.necesita_atencion) {
-            container.innerHTML = '<div class="alert alert-success"><i class="fas fa-check-circle"></i> Todo está en orden</div>';
-            return;
-        }
-        
-        if (alertas.tiendas_sin_cobertura > 0) {
-            container.innerHTML += `
-                <div class="alert alert-warning">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <strong>${alertas.tiendas_sin_cobertura}</strong> tiendas sin cobertura de promotor
-                </div>
-            `;
-        }
-        
-        if (alertas.promotores_en_vacaciones > 0) {
-            container.innerHTML += `
-                <div class="alert alert-info">
-                    <i class="fas fa-umbrella-beach"></i>
-                    <strong>${alertas.promotores_en_vacaciones}</strong> promotores en vacaciones
-                </div>
-            `;
-        }
-        
-        if (alertas.promotores_disponibles > 0) {
-            container.innerHTML += `
-                <div class="alert alert-success">
-                    <i class="fas fa-user-plus"></i>
-                    <strong>${alertas.promotores_disponibles}</strong> promotores disponibles para asignar
-                </div>
-            `;
-        }
-    }
-    
-    function renderActividadReciente(asignaciones) {
-        const container = document.getElementById('recent-assignments');
-        container.innerHTML = '';
-        
-        if (!asignaciones || asignaciones.length === 0) {
-            container.innerHTML = '<p class="text-muted">No hay actividad reciente</p>';
-            return;
-        }
-        
-        asignaciones.forEach(asignacion => {
-            container.innerHTML += `
-                <div class="activity-item">
-                    <div class="activity-icon">
-                        <i class="fas fa-plus-circle"></i>
-                    </div>
-                    <div class="activity-content">
-                        <p><strong>${asignacion.promotor}</strong> asignado a <strong>${asignacion.tienda}</strong></p>
-                        <small>${asignacion.fecha_registro_formatted} • ${asignacion.motivo}</small>
-                    </div>
-                </div>
-            `;
+        const searchParams = new URLSearchParams({
+            page: currentPage,
+            limit: 10,
+            search_field: searchField.value || '',
+            search_value: searchValue.value || '',
+            estatus: estatusFilter.value || ''
         });
-    }
-    
-    // ===== MODAL NUEVA ASIGNACIÓN =====
-    async function abrirModalNuevaAsignacion() {
+        
+        console.log('🔍 Cargando asignaciones con parámetros:', searchParams.toString());
+        
+        const response = await fetch(`../../api/get_asignaciones.php?${searchParams}`);
+        
+        const responseText = await response.text();
+        let data;
         try {
-            // Cargar promotores disponibles
-            await cargarPromotoresDisponibles();
-            // Cargar tiendas disponibles
-            await cargarTiendasDisponibles();
-            // Configurar fecha por defecto
-            document.getElementById('fecha-inicio').value = new Date().toISOString().split('T')[0];
-            // Abrir modal
-            abrirModal(document.getElementById('modal-nueva-asignacion'));
-        } catch (error) {
-            console.error('❌ Error preparando modal:', error);
-            mostrarNotificacion('Error preparando formulario: ' + error.message, 'error');
+            data = JSON.parse(responseText);
+        } catch (jsonError) {
+            throw new Error('Respuesta inválida del servidor');
         }
+        
+        if (!data.success) {
+            throw new Error(data.message || 'Error al cargar asignaciones');
+        }
+        
+        allAsignaciones = data.data;
+        renderAsignaciones(data.data);
+        actualizarPaginacion(data.pagination);
+        showContent();
+        
+        console.log('✅ Asignaciones cargadas:', data.data.length);
+        
+    } catch (error) {
+        console.error('❌ Error cargando asignaciones:', error);
+        showError(error.message);
+    }
+}
+
+function renderAsignaciones(asignaciones) {
+    asignacionesTbody.innerHTML = '';
+    
+    if (!asignaciones || asignaciones.length === 0) {
+        showEmptyState();
+        return;
     }
     
-    async function cargarPromotoresDisponibles() {
+    asignaciones.forEach(asignacion => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${asignacion.id_asignacion}</td>
+            <td>
+                <div class="promotor-cell">
+                    <strong>${asignacion.promotor_nombre_completo}</strong>
+                    <small>${asignacion.promotor_correo || ''}</small>
+                </div>
+            </td>
+            <td>
+                <div class="tienda-cell">
+                    <strong>${asignacion.tienda_identificador}</strong>
+                    <small>${asignacion.tienda_ciudad}, ${asignacion.tienda_estado}</small>
+                </div>
+            </td>
+            <td>
+                <span class="badge badge-region">Región ${asignacion.tienda_region}</span>
+            </td>
+            <td>${asignacion.fecha_inicio_formatted}</td>
+            <td>${asignacion.fecha_fin_formatted || '<em>Activa</em>'}</td>
+            <td>
+                <span class="badge badge-days">${asignacion.duracion_dias} días</span>
+            </td>
+            <td>
+                <span class="badge badge-${asignacion.estatus_texto.toLowerCase()}">${asignacion.estatus_texto}</span>
+            </td>
+            <td>
+                <div class="action-buttons">
+                    <button class="btn-action view" onclick="verHistorialPromotor(${asignacion.id_promotor})" title="Ver Historial">
+                        <i class="fas fa-history"></i>
+                    </button>
+                    ${asignacion.activo && !asignacion.fecha_fin ? `
+                        <button class="btn-action edit" onclick="reasignarPromotor(${asignacion.id_asignacion})" title="Reasignar">
+                            <i class="fas fa-exchange-alt"></i>
+                        </button>
+                        <button class="btn-action delete" onclick="finalizarAsignacion(${asignacion.id_asignacion})" title="Finalizar">
+                            <i class="fas fa-stop-circle"></i>
+                        </button>
+                    ` : ''}
+                </div>
+            </td>
+        `;
+        asignacionesTbody.appendChild(row);
+    });
+}
+
+function actualizarPaginacion(pagination) {
+    if (!pagination) {
+        console.warn('⚠️ Sin datos de paginación');
+        return;
+    }
+    
+    currentPage = pagination.current_page || 1;
+    totalPages = pagination.total_pages || 1;
+    
+    paginationInfo.textContent = `Mostrando ${pagination.per_page || 0} de ${pagination.total_records || 0} registros`;
+    paginationPages.textContent = `Página ${currentPage} de ${totalPages}`;
+    
+    btnPrev.disabled = !pagination.has_prev;
+    btnNext.disabled = !pagination.has_next;
+}
+
+function cambiarPagina(page) {
+    if (page < 1 || page > totalPages) return;
+    currentPage = page;
+    cargarAsignaciones();
+}
+
+function realizarBusqueda() {
+    currentPage = 1;
+    cargarAsignaciones();
+}
+
+function limpiarBusqueda() {
+    searchField.value = '';
+    searchValue.value = '';
+    estatusFilter.value = '';
+    searchValue.disabled = true;
+    btnBuscar.disabled = true;
+    realizarBusqueda();
+}
+
+// ===== FUNCIONES DASHBOARD =====
+function toggleDashboard() {
+    console.log('📊 Toggle dashboard...');
+    if (currentView === 'table') {
+        currentView = 'dashboard';
+        dashboardSection.style.display = 'block';
+        searchSection.style.display = 'none';
+        tableContainer.style.display = 'none';
+        paginationContainer.style.display = 'none';
+        btnDashboard.innerHTML = '<i class="fas fa-table"></i> Tabla';
+        cargarDashboardStats();
+    } else {
+        currentView = 'table';
+        dashboardSection.style.display = 'none';
+        searchSection.style.display = 'block';
+        tableContainer.style.display = 'block';
+        paginationContainer.style.display = 'flex';
+        btnDashboard.innerHTML = '<i class="fas fa-chart-pie"></i> Dashboard';
+    }
+}
+
+async function cargarDashboardStats() {
+    try {
+        console.log('📊 Cargando estadísticas dashboard...');
+        const response = await fetch('../../api/get_dashboard_stats.php');
+        const data = await response.json();
+        
+        if (data.success) {
+            actualizarDashboardStats(data);
+        }
+    } catch (error) {
+        console.error('❌ Error cargando estadísticas dashboard:', error);
+    }
+}
+
+function actualizarDashboardStats(data) {
+    // Actualizar contadores principales
+    document.getElementById('stat-asignaciones-activas').textContent = data.resumen_general.asignaciones.activas;
+    document.getElementById('stat-promotores-asignados').textContent = data.resumen_general.promotores.con_asignacion;
+    document.getElementById('stat-tiendas-cubiertas').textContent = data.resumen_general.tiendas.con_promotor;
+    document.getElementById('stat-cobertura').textContent = data.resumen_general.tiendas.porcentaje_cubiertas + '%';
+    
+    // Actualizar alertas
+    actualizarAlertas(data.alertas);
+    
+    // Actualizar actividad reciente
+    actualizarActividadReciente(data.asignaciones_recientes);
+}
+
+function actualizarAlertas(alertas) {
+    const alertsContainer = document.getElementById('alerts-container');
+    alertsContainer.innerHTML = '';
+    
+    if (alertas.promotores_disponibles > 0) {
+        alertsContainer.innerHTML += `
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i>
+                Tienes ${alertas.promotores_disponibles} promotores disponibles para asignar
+            </div>
+        `;
+    }
+    
+    if (alertas.tiendas_sin_cobertura > 0) {
+        alertsContainer.innerHTML += `
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                ${alertas.tiendas_sin_cobertura} tiendas sin cobertura de promotor
+            </div>
+        `;
+    }
+}
+
+function actualizarActividadReciente(asignaciones) {
+    const activityList = document.getElementById('recent-assignments');
+    activityList.innerHTML = '';
+    
+    asignaciones.forEach(asignacion => {
+        activityList.innerHTML += `
+            <div class="activity-item">
+                <div class="activity-icon">
+                    <i class="fas fa-handshake"></i>
+                </div>
+                <div class="activity-content">
+                    <strong>${asignacion.promotor}</strong> asignado a 
+                    <strong>${asignacion.tienda}</strong>
+                    <small>${asignacion.fecha_asignacion_formatted}</small>
+                </div>
+            </div>
+        `;
+    });
+}
+
+// ===== FUNCIONES MODALES =====
+async function abrirModalNueva() {
+    try {
+        console.log('➕ Abriendo modal nueva asignación...');
+        
+        isEditing = false;
+        editingId = null;
+        modalTitle.innerHTML = '<i class="fas fa-plus"></i> Nueva Asignación';
+        btnGuardar.innerHTML = '<i class="fas fa-save"></i> Guardar';
+        
+        // Cargar promotores disponibles
+        const promResponse = await fetch('../../api/get_promotores_disponibles.php?solo_disponibles=true');
+        const promData = await promResponse.json();
+        
+        // Cargar tiendas disponibles  
+        const tienResponse = await fetch('../../api/get_tiendas_disponibles.php?solo_disponibles=true');
+        const tienData = await tienResponse.json();
+        
+        // Llenar selects
+        const promotorSelect = document.getElementById('nueva-promotor');
+        const tiendaSelect = document.getElementById('nueva-tienda');
+        
+        promotorSelect.innerHTML = '<option value="">Seleccionar promotor...</option>';
+        tiendaSelect.innerHTML = '<option value="">Seleccionar tienda...</option>';
+        
+        if (promData.success) {
+            promData.data.forEach(promotor => {
+                if (promotor.disponible) {
+                    promotorSelect.innerHTML += `<option value="${promotor.id_promotor}">${promotor.nombre_completo}</option>`;
+                }
+            });
+        }
+        
+        if (tienData.success) {
+            tienData.data.forEach(tienda => {
+                if (tienda.disponible) {
+                    tiendaSelect.innerHTML += `<option value="${tienda.id_tienda}">${tienda.identificador}</option>`;
+                }
+            });
+        }
+        
+        // Establecer fecha por defecto
+        document.getElementById('fecha-inicio').value = new Date().toISOString().split('T')[0];
+        
+        modalAsignacion.style.display = 'flex';
+        
+    } catch (error) {
+        console.error('❌ Error abriendo modal nueva asignación:', error);
+        mostrarNotificacion('Error al cargar datos para nueva asignación', 'error');
+    }
+}
+
+function cerrarModalAsignacion() {
+    console.log('❌ Cerrando modal asignación...');
+    modalAsignacion.style.display = 'none';
+    formAsignacion.reset();
+    isEditing = false;
+    editingId = null;
+}
+
+async function guardarAsignacion(e) {
+    e.preventDefault();
+    
+    const originalText = btnGuardar.innerHTML;
+    
+    const data = {
+        id_promotor: document.getElementById('nueva-promotor').value,
+        id_tienda: document.getElementById('nueva-tienda').value,
+        fecha_inicio: document.getElementById('fecha-inicio').value,
+        motivo_asignacion: document.getElementById('motivo-asignacion').value
+    };
+    
+    try {
+        btnGuardar.disabled = true;
+        btnGuardar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+        
+        console.log('💾 Guardando asignación:', data);
+        
+        const response = await fetch('../../api/create_asignacion.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const responseText = await response.text();
+        let result;
         try {
-            const response = await fetch('../../api/get_promotores_disponibles.php?solo_activos=true');
-            const data = await response.json();
-            
-            if (!response.ok || !data.success) {
-                throw new Error(data.message || 'Error al cargar promotores');
-            }
-            
-            const select = document.getElementById('select-promotor');
-            select.innerHTML = '<option value="">Seleccionar promotor...</option>';
+            result = JSON.parse(responseText);
+        } catch (jsonError) {
+            throw new Error('Respuesta inválida del servidor');
+        }
+        
+        if (!result.success) {
+            throw new Error(result.message || 'Error al guardar asignación');
+        }
+        
+        mostrarNotificacion('Asignación guardada correctamente', 'success');
+        cerrarModalAsignacion();
+        cargarAsignaciones();
+        
+    } catch (error) {
+        console.error('❌ Error guardando asignación:', error);
+        mostrarNotificacion('Error al guardar asignación: ' + error.message, 'error');
+    } finally {
+        btnGuardar.disabled = false;
+        btnGuardar.innerHTML = originalText;
+    }
+}
+
+// ===== FUNCIONES DE ACCIONES =====
+function verHistorialPromotor(idPromotor) {
+    console.log('🔍 Abriendo historial del promotor:', idPromotor);
+    modalHistorial.style.display = 'flex';
+    // Aquí cargarías el historial específico del promotor
+}
+
+function cerrarModalHistorial() {
+    modalHistorial.style.display = 'none';
+}
+
+function finalizarAsignacion(idAsignacion) {
+    try {
+        console.log('🛑 Abriendo modal finalizar asignación:', idAsignacion);
+        
+        // Buscar la asignación en los datos actuales
+        const asignacion = allAsignaciones.find(a => a.id_asignacion == idAsignacion);
+        
+        if (asignacion) {
+            // Llenar detalles de la asignación
+            document.getElementById('finalizar-details').innerHTML = `
+                <div class="asignacion-info">
+                    <h4>Asignación a Finalizar</h4>
+                    <p><strong>Promotor:</strong> ${asignacion.promotor_nombre_completo}</p>
+                    <p><strong>Tienda:</strong> ${asignacion.tienda_identificador}</p>
+                    <p><strong>Fecha Inicio:</strong> ${asignacion.fecha_inicio_formatted}</p>
+                    <p><strong>Días Activa:</strong> ${asignacion.duracion_dias} días</p>
+                    <p><strong>Motivo Inicial:</strong> ${asignacion.motivo_asignacion}</p>
+                </div>
+            `;
+        }
+        
+        document.getElementById('finalizar-id-asignacion').value = idAsignacion;
+        document.getElementById('fecha-fin').value = new Date().toISOString().split('T')[0];
+        modalFinalizar.style.display = 'flex';
+        
+    } catch (error) {
+        console.error('❌ Error abriendo modal finalizar:', error);
+        mostrarNotificacion('Error preparando finalización: ' + error.message, 'error');
+    }
+}
+
+function cerrarModalFinalizar() {
+    modalFinalizar.style.display = 'none';
+    document.getElementById('form-finalizar').reset();
+    document.getElementById('finalizar-details').innerHTML = '';
+}
+
+async function confirmarFinalizar(e) {
+    e.preventDefault();
+    
+    const btnConfirmar = document.getElementById('btn-confirmar-finalizar');
+    const originalText = btnConfirmar.innerHTML;
+    
+    const data = {
+        id_asignacion: document.getElementById('finalizar-id-asignacion').value,
+        fecha_fin: document.getElementById('fecha-fin').value,
+        motivo_finalizacion: document.getElementById('motivo-finalizacion').value
+    };
+    
+    try {
+        btnConfirmar.disabled = true;
+        btnConfirmar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Finalizando...';
+        
+        console.log('🛑 Finalizando asignación:', data);
+        
+        const response = await fetch('../../api/finalizar_asignacion.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const responseText = await response.text();
+        let result;
+        try {
+            result = JSON.parse(responseText);
+        } catch (jsonError) {
+            throw new Error('Respuesta inválida del servidor');
+        }
+        
+        if (!result.success) {
+            throw new Error(result.message || 'Error al finalizar asignación');
+        }
+        
+        mostrarNotificacion('Asignación finalizada correctamente', 'success');
+        cerrarModalFinalizar();
+        cargarAsignaciones();
+        
+    } catch (error) {
+        console.error('❌ Error finalizando asignación:', error);
+        mostrarNotificacion('Error al finalizar asignación: ' + error.message, 'error');
+    } finally {
+        btnConfirmar.disabled = false;
+        btnConfirmar.innerHTML = originalText;
+    }
+}
+
+async function reasignarPromotor(idAsignacion) {
+    try {
+        console.log('🔄 Abriendo modal reasignar promotor:', idAsignacion);
+        
+        // Cargar promotores disponibles para el select
+        const response = await fetch('../../api/get_promotores_disponibles.php?solo_disponibles=true');
+        const data = await response.json();
+        
+        if (data.success) {
+            const nuevoPromotorSelect = document.getElementById('nuevo-promotor');
+            nuevoPromotorSelect.innerHTML = '<option value="">Seleccionar nuevo promotor...</option>';
             
             data.data.forEach(promotor => {
-                if (promotor.puede_asignar) {
-                    select.innerHTML += `
-                        <option value="${promotor.id_promotor}">
-                            ${promotor.nombre_completo} - ${promotor.correo}
-                        </option>
-                    `;
+                if (promotor.disponible) {
+                    nuevoPromotorSelect.innerHTML += `<option value="${promotor.id_promotor}">${promotor.nombre_completo}</option>`;
                 }
             });
             
-            console.log(`✅ Cargados ${data.data.filter(p => p.puede_asignar).length} promotores disponibles`);
+            // Cargar datos de la asignación actual para mostrar contexto
+            const asignacion = allAsignaciones.find(a => a.id_asignacion == idAsignacion);
             
-        } catch (error) {
-            console.error('❌ Error cargando promotores:', error);
-            throw error;
-        }
-    }
-    
-    async function cargarTiendasDisponibles() {
-        try {
-            const response = await fetch('../../api/get_tiendas_disponibles.php');
-            const data = await response.json();
-            
-            if (!response.ok || !data.success) {
-                throw new Error(data.message || 'Error al cargar tiendas');
-            }
-            
-            const select = document.getElementById('select-tienda');
-            select.innerHTML = '<option value="">Seleccionar tienda...</option>';
-            
-            // Agrupar por región
-            const tiendasPorRegion = {};
-            data.data.forEach(tienda => {
-                if (tienda.puede_asignar) {
-                    if (!tiendasPorRegion[tienda.region]) {
-                        tiendasPorRegion[tienda.region] = [];
-                    }
-                    tiendasPorRegion[tienda.region].push(tienda);
-                }
-            });
-            
-            // Agregar opciones por región
-            Object.keys(tiendasPorRegion).sort((a, b) => parseInt(a) - parseInt(b)).forEach(region => {
-                const optgroup = document.createElement('optgroup');
-                optgroup.label = `Región ${region}`;
-                
-                tiendasPorRegion[region].forEach(tienda => {
-                    optgroup.innerHTML += `
-                        <option value="${tienda.id_tienda}">
-                            ${tienda.identificador} - ${tienda.ciudad}
-                        </option>
-                    `;
-                });
-                
-                select.appendChild(optgroup);
-            });
-            
-            console.log(`✅ Cargadas ${data.data.filter(t => t.puede_asignar).length} tiendas disponibles`);
-            
-        } catch (error) {
-            console.error('❌ Error cargando tiendas:', error);
-            throw error;
-        }
-    }
-    
-    // ===== ACCIONES =====
-    window.verHistorialPromotor = async function(idPromotor) {
-        try {
-            console.log('📋 Cargando historial del promotor:', idPromotor);
-            
-            const response = await fetch(`../../api/get_historial_promotor.php?id_promotor=${idPromotor}`);
-            const data = await response.json();
-            
-            if (!response.ok || !data.success) {
-                throw new Error(data.message || 'Error al cargar historial');
-            }
-            
-            renderHistorialPromotor(data);
-            abrirModal(document.getElementById('modal-historial'));
-            
-        } catch (error) {
-            console.error('❌ Error cargando historial:', error);
-            mostrarNotificacion('Error cargando historial: ' + error.message, 'error');
-        }
-    };
-    
-    function renderHistorialPromotor(data) {
-        // Actualizar nombre
-        document.getElementById('historial-promotor-nombre').textContent = data.promotor.nombre_completo;
-        
-        // Información del promotor
-        const promotorInfo = document.getElementById('promotor-info');
-        promotorInfo.innerHTML = `
-            <div class="promotor-card">
-                <h4>${data.promotor.nombre_completo}</h4>
-                <p><strong>RFC:</strong> ${data.promotor.rfc}</p>
-                <p><strong>Correo:</strong> ${data.promotor.correo}</p>
-                <p><strong>Teléfono:</strong> ${data.promotor.telefono}</p>
-                <p><strong>Estatus:</strong> <span class="badge badge-${data.promotor.estatus.toLowerCase()}">${data.promotor.estatus}</span></p>
-                <p><strong>Fecha Alta:</strong> ${data.promotor.fecha_alta_formatted}</p>
-            </div>
-        `;
-        
-        // Estadísticas
-        const historialStats = document.getElementById('historial-stats');
-        historialStats.innerHTML = `
-            <div class="stats-grid-small">
-                <div class="stat-small">
-                    <h5>${data.estadisticas.total_asignaciones}</h5>
-                    <p>Total Asignaciones</p>
-                </div>
-                <div class="stat-small">
-                    <h5>${data.estadisticas.asignaciones_activas}</h5>
-                    <p>Activas</p>
-                </div>
-                <div class="stat-small">
-                    <h5>${data.estadisticas.total_dias_asignado}</h5>
-                    <p>Días Totales</p>
-                </div>
-                <div class="stat-small">
-                    <h5>${data.estadisticas.promedio_dias_por_asignacion}</h5>
-                    <p>Promedio p/Asignación</p>
-                </div>
-                <div class="stat-small">
-                    <h5>${data.estadisticas.tiendas_distintas}</h5>
-                    <p>Tiendas Diferentes</p>
-                </div>
-                <div class="stat-small">
-                    <h5>${data.estadisticas.cadenas_distintas}</h5>
-                    <p>Cadenas</p>
-                </div>
-            </div>
-        `;
-        
-        // Timeline del historial
-        const timeline = document.getElementById('historial-timeline');
-        timeline.innerHTML = '<h4><i class="fas fa-timeline"></i> Historial de Asignaciones</h4>';
-        
-        if (!data.historial || data.historial.length === 0) {
-            timeline.innerHTML += '<p class="text-muted">No hay historial de asignaciones</p>';
-            return;
-        }
-        
-        const timelineContainer = document.createElement('div');
-        timelineContainer.className = 'timeline';
-        
-        data.historial.forEach((asignacion, index) => {
-            const timelineItem = document.createElement('div');
-            timelineItem.className = 'timeline-item';
-            timelineItem.innerHTML = `
-                <div class="timeline-marker ${asignacion.actualmente_asignado ? 'active' : 'completed'}">
-                    <i class="fas ${asignacion.actualmente_asignado ? 'fa-play' : 'fa-check'}"></i>
-                </div>
-                <div class="timeline-content">
-                    <div class="timeline-header">
-                        <h5>${asignacion.tienda_identificador}</h5>
-                        <span class="badge badge-${asignacion.estatus_color}">${asignacion.estatus_texto}</span>
+            if (asignacion) {
+                document.getElementById('reasignar-details').innerHTML = `
+                    <div class="asignacion-info">
+                        <h4>Asignación Actual</h4>
+                        <p><strong>Promotor:</strong> ${asignacion.promotor_nombre_completo}</p>
+                        <p><strong>Tienda:</strong> ${asignacion.tienda_identificador}</p>
+                        <p><strong>Fecha Inicio:</strong> ${asignacion.fecha_inicio_formatted}</p>
+                        <p><strong>Días Activa:</strong> ${asignacion.duracion_dias} días</p>
                     </div>
-                    <p><strong>Período:</strong> ${asignacion.fecha_inicio_formatted} - ${asignacion.fecha_fin_formatted || 'Actual'}</p>
-                    <p><strong>Duración:</strong> ${asignacion.dias_asignado} días</p>
-                    <p><strong>Ciudad:</strong> ${asignacion.tienda_ciudad}, ${asignacion.tienda_estado}</p>
-                    <p><strong>Motivo:</strong> ${asignacion.motivo_asignacion}</p>
-                    ${asignacion.motivo_cambio ? `<p><strong>Motivo cambio:</strong> ${asignacion.motivo_cambio}</p>` : ''}
-                    <small class="text-muted">Asignado por: ${asignacion.usuario_asigno}</small>
-                </div>
-            `;
-            timelineContainer.appendChild(timelineItem);
-        });
-        
-        timeline.appendChild(timelineContainer);
-    }
-    
-    window.finalizarAsignacion = function(idAsignacion) {
-        const asignacion = allAsignaciones.find(a => a.id_asignacion === idAsignacion);
-        if (!asignacion) {
-            mostrarNotificacion('Asignación no encontrada', 'error');
-            return;
-        }
-        
-        // Llenar detalles
-        document.getElementById('finalizar-id-asignacion').value = idAsignacion;
-        document.getElementById('finalizar-details').innerHTML = `
-            <div class="asignacion-card">
-                <h4>Finalizar Asignación</h4>
-                <p><strong>Promotor:</strong> ${asignacion.promotor_nombre_completo}</p>
-                <p><strong>Tienda:</strong> ${asignacion.tienda_identificador}</p>
-                <p><strong>Inicio:</strong> ${asignacion.fecha_inicio_formatted}</p>
-                <p><strong>Duración actual:</strong> ${asignacion.duracion_dias} días</p>
-            </div>
-        `;
-        
-        // Fecha por defecto
-        document.getElementById('fecha-fin').value = new Date().toISOString().split('T')[0];
-        
-        abrirModal(document.getElementById('modal-finalizar'));
-    };
-    
-    window.reasignarPromotor = async function(idAsignacion) {
-        try {
-            const asignacion = allAsignaciones.find(a => a.id_asignacion === idAsignacion);
-            if (!asignacion) {
-                mostrarNotificacion('Asignación no encontrada', 'error');
-                return;
+                `;
             }
             
-            // Llenar detalles actuales
             document.getElementById('reasignar-id-asignacion').value = idAsignacion;
-            document.getElementById('reasignar-details').innerHTML = `
-                <div class="reasignacion-card">
-                    <h4>Reasignación de Promotor</h4>
-                    <p><strong>Promotor:</strong> ${asignacion.promotor_nombre_completo}</p>
-                    <p><strong>Tienda Actual:</strong> ${asignacion.tienda_identificador}</p>
-                    <p><strong>Fecha Inicio Actual:</strong> ${asignacion.fecha_inicio_formatted}</p>
-                    <p><strong>Duración Actual:</strong> ${asignacion.duracion_dias} días</p>
-                </div>
-            `;
-            
-            // Cargar tiendas disponibles para reasignación
-            await cargarTiendasParaReasignacion();
-            
-            // Fecha por defecto
             document.getElementById('fecha-cambio').value = new Date().toISOString().split('T')[0];
-            
-            abrirModal(document.getElementById('modal-reasignar'));
-            
-        } catch (error) {
-            console.error('❌ Error preparando reasignación:', error);
-            mostrarNotificacion('Error preparando reasignación: ' + error.message, 'error');
+            modalReasignar.style.display = 'flex';
+        } else {
+            throw new Error(data.message || 'Error cargando promotores');
         }
+        
+    } catch (error) {
+        console.error('❌ Error abriendo modal reasignar:', error);
+        mostrarNotificacion('Error preparando reasignación: ' + error.message, 'error');
+    }
+}
+
+function cerrarModalReasignar() {
+    modalReasignar.style.display = 'none';
+    document.getElementById('form-reasignar').reset();
+    document.getElementById('reasignar-details').innerHTML = '';
+}
+
+async function confirmarReasignar(e) {
+    e.preventDefault();
+    
+    const btnConfirmar = document.getElementById('btn-confirmar-reasignar');
+    const originalText = btnConfirmar.innerHTML;
+    
+    const data = {
+        id_asignacion: document.getElementById('reasignar-id-asignacion').value,
+        nuevo_promotor: document.getElementById('nuevo-promotor').value,
+        fecha_cambio: document.getElementById('fecha-cambio').value,
+        motivo_cambio: document.getElementById('motivo-cambio').value,
+        motivo_nueva_asignacion: document.getElementById('motivo-nueva-asignacion').value || 'Reasignación de promotor'
     };
     
-    async function cargarTiendasParaReasignacion() {
+    try {
+        btnConfirmar.disabled = true;
+        btnConfirmar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Reasignando...';
+        
+        console.log('🔄 Reasignando promotor:', data);
+        
+        const response = await fetch('../../api/reasignar_promotor.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const responseText = await response.text();
+        let result;
         try {
-            const response = await fetch('../../api/get_tiendas_disponibles.php');
-            const data = await response.json();
-            
-            if (!response.ok || !data.success) {
-                throw new Error(data.message || 'Error al cargar tiendas');
-            }
-            
-            const select = document.getElementById('nueva-tienda');
-            select.innerHTML = '<option value="">Seleccionar nueva tienda...</option>';
-            
-            // Agrupar por región
-            const tiendasPorRegion = {};
-            data.data.forEach(tienda => {
-                if (tienda.puede_asignar) {
-                    if (!tiendasPorRegion[tienda.region]) {
-                        tiendasPorRegion[tienda.region] = [];
-                    }
-                    tiendasPorRegion[tienda.region].push(tienda);
-                }
-            });
-            
-            // Agregar opciones por región
-            Object.keys(tiendasPorRegion).sort((a, b) => parseInt(a) - parseInt(b)).forEach(region => {
-                const optgroup = document.createElement('optgroup');
-                optgroup.label = `Región ${region}`;
-                
-                tiendasPorRegion[region].forEach(tienda => {
-                    optgroup.innerHTML += `
-                        <option value="${tienda.id_tienda}">
-                            ${tienda.identificador} - ${tienda.ciudad}
-                        </option>
-                    `;
-                });
-                
-                select.appendChild(optgroup);
-            });
-            
-        } catch (error) {
-            console.error('❌ Error cargando tiendas para reasignación:', error);
-            throw error;
+            result = JSON.parse(responseText);
+        } catch (jsonError) {
+            throw new Error('Respuesta inválida del servidor');
         }
-    }
-    
-    // ===== CONFIGURACIÓN DE MODALES =====
-    function configurarModales() {
-        // Modal Nueva Asignación
-        document.getElementById('modal-close-nueva').addEventListener('click', () => {
-            cerrarModal(document.getElementById('modal-nueva-asignacion'));
-        });
-        document.getElementById('btn-cancelar-nueva').addEventListener('click', () => {
-            cerrarModal(document.getElementById('modal-nueva-asignacion'));
-        });
-        document.getElementById('form-nueva-asignacion').addEventListener('submit', crearNuevaAsignacion);
         
-        // Modal Historial
-        document.getElementById('modal-close-historial').addEventListener('click', () => {
-            cerrarModal(document.getElementById('modal-historial'));
-        });
-        
-        // Modal Finalizar
-        document.getElementById('modal-close-finalizar').addEventListener('click', () => {
-            cerrarModal(document.getElementById('modal-finalizar'));
-        });
-        document.getElementById('btn-cancelar-finalizar').addEventListener('click', () => {
-            cerrarModal(document.getElementById('modal-finalizar'));
-        });
-        document.getElementById('form-finalizar').addEventListener('submit', procesarFinalizacion);
-        
-        // Modal Reasignar
-        document.getElementById('modal-close-reasignar').addEventListener('click', () => {
-            cerrarModal(document.getElementById('modal-reasignar'));
-        });
-        document.getElementById('btn-cancelar-reasignar').addEventListener('click', () => {
-            cerrarModal(document.getElementById('modal-reasignar'));
-        });
-        document.getElementById('form-reasignar').addEventListener('submit', procesarReasignacion);
-    }
-    
-    // ===== PROCESAMIENTO DE FORMULARIOS =====
-    async function crearNuevaAsignacion(e) {
-        e.preventDefault();
-        
-        try {
-            const formData = {
-                id_promotor: document.getElementById('select-promotor').value,
-                id_tienda: document.getElementById('select-tienda').value,
-                fecha_inicio: document.getElementById('fecha-inicio').value,
-                motivo_asignacion: document.getElementById('motivo-asignacion').value
-            };
-            
-            console.log('💾 Creando nueva asignación:', formData);
-            
-            const response = await fetch('../../api/create_asignacion.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(formData)
-            });
-            
-            const result = await response.json();
-            
-            if (!response.ok || !result.success) {
-                throw new Error(result.message || 'Error al crear asignación');
-            }
-            
-            mostrarNotificacion('✅ Asignación creada correctamente', 'success');
-            cerrarModal(document.getElementById('modal-nueva-asignacion'));
-            cargarAsignaciones();
-            
-        } catch (error) {
-            console.error('❌ Error creando asignación:', error);
-            mostrarNotificacion('Error: ' + error.message, 'error');
+        if (!result.success) {
+            throw new Error(result.message || 'Error al reasignar promotor');
         }
+        
+        mostrarNotificacion('Promotor reasignado correctamente', 'success');
+        cerrarModalReasignar();
+        cargarAsignaciones();
+        
+    } catch (error) {
+        console.error('❌ Error reasignando promotor:', error);
+        mostrarNotificacion('Error al reasignar promotor: ' + error.message, 'error');
+    } finally {
+        btnConfirmar.disabled = false;
+        btnConfirmar.innerHTML = originalText;
     }
+}
+
+// ===== NOTIFICACIONES =====
+function mostrarNotificacion(mensaje, tipo = 'info') {
+    const notificacion = document.createElement('div');
+    notificacion.className = `notification ${tipo}`;
     
-    async function procesarFinalizacion(e) {
-        e.preventDefault();
-        
-        try {
-            const formData = {
-                id_asignacion: document.getElementById('finalizar-id-asignacion').value,
-                fecha_fin: document.getElementById('fecha-fin').value,
-                motivo_cambio: document.getElementById('motivo-finalizacion').value,
-                desactivar: document.getElementById('desactivar-asignacion').checked ? 'true' : 'false'
-            };
-            
-            console.log('🛑 Finalizando asignación:', formData);
-            
-            const response = await fetch('../../api/finalizar_asignacion.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(formData)
-            });
-            
-            const result = await response.json();
-            
-            if (!response.ok || !result.success) {
-                throw new Error(result.message || 'Error al finalizar asignación');
-            }
-            
-            mostrarNotificacion('✅ Asignación finalizada correctamente', 'success');
-            cerrarModal(document.getElementById('modal-finalizar'));
-            cargarAsignaciones();
-            
-        } catch (error) {
-            console.error('❌ Error finalizando asignación:', error);
-            mostrarNotificacion('Error: ' + error.message, 'error');
-        }
-    }
+    const iconos = {
+        success: 'fas fa-check-circle',
+        error: 'fas fa-exclamation-circle',
+        warning: 'fas fa-exclamation-triangle',
+        info: 'fas fa-info-circle'
+    };
     
-    async function procesarReasignacion(e) {
-        e.preventDefault();
-        
-        try {
-            const formData = {
-                id_asignacion_actual: document.getElementById('reasignar-id-asignacion').value,
-                id_tienda_nueva: document.getElementById('nueva-tienda').value,
-                fecha_cambio: document.getElementById('fecha-cambio').value,
-                motivo_cambio: document.getElementById('motivo-cambio').value,
-                motivo_nueva_asignacion: document.getElementById('motivo-nueva-asignacion').value || 'Reasignación desde otra tienda'
-            };
-            
-            console.log('🔄 Procesando reasignación:', formData);
-            
-            const response = await fetch('../../api/update_asignacion.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(formData)
-            });
-            
-            const result = await response.json();
-            
-            if (!response.ok || !result.success) {
-                throw new Error(result.message || 'Error al reasignar');
-            }
-            
-            mostrarNotificacion('✅ Reasignación completada correctamente', 'success');
-            cerrarModal(document.getElementById('modal-reasignar'));
-            cargarAsignaciones();
-            
-        } catch (error) {
-            console.error('❌ Error en reasignación:', error);
-            mostrarNotificacion('Error: ' + error.message, 'error');
-        }
-    }
+    const titulos = {
+        success: 'Éxito',
+        error: 'Error',
+        warning: 'Advertencia',
+        info: 'Información'
+    };
     
-    // ===== FUNCIONES AUXILIARES =====
-    function abrirModal(modal) {
-        modal.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-    }
+    notificacion.innerHTML = `
+        <i class="${iconos[tipo]} notification-icon"></i>
+        <div class="notification-content">
+            <h4>${titulos[tipo]}</h4>
+            <p>${mensaje}</p>
+        </div>
+        <button class="notification-close">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
     
-    function cerrarModal(modal) {
-        modal.style.display = 'none';
-        document.body.style.overflow = 'auto';
-        // Limpiar formularios
-        const forms = modal.querySelectorAll('form');
-        forms.forEach(form => form.reset());
-    }
-    
-    // ===== NOTIFICACIONES =====
-    function mostrarNotificacion(mensaje, tipo = 'info') {
-        const notificacion = document.createElement('div');
-        notificacion.className = `notification ${tipo}`;
-        
-        const iconos = {
-            success: 'fas fa-check-circle',
-            error: 'fas fa-exclamation-circle',
-            warning: 'fas fa-exclamation-triangle',
-            info: 'fas fa-info-circle'
-        };
-        
-        const titulos = {
-            success: 'Éxito',
-            error: 'Error',
-            warning: 'Advertencia',
-            info: 'Información'
-        };
-        
-        notificacion.innerHTML = `
-            <i class="${iconos[tipo]} notification-icon"></i>
-            <div class="notification-content">
-                <h4>${titulos[tipo]}</h4>
-                <p>${mensaje}</p>
-            </div>
-            <button class="notification-close">
-                <i class="fas fa-times"></i>
-            </button>
-        `;
-        
-        notificacion.querySelector('.notification-close').addEventListener('click', () => {
-            notificacion.remove();
-        });
-        
-        setTimeout(() => {
-            if (notificacion.parentNode) {
-                notificacion.remove();
-            }
-        }, 5000);
-        
-        document.getElementById('notifications-container').appendChild(notificacion);
-    }
-    
-    // ===== EXPONER FUNCIONES GLOBALES =====
-    window.verHistorialPromotor = verHistorialPromotor;
-    window.finalizarAsignacion = finalizarAsignacion;
-    window.reasignarPromotor = reasignarPromotor;
-    
-    // ===== INICIALIZACIÓN =====
-    console.log('👥 Iniciando módulo Gestión de Asignaciones...');
-    init();
+    notificacion.querySelector('.notification-close').addEventListener('click', () => {
+        notificacion.remove();
+    });
     
     setTimeout(() => {
-        console.log('⏰ Iniciando carga de datos...');
-        cargarAsignaciones();
-    }, 100);
+        if (notificacion.parentNode) {
+            notificacion.remove();
+        }
+    }, 5000);
     
-    console.log('✅ Módulo asignaciones inicializado correctamente');
-});
+    document.getElementById('notifications-container').appendChild(notificacion);
+}
+
+// ===== EXPONER FUNCIONES GLOBALES =====
+window.verHistorialPromotor = verHistorialPromotor;
+window.finalizarAsignacion = finalizarAsignacion;
+window.reasignarPromotor = reasignarPromotor;
+
+// ===== INICIALIZACIÓN =====
+console.log('👥 Iniciando módulo Gestión de Asignaciones...');
+init();
+
+setTimeout(() => {
+    console.log('⏰ Iniciando carga de datos...');
+    cargarAsignaciones();
+}, 100);
+
+console.log('✅ Módulo asignaciones inicializado correctamente');
 </script>
+
+<style>
+/* ===== ESTILOS ASIGNACIONES MODULE ===== */
+.asignaciones-module {
+    padding: 2rem;
+    background: #f8fafc;
+    min-height: 100vh;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* ===== HEADER DEL MÓDULO ===== */
+.module-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    color: white;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.header-title {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.header-icon {
+    font-size: 2.5rem;
+    opacity: 0.9;
+}
+
+.header-title h1 {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.header-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+/* ===== BOTONES ===== */
+.btn-primary, .btn-secondary, .btn-danger, .btn-warning, .btn-success {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+    color: white;
+}
+
+.btn-warning {
+    background: linear-gradient(135deg, #feca57 0%, #ff9ff3 100%);
+    color: white;
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #26de81 0%, #20bf6b 100%);
+    color: white;
+}
+
+/* ===== DASHBOARD STATS ===== */
+.dashboard-stats {
+    margin-bottom: 2rem;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+    border-left: 4px solid transparent;
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+}
+
+.stat-card.primary {
+    border-left-color: #667eea;
+}
+
+.stat-card.success {
+    border-left-color: #26de81;
+}
+
+.stat-card.warning {
+    border-left-color: #feca57;
+}
+
+.stat-card.info {
+    border-left-color: #54a0ff;
+}
+
+.stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.stat-card.primary .stat-icon {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.stat-card.success .stat-icon {
+    background: linear-gradient(135deg, #26de81 0%, #20bf6b 100%);
+    color: white;
+}
+
+.stat-card.warning .stat-icon {
+    background: linear-gradient(135deg, #feca57 0%, #ff9ff3 100%);
+    color: white;
+}
+
+.stat-card.info .stat-icon {
+    background: linear-gradient(135deg, #54a0ff 0%, #2e86de 100%);
+    color: white;
+}
+
+.stat-content h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #2d3748;
+}
+
+.stat-content p {
+    margin: 0;
+    color: #718096;
+    font-weight: 500;
+}
+
+/* ===== ALERTAS ===== */
+.alerts-section {
+    margin-bottom: 2rem;
+}
+
+.alert {
+    background: white;
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border-left: 4px solid transparent;
+}
+
+.alert.alert-info {
+    border-left-color: #54a0ff;
+}
+
+.alert.alert-warning {
+    border-left-color: #feca57;
+}
+
+.alert i {
+    font-size: 1.25rem;
+}
+
+/* ===== ACTIVIDAD RECIENTE ===== */
+.recent-activity {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.recent-activity h3 {
+    margin: 0 0 1.5rem 0;
+    color: #2d3748;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.activity-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 10px;
+}
+
+.activity-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.activity-content {
+    flex: 1;
+}
+
+.activity-content small {
+    display: block;
+    color: #718096;
+    margin-top: 0.25rem;
+}
+
+/* ===== CONTROLES DE BÚSQUEDA ===== */
+.search-controls {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.search-box {
+    display: grid;
+    grid-template-columns: 200px 1fr 180px auto auto;
+    gap: 1rem;
+    align-items: center;
+}
+
+.search-select, .search-input {
+    padding: 0.75rem 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 0.875rem;
+    transition: all 0.3s ease;
+    background: #fafafa;
+}
+
+.search-select:focus, .search-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    background: white;
+}
+
+.search-input:disabled {
+    background: #f1f5f9;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.btn-search, .btn-clear {
+    padding: 0.75rem;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+}
+
+.btn-search {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.btn-search:disabled {
+    background: #cbd5e0;
+    cursor: not-allowed;
+}
+
+.btn-clear {
+    background: #e2e8f0;
+    color: #4a5568;
+}
+
+.btn-clear:hover {
+    background: #cbd5e0;
+}
+
+/* ===== TABLA ===== */
+.table-container {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+.asignaciones-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+
+.asignaciones-table th {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.asignaciones-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+    vertical-align: middle;
+}
+
+.asignaciones-table tr:hover {
+    background: #f8fafc;
+}
+
+/* ===== CELDAS ESPECIALES ===== */
+.promotor-cell, .tienda-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.promotor-cell strong, .tienda-cell strong {
+    color: #2d3748;
+    font-weight: 600;
+}
+
+.promotor-cell small, .tienda-cell small {
+    color: #718096;
+    font-size: 0.75rem;
+}
+
+/* ===== BADGES ===== */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.375rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.badge-region {
+    background: linear-gradient(135deg, #54a0ff 0%, #2e86de 100%);
+    color: white;
+}
+
+.badge-days {
+    background: linear-gradient(135deg, #26de81 0%, #20bf6b 100%);
+    color: white;
+}
+
+.badge-activo {
+    background: linear-gradient(135deg, #26de81 0%, #20bf6b 100%);
+    color: white;
+}
+
+.badge-finalizado {
+    background: linear-gradient(135deg, #a4b0be 0%, #6c5ce7 100%);
+    color: white;
+}
+
+.badge-inactivo {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+    color: white;
+}
+
+/* ===== BOTONES DE ACCIÓN ===== */
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-action {
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.875rem;
+}
+
+.btn-action.view {
+    background: linear-gradient(135deg, #54a0ff 0%, #2e86de 100%);
+    color: white;
+}
+
+.btn-action.edit {
+    background: linear-gradient(135deg, #feca57 0%, #ff9ff3 100%);
+    color: white;
+}
+
+.btn-action.delete {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+    color: white;
+}
+
+.btn-action:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* ===== LOADING Y ESTADOS ===== */
+.table-loading {
+    display: none;
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #718096;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #e2e8f0;
+    border-top: 4px solid #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #718096;
+}
+
+.empty-icon {
+    font-size: 4rem;
+    color: #cbd5e0;
+    margin-bottom: 1rem;
+}
+
+.empty-state h3 {
+    margin: 0 0 0.5rem 0;
+    color: #4a5568;
+    font-size: 1.25rem;
+}
+
+.empty-state p {
+    margin: 0 0 1.5rem 0;
+}
+
+/* ===== PAGINACIÓN ===== */
+.pagination-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    padding: 1.5rem 2rem;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.pagination-info {
+    color: #718096;
+    font-size: 0.875rem;
+}
+
+.pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.pagination-btn {
+    width: 40px;
+    height: 40px;
+    border: 2px solid #e2e8f0;
+    background: white;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #4a5568;
+}
+
+.pagination-btn:hover:not(:disabled) {
+    border-color: #667eea;
+    color: #667eea;
+    transform: translateY(-1px);
+}
+
+.pagination-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pagination-pages {
+    font-weight: 600;
+    color: #4a5568;
+    font-size: 0.875rem;
+}
+
+/* ===== MODALES ===== */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 2rem;
+}
+
+.modal-container {
+    background: white;
+    border-radius: 20px;
+    max-width: 600px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.modal-container.large {
+    max-width: 900px;
+}
+
+.modal-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 20px 20px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.modal-close {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: rotate(90deg);
+}
+
+.modal-content, .modal-form {
+    padding: 2rem;
+}
+
+/* ===== FORMULARIOS ===== */
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #4a5568;
+    font-size: 0.875rem;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 0.875rem;
+    transition: all 0.3s ease;
+    background: #fafafa;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    background: white;
+}
+
+.form-help {
+    font-size: 0.75rem;
+    color: #718096;
+    margin-top: 0.5rem;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+/* ===== INFORMACIÓN DE ASIGNACIÓN ===== */
+.asignacion-info {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border-left: 4px solid #667eea;
+}
+
+.asignacion-info h4 {
+    margin: 0 0 1rem 0;
+    color: #2d3748;
+    font-size: 1.1rem;
+}
+
+.asignacion-info p {
+    margin: 0.5rem 0;
+    color: #4a5568;
+    font-size: 0.875rem;
+}
+
+.asignacion-info strong {
+    color: #2d3748;
+}
+
+/* ===== NOTIFICACIONES ===== */
+.notifications-container {
+    position: fixed;
+    top: 2rem;
+    right: 2rem;
+    z-index: 1100;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-width: 400px;
+}
+
+.notification {
+    background: white;
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    border-left: 4px solid transparent;
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.notification.success {
+    border-left-color: #26de81;
+}
+
+.notification.error {
+    border-left-color: #ff6b6b;
+}
+
+.notification.warning {
+    border-left-color: #feca57;
+}
+
+.notification.info {
+    border-left-color: #54a0ff;
+}
+
+.notification-icon {
+    font-size: 1.25rem;
+    margin-top: 0.125rem;
+}
+
+.notification.success .notification-icon {
+    color: #26de81;
+}
+
+.notification.error .notification-icon {
+    color: #ff6b6b;
+}
+
+.notification.warning .notification-icon {
+    color: #feca57;
+}
+
+.notification.info .notification-icon {
+    color: #54a0ff;
+}
+
+.notification-content {
+    flex: 1;
+}
+
+.notification-content h4 {
+    margin: 0 0 0.25rem 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.notification-content p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: #718096;
+    line-height: 1.4;
+}
+
+.notification-close {
+    background: none;
+    border: none;
+    color: #a0aec0;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0;
+    transition: color 0.3s ease;
+}
+
+.notification-close:hover {
+    color: #4a5568;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+    .asignaciones-module {
+        padding: 1rem;
+    }
+    
+    .header-content {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .search-box {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .pagination-container {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+}
+
+@media (max-width: 768px) {
+    .modal-overlay {
+        padding: 1rem;
+    }
+    
+    .modal-container {
+        max-height: 95vh;
+    }
+    
+    .modal-header {
+        padding: 1.5rem;
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .modal-content, .modal-form {
+        padding: 1.5rem;
+    }
+    
+    .notifications-container {
+        left: 1rem;
+        right: 1rem;
+        max-width: none;
+    }
+    
+    .asignaciones-table {
+        font-size: 0.75rem;
+    }
+    
+    .asignaciones-table th,
+    .asignaciones-table td {
+        padding: 0.75rem 0.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .header-title h1 {
+        font-size: 1.5rem;
+    }
+    
+    .header-icon {
+        font-size: 2rem;
+    }
+    
+    .stat-card {
+        padding: 1.5rem;
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+    }
+    
+    .btn-action {
+        width: 100%;
+        height: 32px;
+    }
+}
+</style>
