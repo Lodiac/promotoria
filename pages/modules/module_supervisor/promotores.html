@@ -1,16 +1,252 @@
-<div style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); color: white; padding: 2rem; border-radius: 16px; text-align: center;">
-    <h1>👑 Panel ROOT </h1>
-    <p>✅ Módulo ROOT cargado exitosamente desde: modules/module_root/bienvenida.html</p>
-    <p>🎯 Sistema detectando correctamente el rol ROOT</p>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestión de Promotores</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<div class="container py-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Gestión de Promotores</h2>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNuevo">
+      ➕ Nuevo Promotor
+    </button>
+  </div>
+
+  <!-- Buscador -->
+  <div class="input-group mb-4">
+    <select id="filtro" class="form-select" style="max-width: 200px;">
+      <option value="nombre">Nombre</option>
+      <option value="apellido">Apellido</option>
+      <option value="rfc">RFC</option>
+    </select>
+    <input type="text" id="busqueda" class="form-control" placeholder="Buscar...">
+  </div>
+
+  <!-- Tabla -->
+  <div class="table-responsive">
+    <table class="table table-striped align-middle">
+      <thead class="table-dark">
+        <tr>
+          <th>ID</th>
+          <th>Nombre</th>
+          <th>Apellido</th>
+          <th>Teléfono</th>
+          <th>Correo</th>
+          <th>RFC</th>
+          <th>Estatus</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="tablaPromotores"></tbody>
+    </table>
+  </div>
 </div>
 
-<div style="background: rgba(255, 255, 255, 0.95); padding: 2rem; border-radius: 12px; margin-top: 2rem; border: 2px solid #27ae60;">
-    <h2 style="color: #27ae60; margin-bottom: 1rem;">🚀 Todo funcionando correctamente</h2>
-    <p>Si ves este mensaje, significa que:</p>
-    <ul style="text-align: left; color: #666;">
-        <li>✅ La sesión ROOT está activa</li>
-        <li>✅ El archivo get_module.php está funcionando</li>
-        <li>✅ La estructura de carpetas es correcta</li>
-        <li>✅ El módulo se está cargando dinámicamente</li>
-    </ul>
+<!-- Modal Nuevo -->
+<div class="modal fade" id="modalNuevo" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <form id="formNuevo">
+        <div class="modal-header">
+          <h5 class="modal-title">Nuevo Promotor</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body row g-3">
+          <div class="col-md-6"><label class="form-label">Nombre</label><input type="text" class="form-control" name="nombre" required></div>
+          <div class="col-md-6"><label class="form-label">Apellido</label><input type="text" class="form-control" name="apellido" required></div>
+          <div class="col-md-6"><label class="form-label">Teléfono</label><input type="text" class="form-control" name="telefono" required></div>
+          <div class="col-md-6"><label class="form-label">Correo</label><input type="email" class="form-control" name="correo" required></div>
+          <div class="col-md-6"><label class="form-label">RFC</label><input type="text" class="form-control" name="rfc" required></div>
+          <div class="col-md-6"><label class="form-label">NSS</label><input type="text" class="form-control" name="nss" required></div>
+          <div class="col-md-6"><label class="form-label">Clave Asistencia</label><input type="text" class="form-control" name="clave_asistencia" required></div>
+          <div class="col-md-6"><label class="form-label">Banco</label><input type="text" class="form-control" name="banco"></div>
+          <div class="col-md-6"><label class="form-label">Cuenta</label><input type="text" class="form-control" name="numero_cuenta"></div>
+          <div class="col-md-6"><label class="form-label">Estatus</label>
+            <select class="form-select" name="estatus" required>
+              <option value="ACTIVO">ACTIVO</option>
+              <option value="BAJA">BAJA</option>
+            </select>
+          </div>
+          <div class="col-md-6"><label class="form-label">Vacaciones</label>
+            <select class="form-select" name="vacaciones" required>
+              <option value="0">No</option>
+              <option value="1">Sí</option>
+            </select>
+          </div>
+          <div class="col-md-6"><label class="form-label">Estado</label>
+            <select class="form-select" name="estado" required>
+              <option value="1">Activo</option>
+              <option value="0">Inactivo</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">Crear</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>
+
+<!-- Modal Editar -->
+<div class="modal fade" id="modalEditar" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <form id="formEditar">
+        <input type="hidden" name="id_promotor" id="edit_id_promotor">
+        <div class="modal-header">
+          <h5 class="modal-title">Editar Promotor</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body row g-3">
+          <div class="col-md-6"><label class="form-label">Nombre</label><input type="text" class="form-control" id="edit_nombre" name="nombre" required></div>
+          <div class="col-md-6"><label class="form-label">Apellido</label><input type="text" class="form-control" id="edit_apellido" name="apellido" required></div>
+          <div class="col-md-6"><label class="form-label">Teléfono</label><input type="text" class="form-control" id="edit_telefono" name="telefono" required></div>
+          <div class="col-md-6"><label class="form-label">Correo</label><input type="email" class="form-control" id="edit_correo" name="correo" required></div>
+          <div class="col-md-6"><label class="form-label">RFC</label><input type="text" class="form-control" id="edit_rfc" name="rfc" required></div>
+          <div class="col-md-6"><label class="form-label">NSS</label><input type="text" class="form-control" id="edit_nss" name="nss" required></div>
+          <div class="col-md-6"><label class="form-label">Clave Asistencia</label><input type="text" class="form-control" id="edit_clave_asistencia" name="clave_asistencia" required></div>
+          <div class="col-md-6"><label class="form-label">Banco</label><input type="text" class="form-control" id="edit_banco" name="banco"></div>
+          <div class="col-md-6"><label class="form-label">Cuenta</label><input type="text" class="form-control" id="edit_numero_cuenta" name="numero_cuenta"></div>
+          <div class="col-md-6"><label class="form-label">Estatus</label>
+            <select class="form-select" id="edit_estatus" name="estatus" required>
+              <option value="ACTIVO">ACTIVO</option>
+              <option value="BAJA">BAJA</option>
+            </select>
+          </div>
+          <div class="col-md-6"><label class="form-label">Vacaciones</label>
+            <select class="form-select" id="edit_vacaciones" name="vacaciones" required>
+              <option value="0">No</option>
+              <option value="1">Sí</option>
+            </select>
+          </div>
+          <div class="col-md-6"><label class="form-label">Estado</label>
+            <select class="form-select" id="edit_estado" name="estado" required>
+              <option value="1">Activo</option>
+              <option value="0">Inactivo</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-warning">Actualizar</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+async function cargarPromotores() {
+  try {
+    const res = await fetch("../../api/get_promotores.php");
+    const json = await res.json();
+
+    if (!json.error && Array.isArray(json.data)) {
+      const tbody = document.getElementById("tablaPromotores");
+      tbody.innerHTML = "";
+
+      json.data.forEach(p => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${p.id}</td>
+          <td>${p.nombre}</td>
+          <td>${p.apellido}</td>
+          <td>${p.telefono}</td>
+          <td>${p.correo}</td>
+          <td>${p.rfc}</td>
+          <td>${p.estatus}</td>
+          <td>
+            <button class="btn btn-sm btn-warning btn-editar">Editar</button>
+            <button class="btn btn-sm btn-danger btn-eliminar">Eliminar</button>
+          </td>`;
+
+        // Asignar eventos de manera segura
+        tr.querySelector(".btn-editar").addEventListener("click", () => abrirEditar(p));
+        tr.querySelector(".btn-eliminar").addEventListener("click", () => eliminarPromotor(p.id));
+
+        tbody.appendChild(tr);
+      });
+    } else {
+      console.warn("⚠️ El servidor no devolvió un array:", json);
+    }
+  } catch (error) {
+    console.error("Error cargando promotores:", error);
+  }
+}
+
+
+// Abre el modal de edición con los datos del promotor
+function abrirEditar(p) {
+  document.getElementById("edit_id_promotor").value = p.id;
+  document.getElementById("edit_nombre").value = p.nombre;
+  document.getElementById("edit_apellido").value = p.apellido;
+  document.getElementById("edit_telefono").value = p.telefono;
+  document.getElementById("edit_correo").value = p.correo;
+  document.getElementById("edit_rfc").value = p.rfc;
+  document.getElementById("edit_nss").value = p.nss;
+  document.getElementById("edit_clave_asistencia").value = p.clave_asistencia;
+  document.getElementById("edit_banco").value = p.banco;
+  document.getElementById("edit_numero_cuenta").value = p.numero_cuenta;
+  document.getElementById("edit_estatus").value = p.estatus;
+  document.getElementById("edit_vacaciones").value = p.vacaciones;
+  document.getElementById("edit_estado").value = p.estado;
+
+  const modal = new bootstrap.Modal(document.getElementById("modalEditar"));
+  modal.show();
+}
+
+// Guardar cambios en edición
+document.getElementById("formEditar").addEventListener("submit", async e => {
+  e.preventDefault();
+  const formData = new FormData(e.target);
+  const res = await fetch("../../api/update_promotor.php", { method:"POST", body: formData });
+  const result = await res.json();
+  alert(result.message);
+  if(result.success){
+    bootstrap.Modal.getInstance(document.getElementById("modalEditar")).hide();
+    cargarPromotores();
+  }
+});
+
+// Eliminar promotor
+async function eliminarPromotor(id){
+  if(!confirm("¿Seguro que deseas eliminar este promotor?")) return;
+  const formData = new FormData();
+  formData.append("id", id);
+  const res = await fetch("../../api/delete_promotor.php", { method:"POST", body: formData });
+  const result = await res.json();
+  alert(result.message);
+  if(result.success) cargarPromotores();
+}
+
+// Crear nuevo promotor
+document.getElementById("formNuevo").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  try {
+    const formData = new FormData(e.target);
+    const response = await fetch("../../api/save_promotor.php", { method: "POST", body: formData });
+    const res = await response.json();
+
+    if (!res.error) {
+      alert("✅ " + res.message);
+      cargarPromotores();
+      e.target.reset();
+      bootstrap.Modal.getInstance(document.getElementById("modalNuevo")).hide();
+    } else {
+      alert("⚠️ " + res.message);
+    }
+  } catch (error) {
+    console.error("Error en fetch:", error);
+    alert("❌ Error al guardar el promotor.");
+  }
+});
+
+// Cargar lista al abrir
+cargarPromotores();
+</script>
