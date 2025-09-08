@@ -1,2490 +1,2408 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Asignaciones v3.0 - Múltiples Promotores</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-</head>
-<body>
-    <!-- ===== MÓDULO ASIGNACIONES V3.0 COMPLETO ===== -->
-    <div class="asignaciones-module">
-        <!-- HEADER DEL MÓDULO -->
-        <div class="module-header">
-            <div class="header-content">
-                <div class="header-title">
-                    <i class="fas fa-users-cog header-icon"></i>
-                    <div>
-                        <h1>Gestión de Asignaciones v3.0</h1>
-                        <p class="header-subtitle">Sistema avanzado con soporte para múltiples promotores por tienda</p>
-                    </div>
-                </div>
-                <div class="header-actions">
-                    <button class="btn-secondary" id="btn-dashboard">
-                        <i class="fas fa-chart-pie"></i> Dashboard
-                    </button>
-                    <button class="btn-primary" id="btn-agregar-promotor">
-                        <i class="fas fa-user-plus"></i> Agregar Promotor
-                    </button>
-                </div>
+<!-- ===== MÓDULO GESTIÓN DE ASIGNACIONES - DISEÑO MODERNO ===== -->
+<div class="asignaciones-module">
+    <!-- HEADER DEL MÓDULO -->
+    <div class="module-header">
+        <div class="header-content">
+            <div class="header-title">
+                <i class="fas fa-users-cog header-icon"></i>
+                <h1>Gestión de Asignaciones</h1>
             </div>
-        </div>
-
-        <!-- DASHBOARD STATS -->
-        <div class="dashboard-section" id="dashboard-section" style="display: none;">
-            <!-- Stats Grid -->
-            <div class="stats-grid">
-                <div class="stat-card primary">
-                    <div class="stat-icon">
-                        <i class="fas fa-handshake"></i>
-                    </div>
-                    <div class="stat-content">
-                        <h3 id="stat-asignaciones-activas">0</h3>
-                        <p>Asignaciones Activas</p>
-                        <div class="stat-trend" id="trend-asignaciones">+0% vs anterior</div>
-                    </div>
-                </div>
-                
-                <div class="stat-card success">
-                    <div class="stat-icon">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <div class="stat-content">
-                        <h3 id="stat-promotores-asignados">0</h3>
-                        <p>Promotores Asignados</p>
-                        <div class="stat-trend" id="trend-promotores">0% cobertura</div>
-                    </div>
-                </div>
-                
-                <div class="stat-card warning">
-                    <div class="stat-icon">
-                        <i class="fas fa-store"></i>
-                    </div>
-                    <div class="stat-content">
-                        <h3 id="stat-tiendas-cubiertas">0</h3>
-                        <p>Tiendas con Cobertura</p>
-                        <div class="stat-trend" id="trend-tiendas">0% del total</div>
-                    </div>
-                </div>
-                
-                <div class="stat-card info">
-                    <div class="stat-icon">
-                        <i class="fas fa-chart-line"></i>
-                    </div>
-                    <div class="stat-content">
-                        <h3 id="stat-promedio-promotores">0.0</h3>
-                        <p>Promedio Promotores/Tienda</p>
-                        <div class="stat-trend" id="trend-promedio">Distribución</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Distribución de Promotores -->
-            <div class="distribution-container">
-                <h3><i class="fas fa-chart-bar"></i> Distribución de Promotores por Tienda</h3>
-                <div class="distribution-grid" id="distribution-grid">
-                    <div class="distribution-card">
-                        <div class="distribution-number" id="dist-0">0</div>
-                        <div class="distribution-label">Sin Promotores</div>
-                    </div>
-                    <div class="distribution-card">
-                        <div class="distribution-number" id="dist-1">0</div>
-                        <div class="distribution-label">1 Promotor</div>
-                    </div>
-                    <div class="distribution-card">
-                        <div class="distribution-number" id="dist-2">0</div>
-                        <div class="distribution-label">2 Promotores</div>
-                    </div>
-                    <div class="distribution-card">
-                        <div class="distribution-number" id="dist-3">0</div>
-                        <div class="distribution-label">3+ Promotores</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Alertas -->
-            <div class="alerts-section" id="alerts-container">
-                <!-- Se llenarán dinámicamente -->
-            </div>
-        </div>
-
-        <!-- VISTA PRINCIPAL: TABLA DE TIENDAS -->
-        <div class="main-view" id="main-view">
-            <!-- Controles de Búsqueda y Filtros -->
-            <div class="search-controls">
-                <div class="search-box">
-                    <select id="search-field" class="search-select">
-                        <option value="">Seleccionar campo...</option>
-                        <option value="cadena">Cadena</option>
-                        <option value="nombre_tienda">Nombre Tienda</option>
-                        <option value="region">Región</option>
-                        <option value="ciudad">Ciudad</option>
-                        <option value="estado">Estado</option>
-                    </select>
-                    <input type="text" id="search-value" placeholder="Valor a buscar..." class="search-input" disabled>
-                    <select id="coverage-filter" class="search-select">
-                        <option value="">Todas las tiendas</option>
-                        <option value="sin_promotores">Sin promotores</option>
-                        <option value="con_promotores">Con promotores</option>
-                    </select>
-                    <button id="btn-buscar" class="btn-search" disabled>
-                        <i class="fas fa-search"></i>
-                    </button>
-                    <button id="btn-limpiar" class="btn-clear">
-                        <i class="fas fa-eraser"></i>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Tabla de Tiendas -->
-            <div class="table-container" id="table-container">
-                <div class="table-loading" id="table-loading">
-                    <div class="loading-spinner"></div>
-                    <p>Cargando tiendas y asignaciones...</p>
-                </div>
-
-                <div class="table-wrapper" id="table-wrapper">
-                    <table class="tiendas-table" id="tiendas-table">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Región</th>
-                                <th>Cadena</th>
-                                <th>Núm. Tienda</th>
-                                <th>Nombre</th>
-                                <th>Ciudad</th>
-                                <th>Estado</th>
-                                <th>Promotores</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tiendas-tbody">
-                            <!-- Se llenarán dinámicamente -->
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="empty-state" id="empty-state" style="display: none;">
-                    <i class="fas fa-store-slash"></i>
-                    <h3>No hay tiendas</h3>
-                    <p>No se encontraron tiendas con los criterios seleccionados</p>
-                    <button class="btn-primary" onclick="limpiarBusqueda()">
-                        <i class="fas fa-refresh"></i> Limpiar Filtros
-                    </button>
-                </div>
-            </div>
-
-            <!-- Paginación -->
-            <div class="pagination-container" id="pagination-container">
-                <div class="pagination-info">
-                    <span id="pagination-info">Mostrando 0 de 0 tiendas</span>
-                </div>
-                <div class="pagination-controls">
-                    <button class="btn-pagination" id="btn-prev">
-                        <i class="fas fa-chevron-left"></i> Anterior
-                    </button>
-                    <span class="pagination-pages" id="pagination-pages">Página 1 de 1</span>
-                    <button class="btn-pagination" id="btn-next">
-                        Siguiente <i class="fas fa-chevron-right"></i>
-                    </button>
-                </div>
+            <div class="header-actions">
+                <button class="btn-secondary" id="btn-dashboard">
+                    <i class="fas fa-chart-pie"></i> Dashboard
+                </button>
+                <button class="btn-primary" id="btn-agregar-promotor">
+                    <i class="fas fa-user-plus"></i> Agregar Promotor
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- ===== MODAL AGREGAR PROMOTOR ===== -->
-    <div class="modal-overlay" id="modal-agregar">
-        <div class="modal-container">
-            <div class="modal-header">
-                <h2><i class="fas fa-user-plus"></i> Agregar Promotor a Tienda</h2>
-                <button class="modal-close" id="modal-close-agregar">
-                    <i class="fas fa-times"></i>
-                </button>
+    <!-- DASHBOARD STATS -->
+    <div class="dashboard-section" id="dashboard-section" style="display: none;">
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card primary">
+                <div class="stat-icon">
+                    <i class="fas fa-handshake"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="stat-asignaciones-activas">0</h3>
+                    <p>Asignaciones Activas</p>
+                    <div class="stat-trend" id="trend-asignaciones">+0% vs anterior</div>
+                </div>
             </div>
             
-            <form class="modal-form" id="form-agregar">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="agregar-promotor">Promotor *</label>
-                        <select id="agregar-promotor" required>
-                            <option value="">Seleccionar promotor...</option>
-                        </select>
-                        <div class="form-help">Todos los promotores activos disponibles</div>
-                    </div>
-                    <div class="form-group">
-                        <label for="agregar-tienda">Tienda *</label>
-                        <select id="agregar-tienda" required>
-                            <option value="">Seleccionar tienda...</option>
-                        </select>
-                        <div class="form-help">Cualquier tienda (múltiples promotores permitidos)</div>
-                    </div>
+            <div class="stat-card success">
+                <div class="stat-icon">
+                    <i class="fas fa-users"></i>
                 </div>
+                <div class="stat-content">
+                    <h3 id="stat-promotores-asignados">0</h3>
+                    <p>Promotores Asignados</p>
+                    <div class="stat-trend" id="trend-promotores">0% cobertura</div>
+                </div>
+            </div>
+            
+            <div class="stat-card warning">
+                <div class="stat-icon">
+                    <i class="fas fa-store"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="stat-tiendas-cubiertas">0</h3>
+                    <p>Tiendas con Cobertura</p>
+                    <div class="stat-trend" id="trend-tiendas">0% del total</div>
+                </div>
+            </div>
+            
+            <div class="stat-card info">
+                <div class="stat-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="stat-promedio-promotores">0.0</h3>
+                    <p>Promedio Promotores/Tienda</p>
+                    <div class="stat-trend" id="trend-promedio">Distribución</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Distribución de Promotores -->
+        <div class="distribution-container">
+            <h3><i class="fas fa-chart-bar"></i> Distribución de Promotores por Tienda</h3>
+            <div class="distribution-grid" id="distribution-grid">
+                <div class="distribution-card">
+                    <div class="distribution-number" id="dist-0">0</div>
+                    <div class="distribution-label">Sin Promotores</div>
+                </div>
+                <div class="distribution-card">
+                    <div class="distribution-number" id="dist-1">0</div>
+                    <div class="distribution-label">1 Promotor</div>
+                </div>
+                <div class="distribution-card">
+                    <div class="distribution-number" id="dist-2">0</div>
+                    <div class="distribution-label">2 Promotores</div>
+                </div>
+                <div class="distribution-card">
+                    <div class="distribution-number" id="dist-3">0</div>
+                    <div class="distribution-label">3+ Promotores</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alertas -->
+        <div class="alerts-section" id="alerts-container">
+            <!-- Se llenarán dinámicamente -->
+        </div>
+    </div>
+
+    <!-- VISTA PRINCIPAL: TABLA DE TIENDAS -->
+    <div class="main-view" id="main-view">
+        <!-- Controles de Búsqueda y Filtros -->
+        <div class="search-controls">
+            <div class="search-box">
+                <select id="search-field" class="search-select">
+                    <option value="">Seleccionar campo...</option>
+                    <option value="cadena">Cadena</option>
+                    <option value="nombre_tienda">Nombre Tienda</option>
+                    <option value="region">Región</option>
+                    <option value="ciudad">Ciudad</option>
+                    <option value="estado">Estado</option>
+                </select>
+                <input type="text" id="search-value" placeholder="Valor a buscar..." class="search-input" disabled>
+                <select id="coverage-filter" class="search-select">
+                    <option value="">Todas las tiendas</option>
+                    <option value="sin_promotores">Sin promotores</option>
+                    <option value="con_promotores">Con promotores</option>
+                </select>
+                <button id="btn-buscar" class="btn-search" disabled>
+                    <i class="fas fa-search"></i>
+                </button>
+                <button id="btn-limpiar" class="btn-clear">
+                    <i class="fas fa-eraser"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Tabla de Tiendas -->
+        <div class="table-container" id="table-container">
+            <div class="table-loading" id="table-loading">
+                <div class="loading-spinner"></div>
+                <p>Cargando tiendas y asignaciones...</p>
+            </div>
+
+            <div class="table-wrapper" id="table-wrapper">
+                <table class="tiendas-table" id="tiendas-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Región</th>
+                            <th>Cadena</th>
+                            <th>Núm. Tienda</th>
+                            <th>Nombre</th>
+                            <th>Ciudad</th>
+                            <th>Estado</th>
+                            <th>Promotores</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tiendas-tbody">
+                        <!-- Se llenarán dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="empty-state" id="empty-state" style="display: none;">
+                <i class="fas fa-store-slash"></i>
+                <h3>No hay tiendas</h3>
+                <p>No se encontraron tiendas con los criterios seleccionados</p>
+                <button class="btn-primary" onclick="limpiarBusqueda()">
+                    <i class="fas fa-refresh"></i> Limpiar Filtros
+                </button>
+            </div>
+        </div>
+
+        <!-- Paginación -->
+        <div class="pagination-container" id="pagination-container">
+            <div class="pagination-info">
+                <span id="pagination-info">Mostrando 0 de 0 tiendas</span>
+            </div>
+            <div class="pagination-controls">
+                <button class="btn-pagination" id="btn-prev">
+                    <i class="fas fa-chevron-left"></i> Anterior
+                </button>
+                <span class="pagination-pages" id="pagination-pages">Página 1 de 1</span>
+                <button class="btn-pagination" id="btn-next">
+                    Siguiente <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== MODAL AGREGAR PROMOTOR ===== -->
+<div class="modal-overlay" id="modal-agregar">
+    <div class="modal-container">
+        <div class="modal-header">
+            <h2><i class="fas fa-user-plus"></i> Agregar Promotor a Tienda</h2>
+            <button class="modal-close" id="modal-close-agregar">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <form class="modal-form" id="form-agregar">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="agregar-promotor">Promotor *</label>
+                    <select id="agregar-promotor" required>
+                        <option value="">Seleccionar promotor...</option>
+                    </select>
+                    <div class="form-help">Todos los promotores activos disponibles</div>
+                </div>
+                <div class="form-group">
+                    <label for="agregar-tienda">Tienda *</label>
+                    <select id="agregar-tienda" required>
+                        <option value="">Seleccionar tienda...</option>
+                    </select>
+                    <div class="form-help">Cualquier tienda (múltiples promotores permitidos)</div>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="agregar-fecha-inicio">Fecha de Inicio *</label>
+                    <input type="date" id="agregar-fecha-inicio" required>
+                </div>
+                <div class="form-group">
+                    <label for="agregar-motivo">Motivo de Asignación *</label>
+                    <input type="text" id="agregar-motivo" placeholder="Ej: Expansión de cobertura..." maxlength="255" required>
+                </div>
+            </div>
+            
+            <div class="modal-actions">
+                <button type="button" class="btn-secondary" id="btn-cancelar-agregar">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+                <button type="submit" class="btn-primary" id="btn-guardar-agregar">
+                    <i class="fas fa-user-plus"></i> Agregar Promotor
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ===== MODAL REASIGNAR PROMOTOR ===== -->
+<div class="modal-overlay" id="modal-reasignar">
+    <div class="modal-container">
+        <div class="modal-header">
+            <h2><i class="fas fa-exchange-alt"></i> Reasignar Promotor</h2>
+            <button class="modal-close" id="modal-close-reasignar">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="modal-content">
+            <div class="current-assignment" id="reasignar-details">
+                <!-- Se llenará dinámicamente -->
+            </div>
+            
+            <form class="modal-form" id="form-reasignar">
+                <input type="hidden" id="reasignar-id-asignacion">
                 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="agregar-fecha-inicio">Fecha de Inicio *</label>
-                        <input type="date" id="agregar-fecha-inicio" required>
+                        <label for="nueva-tienda-destino">Nueva Tienda *</label>
+                        <select id="nueva-tienda-destino" required>
+                            <option value="">Seleccionar nueva tienda...</option>
+                        </select>
+                        <div class="form-help">El promotor se moverá a esta tienda</div>
                     </div>
                     <div class="form-group">
-                        <label for="agregar-motivo">Motivo de Asignación *</label>
-                        <input type="text" id="agregar-motivo" placeholder="Ej: Expansión de cobertura..." maxlength="255" required>
+                        <label for="reasignar-fecha-cambio">Fecha de Cambio *</label>
+                        <input type="date" id="reasignar-fecha-cambio" required>
                     </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="reasignar-motivo-cambio">Motivo del Cambio *</label>
+                    <textarea id="reasignar-motivo-cambio" rows="3" placeholder="Ej: Reestructuración de zona..." maxlength="255" required></textarea>
                 </div>
                 
                 <div class="modal-actions">
-                    <button type="button" class="btn-secondary" id="btn-cancelar-agregar">
+                    <button type="button" class="btn-secondary" id="btn-cancelar-reasignar">
                         <i class="fas fa-times"></i> Cancelar
                     </button>
-                    <button type="submit" class="btn-primary" id="btn-guardar-agregar">
-                        <i class="fas fa-user-plus"></i> Agregar Promotor
+                    <button type="submit" class="btn-warning" id="btn-confirmar-reasignar">
+                        <i class="fas fa-exchange-alt"></i> Reasignar
                     </button>
                 </div>
             </form>
         </div>
     </div>
+</div>
 
-    <!-- ===== MODAL REASIGNAR PROMOTOR ===== -->
-    <div class="modal-overlay" id="modal-reasignar">
-        <div class="modal-container">
-            <div class="modal-header">
-                <h2><i class="fas fa-exchange-alt"></i> Reasignar Promotor</h2>
-                <button class="modal-close" id="modal-close-reasignar">
-                    <i class="fas fa-times"></i>
-                </button>
+<!-- ===== MODAL QUITAR PROMOTOR ===== -->
+<div class="modal-overlay" id="modal-quitar">
+    <div class="modal-container">
+        <div class="modal-header">
+            <h2><i class="fas fa-user-minus"></i> Quitar Promotor de Tienda</h2>
+            <button class="modal-close" id="modal-close-quitar">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="modal-content">
+            <div class="current-assignment" id="quitar-details">
+                <!-- Se llenará dinámicamente -->
             </div>
             
-            <div class="modal-content">
-                <div class="current-assignment" id="reasignar-details">
-                    <!-- Se llenará dinámicamente -->
-                </div>
+            <form class="modal-form" id="form-quitar">
+                <input type="hidden" id="quitar-id-asignacion">
                 
-                <form class="modal-form" id="form-reasignar">
-                    <input type="hidden" id="reasignar-id-asignacion">
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="nueva-tienda-destino">Nueva Tienda *</label>
-                            <select id="nueva-tienda-destino" required>
-                                <option value="">Seleccionar nueva tienda...</option>
-                            </select>
-                            <div class="form-help">El promotor se moverá a esta tienda</div>
-                        </div>
-                        <div class="form-group">
-                            <label for="reasignar-fecha-cambio">Fecha de Cambio *</label>
-                            <input type="date" id="reasignar-fecha-cambio" required>
-                        </div>
-                    </div>
-                    
+                <div class="form-row">
                     <div class="form-group">
-                        <label for="reasignar-motivo-cambio">Motivo del Cambio *</label>
-                        <textarea id="reasignar-motivo-cambio" rows="3" placeholder="Ej: Reestructuración de zona..." maxlength="255" required></textarea>
+                        <label for="quitar-fecha-fin">Fecha de Finalización *</label>
+                        <input type="date" id="quitar-fecha-fin" required>
                     </div>
-                    
-                    <div class="modal-actions">
-                        <button type="button" class="btn-secondary" id="btn-cancelar-reasignar">
-                            <i class="fas fa-times"></i> Cancelar
-                        </button>
-                        <button type="submit" class="btn-warning" id="btn-confirmar-reasignar">
-                            <i class="fas fa-exchange-alt"></i> Reasignar
-                        </button>
+                    <div class="form-group">
+                        <label for="quitar-motivo">Motivo de Finalización *</label>
+                        <textarea id="quitar-motivo" rows="3" placeholder="Ej: Finalización de proyecto..." maxlength="255" required></textarea>
                     </div>
-                </form>
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" id="btn-cancelar-quitar">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                    <button type="submit" class="btn-danger" id="btn-confirmar-quitar">
+                        <i class="fas fa-user-minus"></i> Quitar Promotor
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ===== MODAL HISTORIAL PROMOTOR ===== -->
+<div class="modal-overlay" id="modal-historial">
+    <div class="modal-container modal-large">
+        <div class="modal-header">
+            <h2><i class="fas fa-history"></i> Historial de <span id="historial-promotor-nombre"></span></h2>
+            <button class="modal-close" id="modal-close-historial">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="modal-content">
+            <div class="promotor-info" id="promotor-info">
+                <!-- Se llenará dinámicamente -->
+            </div>
+            <div class="historial-timeline" id="historial-timeline">
+                <!-- Se llenará dinámicamente -->
             </div>
         </div>
     </div>
-
-    <!-- ===== MODAL QUITAR PROMOTOR ===== -->
-    <div class="modal-overlay" id="modal-quitar">
-        <div class="modal-container">
-            <div class="modal-header">
-                <h2><i class="fas fa-user-minus"></i> Quitar Promotor de Tienda</h2>
-                <button class="modal-close" id="modal-close-quitar">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            
-            <div class="modal-content">
-                <div class="current-assignment" id="quitar-details">
-                    <!-- Se llenará dinámicamente -->
-                </div>
-                
-                <form class="modal-form" id="form-quitar">
-                    <input type="hidden" id="quitar-id-asignacion">
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="quitar-fecha-fin">Fecha de Finalización *</label>
-                            <input type="date" id="quitar-fecha-fin" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="quitar-motivo">Motivo de Finalización *</label>
-                            <textarea id="quitar-motivo" rows="3" placeholder="Ej: Finalización de proyecto..." maxlength="255" required></textarea>
-                        </div>
-                    </div>
-                    
-                    <div class="modal-actions">
-                        <button type="button" class="btn-secondary" id="btn-cancelar-quitar">
-                            <i class="fas fa-times"></i> Cancelar
-                        </button>
-                        <button type="submit" class="btn-danger" id="btn-confirmar-quitar">
-                            <i class="fas fa-user-minus"></i> Quitar Promotor
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- ===== MODAL HISTORIAL PROMOTOR ===== -->
-    <div class="modal-overlay" id="modal-historial">
-        <div class="modal-container large">
-            <div class="modal-header">
-                <h2><i class="fas fa-history"></i> Historial de <span id="historial-promotor-nombre"></span></h2>
-                <button class="modal-close" id="modal-close-historial">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            
-            <div class="modal-content">
-                <div class="promotor-info" id="promotor-info">
-                    <!-- Se llenará dinámicamente -->
-                </div>
-                <div class="historial-timeline" id="historial-timeline">
-                    <!-- Se llenará dinámicamente -->
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ===== SISTEMA DE NOTIFICACIONES ===== -->
-    <div class="notifications-container" id="notifications-container"></div>
-
-    <style>
-        /* ===== ESTILOS BASE ===== */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #2d3748;
-            line-height: 1.6;
-            min-height: 100vh;
-        }
-
-        /* ===== CONTENEDOR PRINCIPAL ===== */
-        .asignaciones-module {
-            padding: 2rem;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        /* ===== HEADER DEL MÓDULO ===== */
-        .module-header {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            padding: 2.5rem;
-            margin-bottom: 2rem;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-        }
-
-        .header-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 1.5rem;
-        }
-
-        .header-title {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-        }
-
-        .header-icon {
-            width: 70px;
-            height: 70px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 2rem;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-
-        .header-title h1 {
-            margin: 0;
-            font-size: 2.5rem;
-            font-weight: 800;
-            color: #333;
-        }
-
-        .header-subtitle {
-            margin-top: 0.5rem;
-            color: #666;
-            font-size: 1.1rem;
-            font-weight: 500;
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-
-        /* ===== BOTONES ===== */
-        .btn-primary, .btn-secondary, .btn-danger, .btn-warning, .btn-search, .btn-clear, .btn-pagination {
-            border: none;
-            border-radius: 12px;
-            padding: 0.875rem 1.75rem;
-            font-weight: 600;
-            font-size: 0.875rem;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            display: inline-flex;
-            align-items: center;
-            gap: 0.75rem;
-            text-decoration: none;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
-        }
-
-        .btn-primary:hover:not(:disabled) {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 30px rgba(102, 126, 234, 0.4);
-        }
-
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.9);
-            color: #667eea;
-            border: 2px solid rgba(102, 126, 234, 0.3);
-            backdrop-filter: blur(10px);
-        }
-
-        .btn-secondary:hover:not(:disabled) {
-            background: rgba(255, 255, 255, 1);
-            transform: translateY(-2px);
-        }
-
-        .btn-warning {
-            background: linear-gradient(135deg, #feca57 0%, #ff9ff3 100%);
-            color: white;
-        }
-
-        .btn-danger {
-            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
-            color: white;
-        }
-
-        .btn-search {
-            background: linear-gradient(135deg, #26de81 0%, #20bf6b 100%);
-            color: white;
-            padding: 0.875rem;
-            width: 50px;
-            height: 50px;
-            justify-content: center;
-        }
-
-        .btn-clear {
-            background: #e2e8f0;
-            color: #4a5568;
-            padding: 0.875rem;
-            width: 50px;
-            height: 50px;
-            justify-content: center;
-        }
-
-        .btn-pagination {
-            background: rgba(255, 255, 255, 0.9);
-            color: #333;
-            border: 2px solid #e0e6ed;
-        }
-
-        .btn-pagination:hover:not(:disabled) {
-            background: #667eea;
-            color: white;
-            border-color: #667eea;
-            transform: translateY(-2px);
-        }
-
-        .btn-pagination:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        /* ===== DASHBOARD STATS ===== */
-        .dashboard-section {
-            margin-bottom: 2rem;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .stat-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            padding: 2rem;
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.8);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .stat-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-        }
-
-        .stat-card.primary .stat-icon { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-        .stat-card.success .stat-icon { background: linear-gradient(135deg, #26de81 0%, #20bf6b 100%); }
-        .stat-card.warning .stat-icon { background: linear-gradient(135deg, #feca57 0%, #ff9ff3 100%); }
-        .stat-card.info .stat-icon { background: linear-gradient(135deg, #54a0ff 0%, #2e86de 100%); }
-
-        .stat-icon {
-            width: 70px;
-            height: 70px;
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.75rem;
-            color: white;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-        }
-
-        .stat-content h3 {
-            margin: 0 0 0.5rem 0;
-            font-size: 2.5rem;
-            font-weight: 800;
-            color: #2d3748;
-        }
-
-        .stat-content p {
-            margin: 0;
-            color: #718096;
-            font-weight: 600;
-            font-size: 0.95rem;
-        }
-
-        .stat-trend {
-            font-size: 0.8rem;
-            color: #26de81;
-            font-weight: 600;
-            margin-top: 0.25rem;
-        }
-
-        /* ===== DISTRIBUCIÓN ===== */
-        .distribution-container {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            border: 1px solid rgba(255, 255, 255, 0.8);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        }
-
-        .distribution-container h3 {
-            margin: 0 0 1.5rem 0;
-            color: #2d3748;
-            font-size: 1.25rem;
-            font-weight: 700;
-        }
-
-        .distribution-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-        }
-
-        .distribution-card {
-            background: #f8fafc;
-            border-radius: 12px;
-            padding: 1.5rem;
-            text-align: center;
-            border: 2px solid #e2e8f0;
-            transition: all 0.3s ease;
-        }
-
-        .distribution-card:hover {
-            border-color: #667eea;
-            background: white;
-            transform: translateY(-2px);
-        }
-
-        .distribution-number {
-            font-size: 2rem;
-            font-weight: 800;
-            color: #667eea;
-            margin-bottom: 0.5rem;
-        }
-
-        .distribution-label {
-            font-size: 0.875rem;
-            color: #718096;
-            font-weight: 600;
-        }
-
-        /* ===== ALERTAS ===== */
-        .alerts-section {
-            margin-bottom: 2rem;
-        }
-
-        .alert {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 16px;
-            padding: 1.25rem 1.75rem;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-            border-left: 4px solid var(--alert-color);
-            animation: slideInLeft 0.5s ease-out;
-        }
-
-        .alert.alert-info { --alert-color: #54a0ff; }
-        .alert.alert-warning { --alert-color: #feca57; }
-        .alert.alert-success { --alert-color: #26de81; }
-
-        .alert i {
-            font-size: 1.5rem;
-            color: var(--alert-color);
-        }
-
-        .alert-content {
-            flex: 1;
-        }
-
-        .alert-title {
-            font-weight: 700;
-            color: #2d3748;
-            margin-bottom: 0.25rem;
-        }
-
-        .alert-message {
-            color: #718096;
-            margin: 0;
-        }
-
-        /* ===== CONTROLES DE BÚSQUEDA ===== */
-        .search-controls {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.8);
-        }
-
-        .search-box {
-            display: grid;
-            grid-template-columns: 200px 1fr 180px auto auto;
-            gap: 1rem;
-            align-items: center;
-        }
-
-        .search-select, .search-input {
-            padding: 0.875rem 1.25rem;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            font-size: 0.875rem;
-            transition: all 0.3s ease;
-            background: #fafafa;
-            font-weight: 500;
-        }
-
-        .search-select:focus, .search-input:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
-            background: white;
-            transform: translateY(-1px);
-        }
-
-        .search-input:disabled {
-            background: #f1f5f9;
-            cursor: not-allowed;
-            opacity: 0.6;
-        }
-
-        /* ===== TABLA DE TIENDAS ===== */
-        .table-container {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.8);
-            position: relative;
-            min-height: 300px;
-        }
-
-        .table-loading {
-            display: none;
-            text-align: center;
-            padding: 5rem 2rem;
-            color: #718096;
-        }
-
-        .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid #e2e8f0;
-            border-top: 4px solid #667eea;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 1.5rem;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .table-wrapper {
-            overflow-x: auto;
-            border-radius: 12px;
-            border: 1px solid #e2e8f0;
-            background: white;
-        }
-
-        .tiendas-table {
-            width: 100%;
-            min-width: 1200px;
-            border-collapse: collapse;
-            background: white;
-            font-size: 0.875rem;
-        }
-
-        .tiendas-table thead {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        .tiendas-table th {
-            padding: 1.25rem 1rem;
-            text-align: left;
-            font-weight: 700;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .tiendas-table th:first-child {
-            border-radius: 12px 0 0 0;
-        }
-
-        .tiendas-table th:last-child {
-            border-radius: 0 12px 0 0;
-        }
-
-        .tiendas-table tbody tr {
-            transition: all 0.3s ease;
-            border-bottom: 1px solid #f1f5f9;
-        }
-
-        .tiendas-table tbody tr:hover {
-            background: #f8fafc;
-            transform: scale(1.01);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-        }
-
-        .tiendas-table td {
-            padding: 1rem;
-            vertical-align: middle;
-            border-bottom: 1px solid #e2e8f0;
-            color: #4a5568;
-        }
-
-        .tienda-id {
-            font-weight: 700;
-            color: #667eea;
-            font-size: 0.9rem;
-        }
-
-        .tienda-cadena {
-            font-weight: 600;
-            color: #2d3748;
-        }
-
-        .tienda-numero {
-            background: #667eea;
-            color: white;
-            padding: 0.25rem 0.5rem;
-            border-radius: 6px;
-            font-weight: 600;
-            font-size: 0.8rem;
-            display: inline-block;
-            min-width: 40px;
-            text-align: center;
-        }
-
-        .tienda-nombre {
-            font-weight: 600;
-            color: #2d3748;
-            max-width: 200px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .tienda-ubicacion {
-            color: #718096;
-            font-size: 0.85rem;
-        }
-
-        /* ===== COLUMNA PROMOTORES ===== */
-        .promotores-cell {
-            max-width: 300px;
-        }
-
-        .promotores-list {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .promotor-badge {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 0.5rem 0.75rem;
-            transition: all 0.3s ease;
-        }
-
-        .promotor-badge:hover {
-            background: white;
-            border-color: #667eea;
-            transform: translateY(-1px);
-        }
-
-        .promotor-info {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .promotor-name {
-            font-weight: 600;
-            color: #2d3748;
-            font-size: 0.85rem;
-            margin-bottom: 0.125rem;
-        }
-
-        .promotor-date {
-            font-size: 0.75rem;
-            color: #718096;
-        }
-
-        .promotor-actions {
-            display: flex;
-            gap: 0.25rem;
-            margin-left: 0.5rem;
-        }
-
-        .btn-micro {
-            width: 24px;
-            height: 24px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.75rem;
-            transition: all 0.3s ease;
-        }
-
-        .btn-micro.view {
-            background: #e2e8f0;
-            color: #4a5568;
-        }
-
-        .btn-micro.move {
-            background: #fef5e7;
-            color: #d69e2e;
-        }
-
-        .btn-micro.remove {
-            background: #fed7d7;
-            color: #c53030;
-        }
-
-        .btn-micro:hover {
-            transform: scale(1.2);
-        }
-
-        .sin-promotores {
-            text-align: center;
-            color: #a0aec0;
-            font-style: italic;
-            padding: 1rem;
-        }
-
-        /* ===== COLUMNA ACCIONES ===== */
-        .acciones-cell {
-            text-align: center;
-            white-space: nowrap;
-        }
-
-        .btn-tabla {
-            padding: 0.5rem 1rem;
-            border: none;
-            border-radius: 8px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            text-decoration: none;
-        }
-
-        .btn-tabla.primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        .btn-tabla.secondary {
-            background: #f1f5f9;
-            color: #4a5568;
-            border: 1px solid #e2e8f0;
-        }
-
-        .btn-tabla:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        /* ===== EMPTY STATES ===== */
-        .empty-state {
-            text-align: center;
-            padding: 5rem 2rem;
-            color: #718096;
-        }
-
-        .empty-state i {
-            font-size: 5rem;
-            color: #cbd5e0;
-            margin-bottom: 1.5rem;
-        }
-
-        .empty-state h3 {
-            margin: 0 0 0.75rem 0;
-            color: #4a5568;
-            font-size: 1.5rem;
-            font-weight: 700;
-        }
-
-        .empty-state p {
-            margin: 0 0 2rem 0;
-            font-size: 1.1rem;
-        }
-
-        /* ===== PAGINACIÓN ===== */
-        .pagination-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            padding: 1.75rem 2rem;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.8);
-        }
-
-        .pagination-info {
-            color: #718096;
-            font-size: 0.9rem;
-            font-weight: 600;
-        }
-
-        .pagination-controls {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .pagination-pages {
-            color: #333;
-            font-weight: 700;
-            font-size: 0.9rem;
-            padding: 0 1rem;
-        }
-
-        /* ===== MODALES ===== */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.7);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            padding: 2rem;
-            backdrop-filter: blur(8px);
-        }
-
-        .modal-container {
-            background: white;
-            border-radius: 24px;
-            max-width: 700px;
-            width: 100%;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.3);
-            animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 1px solid rgba(255, 255, 255, 0.8);
-        }
-
-        .modal-container.large {
-            max-width: 1000px;
-        }
-
-        @keyframes modalSlideIn {
-            from {
-                opacity: 0;
-                transform: translateY(40px) scale(0.9);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-
-        .modal-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 2.5rem;
-            border-radius: 24px 24px 0 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal-header h2 {
-            margin: 0;
-            font-size: 1.75rem;
-            font-weight: 800;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .modal-close {
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            color: white;
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-        }
-
-        .modal-close:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: rotate(90deg) scale(1.1);
-        }
-
-        .modal-content, .modal-form {
-            padding: 2.5rem;
-        }
-
-        .current-assignment {
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-            border-radius: 16px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            border-left: 5px solid #667eea;
-        }
-
-        .current-assignment h4 {
-            margin: 0 0 1.25rem 0;
-            color: #2d3748;
-            font-size: 1.25rem;
-            font-weight: 800;
-        }
-
-        .current-assignment p {
-            margin: 0.75rem 0;
-            color: #4a5568;
-            font-size: 0.9rem;
-        }
-
-        .current-assignment strong {
-            color: #2d3748;
-            font-weight: 700;
-        }
-
-        /* ===== FORMULARIOS ===== */
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.75rem;
-            font-weight: 700;
-            color: #4a5568;
-            font-size: 0.9rem;
-        }
-
-        .form-group input, .form-group select, .form-group textarea {
-            width: 100%;
-            padding: 0.875rem 1.25rem;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            font-size: 0.875rem;
-            transition: all 0.3s ease;
-            background: #fafafa;
-            font-weight: 500;
-        }
-
-        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
-            background: white;
-            transform: translateY(-1px);
-        }
-
-        .form-help {
-            font-size: 0.8rem;
-            color: #718096;
-            margin-top: 0.5rem;
-            font-weight: 500;
-        }
-
-        .modal-actions {
-            display: flex;
-            gap: 1rem;
-            justify-content: flex-end;
-            margin-top: 2.5rem;
-            padding-top: 2rem;
-            border-top: 1px solid #e2e8f0;
-        }
-
-        /* ===== HISTORIAL TIMELINE ===== */
-        .promotor-info {
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-            border-radius: 16px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            border-left: 5px solid #667eea;
-        }
-
-        .promotor-info h4 {
-            margin: 0 0 1.25rem 0;
-            color: #2d3748;
-            font-size: 1.25rem;
-            font-weight: 800;
-        }
-
-        .stats-grid-small {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 1rem;
-            margin: 1.5rem 0;
-        }
-
-        .stat-mini {
-            background: white;
-            border-radius: 12px;
-            padding: 1.25rem;
-            text-align: center;
-            border: 2px solid #e2e8f0;
-            transition: all 0.3s ease;
-        }
-
-        .stat-mini:hover {
-            border-color: #667eea;
-            transform: translateY(-2px);
-        }
-
-        .stat-mini h5 {
-            font-size: 1.75rem;
-            font-weight: 800;
-            color: #667eea;
-            margin: 0 0 0.5rem 0;
-        }
-
-        .stat-mini p {
-            margin: 0;
-            font-size: 0.8rem;
-            color: #718096;
-            font-weight: 600;
-        }
-
-        .historial-timeline {
-            position: relative;
-            padding-left: 2rem;
-        }
-
-        .historial-timeline::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 3px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 2px;
-        }
-
-        .timeline-item {
-            position: relative;
-            margin-bottom: 2rem;
-            background: white;
-            border-radius: 16px;
-            padding: 1.5rem;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            margin-left: 1.5rem;
-            border: 1px solid #e2e8f0;
-        }
-
-        .timeline-item::before {
-            content: '';
-            position: absolute;
-            left: -2.25rem;
-            top: 1.5rem;
-            width: 12px;
-            height: 12px;
-            background: #667eea;
-            border-radius: 50%;
-            border: 3px solid white;
-            box-shadow: 0 0 0 3px #667eea;
-        }
-
-        .timeline-item.active::before {
-            background: #26de81;
-            box-shadow: 0 0 0 3px #26de81;
-        }
-
-        /* ===== NOTIFICACIONES ===== */
-        .notifications-container {
-            position: fixed;
-            top: 2rem;
-            right: 2rem;
-            z-index: 1100;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            max-width: 420px;
-        }
-
-        .notification {
-            background: white;
-            border-radius: 16px;
-            padding: 1.25rem 1.75rem;
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
-            display: flex;
-            align-items: flex-start;
-            gap: 1rem;
-            border-left: 4px solid var(--notif-color);
-            animation: notificationSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.8);
-        }
-
-        .notification.success { --notif-color: #26de81; }
-        .notification.error { --notif-color: #ff6b6b; }
-        .notification.warning { --notif-color: #feca57; }
-        .notification.info { --notif-color: #54a0ff; }
-
-        @keyframes notificationSlideIn {
-            from {
-                opacity: 0;
-                transform: translateX(100%) scale(0.9);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0) scale(1);
-            }
-        }
-
-        .notification-icon {
-            font-size: 1.5rem;
-            margin-top: 0.125rem;
-            color: var(--notif-color);
-        }
-
-        .notification-content {
-            flex: 1;
-        }
-
-        .notification-content h4 {
-            margin: 0 0 0.375rem 0;
-            font-size: 0.95rem;
-            font-weight: 700;
-            color: #2d3748;
-        }
-
-        .notification-content p {
-            margin: 0;
-            font-size: 0.875rem;
-            color: #718096;
-            line-height: 1.5;
-            font-weight: 500;
-        }
-
-        .notification-close {
-            background: none;
-            border: none;
-            color: #a0aec0;
-            cursor: pointer;
-            font-size: 1.1rem;
-            padding: 0;
-            transition: all 0.3s ease;
-            width: 24px;
-            height: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-        }
-
-        .notification-close:hover {
-            color: #4a5568;
-            background: #f7fafc;
-            transform: scale(1.1);
-        }
-
-        /* ===== RESPONSIVE ===== */
-        @media (max-width: 1024px) {
-            .asignaciones-module {
-                padding: 1.5rem;
-            }
-            
-            .header-content {
-                flex-direction: column;
-                text-align: center;
-            }
-            
-            .search-box {
-                grid-template-columns: 1fr;
-                gap: 1rem;
-            }
-            
-            .stats-grid {
-                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            }
-            
-            .table-wrapper {
-                overflow-x: scroll;
-            }
-            
-            .tiendas-table {
-                min-width: 1000px;
-            }
-            
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-            
-            .pagination-container {
-                flex-direction: column;
-                gap: 1.25rem;
-                text-align: center;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .modal-overlay {
-                padding: 1rem;
-            }
-            
-            .modal-container {
-                max-height: 95vh;
-            }
-            
-            .modal-header {
-                padding: 2rem;
-                flex-direction: column;
-                gap: 1rem;
-                text-align: center;
-            }
-            
-            .modal-content, .modal-form {
-                padding: 2rem;
-            }
-            
-            .notifications-container {
-                left: 1rem;
-                right: 1rem;
-                max-width: none;
-            }
-            
-            .tiendas-table th,
-            .tiendas-table td {
-                padding: 0.75rem 0.5rem;
-                font-size: 0.8rem;
-            }
-            
-            .tienda-nombre {
-                max-width: 150px;
-            }
-            
-            .promotores-cell {
-                max-width: 200px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .header-title h1 {
-                font-size: 2rem;
-            }
-            
-            .stat-card {
-                padding: 1.5rem;
-                flex-direction: column;
-                text-align: center;
-            }
-            
-            .modal-actions {
-                flex-direction: column;
-            }
-            
-            .tiendas-table {
-                min-width: 800px;
-                font-size: 0.75rem;
-            }
-            
-            .btn-tabla {
-                padding: 0.375rem 0.75rem;
-                font-size: 0.7rem;
-            }
-            
-            .btn-micro {
-                width: 20px;
-                height: 20px;
-                font-size: 0.65rem;
-            }
-        }
-
-        /* ===== UTILIDADES ===== */
-        .text-center { text-align: center; }
-        .fw-bold { font-weight: 700; }
-        .text-muted { color: #718096; }
-        .fade-in { animation: fadeIn 0.5s ease-out; }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes slideInLeft {
-            from { opacity: 0; transform: translateX(-20px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-    </style>
-
-    <script>
-        // ===== VARIABLES GLOBALES =====
-        let currentPage = 1;
-        let totalPages = 1;
-        let allTiendas = [];
-        let allAsignaciones = [];
-        let currentView = 'main'; // 'main' o 'dashboard'
-        let currentSearch = { field: '', value: '', coverage: '' };
-
-        // ===== ELEMENTOS DOM =====
-        const dashboardSection = document.getElementById('dashboard-section');
-        const mainView = document.getElementById('main-view');
-        const tableContainer = document.getElementById('table-container');
-        const loadingElement = document.getElementById('table-loading');
-        const emptyState = document.getElementById('empty-state');
-        const tableWrapper = document.getElementById('table-wrapper');
-        const tiendasTbody = document.getElementById('tiendas-tbody');
-
-        const searchField = document.getElementById('search-field');
-        const searchValue = document.getElementById('search-value');
-        const coverageFilter = document.getElementById('coverage-filter');
-        const btnBuscar = document.getElementById('btn-buscar');
-        const btnLimpiar = document.getElementById('btn-limpiar');
-
-        const paginationContainer = document.getElementById('pagination-container');
-        const paginationInfo = document.getElementById('pagination-info');
-        const paginationPages = document.getElementById('pagination-pages');
-        const btnPrev = document.getElementById('btn-prev');
-        const btnNext = document.getElementById('btn-next');
-
-        // Botones principales
-        const btnDashboard = document.getElementById('btn-dashboard');
-        const btnAgregarPromotor = document.getElementById('btn-agregar-promotor');
-
-        // Modales
-        const modalAgregar = document.getElementById('modal-agregar');
-        const modalReasignar = document.getElementById('modal-reasignar');
-        const modalQuitar = document.getElementById('modal-quitar');
-        const modalHistorial = document.getElementById('modal-historial');
-
-        // ===== FUNCIONES DE ESTADO DE UI =====
-        function showLoading() {
-            loadingElement.style.display = 'block';
-            tableWrapper.style.display = 'none';
-            emptyState.style.display = 'none';
-            paginationContainer.style.display = 'none';
-        }
-
-        function showContent() {
-            loadingElement.style.display = 'none';
-            tableWrapper.style.display = 'block';
-            emptyState.style.display = 'none';
-            paginationContainer.style.display = 'flex';
-        }
-
-        function showEmptyState(message = 'No se encontraron tiendas') {
-            loadingElement.style.display = 'none';
-            tableWrapper.style.display = 'none';
-            emptyState.style.display = 'block';
-            paginationContainer.style.display = 'none';
-            
-            const emptyTitle = emptyState.querySelector('h3');
-            if (emptyTitle) emptyTitle.textContent = message;
-        }
-
-        function showError(message) {
-            loadingElement.style.display = 'none';
-            tableWrapper.style.display = 'none';
-            emptyState.style.display = 'none';
-            paginationContainer.style.display = 'none';
-            
-            mostrarNotificacion('Error: ' + message, 'error');
-        }
-
-        // ===== INICIALIZACIÓN =====
-        function init() {
-            console.log('Inicializando módulo asignaciones v3.0 completo...');
-            configurarEventListeners();
-        }
-
-        // ===== EVENT LISTENERS =====
-        function configurarEventListeners() {
-            // Búsqueda
-            searchField.addEventListener('change', handleSearchFieldChange);
-            searchValue.addEventListener('keypress', handleSearchKeypress);
-            coverageFilter.addEventListener('change', realizarBusqueda);
-            btnBuscar.addEventListener('click', realizarBusqueda);
-            btnLimpiar.addEventListener('click', limpiarBusqueda);
-            
-            // Botones principales
-            btnDashboard.addEventListener('click', toggleDashboard);
-            btnAgregarPromotor.addEventListener('click', abrirModalAgregar);
-            
-            // Paginación
-            btnPrev.addEventListener('click', () => cambiarPagina(currentPage - 1));
-            btnNext.addEventListener('click', () => cambiarPagina(currentPage + 1));
-            
-            // Modales - cerrar
-            document.getElementById('modal-close-agregar').addEventListener('click', cerrarModalAgregar);
-            document.getElementById('btn-cancelar-agregar').addEventListener('click', cerrarModalAgregar);
-            document.getElementById('modal-close-reasignar').addEventListener('click', cerrarModalReasignar);
-            document.getElementById('btn-cancelar-reasignar').addEventListener('click', cerrarModalReasignar);
-            document.getElementById('modal-close-quitar').addEventListener('click', cerrarModalQuitar);
-            document.getElementById('btn-cancelar-quitar').addEventListener('click', cerrarModalQuitar);
-            document.getElementById('modal-close-historial').addEventListener('click', cerrarModalHistorial);
-            
-            // Formularios
-            document.getElementById('form-agregar').addEventListener('submit', guardarAgregarPromotor);
-            document.getElementById('form-reasignar').addEventListener('submit', confirmarReasignar);
-            document.getElementById('form-quitar').addEventListener('submit', confirmarQuitar);
-        }
-
-        function handleSearchFieldChange() {
-            const isFieldSelected = searchField.value !== '';
-            searchValue.disabled = !isFieldSelected;
-            btnBuscar.disabled = !isFieldSelected;
-            
-            if (!isFieldSelected) {
-                searchValue.value = '';
-                realizarBusqueda();
-            }
-        }
-
-        function handleSearchKeypress(e) {
-            if (e.key === 'Enter') {
-                realizarBusqueda();
-            }
-        }
-
-        // ===== FUNCIONES PRINCIPALES =====
-        async function cargarTiendasConPromotores() {
-            try {
-                showLoading();
-                
-                const searchParams = new URLSearchParams({
-                    page: currentPage,
-                    limit: 20
-                });
-                
-                // Aplicar filtros de búsqueda
-                if (currentSearch.field && currentSearch.value) {
-                    searchParams.append('search_field', currentSearch.field);
-                    searchParams.append('search_value', currentSearch.value);
-                }
-                
-                console.log('Cargando tiendas con parámetros:', searchParams.toString());
-                
-                // Usar la API correcta según disponibilidad
-                let apiUrl = '../../api/get_tiendas.php';
-                
-                const response = await fetch(`${apiUrl}?${searchParams}`);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-                
-                const responseText = await response.text();
-                let data;
-                try {
-                    data = JSON.parse(responseText);
-                } catch (jsonError) {
-                    console.error('Respuesta del servidor:', responseText);
-                    throw new Error('Respuesta inválida del servidor');
-                }
-                
-                if (!data.success) {
-                    throw new Error(data.message || 'Error al cargar tiendas');
-                }
-                
-                allTiendas = data.data || [];
-                
-                // Filtrar por cobertura después de cargar
-                if (currentSearch.coverage) {
-                    await aplicarFiltroCoberturaLocalmenteConAsignaciones();
-                } else {
-                    renderTabla(allTiendas);
-                }
-                
-                actualizarPaginacion(data.pagination);
-                showContent();
-                
-                console.log('Tiendas cargadas:', allTiendas.length);
-                
-            } catch (error) {
-                console.error('Error cargando tiendas:', error);
-                showError(error.message);
-            }
-        }
-
-        async function aplicarFiltroCoberturaLocalmenteConAsignaciones() {
-            try {
-                // Cargar asignaciones activas
-                const response = await fetch('../../api/get_asignaciones.php?estatus=activo&limit=1000');
-                const data = await response.json();
-                
-                let tiendasFiltradas = allTiendas;
-                
-                if (data.success) {
-                    // Crear mapa de tiendas con promotores
-                    const tiendasConPromotores = new Set();
-                    data.data.forEach(asignacion => {
-                        tiendasConPromotores.add(asignacion.id_tienda);
-                    });
-                    
-                    // Filtrar según cobertura
-                    if (currentSearch.coverage === 'sin_promotores') {
-                        tiendasFiltradas = allTiendas.filter(tienda => !tiendasConPromotores.has(tienda.id_tienda));
-                    } else if (currentSearch.coverage === 'con_promotores') {
-                        tiendasFiltradas = allTiendas.filter(tienda => tiendasConPromotores.has(tienda.id_tienda));
-                    }
-                }
-                
-                renderTabla(tiendasFiltradas);
-                
-            } catch (error) {
-                console.error('Error aplicando filtro de cobertura:', error);
-                renderTabla(allTiendas); // Fallback a mostrar todas
-            }
-        }
-
-        function renderTabla(tiendas) {
-            tiendasTbody.innerHTML = '';
-            
-            if (!tiendas || tiendas.length === 0) {
-                showEmptyState();
-                return;
-            }
-            
-            tiendas.forEach(tienda => {
-                const row = document.createElement('tr');
-                row.className = 'fade-in';
-                
-                row.innerHTML = `
-                    <td class="tienda-id">${tienda.id_tienda}</td>
-                    <td class="tienda-region">${tienda.region}</td>
-                    <td class="tienda-cadena">${tienda.cadena}</td>
-                    <td><span class="tienda-numero">${tienda.num_tienda}</span></td>
-                    <td class="tienda-nombre" title="${tienda.nombre_tienda}">${tienda.nombre_tienda}</td>
-                    <td class="tienda-ubicacion">${tienda.ciudad}</td>
-                    <td class="tienda-ubicacion">${tienda.estado}</td>
-                    <td class="promotores-cell">
-                        <div id="promotores-${tienda.id_tienda}">
-                            <div class="sin-promotores">
-                                <i class="fas fa-spinner fa-spin"></i> Cargando...
-                            </div>
-                        </div>
-                    </td>
-                    <td class="acciones-cell">
-                        <button class="btn-tabla primary" onclick="agregarPromotorATienda(${tienda.id_tienda}, '${tienda.cadena} #${tienda.num_tienda}')">
-                            <i class="fas fa-user-plus"></i> Agregar
-                        </button>
-                    </td>
-                `;
-                
-                tiendasTbody.appendChild(row);
+</div>
+
+<!-- ===== SISTEMA DE NOTIFICACIONES ===== -->
+<div class="notifications-container" id="notifications-container"></div>
+
+<style>
+/* ===== ESTILOS ASIGNACIONES MODULE ===== */
+.asignaciones-module {
+    padding: 0;
+    max-width: 100%;
+}
+
+/* ===== HEADER DEL MÓDULO ===== */
+.module-header {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.header-title {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.header-icon {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+}
+
+.header-title h1 {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #333;
+}
+
+.header-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+/* ===== CONTROLES DE BÚSQUEDA ===== */
+.search-controls {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.search-box {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.search-select {
+    min-width: 200px;
+    padding: 12px 15px;
+    border: 2px solid #e0e6ed;
+    border-radius: 8px;
+    background: white;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+.search-select:focus {
+    border-color: #a855f7;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1);
+}
+
+.search-input {
+    flex: 1;
+    min-width: 250px;
+    padding: 12px 15px;
+    border: 2px solid #e0e6ed;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+.search-input:focus {
+    border-color: #a855f7;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1);
+}
+
+.search-input:disabled {
+    background: #f8f9fa;
+    color: #666;
+    cursor: not-allowed;
+}
+
+/* ===== BOTONES ===== */
+.btn-primary, .btn-secondary, .btn-danger, .btn-warning, .btn-search, .btn-clear, .btn-action, .btn-pagination {
+    border: none;
+    border-radius: 8px;
+    padding: 12px 20px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+    color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(168, 85, 247, 0.3);
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover:not(:disabled) {
+    background: #5a6268;
+    transform: translateY(-2px);
+}
+
+.btn-warning {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: white;
+}
+
+.btn-warning:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(245, 158, 11, 0.3);
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    color: white;
+}
+
+.btn-danger:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(231, 76, 60, 0.3);
+}
+
+.btn-search {
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+    color: white;
+    padding: 12px 16px;
+}
+
+.btn-search:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(52, 152, 219, 0.3);
+}
+
+.btn-clear {
+    background: #6c757d;
+    color: white;
+    padding: 12px 16px;
+}
+
+.btn-clear:hover {
+    background: #5a6268;
+    transform: translateY(-2px);
+}
+
+.btn-action {
+    padding: 8px 12px;
+    font-size: 0.8rem;
+    margin: 0 2px;
+}
+
+.btn-action.edit {
+    background: linear-gradient(135deg, #f39c12 0%, #d68910 100%);
+    color: white;
+}
+
+.btn-action.delete {
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    color: white;
+}
+
+.btn-pagination {
+    background: rgba(255, 255, 255, 0.9);
+    color: #333;
+    border: 2px solid #e0e6ed;
+}
+
+.btn-pagination:hover:not(:disabled) {
+    background: #a855f7;
+    color: white;
+    border-color: #a855f7;
+    transform: translateY(-2px);
+}
+
+.btn-pagination:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ===== DASHBOARD STATS ===== */
+.dashboard-section {
+    margin-bottom: 2rem;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 16px;
+    padding: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.stat-card.primary .stat-icon { 
+    background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%); 
+}
+.stat-card.success .stat-icon { 
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%); 
+}
+.stat-card.warning .stat-icon { 
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); 
+}
+.stat-card.info .stat-icon { 
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); 
+}
+
+.stat-icon {
+    width: 70px;
+    height: 70px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    color: white;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.stat-content h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #2d3748;
+}
+
+.stat-content p {
+    margin: 0;
+    color: #718096;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.stat-trend {
+    font-size: 0.8rem;
+    color: #10b981;
+    font-weight: 600;
+    margin-top: 0.25rem;
+}
+
+/* ===== DISTRIBUCIÓN ===== */
+.distribution-container {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.distribution-container h3 {
+    margin: 0 0 1.5rem 0;
+    color: #2d3748;
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.distribution-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.distribution-card {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    border: 2px solid #e2e8f0;
+    transition: all 0.3s ease;
+}
+
+.distribution-card:hover {
+    border-color: #a855f7;
+    background: white;
+    transform: translateY(-2px);
+}
+
+.distribution-number {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #a855f7;
+    margin-bottom: 0.5rem;
+}
+
+.distribution-label {
+    font-size: 0.875rem;
+    color: #718096;
+    font-weight: 600;
+}
+
+/* ===== ALERTAS ===== */
+.alerts-section {
+    margin-bottom: 2rem;
+}
+
+.alert {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 16px;
+    padding: 1.25rem 1.75rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    border-left: 4px solid var(--alert-color);
+    animation: slideInLeft 0.5s ease-out;
+}
+
+.alert.alert-info { --alert-color: #3b82f6; }
+.alert.alert-warning { --alert-color: #f59e0b; }
+.alert.alert-success { --alert-color: #10b981; }
+
+.alert i {
+    font-size: 1.5rem;
+    color: var(--alert-color);
+}
+
+.alert-content {
+    flex: 1;
+}
+
+.alert-title {
+    font-weight: 700;
+    color: #2d3748;
+    margin-bottom: 0.25rem;
+}
+
+.alert-message {
+    color: #718096;
+    margin: 0;
+}
+
+/* ===== TABLA ===== */
+.table-container {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+.tiendas-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0;
+}
+
+.tiendas-table th {
+    background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+    color: white;
+    padding: 15px 12px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+.tiendas-table th:first-child {
+    border-radius: 8px 0 0 0;
+}
+
+.tiendas-table th:last-child {
+    border-radius: 0 8px 0 0;
+}
+
+.tiendas-table td {
+    padding: 15px 12px;
+    border-bottom: 1px solid #e0e6ed;
+    font-size: 0.9rem;
+    vertical-align: middle;
+}
+
+.tiendas-table tbody tr {
+    transition: all 0.3s ease;
+}
+
+.tiendas-table tbody tr:hover {
+    background: rgba(168, 85, 247, 0.05);
+}
+
+.tiendas-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* ===== COLUMNA PROMOTORES ===== */
+.promotores-cell {
+    max-width: 300px;
+}
+
+.promotores-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.promotor-badge {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+    transition: all 0.3s ease;
+}
+
+.promotor-badge:hover {
+    background: white;
+    border-color: #a855f7;
+    transform: translateY(-1px);
+}
+
+.promotor-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.promotor-name {
+    font-weight: 600;
+    color: #2d3748;
+    font-size: 0.85rem;
+    margin-bottom: 0.125rem;
+}
+
+.promotor-date {
+    font-size: 0.75rem;
+    color: #718096;
+}
+
+.promotor-actions {
+    display: flex;
+    gap: 0.25rem;
+    margin-left: 0.5rem;
+}
+
+.btn-micro {
+    width: 24px;
+    height: 24px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    transition: all 0.3s ease;
+}
+
+.btn-micro.view {
+    background: #e2e8f0;
+    color: #4a5568;
+}
+
+.btn-micro.move {
+    background: #fef5e7;
+    color: #d69e2e;
+}
+
+.btn-micro.remove {
+    background: #fed7d7;
+    color: #c53030;
+}
+
+.btn-micro:hover {
+    transform: scale(1.2);
+}
+
+.sin-promotores {
+    text-align: center;
+    color: #a0aec0;
+    font-style: italic;
+    padding: 1rem;
+}
+
+/* ===== ACCIONES ===== */
+.acciones-cell {
+    text-align: center;
+    white-space: nowrap;
+}
+
+.btn-tabla {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+}
+
+.btn-tabla.primary {
+    background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+    color: white;
+}
+
+.btn-tabla:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* ===== LOADING Y EMPTY STATES ===== */
+.table-loading, .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #666;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(168, 85, 247, 0.1);
+    border-radius: 50%;
+    border-top-color: #a855f7;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.empty-state i {
+    font-size: 4rem;
+    color: #dee2e6;
+    margin-bottom: 1rem;
+}
+
+.empty-state h3 {
+    margin: 0 0 0.5rem 0;
+    color: #495057;
+}
+
+/* ===== PAGINACIÓN ===== */
+.pagination-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 16px;
+    padding: 1rem 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.pagination-info {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.pagination-pages {
+    color: #333;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+/* ===== MODALES ===== */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    padding: 20px;
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal-container {
+    background: white;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: modalSlideIn 0.3s ease;
+}
+
+.modal-container.modal-large {
+    max-width: 800px;
+}
+
+@keyframes modalSlideIn {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-header {
+    background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+    color: white;
+    padding: 1.5rem 2rem;
+    border-radius: 16px 16px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: white;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.modal-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.modal-content, .modal-form {
+    padding: 2rem;
+}
+
+.current-assignment {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border-left: 4px solid #a855f7;
+}
+
+.current-assignment h4 {
+    margin: 0 0 1rem 0;
+    color: #333;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.current-assignment p {
+    margin: 0.5rem 0;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.current-assignment strong {
+    color: #333;
+    font-weight: 600;
+}
+
+/* ===== FORMULARIOS ===== */
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.form-group input, .form-group select, .form-group textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #e0e6ed;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    border-color: #a855f7;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1);
+}
+
+.form-help {
+    font-size: 0.8rem;
+    color: #666;
+    margin-top: 0.5rem;
+}
+
+.modal-actions {
+    padding: 1.5rem 2rem;
+    border-top: 1px solid #e0e6ed;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+}
+
+/* ===== HISTORIAL TIMELINE ===== */
+.promotor-info {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border-left: 4px solid #a855f7;
+}
+
+.promotor-info h4 {
+    margin: 0 0 1rem 0;
+    color: #333;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.stats-grid-small {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+.stat-mini {
+    background: white;
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+    border: 2px solid #e2e8f0;
+    transition: all 0.3s ease;
+}
+
+.stat-mini:hover {
+    border-color: #a855f7;
+    transform: translateY(-2px);
+}
+
+.stat-mini h5 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #a855f7;
+    margin: 0 0 0.5rem 0;
+}
+
+.stat-mini p {
+    margin: 0;
+    font-size: 0.8rem;
+    color: #666;
+    font-weight: 600;
+}
+
+.historial-timeline {
+    position: relative;
+    padding-left: 2rem;
+}
+
+.historial-timeline::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+    border-radius: 2px;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 2rem;
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    margin-left: 1.5rem;
+    border: 1px solid #e2e8f0;
+}
+
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -2.25rem;
+    top: 1.5rem;
+    width: 12px;
+    height: 12px;
+    background: #a855f7;
+    border-radius: 50%;
+    border: 3px solid white;
+    box-shadow: 0 0 0 3px #a855f7;
+}
+
+.timeline-item.active::before {
+    background: #10b981;
+    box-shadow: 0 0 0 3px #10b981;
+}
+
+/* ===== NOTIFICACIONES ===== */
+.notifications-container {
+    position: fixed;
+    top: 100px;
+    right: 20px;
+    z-index: 3000;
+    max-width: 400px;
+}
+
+.notification {
+    background: white;
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    margin-bottom: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    border-left: 4px solid;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    animation: notificationSlideIn 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.notification.success {
+    border-left-color: #10b981;
+}
+
+.notification.error {
+    border-left-color: #e74c3c;
+}
+
+.notification.warning {
+    border-left-color: #f59e0b;
+}
+
+.notification.info {
+    border-left-color: #3b82f6;
+}
+
+@keyframes notificationSlideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.notification-icon {
+    font-size: 1.2rem;
+}
+
+.notification.success .notification-icon {
+    color: #10b981;
+}
+
+.notification.error .notification-icon {
+    color: #e74c3c;
+}
+
+.notification.warning .notification-icon {
+    color: #f59e0b;
+}
+
+.notification.info .notification-icon {
+    color: #3b82f6;
+}
+
+.notification-content h4 {
+    margin: 0 0 5px 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.notification-content p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.notification-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 1rem;
+    color: #999;
+    cursor: pointer;
+    padding: 2px;
+}
+
+.notification-close:hover {
+    color: #333;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .header-content {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .header-actions {
+        width: 100%;
+    }
+
+    .search-box {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .search-select, .search-input {
+        min-width: auto;
+        width: 100%;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .modal-container {
+        margin: 10px;
+        max-width: calc(100% - 20px);
+    }
+
+    .pagination-container {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .table-wrapper {
+        font-size: 0.8rem;
+    }
+
+    .tiendas-table th, .tiendas-table td {
+        padding: 10px 8px;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .modal-form, .modal-content {
+        padding: 1rem;
+    }
+
+    .modal-header {
+        padding: 1rem;
+    }
+
+    .modal-actions {
+        padding: 1rem;
+        flex-direction: column;
+    }
+}
+
+/* ===== ANIMACIONES ===== */
+@keyframes slideInLeft {
+    from { opacity: 0; transform: translateX(-20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+.fade-in { 
+    animation: fadeIn 0.5s ease-out; 
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+</style>
+
+<script>
+// ===== VARIABLES GLOBALES =====
+let currentPage = 1;
+let totalPages = 1;
+let allTiendas = [];
+let allAsignaciones = [];
+let currentView = 'main'; // 'main' o 'dashboard'
+let currentSearch = { field: '', value: '', coverage: '' };
+
+// ===== ELEMENTOS DOM =====
+const dashboardSection = document.getElementById('dashboard-section');
+const mainView = document.getElementById('main-view');
+const tableContainer = document.getElementById('table-container');
+const loadingElement = document.getElementById('table-loading');
+const emptyState = document.getElementById('empty-state');
+const tableWrapper = document.getElementById('table-wrapper');
+const tiendasTbody = document.getElementById('tiendas-tbody');
+
+const searchField = document.getElementById('search-field');
+const searchValue = document.getElementById('search-value');
+const coverageFilter = document.getElementById('coverage-filter');
+const btnBuscar = document.getElementById('btn-buscar');
+const btnLimpiar = document.getElementById('btn-limpiar');
+
+const paginationContainer = document.getElementById('pagination-container');
+const paginationInfo = document.getElementById('pagination-info');
+const paginationPages = document.getElementById('pagination-pages');
+const btnPrev = document.getElementById('btn-prev');
+const btnNext = document.getElementById('btn-next');
+
+// Botones principales
+const btnDashboard = document.getElementById('btn-dashboard');
+const btnAgregarPromotor = document.getElementById('btn-agregar-promotor');
+
+// Modales
+const modalAgregar = document.getElementById('modal-agregar');
+const modalReasignar = document.getElementById('modal-reasignar');
+const modalQuitar = document.getElementById('modal-quitar');
+const modalHistorial = document.getElementById('modal-historial');
+
+// ===== FUNCIONES DE ESTADO DE UI =====
+function showLoading() {
+    loadingElement.style.display = 'block';
+    tableWrapper.style.display = 'none';
+    emptyState.style.display = 'none';
+    paginationContainer.style.display = 'none';
+}
+
+function showContent() {
+    loadingElement.style.display = 'none';
+    tableWrapper.style.display = 'block';
+    emptyState.style.display = 'none';
+    paginationContainer.style.display = 'flex';
+}
+
+function showEmptyState(message = 'No se encontraron tiendas') {
+    loadingElement.style.display = 'none';
+    tableWrapper.style.display = 'none';
+    emptyState.style.display = 'block';
+    paginationContainer.style.display = 'none';
+    
+    const emptyTitle = emptyState.querySelector('h3');
+    if (emptyTitle) emptyTitle.textContent = message;
+}
+
+function showError(message) {
+    loadingElement.style.display = 'none';
+    tableWrapper.style.display = 'none';
+    emptyState.style.display = 'none';
+    paginationContainer.style.display = 'none';
+    
+    mostrarNotificacion('Error: ' + message, 'error');
+}
+
+// ===== INICIALIZACIÓN =====
+function init() {
+    console.log('🚀 Inicializando módulo asignaciones...');
+    configurarEventListeners();
+}
+
+// ===== EVENT LISTENERS =====
+function configurarEventListeners() {
+    // Búsqueda
+    searchField.addEventListener('change', handleSearchFieldChange);
+    searchValue.addEventListener('keypress', handleSearchKeypress);
+    coverageFilter.addEventListener('change', realizarBusqueda);
+    btnBuscar.addEventListener('click', realizarBusqueda);
+    btnLimpiar.addEventListener('click', limpiarBusqueda);
+    
+    // Botones principales
+    btnDashboard.addEventListener('click', toggleDashboard);
+    btnAgregarPromotor.addEventListener('click', abrirModalAgregar);
+    
+    // Paginación
+    btnPrev.addEventListener('click', () => cambiarPagina(currentPage - 1));
+    btnNext.addEventListener('click', () => cambiarPagina(currentPage + 1));
+    
+    // Modales - cerrar
+    document.getElementById('modal-close-agregar').addEventListener('click', cerrarModalAgregar);
+    document.getElementById('btn-cancelar-agregar').addEventListener('click', cerrarModalAgregar);
+    document.getElementById('modal-close-reasignar').addEventListener('click', cerrarModalReasignar);
+    document.getElementById('btn-cancelar-reasignar').addEventListener('click', cerrarModalReasignar);
+    document.getElementById('modal-close-quitar').addEventListener('click', cerrarModalQuitar);
+    document.getElementById('btn-cancelar-quitar').addEventListener('click', cerrarModalQuitar);
+    document.getElementById('modal-close-historial').addEventListener('click', cerrarModalHistorial);
+    
+    // Formularios
+    document.getElementById('form-agregar').addEventListener('submit', guardarAgregarPromotor);
+    document.getElementById('form-reasignar').addEventListener('submit', confirmarReasignar);
+    document.getElementById('form-quitar').addEventListener('submit', confirmarQuitar);
+    
+    // Cerrar modales con ESC
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            cerrarModalAgregar();
+            cerrarModalReasignar();
+            cerrarModalQuitar();
+            cerrarModalHistorial();
+        }
+    });
+    
+    // Cerrar modales clicking fuera
+    modalAgregar.addEventListener('click', (e) => {
+        if (e.target === modalAgregar) cerrarModalAgregar();
+    });
+    
+    modalReasignar.addEventListener('click', (e) => {
+        if (e.target === modalReasignar) cerrarModalReasignar();
+    });
+    
+    modalQuitar.addEventListener('click', (e) => {
+        if (e.target === modalQuitar) cerrarModalQuitar();
+    });
+    
+    modalHistorial.addEventListener('click', (e) => {
+        if (e.target === modalHistorial) cerrarModalHistorial();
+    });
+}
+
+function handleSearchFieldChange() {
+    const isFieldSelected = searchField.value !== '';
+    searchValue.disabled = !isFieldSelected;
+    btnBuscar.disabled = !isFieldSelected;
+    
+    if (!isFieldSelected) {
+        searchValue.value = '';
+        realizarBusqueda();
+    }
+}
+
+function handleSearchKeypress(e) {
+    if (e.key === 'Enter') {
+        realizarBusqueda();
+    }
+}
+
+// ===== FUNCIONES PRINCIPALES =====
+async function cargarTiendasConPromotores() {
+    try {
+        showLoading();
+        
+        const searchParams = new URLSearchParams({
+            page: currentPage,
+            limit: 20
+        });
+        
+        // Aplicar filtros de búsqueda
+        if (currentSearch.field && currentSearch.value) {
+            searchParams.append('search_field', currentSearch.field);
+            searchParams.append('search_value', currentSearch.value);
+        }
+        
+        console.log('📡 Cargando tiendas con parámetros:', searchParams.toString());
+        
+        // Usar la API correcta según disponibilidad
+        let apiUrl = '../../api/get_tiendas.php';
+        
+        const response = await fetch(`${apiUrl}?${searchParams}`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const responseText = await response.text();
+        let data;
+        try {
+            data = JSON.parse(responseText);
+        } catch (jsonError) {
+            console.error('Respuesta del servidor:', responseText);
+            throw new Error('Respuesta inválida del servidor');
+        }
+        
+        if (!data.success) {
+            throw new Error(data.message || 'Error al cargar tiendas');
+        }
+        
+        allTiendas = data.data || [];
+        
+        // Filtrar por cobertura después de cargar
+        if (currentSearch.coverage) {
+            await aplicarFiltroCoberturaLocalmenteConAsignaciones();
+        } else {
+            renderTabla(allTiendas);
+        }
+        
+        actualizarPaginacion(data.pagination);
+        showContent();
+        
+        console.log('✅ Tiendas cargadas:', allTiendas.length);
+        
+    } catch (error) {
+        console.error('❌ Error cargando tiendas:', error);
+        showError(error.message);
+    }
+}
+
+async function aplicarFiltroCoberturaLocalmenteConAsignaciones() {
+    try {
+        // Cargar asignaciones activas
+        const response = await fetch('../../api/get_asignaciones.php?estatus=activo&limit=1000');
+        const data = await response.json();
+        
+        let tiendasFiltradas = allTiendas;
+        
+        if (data.success) {
+            // Crear mapa de tiendas con promotores
+            const tiendasConPromotores = new Set();
+            data.data.forEach(asignacion => {
+                tiendasConPromotores.add(asignacion.id_tienda);
             });
             
-            // Cargar promotores después de renderizar la tabla
-            cargarPromotoresPorTienda();
+            // Filtrar según cobertura
+            if (currentSearch.coverage === 'sin_promotores') {
+                tiendasFiltradas = allTiendas.filter(tienda => !tiendasConPromotores.has(tienda.id_tienda));
+            } else if (currentSearch.coverage === 'con_promotores') {
+                tiendasFiltradas = allTiendas.filter(tienda => tiendasConPromotores.has(tienda.id_tienda));
+            }
         }
+        
+        renderTabla(tiendasFiltradas);
+        
+    } catch (error) {
+        console.error('Error aplicando filtro de cobertura:', error);
+        renderTabla(allTiendas); // Fallback a mostrar todas
+    }
+}
 
-        async function cargarPromotoresPorTienda() {
-            try {
-                // Cargar asignaciones activas
-                const response = await fetch('../../api/get_asignaciones.php?estatus=activo&limit=1000');
-                const data = await response.json();
-                
-                if (data.success) {
-                    const asignacionesPorTienda = {};
-                    allAsignaciones = data.data;
-                    
-                    // Agrupar asignaciones por tienda
-                    data.data.forEach(asignacion => {
-                        const idTienda = asignacion.id_tienda;
-                        if (!asignacionesPorTienda[idTienda]) {
-                            asignacionesPorTienda[idTienda] = [];
-                        }
-                        asignacionesPorTienda[idTienda].push(asignacion);
-                    });
-                    
-                    // Actualizar cada celda de promotores
-                    allTiendas.forEach(tienda => {
-                        const promotoresContainer = document.getElementById(`promotores-${tienda.id_tienda}`);
-                        if (promotoresContainer) {
-                            const promotores = asignacionesPorTienda[tienda.id_tienda] || [];
-                            
-                            if (promotores.length === 0) {
-                                promotoresContainer.innerHTML = `
-                                    <div class="sin-promotores">
-                                        <i class="fas fa-user-slash"></i> Sin promotores
-                                    </div>
-                                `;
-                            } else {
-                                promotoresContainer.innerHTML = `
-                                    <div class="promotores-list">
-                                        ${promotores.map(promotor => `
-                                            <div class="promotor-badge">
-                                                <div class="promotor-info">
-                                                    <div class="promotor-name">${promotor.promotor_nombre_completo}</div>
-                                                    <div class="promotor-date">
-                                                        <i class="fas fa-calendar"></i> ${promotor.fecha_inicio_formatted} 
-                                                        (${promotor.duracion_dias} días)
-                                                    </div>
-                                                </div>
-                                                <div class="promotor-actions">
-                                                    <button class="btn-micro view" onclick="verHistorialPromotor(${promotor.id_promotor})" title="Ver Historial">
-                                                        <i class="fas fa-history"></i>
-                                                    </button>
-                                                    <button class="btn-micro move" onclick="reasignarPromotor(${promotor.id_asignacion})" title="Reasignar">
-                                                        <i class="fas fa-exchange-alt"></i>
-                                                    </button>
-                                                    <button class="btn-micro remove" onclick="quitarPromotor(${promotor.id_asignacion})" title="Quitar">
-                                                        <i class="fas fa-user-minus"></i>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        `).join('')}
-                                    </div>
-                                `;
-                            }
-                        }
-                    });
+function renderTabla(tiendas) {
+    tiendasTbody.innerHTML = '';
+    
+    if (!tiendas || tiendas.length === 0) {
+        showEmptyState();
+        return;
+    }
+    
+    tiendas.forEach(tienda => {
+        const row = document.createElement('tr');
+        row.className = 'fade-in';
+        
+        row.innerHTML = `
+            <td style="font-weight: 700; color: #a855f7;">${tienda.id_tienda}</td>
+            <td style="color: #4a5568;">${tienda.region}</td>
+            <td style="font-weight: 600; color: #2d3748;">${tienda.cadena}</td>
+            <td><span style="background: #a855f7; color: white; padding: 0.25rem 0.5rem; border-radius: 6px; font-weight: 600; font-size: 0.8rem; display: inline-block; min-width: 40px; text-align: center;">${tienda.num_tienda}</span></td>
+            <td style="font-weight: 600; color: #2d3748; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${tienda.nombre_tienda}">${tienda.nombre_tienda}</td>
+            <td style="color: #718096; font-size: 0.85rem;">${tienda.ciudad}</td>
+            <td style="color: #718096; font-size: 0.85rem;">${tienda.estado}</td>
+            <td class="promotores-cell">
+                <div id="promotores-${tienda.id_tienda}">
+                    <div class="sin-promotores">
+                        <i class="fas fa-spinner fa-spin"></i> Cargando...
+                    </div>
+                </div>
+            </td>
+            <td class="acciones-cell">
+                <button class="btn-tabla primary" onclick="agregarPromotorATienda(${tienda.id_tienda}, '${tienda.cadena} #${tienda.num_tienda}')">
+                    <i class="fas fa-user-plus"></i> Agregar
+                </button>
+            </td>
+        `;
+        
+        tiendasTbody.appendChild(row);
+    });
+    
+    // Cargar promotores después de renderizar la tabla
+    cargarPromotoresPorTienda();
+}
+
+async function cargarPromotoresPorTienda() {
+    try {
+        // Cargar asignaciones activas
+        const response = await fetch('../../api/get_asignaciones.php?estatus=activo&limit=1000');
+        const data = await response.json();
+        
+        if (data.success) {
+            const asignacionesPorTienda = {};
+            allAsignaciones = data.data;
+            
+            // Agrupar asignaciones por tienda
+            data.data.forEach(asignacion => {
+                const idTienda = asignacion.id_tienda;
+                if (!asignacionesPorTienda[idTienda]) {
+                    asignacionesPorTienda[idTienda] = [];
                 }
-                
-            } catch (error) {
-                console.error('Error cargando promotores por tienda:', error);
-                // Mostrar error en las celdas de promotores
-                allTiendas.forEach(tienda => {
-                    const promotoresContainer = document.getElementById(`promotores-${tienda.id_tienda}`);
-                    if (promotoresContainer) {
+                asignacionesPorTienda[idTienda].push(asignacion);
+            });
+            
+            // Actualizar cada celda de promotores
+            allTiendas.forEach(tienda => {
+                const promotoresContainer = document.getElementById(`promotores-${tienda.id_tienda}`);
+                if (promotoresContainer) {
+                    const promotores = asignacionesPorTienda[tienda.id_tienda] || [];
+                    
+                    if (promotores.length === 0) {
                         promotoresContainer.innerHTML = `
                             <div class="sin-promotores">
-                                <i class="fas fa-exclamation-triangle"></i> Error cargando
+                                <i class="fas fa-user-slash"></i> Sin promotores
+                            </div>
+                        `;
+                    } else {
+                        promotoresContainer.innerHTML = `
+                            <div class="promotores-list">
+                                ${promotores.map(promotor => `
+                                    <div class="promotor-badge">
+                                        <div class="promotor-info">
+                                            <div class="promotor-name">${promotor.promotor_nombre_completo}</div>
+                                            <div class="promotor-date">
+                                                <i class="fas fa-calendar"></i> ${promotor.fecha_inicio_formatted} 
+                                                (${promotor.duracion_dias} días)
+                                            </div>
+                                        </div>
+                                        <div class="promotor-actions">
+                                            <button class="btn-micro view" onclick="verHistorialPromotor(${promotor.id_promotor})" title="Ver Historial">
+                                                <i class="fas fa-history"></i>
+                                            </button>
+                                            <button class="btn-micro move" onclick="reasignarPromotor(${promotor.id_asignacion})" title="Reasignar">
+                                                <i class="fas fa-exchange-alt"></i>
+                                            </button>
+                                            <button class="btn-micro remove" onclick="quitarPromotor(${promotor.id_asignacion})" title="Quitar">
+                                                <i class="fas fa-user-minus"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                `).join('')}
                             </div>
                         `;
                     }
-                });
-            }
-        }
-
-        function actualizarPaginacion(pagination) {
-            if (!pagination) {
-                console.warn('Sin datos de paginación');
-                return;
-            }
-            
-            totalPages = pagination.total_pages || 1;
-            const total = pagination.total_records || 0;
-            const current = pagination.current_page || currentPage;
-            
-            paginationInfo.textContent = `Mostrando ${pagination.per_page || 0} de ${total} tiendas`;
-            paginationPages.textContent = `Página ${current} de ${totalPages}`;
-            
-            btnPrev.disabled = current <= 1;
-            btnNext.disabled = current >= totalPages;
-        }
-
-        function cambiarPagina(page) {
-            if (page < 1 || page > totalPages) return;
-            currentPage = page;
-            cargarTiendasConPromotores();
-        }
-
-        function realizarBusqueda() {
-            currentSearch = {
-                field: searchField.value,
-                value: searchValue.value.trim(),
-                coverage: coverageFilter.value
-            };
-            currentPage = 1;
-            cargarTiendasConPromotores();
-        }
-
-        function limpiarBusqueda() {
-            searchField.value = '';
-            searchValue.value = '';
-            coverageFilter.value = '';
-            searchValue.disabled = true;
-            btnBuscar.disabled = true;
-            currentSearch = { field: '', value: '', coverage: '' };
-            currentPage = 1;
-            cargarTiendasConPromotores();
-        }
-
-        // ===== FUNCIONES DASHBOARD =====
-        function toggleDashboard() {
-            if (currentView === 'main') {
-                currentView = 'dashboard';
-                dashboardSection.style.display = 'block';
-                mainView.style.display = 'none';
-                btnDashboard.innerHTML = '<i class="fas fa-list"></i> Ver Tiendas';
-                cargarDashboardStats();
-            } else {
-                currentView = 'main';
-                dashboardSection.style.display = 'none';
-                mainView.style.display = 'block';
-                btnDashboard.innerHTML = '<i class="fas fa-chart-pie"></i> Dashboard';
-            }
-        }
-
-        async function cargarDashboardStats() {
-            try {
-                console.log('Cargando estadísticas dashboard...');
-                const response = await fetch('../../api/get_dashboard_stats.php');
-                const data = await response.json();
-                
-                if (data.success) {
-                    actualizarDashboardStats(data);
                 }
-            } catch (error) {
-                console.error('Error cargando estadísticas dashboard:', error);
-                mostrarNotificacion('Error al cargar estadísticas del dashboard', 'error');
-            }
-        }
-
-        function actualizarDashboardStats(data) {
-            // Actualizar contadores principales
-            document.getElementById('stat-asignaciones-activas').textContent = data.resumen_general.asignaciones.activas;
-            document.getElementById('stat-promotores-asignados').textContent = data.resumen_general.promotores.con_asignacion;
-            document.getElementById('stat-tiendas-cubiertas').textContent = data.resumen_general.tiendas.con_promotor;
-            document.getElementById('stat-promedio-promotores').textContent = data.resumen_general.distribucion_promotores.promedio_promotores_por_tienda.toFixed(1);
-            
-            // Actualizar trends
-            document.getElementById('trend-promotores').textContent = `${data.resumen_general.promotores.porcentaje_asignados}% de cobertura`;
-            document.getElementById('trend-tiendas').textContent = `${data.resumen_general.tiendas.porcentaje_cubiertas}% del total`;
-            document.getElementById('trend-promedio').textContent = `Max: ${data.resumen_general.distribucion_promotores.max_promotores_en_tienda} en una tienda`;
-            
-            // Actualizar distribución
-            document.getElementById('dist-0').textContent = data.resumen_general.distribucion_promotores.tiendas_sin_promotores;
-            document.getElementById('dist-1').textContent = data.resumen_general.distribucion_promotores.tiendas_con_1_promotor;
-            document.getElementById('dist-2').textContent = data.resumen_general.distribucion_promotores.tiendas_con_2_promotores;
-            document.getElementById('dist-3').textContent = data.resumen_general.distribucion_promotores.tiendas_con_3_mas_promotores;
-            
-            // Actualizar alertas
-            actualizarAlertas(data.alertas);
-        }
-
-        function actualizarAlertas(alertas) {
-            const alertsContainer = document.getElementById('alerts-container');
-            alertsContainer.innerHTML = '';
-            
-            if (alertas.promotores_disponibles > 0) {
-                alertsContainer.innerHTML += `
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle"></i>
-                        <div class="alert-content">
-                            <div class="alert-title">Promotores Disponibles</div>
-                            <div class="alert-message">Tienes ${alertas.promotores_disponibles} promotores disponibles para asignar</div>
-                        </div>
-                    </div>
-                `;
-            }
-            
-            if (alertas.tiendas_sin_cobertura > 0) {
-                alertsContainer.innerHTML += `
-                    <div class="alert alert-warning">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <div class="alert-content">
-                            <div class="alert-title">Tiendas Sin Cobertura</div>
-                            <div class="alert-message">${alertas.tiendas_sin_cobertura} tiendas no tienen ningún promotor asignado</div>
-                        </div>
-                    </div>
-                `;
-            }
-            
-            if (alertas.oportunidades_expansion > 0) {
-                alertsContainer.innerHTML += `
-                    <div class="alert alert-success">
-                        <i class="fas fa-chart-line"></i>
-                        <div class="alert-content">
-                            <div class="alert-title">Oportunidades de Expansión</div>
-                            <div class="alert-message">${alertas.oportunidades_expansion} tiendas podrían beneficiarse de promotores adicionales</div>
-                        </div>
-                    </div>
-                `;
-            }
-        }
-
-        // ===== FUNCIONES MODALES =====
-        async function abrirModalAgregar() {
-            try {
-                console.log('Abriendo modal agregar promotor...');
-                
-                // Cargar promotores activos
-                const promResponse = await fetch('../../api/get_promotores_disponibles.php?solo_activos=true');
-                const promData = await promResponse.json();
-                
-                // Cargar todas las tiendas
-                const tienResponse = await fetch('../../api/get_tiendas_disponibles.php');
-                const tienData = await tienResponse.json();
-                
-                // Llenar selects
-                const promotorSelect = document.getElementById('agregar-promotor');
-                const tiendaSelect = document.getElementById('agregar-tienda');
-                
-                promotorSelect.innerHTML = '<option value="">Seleccionar promotor...</option>';
-                tiendaSelect.innerHTML = '<option value="">Seleccionar tienda...</option>';
-                
-                if (promData.success) {
-                    promData.data.forEach(promotor => {
-                        if (promotor.activo) {
-                            const info = promotor.tiene_asignacion ? 
-                                ` (Ya asignado)` : ' (Disponible)';
-                            promotorSelect.innerHTML += `<option value="${promotor.id_promotor}">${promotor.nombre_completo}${info}</option>`;
-                        }
-                    });
-                }
-                
-                if (tienData.success) {
-                    tienData.data.forEach(tienda => {
-                        const info = tienda.total_promotores > 0 ? ` (${tienda.total_promotores} promotor${tienda.total_promotores > 1 ? 'es' : ''})` : '';
-                        tiendaSelect.innerHTML += `<option value="${tienda.id_tienda}">${tienda.identificador}${info}</option>`;
-                    });
-                } else {
-                    // Fallback: usar tiendas ya cargadas
-                    allTiendas.forEach(tienda => {
-                        tiendaSelect.innerHTML += `<option value="${tienda.id_tienda}">${tienda.cadena} #${tienda.num_tienda} - ${tienda.nombre_tienda}</option>`;
-                    });
-                }
-                
-                // Establecer fecha por defecto
-                document.getElementById('agregar-fecha-inicio').value = new Date().toISOString().split('T')[0];
-                
-                modalAgregar.style.display = 'flex';
-                
-            } catch (error) {
-                console.error('Error abriendo modal agregar:', error);
-                mostrarNotificacion('Error al cargar datos para agregar promotor', 'error');
-            }
-        }
-
-        function agregarPromotorATienda(idTienda, nombreTienda) {
-            // Pre-seleccionar la tienda en el modal
-            abrirModalAgregar().then(() => {
-                document.getElementById('agregar-tienda').value = idTienda;
-            }).catch(() => {
-                // Modal ya está abierto, solo seleccionar tienda
-                document.getElementById('agregar-tienda').value = idTienda;
             });
         }
-
-        function cerrarModalAgregar() {
-            modalAgregar.style.display = 'none';
-            document.getElementById('form-agregar').reset();
-        }
-
-        async function guardarAgregarPromotor(e) {
-            e.preventDefault();
-            
-            const btnGuardar = document.getElementById('btn-guardar-agregar');
-            const originalText = btnGuardar.innerHTML;
-            
-            const data = {
-                id_promotor: document.getElementById('agregar-promotor').value,
-                id_tienda: document.getElementById('agregar-tienda').value,
-                fecha_inicio: document.getElementById('agregar-fecha-inicio').value,
-                motivo_asignacion: document.getElementById('agregar-motivo').value
-            };
-            
-            try {
-                btnGuardar.disabled = true;
-                btnGuardar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Agregando...';
-                
-                console.log('Agregando promotor:', data);
-                
-                const response = await fetch('../../api/create_asignacion.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(data)
-                });
-                
-                const responseText = await response.text();
-                let result;
-                try {
-                    result = JSON.parse(responseText);
-                } catch (jsonError) {
-                    throw new Error('Respuesta inválida del servidor');
-                }
-                
-                if (!result.success) {
-                    throw new Error(result.message || 'Error al agregar promotor');
-                }
-                
-                mostrarNotificacion('Promotor agregado correctamente a la tienda', 'success');
-                cerrarModalAgregar();
-                cargarTiendasConPromotores(); // Recargar toda la tabla
-                
-            } catch (error) {
-                console.error('Error agregando promotor:', error);
-                mostrarNotificacion('Error al agregar promotor: ' + error.message, 'error');
-            } finally {
-                btnGuardar.disabled = false;
-                btnGuardar.innerHTML = originalText;
-            }
-        }
-
-        // ===== FUNCIONES REASIGNAR =====
-        async function reasignarPromotor(idAsignacion) {
-            try {
-                console.log('Preparando reasignación para asignación:', idAsignacion);
-                
-                // Buscar la asignación actual
-                const asignacionActual = allAsignaciones.find(a => a.id_asignacion == idAsignacion);
-                
-                if (!asignacionActual) {
-                    throw new Error('No se encontró la asignación');
-                }
-                
-                // Cargar tiendas disponibles
-                const response = await fetch('../../api/get_tiendas_disponibles.php');
-                const data = await response.json();
-                
-                if (!data.success) {
-                    throw new Error('Error cargando tiendas disponibles');
-                }
-                
-                // Llenar detalles de asignación actual
-                document.getElementById('reasignar-details').innerHTML = `
-                    <h4><i class="fas fa-info-circle"></i> Asignación Actual</h4>
-                    <p><strong>Promotor:</strong> ${asignacionActual.promotor_nombre_completo}</p>
-                    <p><strong>Tienda actual:</strong> ${asignacionActual.tienda_identificador}</p>
-                    <p><strong>Fecha inicio:</strong> ${asignacionActual.fecha_inicio_formatted}</p>
-                    <p><strong>Duración:</strong> ${asignacionActual.duracion_dias} días</p>
-                    <p><strong>Motivo original:</strong> ${asignacionActual.motivo_asignacion}</p>
-                `;
-                
-                // Llenar select de tiendas (excluyendo la actual)
-                const tiendaSelect = document.getElementById('nueva-tienda-destino');
-                tiendaSelect.innerHTML = '<option value="">Seleccionar nueva tienda...</option>';
-                
-                data.data.forEach(tienda => {
-                    if (tienda.id_tienda != asignacionActual.id_tienda) {
-                        const info = tienda.total_promotores > 0 ? ` (${tienda.total_promotores} promotor${tienda.total_promotores > 1 ? 'es' : ''})` : '';
-                        tiendaSelect.innerHTML += `<option value="${tienda.id_tienda}">${tienda.identificador}${info}</option>`;
-                    }
-                });
-                
-                // Establecer ID y fecha por defecto
-                document.getElementById('reasignar-id-asignacion').value = idAsignacion;
-                document.getElementById('reasignar-fecha-cambio').value = new Date().toISOString().split('T')[0];
-                
-                modalReasignar.style.display = 'flex';
-                
-            } catch (error) {
-                console.error('Error preparando reasignación:', error);
-                mostrarNotificacion('Error preparando reasignación: ' + error.message, 'error');
-            }
-        }
-
-        function cerrarModalReasignar() {
-            modalReasignar.style.display = 'none';
-            document.getElementById('form-reasignar').reset();
-        }
-
-        async function confirmarReasignar(e) {
-            e.preventDefault();
-            
-            const btnConfirmar = document.getElementById('btn-confirmar-reasignar');
-            const originalText = btnConfirmar.innerHTML;
-            
-            const data = {
-                id_asignacion_actual: document.getElementById('reasignar-id-asignacion').value,
-                id_tienda_nueva: document.getElementById('nueva-tienda-destino').value,
-                fecha_cambio: document.getElementById('reasignar-fecha-cambio').value,
-                motivo_cambio: document.getElementById('reasignar-motivo-cambio').value,
-                motivo_nueva_asignacion: 'Reasignación desde otra tienda'
-            };
-            
-            try {
-                btnConfirmar.disabled = true;
-                btnConfirmar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Reasignando...';
-                
-                console.log('Reasignando promotor:', data);
-                
-                const response = await fetch('../../api/update_asignacion.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(data)
-                });
-                
-                const responseText = await response.text();
-                let result;
-                try {
-                    result = JSON.parse(responseText);
-                } catch (jsonError) {
-                    throw new Error('Respuesta inválida del servidor');
-                }
-                
-                if (!result.success) {
-                    throw new Error(result.message || 'Error al reasignar promotor');
-                }
-                
-                mostrarNotificacion('Promotor reasignado correctamente', 'success');
-                cerrarModalReasignar();
-                cargarTiendasConPromotores();
-                
-            } catch (error) {
-                console.error('Error reasignando promotor:', error);
-                mostrarNotificacion('Error al reasignar promotor: ' + error.message, 'error');
-            } finally {
-                btnConfirmar.disabled = false;
-                btnConfirmar.innerHTML = originalText;
-            }
-        }
-
-        // ===== FUNCIONES QUITAR =====
-        async function quitarPromotor(idAsignacion) {
-            try {
-                console.log('Preparando eliminación para asignación:', idAsignacion);
-                
-                // Buscar la asignación actual
-                const asignacionActual = allAsignaciones.find(a => a.id_asignacion == idAsignacion);
-                
-                if (!asignacionActual) {
-                    throw new Error('No se encontró la asignación');
-                }
-                
-                // Llenar detalles de asignación actual
-                document.getElementById('quitar-details').innerHTML = `
-                    <h4><i class="fas fa-info-circle"></i> Asignación a Finalizar</h4>
-                    <p><strong>Promotor:</strong> ${asignacionActual.promotor_nombre_completo}</p>
-                    <p><strong>Tienda:</strong> ${asignacionActual.tienda_identificador}</p>
-                    <p><strong>Fecha inicio:</strong> ${asignacionActual.fecha_inicio_formatted}</p>
-                    <p><strong>Duración actual:</strong> ${asignacionActual.duracion_dias} días</p>
-                    <p><strong>Motivo asignación:</strong> ${asignacionActual.motivo_asignacion}</p>
-                `;
-                
-                // Establecer ID y fecha por defecto
-                document.getElementById('quitar-id-asignacion').value = idAsignacion;
-                document.getElementById('quitar-fecha-fin').value = new Date().toISOString().split('T')[0];
-                
-                modalQuitar.style.display = 'flex';
-                
-            } catch (error) {
-                console.error('Error preparando eliminación:', error);
-                mostrarNotificacion('Error preparando eliminación: ' + error.message, 'error');
-            }
-        }
-
-        function cerrarModalQuitar() {
-            modalQuitar.style.display = 'none';
-            document.getElementById('form-quitar').reset();
-        }
-
-        async function confirmarQuitar(e) {
-            e.preventDefault();
-            
-            const btnConfirmar = document.getElementById('btn-confirmar-quitar');
-            const originalText = btnConfirmar.innerHTML;
-            
-            const data = {
-                id_asignacion: document.getElementById('quitar-id-asignacion').value,
-                fecha_fin: document.getElementById('quitar-fecha-fin').value,
-                motivo_finalizacion: document.getElementById('quitar-motivo').value,
-                desactivar: 'true'
-            };
-            
-            try {
-                btnConfirmar.disabled = true;
-                btnConfirmar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Quitando...';
-                
-                console.log('Finalizando asignación:', data);
-                
-                const response = await fetch('../../api/finalizar_asignacion.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(data)
-                });
-                
-                const responseText = await response.text();
-                let result;
-                try {
-                    result = JSON.parse(responseText);
-                } catch (jsonError) {
-                    throw new Error('Respuesta inválida del servidor');
-                }
-                
-                if (!result.success) {
-                    throw new Error(result.message || 'Error al quitar promotor');
-                }
-                
-                mostrarNotificacion('Promotor removido correctamente de la tienda', 'success');
-                cerrarModalQuitar();
-                cargarTiendasConPromotores();
-                
-            } catch (error) {
-                console.error('Error quitando promotor:', error);
-                mostrarNotificacion('Error al quitar promotor: ' + error.message, 'error');
-            } finally {
-                btnConfirmar.disabled = false;
-                btnConfirmar.innerHTML = originalText;
-            }
-        }
-
-        // ===== FUNCIONES HISTORIAL =====
-        async function verHistorialPromotor(idPromotor) {
-            try {
-                console.log('Cargando historial del promotor:', idPromotor);
-                
-                const response = await fetch(`../../api/get_historial_promotor.php?id_promotor=${idPromotor}`);
-                const data = await response.json();
-                
-                if (data.success) {
-                    document.getElementById('historial-promotor-nombre').textContent = data.promotor.nombre_completo;
-                    
-                    // Llenar información del promotor
-                    document.getElementById('promotor-info').innerHTML = `
-                        <h4><i class="fas fa-user"></i> Información del Promotor</h4>
-                        <div class="stats-grid-small">
-                            <div class="stat-mini">
-                                <h5>${data.estadisticas.total_asignaciones}</h5>
-                                <p>Total Asignaciones</p>
-                            </div>
-                            <div class="stat-mini">
-                                <h5>${data.estadisticas.asignaciones_activas}</h5>
-                                <p>Activas</p>
-                            </div>
-                            <div class="stat-mini">
-                                <h5>${data.estadisticas.total_dias_asignado}</h5>
-                                <p>Días Totales</p>
-                            </div>
-                            <div class="stat-mini">
-                                <h5>${data.estadisticas.tiendas_distintas}</h5>
-                                <p>Tiendas Diferentes</p>
-                            </div>
-                        </div>
-                        <div style="margin-top: 1.5rem;">
-                            <p><strong>Nombre:</strong> ${data.promotor.nombre_completo}</p>
-                            <p><strong>Teléfono:</strong> ${data.promotor.telefono}</p>
-                            <p><strong>Email:</strong> ${data.promotor.correo}</p>
-                            <p><strong>RFC:</strong> ${data.promotor.rfc}</p>
-                            <p><strong>Estatus:</strong> ${data.promotor.estatus}</p>
-                            <p><strong>Fecha Alta:</strong> ${data.promotor.fecha_alta_formatted}</p>
-                        </div>
-                    `;
-                    
-                    // Llenar timeline del historial
-                    renderHistorialTimeline(data.historial);
-                    
-                    modalHistorial.style.display = 'flex';
-                } else {
-                    throw new Error(data.message || 'Error al cargar historial');
-                }
-                
-            } catch (error) {
-                console.error('Error cargando historial:', error);
-                mostrarNotificacion('Error al cargar historial del promotor', 'error');
-            }
-        }
-
-        function renderHistorialTimeline(historial) {
-            const timeline = document.getElementById('historial-timeline');
-            timeline.innerHTML = '<h4><i class="fas fa-history"></i> Historial de Asignaciones</h4>';
-            
-            if (historial.length === 0) {
-                timeline.innerHTML += '<p class="text-muted text-center">No hay historial de asignaciones</p>';
-                return;
-            }
-            
-            historial.forEach(item => {
-                const isActive = item.actualmente_asignado;
-                timeline.innerHTML += `
-                    <div class="timeline-item ${isActive ? 'active' : ''}">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                            <div style="font-weight: 700; color: #2d3748; font-size: 1.1rem;">${item.tienda_identificador}</div>
-                            <div style="color: #718096; font-size: 0.85rem; font-weight: 600;">${item.fecha_inicio_formatted}</div>
-                        </div>
-                        <div>
-                            <p><strong>Duración:</strong> ${item.dias_asignado} días ${isActive ? '(activa)' : ''}</p>
-                            <p><strong>Motivo:</strong> ${item.motivo_asignacion}</p>
-                            ${item.motivo_cambio ? `<p><strong>Fin:</strong> ${item.motivo_cambio}</p>` : ''}
-                            <p><strong>Usuario:</strong> ${item.usuario_asigno}</p>
-                        </div>
+        
+    } catch (error) {
+        console.error('❌ Error cargando promotores por tienda:', error);
+        // Mostrar error en las celdas de promotores
+        allTiendas.forEach(tienda => {
+            const promotoresContainer = document.getElementById(`promotores-${tienda.id_tienda}`);
+            if (promotoresContainer) {
+                promotoresContainer.innerHTML = `
+                    <div class="sin-promotores">
+                        <i class="fas fa-exclamation-triangle"></i> Error cargando
                     </div>
                 `;
-            });
-        }
+            }
+        });
+    }
+}
 
-        function cerrarModalHistorial() {
-            modalHistorial.style.display = 'none';
-        }
+function actualizarPaginacion(pagination) {
+    if (!pagination) {
+        console.warn('⚠️ Sin datos de paginación');
+        return;
+    }
+    
+    totalPages = pagination.total_pages || 1;
+    const total = pagination.total_records || 0;
+    const current = pagination.current_page || currentPage;
+    
+    paginationInfo.textContent = `Mostrando ${pagination.per_page || 0} de ${total} tiendas`;
+    paginationPages.textContent = `Página ${current} de ${totalPages}`;
+    
+    btnPrev.disabled = current <= 1;
+    btnNext.disabled = current >= totalPages;
+}
 
-        // ===== NOTIFICACIONES =====
-        function mostrarNotificacion(mensaje, tipo = 'info') {
-            const notificacion = document.createElement('div');
-            notificacion.className = `notification ${tipo}`;
-            
-            const iconos = {
-                success: 'fas fa-check-circle',
-                error: 'fas fa-exclamation-circle',
-                warning: 'fas fa-exclamation-triangle',
-                info: 'fas fa-info-circle'
-            };
-            
-            const titulos = {
-                success: 'Éxito',
-                error: 'Error',
-                warning: 'Advertencia',
-                info: 'Información'
-            };
-            
-            notificacion.innerHTML = `
-                <i class="${iconos[tipo]} notification-icon"></i>
-                <div class="notification-content">
-                    <h4>${titulos[tipo]}</h4>
-                    <p>${mensaje}</p>
+function cambiarPagina(page) {
+    if (page < 1 || page > totalPages) return;
+    currentPage = page;
+    cargarTiendasConPromotores();
+}
+
+function realizarBusqueda() {
+    currentSearch = {
+        field: searchField.value,
+        value: searchValue.value.trim(),
+        coverage: coverageFilter.value
+    };
+    currentPage = 1;
+    cargarTiendasConPromotores();
+}
+
+function limpiarBusqueda() {
+    searchField.value = '';
+    searchValue.value = '';
+    coverageFilter.value = '';
+    searchValue.disabled = true;
+    btnBuscar.disabled = true;
+    currentSearch = { field: '', value: '', coverage: '' };
+    currentPage = 1;
+    cargarTiendasConPromotores();
+}
+
+// ===== FUNCIONES DASHBOARD =====
+function toggleDashboard() {
+    if (currentView === 'main') {
+        currentView = 'dashboard';
+        dashboardSection.style.display = 'block';
+        mainView.style.display = 'none';
+        btnDashboard.innerHTML = '<i class="fas fa-list"></i> Ver Tiendas';
+        cargarDashboardStats();
+    } else {
+        currentView = 'main';
+        dashboardSection.style.display = 'none';
+        mainView.style.display = 'block';
+        btnDashboard.innerHTML = '<i class="fas fa-chart-pie"></i> Dashboard';
+    }
+}
+
+async function cargarDashboardStats() {
+    try {
+        console.log('📊 Cargando estadísticas dashboard...');
+        const response = await fetch('../../api/get_dashboard_stats.php');
+        const data = await response.json();
+        
+        if (data.success) {
+            actualizarDashboardStats(data);
+        }
+    } catch (error) {
+        console.error('❌ Error cargando estadísticas dashboard:', error);
+        mostrarNotificacion('Error al cargar estadísticas del dashboard', 'error');
+    }
+}
+
+function actualizarDashboardStats(data) {
+    // Actualizar contadores principales
+    document.getElementById('stat-asignaciones-activas').textContent = data.resumen_general.asignaciones.activas;
+    document.getElementById('stat-promotores-asignados').textContent = data.resumen_general.promotores.con_asignacion;
+    document.getElementById('stat-tiendas-cubiertas').textContent = data.resumen_general.tiendas.con_promotor;
+    document.getElementById('stat-promedio-promotores').textContent = data.resumen_general.distribucion_promotores.promedio_promotores_por_tienda.toFixed(1);
+    
+    // Actualizar trends
+    document.getElementById('trend-promotores').textContent = `${data.resumen_general.promotores.porcentaje_asignados}% de cobertura`;
+    document.getElementById('trend-tiendas').textContent = `${data.resumen_general.tiendas.porcentaje_cubiertas}% del total`;
+    document.getElementById('trend-promedio').textContent = `Max: ${data.resumen_general.distribucion_promotores.max_promotores_en_tienda} en una tienda`;
+    
+    // Actualizar distribución
+    document.getElementById('dist-0').textContent = data.resumen_general.distribucion_promotores.tiendas_sin_promotores;
+    document.getElementById('dist-1').textContent = data.resumen_general.distribucion_promotores.tiendas_con_1_promotor;
+    document.getElementById('dist-2').textContent = data.resumen_general.distribucion_promotores.tiendas_con_2_promotores;
+    document.getElementById('dist-3').textContent = data.resumen_general.distribucion_promotores.tiendas_con_3_mas_promotores;
+    
+    // Actualizar alertas
+    actualizarAlertas(data.alertas);
+}
+
+function actualizarAlertas(alertas) {
+    const alertsContainer = document.getElementById('alerts-container');
+    alertsContainer.innerHTML = '';
+    
+    if (alertas.promotores_disponibles > 0) {
+        alertsContainer.innerHTML += `
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i>
+                <div class="alert-content">
+                    <div class="alert-title">Promotores Disponibles</div>
+                    <div class="alert-message">Tienes ${alertas.promotores_disponibles} promotores disponibles para asignar</div>
                 </div>
-                <button class="notification-close">
-                    <i class="fas fa-times"></i>
-                </button>
+            </div>
+        `;
+    }
+    
+    if (alertas.tiendas_sin_cobertura > 0) {
+        alertsContainer.innerHTML += `
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                <div class="alert-content">
+                    <div class="alert-title">Tiendas Sin Cobertura</div>
+                    <div class="alert-message">${alertas.tiendas_sin_cobertura} tiendas no tienen ningún promotor asignado</div>
+                </div>
+            </div>
+        `;
+    }
+    
+    if (alertas.oportunidades_expansion > 0) {
+        alertsContainer.innerHTML += `
+            <div class="alert alert-success">
+                <i class="fas fa-chart-line"></i>
+                <div class="alert-content">
+                    <div class="alert-title">Oportunidades de Expansión</div>
+                    <div class="alert-message">${alertas.oportunidades_expansion} tiendas podrían beneficiarse de promotores adicionales</div>
+                </div>
+            </div>
+        `;
+    }
+}
+
+// ===== MODAL AGREGAR =====
+async function abrirModalAgregar() {
+    try {
+        console.log('🔄 Abriendo modal agregar promotor...');
+        
+        // Cargar promotores activos
+        const promResponse = await fetch('../../api/get_promotores_disponibles.php?solo_activos=true');
+        const promData = await promResponse.json();
+        
+        // Cargar todas las tiendas
+        const tienResponse = await fetch('../../api/get_tiendas_disponibles.php');
+        const tienData = await tienResponse.json();
+        
+        // Llenar selects
+        const promotorSelect = document.getElementById('agregar-promotor');
+        const tiendaSelect = document.getElementById('agregar-tienda');
+        
+        promotorSelect.innerHTML = '<option value="">Seleccionar promotor...</option>';
+        tiendaSelect.innerHTML = '<option value="">Seleccionar tienda...</option>';
+        
+        if (promData.success) {
+            promData.data.forEach(promotor => {
+                if (promotor.activo) {
+                    const info = promotor.tiene_asignacion ? 
+                        ` (Ya asignado)` : ' (Disponible)';
+                    promotorSelect.innerHTML += `<option value="${promotor.id_promotor}">${promotor.nombre_completo}${info}</option>`;
+                }
+            });
+        }
+        
+        if (tienData.success) {
+            tienData.data.forEach(tienda => {
+                const info = tienda.total_promotores > 0 ? ` (${tienda.total_promotores} promotor${tienda.total_promotores > 1 ? 'es' : ''})` : '';
+                tiendaSelect.innerHTML += `<option value="${tienda.id_tienda}">${tienda.identificador}${info}</option>`;
+            });
+        } else {
+            // Fallback: usar tiendas ya cargadas
+            allTiendas.forEach(tienda => {
+                tiendaSelect.innerHTML += `<option value="${tienda.id_tienda}">${tienda.cadena} #${tienda.num_tienda} - ${tienda.nombre_tienda}</option>`;
+            });
+        }
+        
+        // Establecer fecha por defecto
+        document.getElementById('agregar-fecha-inicio').value = new Date().toISOString().split('T')[0];
+        
+        modalAgregar.classList.add('active');
+        
+    } catch (error) {
+        console.error('❌ Error abriendo modal agregar:', error);
+        mostrarNotificacion('Error al cargar datos para agregar promotor', 'error');
+    }
+}
+
+function agregarPromotorATienda(idTienda, nombreTienda) {
+    // Pre-seleccionar la tienda en el modal
+    abrirModalAgregar().then(() => {
+        document.getElementById('agregar-tienda').value = idTienda;
+    }).catch(() => {
+        // Modal ya está abierto, solo seleccionar tienda
+        document.getElementById('agregar-tienda').value = idTienda;
+    });
+}
+
+function cerrarModalAgregar() {
+    modalAgregar.classList.remove('active');
+    document.getElementById('form-agregar').reset();
+}
+
+async function guardarAgregarPromotor(e) {
+    e.preventDefault();
+    
+    const btnGuardar = document.getElementById('btn-guardar-agregar');
+    const originalText = btnGuardar.innerHTML;
+    
+    const data = {
+        id_promotor: document.getElementById('agregar-promotor').value,
+        id_tienda: document.getElementById('agregar-tienda').value,
+        fecha_inicio: document.getElementById('agregar-fecha-inicio').value,
+        motivo_asignacion: document.getElementById('agregar-motivo').value
+    };
+    
+    try {
+        btnGuardar.disabled = true;
+        btnGuardar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Agregando...';
+        
+        console.log('📝 Agregando promotor:', data);
+        
+        const response = await fetch('../../api/create_asignacion.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const responseText = await response.text();
+        let result;
+        try {
+            result = JSON.parse(responseText);
+        } catch (jsonError) {
+            throw new Error('Respuesta inválida del servidor');
+        }
+        
+        if (!result.success) {
+            throw new Error(result.message || 'Error al agregar promotor');
+        }
+        
+        mostrarNotificacion('Promotor agregado correctamente a la tienda', 'success');
+        cerrarModalAgregar();
+        cargarTiendasConPromotores(); // Recargar toda la tabla
+        
+    } catch (error) {
+        console.error('❌ Error agregando promotor:', error);
+        mostrarNotificacion('Error al agregar promotor: ' + error.message, 'error');
+    } finally {
+        btnGuardar.disabled = false;
+        btnGuardar.innerHTML = originalText;
+    }
+}
+
+// ===== FUNCIONES REASIGNAR =====
+async function reasignarPromotor(idAsignacion) {
+    try {
+        console.log('🔄 Preparando reasignación para asignación:', idAsignacion);
+        
+        // Buscar la asignación actual
+        const asignacionActual = allAsignaciones.find(a => a.id_asignacion == idAsignacion);
+        
+        if (!asignacionActual) {
+            throw new Error('No se encontró la asignación');
+        }
+        
+        // Cargar tiendas disponibles
+        const response = await fetch('../../api/get_tiendas_disponibles.php');
+        const data = await response.json();
+        
+        if (!data.success) {
+            throw new Error('Error cargando tiendas disponibles');
+        }
+        
+        // Llenar detalles de asignación actual
+        document.getElementById('reasignar-details').innerHTML = `
+            <h4><i class="fas fa-info-circle"></i> Asignación Actual</h4>
+            <p><strong>Promotor:</strong> ${asignacionActual.promotor_nombre_completo}</p>
+            <p><strong>Tienda actual:</strong> ${asignacionActual.tienda_identificador}</p>
+            <p><strong>Fecha inicio:</strong> ${asignacionActual.fecha_inicio_formatted}</p>
+            <p><strong>Duración:</strong> ${asignacionActual.duracion_dias} días</p>
+            <p><strong>Motivo original:</strong> ${asignacionActual.motivo_asignacion}</p>
+        `;
+        
+        // Llenar select de tiendas (excluyendo la actual)
+        const tiendaSelect = document.getElementById('nueva-tienda-destino');
+        tiendaSelect.innerHTML = '<option value="">Seleccionar nueva tienda...</option>';
+        
+        data.data.forEach(tienda => {
+            if (tienda.id_tienda != asignacionActual.id_tienda) {
+                const info = tienda.total_promotores > 0 ? ` (${tienda.total_promotores} promotor${tienda.total_promotores > 1 ? 'es' : ''})` : '';
+                tiendaSelect.innerHTML += `<option value="${tienda.id_tienda}">${tienda.identificador}${info}</option>`;
+            }
+        });
+        
+        // Establecer ID y fecha por defecto
+        document.getElementById('reasignar-id-asignacion').value = idAsignacion;
+        document.getElementById('reasignar-fecha-cambio').value = new Date().toISOString().split('T')[0];
+        
+        modalReasignar.classList.add('active');
+        
+    } catch (error) {
+        console.error('❌ Error preparando reasignación:', error);
+        mostrarNotificacion('Error preparando reasignación: ' + error.message, 'error');
+    }
+}
+
+function cerrarModalReasignar() {
+    modalReasignar.classList.remove('active');
+    document.getElementById('form-reasignar').reset();
+}
+
+async function confirmarReasignar(e) {
+    e.preventDefault();
+    
+    const btnConfirmar = document.getElementById('btn-confirmar-reasignar');
+    const originalText = btnConfirmar.innerHTML;
+    
+    const data = {
+        id_asignacion_actual: document.getElementById('reasignar-id-asignacion').value,
+        id_tienda_nueva: document.getElementById('nueva-tienda-destino').value,
+        fecha_cambio: document.getElementById('reasignar-fecha-cambio').value,
+        motivo_cambio: document.getElementById('reasignar-motivo-cambio').value,
+        motivo_nueva_asignacion: 'Reasignación desde otra tienda'
+    };
+    
+    try {
+        btnConfirmar.disabled = true;
+        btnConfirmar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Reasignando...';
+        
+        console.log('🔄 Reasignando promotor:', data);
+        
+        const response = await fetch('../../api/update_asignacion.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const responseText = await response.text();
+        let result;
+        try {
+            result = JSON.parse(responseText);
+        } catch (jsonError) {
+            throw new Error('Respuesta inválida del servidor');
+        }
+        
+        if (!result.success) {
+            throw new Error(result.message || 'Error al reasignar promotor');
+        }
+        
+        mostrarNotificacion('Promotor reasignado correctamente', 'success');
+        cerrarModalReasignar();
+        cargarTiendasConPromotores();
+        
+    } catch (error) {
+        console.error('❌ Error reasignando promotor:', error);
+        mostrarNotificacion('Error al reasignar promotor: ' + error.message, 'error');
+    } finally {
+        btnConfirmar.disabled = false;
+        btnConfirmar.innerHTML = originalText;
+    }
+}
+
+// ===== FUNCIONES QUITAR =====
+async function quitarPromotor(idAsignacion) {
+    try {
+        console.log('🔄 Preparando eliminación para asignación:', idAsignacion);
+        
+        // Buscar la asignación actual
+        const asignacionActual = allAsignaciones.find(a => a.id_asignacion == idAsignacion);
+        
+        if (!asignacionActual) {
+            throw new Error('No se encontró la asignación');
+        }
+        
+        // Llenar detalles de asignación actual
+        document.getElementById('quitar-details').innerHTML = `
+            <h4><i class="fas fa-info-circle"></i> Asignación a Finalizar</h4>
+            <p><strong>Promotor:</strong> ${asignacionActual.promotor_nombre_completo}</p>
+            <p><strong>Tienda:</strong> ${asignacionActual.tienda_identificador}</p>
+            <p><strong>Fecha inicio:</strong> ${asignacionActual.fecha_inicio_formatted}</p>
+            <p><strong>Duración actual:</strong> ${asignacionActual.duracion_dias} días</p>
+            <p><strong>Motivo asignación:</strong> ${asignacionActual.motivo_asignacion}</p>
+        `;
+        
+        // Establecer ID y fecha por defecto
+        document.getElementById('quitar-id-asignacion').value = idAsignacion;
+        document.getElementById('quitar-fecha-fin').value = new Date().toISOString().split('T')[0];
+        
+        modalQuitar.classList.add('active');
+        
+    } catch (error) {
+        console.error('❌ Error preparando eliminación:', error);
+        mostrarNotificacion('Error preparando eliminación: ' + error.message, 'error');
+    }
+}
+
+function cerrarModalQuitar() {
+    modalQuitar.classList.remove('active');
+    document.getElementById('form-quitar').reset();
+}
+
+async function confirmarQuitar(e) {
+    e.preventDefault();
+    
+    const btnConfirmar = document.getElementById('btn-confirmar-quitar');
+    const originalText = btnConfirmar.innerHTML;
+    
+    const data = {
+        id_asignacion: document.getElementById('quitar-id-asignacion').value,
+        fecha_fin: document.getElementById('quitar-fecha-fin').value,
+        motivo_finalizacion: document.getElementById('quitar-motivo').value,
+        desactivar: 'true'
+    };
+    
+    try {
+        btnConfirmar.disabled = true;
+        btnConfirmar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Quitando...';
+        
+        console.log('🗑️ Finalizando asignación:', data);
+        
+        const response = await fetch('../../api/finalizar_asignacion.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const responseText = await response.text();
+        let result;
+        try {
+            result = JSON.parse(responseText);
+        } catch (jsonError) {
+            throw new Error('Respuesta inválida del servidor');
+        }
+        
+        if (!result.success) {
+            throw new Error(result.message || 'Error al quitar promotor');
+        }
+        
+        mostrarNotificacion('Promotor removido correctamente de la tienda', 'success');
+        cerrarModalQuitar();
+        cargarTiendasConPromotores();
+        
+    } catch (error) {
+        console.error('❌ Error quitando promotor:', error);
+        mostrarNotificacion('Error al quitar promotor: ' + error.message, 'error');
+    } finally {
+        btnConfirmar.disabled = false;
+        btnConfirmar.innerHTML = originalText;
+    }
+}
+
+// ===== FUNCIONES HISTORIAL =====
+async function verHistorialPromotor(idPromotor) {
+    try {
+        console.log('📖 Cargando historial del promotor:', idPromotor);
+        
+        const response = await fetch(`../../api/get_historial_promotor.php?id_promotor=${idPromotor}`);
+        const data = await response.json();
+        
+        if (data.success) {
+            document.getElementById('historial-promotor-nombre').textContent = data.promotor.nombre_completo;
+            
+            // Llenar información del promotor
+            document.getElementById('promotor-info').innerHTML = `
+                <h4><i class="fas fa-user"></i> Información del Promotor</h4>
+                <div class="stats-grid-small">
+                    <div class="stat-mini">
+                        <h5>${data.estadisticas.total_asignaciones}</h5>
+                        <p>Total Asignaciones</p>
+                    </div>
+                    <div class="stat-mini">
+                        <h5>${data.estadisticas.asignaciones_activas}</h5>
+                        <p>Activas</p>
+                    </div>
+                    <div class="stat-mini">
+                        <h5>${data.estadisticas.total_dias_asignado}</h5>
+                        <p>Días Totales</p>
+                    </div>
+                    <div class="stat-mini">
+                        <h5>${data.estadisticas.tiendas_distintas}</h5>
+                        <p>Tiendas Diferentes</p>
+                    </div>
+                </div>
+                <div style="margin-top: 1.5rem;">
+                    <p><strong>Nombre:</strong> ${data.promotor.nombre_completo}</p>
+                    <p><strong>Teléfono:</strong> ${data.promotor.telefono}</p>
+                    <p><strong>Email:</strong> ${data.promotor.correo}</p>
+                    <p><strong>RFC:</strong> ${data.promotor.rfc}</p>
+                    <p><strong>Estatus:</strong> ${data.promotor.estatus}</p>
+                    <p><strong>Fecha Alta:</strong> ${data.promotor.fecha_alta_formatted}</p>
+                </div>
             `;
             
-            notificacion.querySelector('.notification-close').addEventListener('click', () => {
-                notificacion.remove();
-            });
+            // Llenar timeline del historial
+            renderHistorialTimeline(data.historial);
             
-            setTimeout(() => {
-                if (notificacion.parentNode) {
-                    notificacion.remove();
-                }
-            }, 6000);
-            
-            document.getElementById('notifications-container').appendChild(notificacion);
+            modalHistorial.classList.add('active');
+        } else {
+            throw new Error(data.message || 'Error al cargar historial');
         }
-
-        // ===== EXPONER FUNCIONES GLOBALES =====
-        window.verHistorialPromotor = verHistorialPromotor;
-        window.reasignarPromotor = reasignarPromotor;
-        window.quitarPromotor = quitarPromotor;
-        window.agregarPromotorATienda = agregarPromotorATienda;
-        window.limpiarBusqueda = limpiarBusqueda;
-
-        // ===== INICIALIZACIÓN =====
-        console.log('Iniciando módulo Gestión de Asignaciones v3.0 COMPLETO...');
-        console.log('Características:');
-        console.log('✅ Soporte para múltiples promotores por tienda');
-        console.log('✅ Vista de tabla organizada y escalable');
-        console.log('✅ Dashboard avanzado con distribución');
-        console.log('✅ Búsqueda y filtros funcionales');
-        console.log('✅ CRUD completo de asignaciones');
-        console.log('✅ Modales conectados a APIs');
-        console.log('✅ Notificaciones modernas');
         
-        init();
+    } catch (error) {
+        console.error('❌ Error cargando historial:', error);
+        mostrarNotificacion('Error al cargar historial del promotor', 'error');
+    }
+}
 
-        // Cargar datos iniciales
-        setTimeout(() => {
-            console.log('Iniciando carga de datos...');
-            cargarTiendasConPromotores();
-        }, 200);
+function renderHistorialTimeline(historial) {
+    const timeline = document.getElementById('historial-timeline');
+    timeline.innerHTML = '<h4><i class="fas fa-history"></i> Historial de Asignaciones</h4>';
+    
+    if (historial.length === 0) {
+        timeline.innerHTML += '<p style="text-align: center; color: #666;">No hay historial de asignaciones</p>';
+        return;
+    }
+    
+    historial.forEach(item => {
+        const isActive = item.actualmente_asignado;
+        timeline.innerHTML += `
+            <div class="timeline-item ${isActive ? 'active' : ''}">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <div style="font-weight: 700; color: #2d3748; font-size: 1.1rem;">${item.tienda_identificador}</div>
+                    <div style="color: #718096; font-size: 0.85rem; font-weight: 600;">${item.fecha_inicio_formatted}</div>
+                </div>
+                <div>
+                    <p><strong>Duración:</strong> ${item.dias_asignado} días ${isActive ? '(activa)' : ''}</p>
+                    <p><strong>Motivo:</strong> ${item.motivo_asignacion}</p>
+                    ${item.motivo_cambio ? `<p><strong>Fin:</strong> ${item.motivo_cambio}</p>` : ''}
+                    <p><strong>Usuario:</strong> ${item.usuario_asigno}</p>
+                </div>
+            </div>
+        `;
+    });
+}
 
-        console.log('✅ Módulo asignaciones v3.0 COMPLETO inicializado correctamente');
-    </script>
-</body>
-</html>
+function cerrarModalHistorial() {
+    modalHistorial.classList.remove('active');
+}
+
+// ===== NOTIFICACIONES =====
+function mostrarNotificacion(mensaje, tipo = 'info') {
+    const notificacion = document.createElement('div');
+    notificacion.className = `notification ${tipo}`;
+    
+    const iconos = {
+        success: 'fas fa-check-circle',
+        error: 'fas fa-exclamation-circle',
+        warning: 'fas fa-exclamation-triangle',
+        info: 'fas fa-info-circle'
+    };
+    
+    const titulos = {
+        success: 'Éxito',
+        error: 'Error',
+        warning: 'Advertencia',
+        info: 'Información'
+    };
+    
+    notificacion.innerHTML = `
+        <i class="${iconos[tipo]} notification-icon"></i>
+        <div class="notification-content">
+            <h4>${titulos[tipo]}</h4>
+            <p>${mensaje}</p>
+        </div>
+        <button class="notification-close">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+    
+    notificacion.querySelector('.notification-close').addEventListener('click', () => {
+        notificacion.remove();
+    });
+    
+    setTimeout(() => {
+        if (notificacion.parentNode) {
+            notificacion.remove();
+        }
+    }, 5000);
+    
+    document.getElementById('notifications-container').appendChild(notificacion);
+}
+
+// ===== EXPONER FUNCIONES GLOBALES =====
+window.verHistorialPromotor = verHistorialPromotor;
+window.reasignarPromotor = reasignarPromotor;
+window.quitarPromotor = quitarPromotor;
+window.agregarPromotorATienda = agregarPromotorATienda;
+window.limpiarBusqueda = limpiarBusqueda;
+
+// ===== INICIALIZACIÓN =====
+console.log('🚀 Iniciando módulo Gestión de Asignaciones...');
+console.log('Características:');
+console.log('✅ Soporte para múltiples promotores por tienda');
+console.log('✅ Vista de tabla organizada y escalable');
+console.log('✅ Dashboard avanzado con distribución');
+console.log('✅ Búsqueda y filtros funcionales');
+console.log('✅ CRUD completo de asignaciones');
+console.log('✅ Modales conectados a APIs');
+console.log('✅ Notificaciones modernas');
+console.log('🎨 Esquema de color distintivo: Púrpura-Rosa');
+
+init();
+
+// Cargar datos iniciales
+setTimeout(() => {
+    console.log('⏰ Iniciando carga de datos...');
+    cargarTiendasConPromotores();
+}, 100);
+
+console.log('✅ Módulo asignaciones inicializado correctamente');
+</script>
