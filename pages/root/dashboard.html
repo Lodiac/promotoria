@@ -430,11 +430,12 @@
             const headerUserRole = document.getElementById('header-user-role');
             const logoutBtn = document.getElementById('logout-btn');
             
-            // ===== MÓDULOS ESPECÍFICOS PARA ROOT =====
+            // ===== MÓDULOS ESPECÍFICOS PARA ROOT (ACTUALIZADO CON ASIGNACIÓN) =====
             const rootModules = [
                 { id: 'bienvenida', name: 'Inicio', icon: 'fas fa-home' },
                 { id: 'promotores', name: 'Promotoria', icon: 'fas fa-users' },
                 { id: 'cadenas', name: 'Cadenas Comerciales', icon: 'fas fa-link' },
+                { id: 'asignacion', name: 'Asignación', icon: 'fas fa-tasks' },
                 { id: 'usuarios', name: 'Usuarios', icon: 'fas fa-user-cog' }
             ];
             
@@ -590,7 +591,7 @@
                     sidebarMenu.appendChild(menuItem);
                 });
                 
-                console.log(`✅ Menú ROOT generado - ${rootModules.length} módulos`);
+                console.log(`✅ Menú ROOT generado - ${rootModules.length} módulos (incluyendo Asignación)`);
             }
             
             async function cargarModuloInicial() {

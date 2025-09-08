@@ -46,7 +46,8 @@ $allowedModules = [
         'bienvenida',
         'promotores',
         'cadenas',
-        'usuarios'
+        'usuarios',
+        'asignacion'
     ],
     'supervisor' => [
         'bienvenida',
