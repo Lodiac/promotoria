@@ -1,0 +1,1224 @@
+<!-- ===== MÓDULO GESTIÓN DE ASIGNACIONES - SISTEMA PROMOTORIA ===== -->
+<div class="asignaciones-module">
+    <!-- HEADER DEL MÓDULO -->
+    <div class="module-header">
+        <div class="header-content">
+            <div class="header-title">
+                <i class="fas fa-tasks header-icon"></i>
+                <h1>Gestión de Asignaciones</h1>
+            </div>
+            <div class="header-actions">
+                <button class="btn-secondary" id="btn-dashboard">
+                    <i class="fas fa-chart-pie"></i> Dashboard
+                </button>
+                <button class="btn-primary" id="btn-nueva-asignacion">
+                    <i class="fas fa-plus"></i> Nueva Asignación
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- DASHBOARD STATS (OCULTO POR DEFECTO) -->
+    <div class="dashboard-stats" id="dashboard-section" style="display: none;">
+        <div class="stats-grid">
+            <div class="stat-card primary">
+                <div class="stat-icon">
+                    <i class="fas fa-handshake"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="stat-asignaciones-activas">0</h3>
+                    <p>Asignaciones Activas</p>
+                </div>
+            </div>
+            
+            <div class="stat-card success">
+                <div class="stat-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="stat-promotores-asignados">0</h3>
+                    <p>Promotores Asignados</p>
+                </div>
+            </div>
+            
+            <div class="stat-card warning">
+                <div class="stat-icon">
+                    <i class="fas fa-store"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="stat-tiendas-cubiertas">0</h3>
+                    <p>Tiendas Cubiertas</p>
+                </div>
+            </div>
+            
+            <div class="stat-card info">
+                <div class="stat-icon">
+                    <i class="fas fa-percentage"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="stat-cobertura">0%</h3>
+                    <p>Cobertura General</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="alerts-section" id="alerts-container">
+            <!-- Se llenarán dinámicamente -->
+        </div>
+
+        <div class="recent-activity">
+            <h3><i class="fas fa-clock"></i> Asignaciones Recientes</h3>
+            <div class="activity-list" id="recent-assignments">
+                <!-- Se llenarán dinámicamente -->
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTROLES DE BÚSQUEDA -->
+    <div class="search-controls" id="search-section">
+        <div class="search-box">
+            <select id="search-field" class="search-select">
+                <option value="">Seleccionar campo...</option>
+                <option value="promotor_nombre">Nombre Promotor</option>
+                <option value="promotor_apellido">Apellido Promotor</option>
+                <option value="tienda_nombre">Nombre Tienda</option>
+                <option value="cadena">Cadena</option>
+                <option value="region">Región</option>
+                <option value="motivo_asignacion">Motivo</option>
+            </select>
+            <input type="text" id="search-value" placeholder="Valor a buscar..." class="search-input" disabled>
+            <select id="estatus-filter" class="search-select">
+                <option value="">Todos los estatus</option>
+                <option value="activo">Solo Activos</option>
+                <option value="finalizado">Solo Finalizados</option>
+            </select>
+            <button id="btn-buscar" class="btn-search" disabled>
+                <i class="fas fa-search"></i>
+            </button>
+            <button id="btn-limpiar" class="btn-clear">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- TABLA DE ASIGNACIONES -->
+    <div class="table-container" id="table-section">
+        <div class="table-wrapper">
+            <table class="asignaciones-table" id="asignaciones-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Promotor</th>
+                        <th>Tienda</th>
+                        <th>Región</th>
+                        <th>Fecha Inicio</th>
+                        <th>Fecha Fin</th>
+                        <th>Días</th>
+                        <th>Estatus</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="asignaciones-tbody">
+                    <!-- Los datos se cargarán dinámicamente -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- LOADING TABLA -->
+        <div class="table-loading" id="table-loading">
+            <div class="loading-spinner"></div>
+            <p>Cargando asignaciones...</p>
+        </div>
+
+        <!-- EMPTY STATE -->
+        <div class="empty-state" id="empty-state" style="display: none;">
+            <i class="fas fa-tasks"></i>
+            <h3>No se encontraron asignaciones</h3>
+            <p>No hay asignaciones que coincidan con los criterios de búsqueda.</p>
+        </div>
+    </div>
+
+    <!-- PAGINACIÓN -->
+    <div class="pagination-container" id="pagination-container">
+        <div class="pagination-info">
+            <span id="pagination-info">Cargando...</span>
+        </div>
+        <div class="pagination-controls">
+            <button id="btn-prev" class="btn-pagination" disabled>
+                <i class="fas fa-chevron-left"></i> Anterior
+            </button>
+            <span class="pagination-pages" id="pagination-pages"></span>
+            <button id="btn-next" class="btn-pagination" disabled>
+                Siguiente <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- CONTAINER DE NOTIFICACIONES -->
+<div id="notifications-container" class="notifications-container"></div>
+
+<!-- ===== MODAL NUEVA ASIGNACIÓN ===== -->
+<div class="modal-overlay" id="modal-nueva-asignacion">
+    <div class="modal-container large">
+        <div class="modal-header">
+            <h2><i class="fas fa-plus"></i> Nueva Asignación</h2>
+            <button class="modal-close" id="modal-close-nueva">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <form class="modal-form" id="form-nueva-asignacion">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="select-promotor">Promotor *</label>
+                    <select id="select-promotor" required>
+                        <option value="">Seleccionar promotor...</option>
+                    </select>
+                    <div class="form-help">Solo se muestran promotores disponibles</div>
+                </div>
+                <div class="form-group">
+                    <label for="select-tienda">Tienda *</label>
+                    <select id="select-tienda" required>
+                        <option value="">Seleccionar tienda...</option>
+                    </select>
+                    <div class="form-help">Solo se muestran tiendas sin promotor</div>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="fecha-inicio">Fecha de Inicio *</label>
+                    <input type="date" id="fecha-inicio" required>
+                </div>
+                <div class="form-group">
+                    <label for="motivo-asignacion">Motivo de Asignación *</label>
+                    <input type="text" id="motivo-asignacion" placeholder="Ej: Primera asignación, cobertura de zona..." maxlength="255" required>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button type="button" class="btn-secondary" id="btn-cancelar-nueva">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+                <button type="submit" class="btn-primary" id="btn-guardar-nueva">
+                    <i class="fas fa-save"></i> Crear Asignación
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ===== MODAL HISTORIAL PROMOTOR ===== -->
+<div class="modal-overlay" id="modal-historial">
+    <div class="modal-container large">
+        <div class="modal-header">
+            <h2><i class="fas fa-history"></i> Historial de <span id="historial-promotor-nombre"></span></h2>
+            <button class="modal-close" id="modal-close-historial">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="modal-content">
+            <!-- INFORMACIÓN DEL PROMOTOR -->
+            <div class="promotor-info" id="promotor-info">
+                <!-- Se llenará dinámicamente -->
+            </div>
+
+            <!-- ESTADÍSTICAS DEL HISTORIAL -->
+            <div class="historial-stats" id="historial-stats">
+                <!-- Se llenará dinámicamente -->
+            </div>
+
+            <!-- HISTORIAL DE ASIGNACIONES -->
+            <div class="historial-timeline" id="historial-timeline">
+                <!-- Se llenará dinámicamente -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== MODAL FINALIZAR ASIGNACIÓN ===== -->
+<div class="modal-overlay" id="modal-finalizar">
+    <div class="modal-container">
+        <div class="modal-header">
+            <h2><i class="fas fa-stop-circle"></i> Finalizar Asignación</h2>
+            <button class="modal-close" id="modal-close-finalizar">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <form class="modal-form" id="form-finalizar">
+            <input type="hidden" id="finalizar-id-asignacion">
+            
+            <div class="asignacion-details" id="finalizar-details">
+                <!-- Se llenará con los detalles de la asignación -->
+            </div>
+            
+            <div class="form-group">
+                <label for="fecha-fin">Fecha de Finalización *</label>
+                <input type="date" id="fecha-fin" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="motivo-finalizacion">Motivo de Finalización *</label>
+                <textarea id="motivo-finalizacion" rows="3" placeholder="Ej: Término de contrato, cambio de zona..." maxlength="255" required></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label class="checkbox-container">
+                    <input type="checkbox" id="desactivar-asignacion" checked>
+                    <span class="checkmark"></span>
+                    Desactivar asignación al finalizar
+                </label>
+            </div>
+            
+            <div class="form-actions">
+                <button type="button" class="btn-secondary" id="btn-cancelar-finalizar">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+                <button type="submit" class="btn-danger" id="btn-confirmar-finalizar">
+                    <i class="fas fa-stop-circle"></i> Finalizar Asignación
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ===== MODAL REASIGNAR ===== -->
+<div class="modal-overlay" id="modal-reasignar">
+    <div class="modal-container large">
+        <div class="modal-header">
+            <h2><i class="fas fa-exchange-alt"></i> Reasignar Promotor</h2>
+            <button class="modal-close" id="modal-close-reasignar">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <form class="modal-form" id="form-reasignar">
+            <input type="hidden" id="reasignar-id-asignacion">
+            
+            <div class="reasignacion-details" id="reasignar-details">
+                <!-- Se llenará con los detalles actuales -->
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="nueva-tienda">Nueva Tienda *</label>
+                    <select id="nueva-tienda" required>
+                        <option value="">Seleccionar nueva tienda...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="fecha-cambio">Fecha de Cambio *</label>
+                    <input type="date" id="fecha-cambio" required>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="motivo-cambio">Motivo del Cambio *</label>
+                <textarea id="motivo-cambio" rows="3" placeholder="Ej: Reestructuración de zona, mejor cobertura..." maxlength="255" required></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="motivo-nueva-asignacion">Motivo Nueva Asignación</label>
+                <input type="text" id="motivo-nueva-asignacion" placeholder="Se rellenará automáticamente..." maxlength="255">
+                <div class="form-help">Si se deja vacío, se usará: "Reasignación desde otra tienda"</div>
+            </div>
+            
+            <div class="form-actions">
+                <button type="button" class="btn-secondary" id="btn-cancelar-reasignar">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+                <button type="submit" class="btn-warning" id="btn-confirmar-reasignar">
+                    <i class="fas fa-exchange-alt"></i> Reasignar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 Iniciando módulo de asignaciones...');
+    
+    // ===== VARIABLES GLOBALES =====
+    let currentPage = 1;
+    let totalPages = 1;
+    let allAsignaciones = [];
+    let currentView = 'table'; // 'table' o 'dashboard'
+    let isEditing = false;
+    let editingId = null;
+    
+    // ===== ELEMENTOS DOM =====
+    const dashboardSection = document.getElementById('dashboard-section');
+    const searchSection = document.getElementById('search-section');
+    const tableSection = document.getElementById('table-section');
+    const paginationContainer = document.getElementById('pagination-container');
+    
+    const loadingElement = document.getElementById('table-loading');
+    const emptyState = document.getElementById('empty-state');
+    const asignacionesTbody = document.getElementById('asignaciones-tbody');
+    
+    const searchField = document.getElementById('search-field');
+    const searchValue = document.getElementById('search-value');
+    const estatusFilter = document.getElementById('estatus-filter');
+    const btnBuscar = document.getElementById('btn-buscar');
+    const btnLimpiar = document.getElementById('btn-limpiar');
+    
+    const paginationInfo = document.getElementById('pagination-info');
+    const paginationPages = document.getElementById('pagination-pages');
+    const btnPrev = document.getElementById('btn-prev');
+    const btnNext = document.getElementById('btn-next');
+    
+    // Botones principales
+    const btnDashboard = document.getElementById('btn-dashboard');
+    const btnNuevaAsignacion = document.getElementById('btn-nueva-asignacion');
+    
+    // ===== INICIALIZACIÓN =====
+    function init() {
+        console.log('🚀 Inicializando módulo asignaciones...');
+        configurarEventListeners();
+        cargarAsignaciones();
+    }
+    
+    // ===== EVENT LISTENERS =====
+    function configurarEventListeners() {
+        // Vista dashboard vs tabla
+        btnDashboard.addEventListener('click', toggleDashboard);
+        
+        // Búsqueda
+        searchField.addEventListener('change', handleSearchFieldChange);
+        searchValue.addEventListener('keypress', handleSearchKeypress);
+        estatusFilter.addEventListener('change', realizarBusqueda);
+        btnBuscar.addEventListener('click', realizarBusqueda);
+        btnLimpiar.addEventListener('click', limpiarBusqueda);
+        
+        // Paginación
+        btnPrev.addEventListener('click', () => cambiarPagina(currentPage - 1));
+        btnNext.addEventListener('click', () => cambiarPagina(currentPage + 1));
+        
+        // Modales
+        btnNuevaAsignacion.addEventListener('click', abrirModalNuevaAsignacion);
+        configurarModales();
+    }
+    
+    function handleSearchFieldChange() {
+        const isFieldSelected = searchField.value !== '';
+        searchValue.disabled = !isFieldSelected;
+        btnBuscar.disabled = !isFieldSelected;
+        
+        if (!isFieldSelected) {
+            searchValue.value = '';
+            realizarBusqueda();
+        }
+    }
+    
+    function handleSearchKeypress(e) {
+        if (e.key === 'Enter') {
+            realizarBusqueda();
+        }
+    }
+    
+    // ===== FUNCIONES PRINCIPALES =====
+    async function cargarAsignaciones() {
+        try {
+            showLoading();
+            
+            const searchParams = new URLSearchParams({
+                page: currentPage,
+                limit: 10,
+                search_field: searchField.value || '',
+                search_value: searchValue.value || '',
+                estatus: estatusFilter.value || ''
+            });
+            
+            console.log('🔍 Cargando asignaciones con parámetros:', searchParams.toString());
+            
+            const response = await fetch(`../../api/get_asignaciones.php?${searchParams}`);
+            const data = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(data.message || 'Error al cargar asignaciones');
+            }
+            
+            if (data.success) {
+                allAsignaciones = data.data;
+                renderAsignaciones(data.data);
+                actualizarPaginacion(data.pagination);
+                showContent();
+            } else {
+                throw new Error(data.message);
+            }
+            
+        } catch (error) {
+            console.error('❌ Error cargando asignaciones:', error);
+            showError(error.message);
+        }
+    }
+    
+    function renderAsignaciones(asignaciones) {
+        asignacionesTbody.innerHTML = '';
+        
+        if (!asignaciones || asignaciones.length === 0) {
+            showEmptyState();
+            return;
+        }
+        
+        asignaciones.forEach(asignacion => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${asignacion.id_asignacion}</td>
+                <td>
+                    <div class="promotor-cell">
+                        <strong>${asignacion.promotor_nombre_completo}</strong>
+                        <small>${asignacion.promotor_correo}</small>
+                    </div>
+                </td>
+                <td>
+                    <div class="tienda-cell">
+                        <strong>${asignacion.tienda_identificador}</strong>
+                        <small>${asignacion.tienda_ciudad}, ${asignacion.tienda_estado}</small>
+                    </div>
+                </td>
+                <td>
+                    <span class="badge badge-region">Región ${asignacion.tienda_region}</span>
+                </td>
+                <td>${asignacion.fecha_inicio_formatted}</td>
+                <td>${asignacion.fecha_fin_formatted || '<em>Activa</em>'}</td>
+                <td>
+                    <span class="badge badge-days">${asignacion.duracion_dias} días</span>
+                </td>
+                <td>
+                    <span class="badge badge-${asignacion.estatus_texto.toLowerCase()}">${asignacion.estatus_texto}</span>
+                </td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="btn-action view" onclick="verHistorialPromotor(${asignacion.id_promotor})" title="Ver Historial">
+                            <i class="fas fa-history"></i>
+                        </button>
+                        ${asignacion.activo && !asignacion.fecha_fin ? `
+                            <button class="btn-action edit" onclick="reasignarPromotor(${asignacion.id_asignacion})" title="Reasignar">
+                                <i class="fas fa-exchange-alt"></i>
+                            </button>
+                            <button class="btn-action delete" onclick="finalizarAsignacion(${asignacion.id_asignacion})" title="Finalizar">
+                                <i class="fas fa-stop-circle"></i>
+                            </button>
+                        ` : ''}
+                    </div>
+                </td>
+            `;
+            asignacionesTbody.appendChild(row);
+        });
+    }
+    
+    function actualizarPaginacion(pagination) {
+        if (!pagination) {
+            console.warn('⚠️ Sin datos de paginación');
+            return;
+        }
+        
+        currentPage = pagination.current_page || 1;
+        totalPages = pagination.total_pages || 1;
+        
+        paginationInfo.textContent = `Mostrando ${pagination.per_page || 0} de ${pagination.total_records || 0} registros`;
+        paginationPages.textContent = `Página ${currentPage} de ${totalPages}`;
+        
+        btnPrev.disabled = !pagination.has_prev;
+        btnNext.disabled = !pagination.has_next;
+    }
+    
+    function cambiarPagina(page) {
+        if (page < 1 || page > totalPages) return;
+        currentPage = page;
+        cargarAsignaciones();
+    }
+    
+    function realizarBusqueda() {
+        currentPage = 1;
+        cargarAsignaciones();
+    }
+    
+    function limpiarBusqueda() {
+        searchField.value = '';
+        searchValue.value = '';
+        estatusFilter.value = '';
+        searchValue.disabled = true;
+        btnBuscar.disabled = true;
+        realizarBusqueda();
+    }
+    
+    // ===== FUNCIONES DE ESTADO UI =====
+    function showLoading() {
+        loadingElement.style.display = 'block';
+        tableSection.querySelector('.table-wrapper').style.display = 'none';
+        emptyState.style.display = 'none';
+        paginationContainer.style.display = 'none';
+    }
+    
+    function showContent() {
+        loadingElement.style.display = 'none';
+        tableSection.querySelector('.table-wrapper').style.display = 'block';
+        emptyState.style.display = 'none';
+        paginationContainer.style.display = 'flex';
+    }
+    
+    function showEmptyState(message = 'No se encontraron asignaciones') {
+        loadingElement.style.display = 'none';
+        tableSection.querySelector('.table-wrapper').style.display = 'none';
+        emptyState.style.display = 'block';
+        paginationContainer.style.display = 'none';
+        
+        const emptyTitle = emptyState.querySelector('h3');
+        if (emptyTitle) emptyTitle.textContent = message;
+    }
+    
+    function showError(message) {
+        console.error('❌ Error:', message);
+        showEmptyState('Error: ' + message);
+        mostrarNotificacion('Error: ' + message, 'error');
+    }
+    
+    // ===== DASHBOARD =====
+    async function toggleDashboard() {
+        if (currentView === 'dashboard') {
+            // Cambiar a vista tabla
+            currentView = 'table';
+            dashboardSection.style.display = 'none';
+            searchSection.style.display = 'block';
+            tableSection.style.display = 'block';
+            paginationContainer.style.display = 'flex';
+            btnDashboard.innerHTML = '<i class="fas fa-chart-pie"></i> Dashboard';
+        } else {
+            // Cambiar a vista dashboard
+            currentView = 'dashboard';
+            await cargarDashboard();
+            dashboardSection.style.display = 'block';
+            searchSection.style.display = 'none';
+            tableSection.style.display = 'none';
+            paginationContainer.style.display = 'none';
+            btnDashboard.innerHTML = '<i class="fas fa-table"></i> Ver Tabla';
+        }
+    }
+    
+    async function cargarDashboard() {
+        try {
+            console.log('📊 Cargando dashboard...');
+            
+            const response = await fetch('../../api/get_dashboard_stats.php');
+            const data = await response.json();
+            
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || 'Error al cargar estadísticas');
+            }
+            
+            renderDashboard(data);
+            
+        } catch (error) {
+            console.error('❌ Error cargando dashboard:', error);
+            mostrarNotificacion('Error cargando dashboard: ' + error.message, 'error');
+        }
+    }
+    
+    function renderDashboard(data) {
+        // Actualizar estadísticas principales
+        document.getElementById('stat-asignaciones-activas').textContent = data.resumen_general.asignaciones.activas;
+        document.getElementById('stat-promotores-asignados').textContent = data.resumen_general.promotores.con_asignacion;
+        document.getElementById('stat-tiendas-cubiertas').textContent = data.resumen_general.tiendas.con_promotor;
+        document.getElementById('stat-cobertura').textContent = data.resumen_general.tiendas.porcentaje_cubiertas + '%';
+        
+        // Renderizar alertas
+        renderAlertas(data.alertas);
+        
+        // Renderizar actividad reciente
+        renderActividadReciente(data.asignaciones_recientes);
+    }
+    
+    function renderAlertas(alertas) {
+        const container = document.getElementById('alerts-container');
+        container.innerHTML = '';
+        
+        if (!alertas.necesita_atencion) {
+            container.innerHTML = '<div class="alert alert-success"><i class="fas fa-check-circle"></i> Todo está en orden</div>';
+            return;
+        }
+        
+        if (alertas.tiendas_sin_cobertura > 0) {
+            container.innerHTML += `
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>${alertas.tiendas_sin_cobertura}</strong> tiendas sin cobertura de promotor
+                </div>
+            `;
+        }
+        
+        if (alertas.promotores_en_vacaciones > 0) {
+            container.innerHTML += `
+                <div class="alert alert-info">
+                    <i class="fas fa-umbrella-beach"></i>
+                    <strong>${alertas.promotores_en_vacaciones}</strong> promotores en vacaciones
+                </div>
+            `;
+        }
+        
+        if (alertas.promotores_disponibles > 0) {
+            container.innerHTML += `
+                <div class="alert alert-success">
+                    <i class="fas fa-user-plus"></i>
+                    <strong>${alertas.promotores_disponibles}</strong> promotores disponibles para asignar
+                </div>
+            `;
+        }
+    }
+    
+    function renderActividadReciente(asignaciones) {
+        const container = document.getElementById('recent-assignments');
+        container.innerHTML = '';
+        
+        if (!asignaciones || asignaciones.length === 0) {
+            container.innerHTML = '<p class="text-muted">No hay actividad reciente</p>';
+            return;
+        }
+        
+        asignaciones.forEach(asignacion => {
+            container.innerHTML += `
+                <div class="activity-item">
+                    <div class="activity-icon">
+                        <i class="fas fa-plus-circle"></i>
+                    </div>
+                    <div class="activity-content">
+                        <p><strong>${asignacion.promotor}</strong> asignado a <strong>${asignacion.tienda}</strong></p>
+                        <small>${asignacion.fecha_registro_formatted} • ${asignacion.motivo}</small>
+                    </div>
+                </div>
+            `;
+        });
+    }
+    
+    // ===== MODAL NUEVA ASIGNACIÓN =====
+    async function abrirModalNuevaAsignacion() {
+        try {
+            // Cargar promotores disponibles
+            await cargarPromotoresDisponibles();
+            // Cargar tiendas disponibles
+            await cargarTiendasDisponibles();
+            // Configurar fecha por defecto
+            document.getElementById('fecha-inicio').value = new Date().toISOString().split('T')[0];
+            // Abrir modal
+            abrirModal(document.getElementById('modal-nueva-asignacion'));
+        } catch (error) {
+            console.error('❌ Error preparando modal:', error);
+            mostrarNotificacion('Error preparando formulario: ' + error.message, 'error');
+        }
+    }
+    
+    async function cargarPromotoresDisponibles() {
+        try {
+            const response = await fetch('../../api/get_promotores_disponibles.php?solo_activos=true');
+            const data = await response.json();
+            
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || 'Error al cargar promotores');
+            }
+            
+            const select = document.getElementById('select-promotor');
+            select.innerHTML = '<option value="">Seleccionar promotor...</option>';
+            
+            data.data.forEach(promotor => {
+                if (promotor.puede_asignar) {
+                    select.innerHTML += `
+                        <option value="${promotor.id_promotor}">
+                            ${promotor.nombre_completo} - ${promotor.correo}
+                        </option>
+                    `;
+                }
+            });
+            
+            console.log(`✅ Cargados ${data.data.filter(p => p.puede_asignar).length} promotores disponibles`);
+            
+        } catch (error) {
+            console.error('❌ Error cargando promotores:', error);
+            throw error;
+        }
+    }
+    
+    async function cargarTiendasDisponibles() {
+        try {
+            const response = await fetch('../../api/get_tiendas_disponibles.php');
+            const data = await response.json();
+            
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || 'Error al cargar tiendas');
+            }
+            
+            const select = document.getElementById('select-tienda');
+            select.innerHTML = '<option value="">Seleccionar tienda...</option>';
+            
+            // Agrupar por región
+            const tiendasPorRegion = {};
+            data.data.forEach(tienda => {
+                if (tienda.puede_asignar) {
+                    if (!tiendasPorRegion[tienda.region]) {
+                        tiendasPorRegion[tienda.region] = [];
+                    }
+                    tiendasPorRegion[tienda.region].push(tienda);
+                }
+            });
+            
+            // Agregar opciones por región
+            Object.keys(tiendasPorRegion).sort((a, b) => parseInt(a) - parseInt(b)).forEach(region => {
+                const optgroup = document.createElement('optgroup');
+                optgroup.label = `Región ${region}`;
+                
+                tiendasPorRegion[region].forEach(tienda => {
+                    optgroup.innerHTML += `
+                        <option value="${tienda.id_tienda}">
+                            ${tienda.identificador} - ${tienda.ciudad}
+                        </option>
+                    `;
+                });
+                
+                select.appendChild(optgroup);
+            });
+            
+            console.log(`✅ Cargadas ${data.data.filter(t => t.puede_asignar).length} tiendas disponibles`);
+            
+        } catch (error) {
+            console.error('❌ Error cargando tiendas:', error);
+            throw error;
+        }
+    }
+    
+    // ===== ACCIONES =====
+    window.verHistorialPromotor = async function(idPromotor) {
+        try {
+            console.log('📋 Cargando historial del promotor:', idPromotor);
+            
+            const response = await fetch(`../../api/get_historial_promotor.php?id_promotor=${idPromotor}`);
+            const data = await response.json();
+            
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || 'Error al cargar historial');
+            }
+            
+            renderHistorialPromotor(data);
+            abrirModal(document.getElementById('modal-historial'));
+            
+        } catch (error) {
+            console.error('❌ Error cargando historial:', error);
+            mostrarNotificacion('Error cargando historial: ' + error.message, 'error');
+        }
+    };
+    
+    function renderHistorialPromotor(data) {
+        // Actualizar nombre
+        document.getElementById('historial-promotor-nombre').textContent = data.promotor.nombre_completo;
+        
+        // Información del promotor
+        const promotorInfo = document.getElementById('promotor-info');
+        promotorInfo.innerHTML = `
+            <div class="promotor-card">
+                <h4>${data.promotor.nombre_completo}</h4>
+                <p><strong>RFC:</strong> ${data.promotor.rfc}</p>
+                <p><strong>Correo:</strong> ${data.promotor.correo}</p>
+                <p><strong>Teléfono:</strong> ${data.promotor.telefono}</p>
+                <p><strong>Estatus:</strong> <span class="badge badge-${data.promotor.estatus.toLowerCase()}">${data.promotor.estatus}</span></p>
+                <p><strong>Fecha Alta:</strong> ${data.promotor.fecha_alta_formatted}</p>
+            </div>
+        `;
+        
+        // Estadísticas
+        const historialStats = document.getElementById('historial-stats');
+        historialStats.innerHTML = `
+            <div class="stats-grid-small">
+                <div class="stat-small">
+                    <h5>${data.estadisticas.total_asignaciones}</h5>
+                    <p>Total Asignaciones</p>
+                </div>
+                <div class="stat-small">
+                    <h5>${data.estadisticas.asignaciones_activas}</h5>
+                    <p>Activas</p>
+                </div>
+                <div class="stat-small">
+                    <h5>${data.estadisticas.total_dias_asignado}</h5>
+                    <p>Días Totales</p>
+                </div>
+                <div class="stat-small">
+                    <h5>${data.estadisticas.promedio_dias_por_asignacion}</h5>
+                    <p>Promedio p/Asignación</p>
+                </div>
+                <div class="stat-small">
+                    <h5>${data.estadisticas.tiendas_distintas}</h5>
+                    <p>Tiendas Diferentes</p>
+                </div>
+                <div class="stat-small">
+                    <h5>${data.estadisticas.cadenas_distintas}</h5>
+                    <p>Cadenas</p>
+                </div>
+            </div>
+        `;
+        
+        // Timeline del historial
+        const timeline = document.getElementById('historial-timeline');
+        timeline.innerHTML = '<h4><i class="fas fa-timeline"></i> Historial de Asignaciones</h4>';
+        
+        if (!data.historial || data.historial.length === 0) {
+            timeline.innerHTML += '<p class="text-muted">No hay historial de asignaciones</p>';
+            return;
+        }
+        
+        const timelineContainer = document.createElement('div');
+        timelineContainer.className = 'timeline';
+        
+        data.historial.forEach((asignacion, index) => {
+            const timelineItem = document.createElement('div');
+            timelineItem.className = 'timeline-item';
+            timelineItem.innerHTML = `
+                <div class="timeline-marker ${asignacion.actualmente_asignado ? 'active' : 'completed'}">
+                    <i class="fas ${asignacion.actualmente_asignado ? 'fa-play' : 'fa-check'}"></i>
+                </div>
+                <div class="timeline-content">
+                    <div class="timeline-header">
+                        <h5>${asignacion.tienda_identificador}</h5>
+                        <span class="badge badge-${asignacion.estatus_color}">${asignacion.estatus_texto}</span>
+                    </div>
+                    <p><strong>Período:</strong> ${asignacion.fecha_inicio_formatted} - ${asignacion.fecha_fin_formatted || 'Actual'}</p>
+                    <p><strong>Duración:</strong> ${asignacion.dias_asignado} días</p>
+                    <p><strong>Ciudad:</strong> ${asignacion.tienda_ciudad}, ${asignacion.tienda_estado}</p>
+                    <p><strong>Motivo:</strong> ${asignacion.motivo_asignacion}</p>
+                    ${asignacion.motivo_cambio ? `<p><strong>Motivo cambio:</strong> ${asignacion.motivo_cambio}</p>` : ''}
+                    <small class="text-muted">Asignado por: ${asignacion.usuario_asigno}</small>
+                </div>
+            `;
+            timelineContainer.appendChild(timelineItem);
+        });
+        
+        timeline.appendChild(timelineContainer);
+    }
+    
+    window.finalizarAsignacion = function(idAsignacion) {
+        const asignacion = allAsignaciones.find(a => a.id_asignacion === idAsignacion);
+        if (!asignacion) {
+            mostrarNotificacion('Asignación no encontrada', 'error');
+            return;
+        }
+        
+        // Llenar detalles
+        document.getElementById('finalizar-id-asignacion').value = idAsignacion;
+        document.getElementById('finalizar-details').innerHTML = `
+            <div class="asignacion-card">
+                <h4>Finalizar Asignación</h4>
+                <p><strong>Promotor:</strong> ${asignacion.promotor_nombre_completo}</p>
+                <p><strong>Tienda:</strong> ${asignacion.tienda_identificador}</p>
+                <p><strong>Inicio:</strong> ${asignacion.fecha_inicio_formatted}</p>
+                <p><strong>Duración actual:</strong> ${asignacion.duracion_dias} días</p>
+            </div>
+        `;
+        
+        // Fecha por defecto
+        document.getElementById('fecha-fin').value = new Date().toISOString().split('T')[0];
+        
+        abrirModal(document.getElementById('modal-finalizar'));
+    };
+    
+    window.reasignarPromotor = async function(idAsignacion) {
+        try {
+            const asignacion = allAsignaciones.find(a => a.id_asignacion === idAsignacion);
+            if (!asignacion) {
+                mostrarNotificacion('Asignación no encontrada', 'error');
+                return;
+            }
+            
+            // Llenar detalles actuales
+            document.getElementById('reasignar-id-asignacion').value = idAsignacion;
+            document.getElementById('reasignar-details').innerHTML = `
+                <div class="reasignacion-card">
+                    <h4>Reasignación de Promotor</h4>
+                    <p><strong>Promotor:</strong> ${asignacion.promotor_nombre_completo}</p>
+                    <p><strong>Tienda Actual:</strong> ${asignacion.tienda_identificador}</p>
+                    <p><strong>Fecha Inicio Actual:</strong> ${asignacion.fecha_inicio_formatted}</p>
+                    <p><strong>Duración Actual:</strong> ${asignacion.duracion_dias} días</p>
+                </div>
+            `;
+            
+            // Cargar tiendas disponibles para reasignación
+            await cargarTiendasParaReasignacion();
+            
+            // Fecha por defecto
+            document.getElementById('fecha-cambio').value = new Date().toISOString().split('T')[0];
+            
+            abrirModal(document.getElementById('modal-reasignar'));
+            
+        } catch (error) {
+            console.error('❌ Error preparando reasignación:', error);
+            mostrarNotificacion('Error preparando reasignación: ' + error.message, 'error');
+        }
+    };
+    
+    async function cargarTiendasParaReasignacion() {
+        try {
+            const response = await fetch('../../api/get_tiendas_disponibles.php');
+            const data = await response.json();
+            
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || 'Error al cargar tiendas');
+            }
+            
+            const select = document.getElementById('nueva-tienda');
+            select.innerHTML = '<option value="">Seleccionar nueva tienda...</option>';
+            
+            // Agrupar por región
+            const tiendasPorRegion = {};
+            data.data.forEach(tienda => {
+                if (tienda.puede_asignar) {
+                    if (!tiendasPorRegion[tienda.region]) {
+                        tiendasPorRegion[tienda.region] = [];
+                    }
+                    tiendasPorRegion[tienda.region].push(tienda);
+                }
+            });
+            
+            // Agregar opciones por región
+            Object.keys(tiendasPorRegion).sort((a, b) => parseInt(a) - parseInt(b)).forEach(region => {
+                const optgroup = document.createElement('optgroup');
+                optgroup.label = `Región ${region}`;
+                
+                tiendasPorRegion[region].forEach(tienda => {
+                    optgroup.innerHTML += `
+                        <option value="${tienda.id_tienda}">
+                            ${tienda.identificador} - ${tienda.ciudad}
+                        </option>
+                    `;
+                });
+                
+                select.appendChild(optgroup);
+            });
+            
+        } catch (error) {
+            console.error('❌ Error cargando tiendas para reasignación:', error);
+            throw error;
+        }
+    }
+    
+    // ===== CONFIGURACIÓN DE MODALES =====
+    function configurarModales() {
+        // Modal Nueva Asignación
+        document.getElementById('modal-close-nueva').addEventListener('click', () => {
+            cerrarModal(document.getElementById('modal-nueva-asignacion'));
+        });
+        document.getElementById('btn-cancelar-nueva').addEventListener('click', () => {
+            cerrarModal(document.getElementById('modal-nueva-asignacion'));
+        });
+        document.getElementById('form-nueva-asignacion').addEventListener('submit', crearNuevaAsignacion);
+        
+        // Modal Historial
+        document.getElementById('modal-close-historial').addEventListener('click', () => {
+            cerrarModal(document.getElementById('modal-historial'));
+        });
+        
+        // Modal Finalizar
+        document.getElementById('modal-close-finalizar').addEventListener('click', () => {
+            cerrarModal(document.getElementById('modal-finalizar'));
+        });
+        document.getElementById('btn-cancelar-finalizar').addEventListener('click', () => {
+            cerrarModal(document.getElementById('modal-finalizar'));
+        });
+        document.getElementById('form-finalizar').addEventListener('submit', procesarFinalizacion);
+        
+        // Modal Reasignar
+        document.getElementById('modal-close-reasignar').addEventListener('click', () => {
+            cerrarModal(document.getElementById('modal-reasignar'));
+        });
+        document.getElementById('btn-cancelar-reasignar').addEventListener('click', () => {
+            cerrarModal(document.getElementById('modal-reasignar'));
+        });
+        document.getElementById('form-reasignar').addEventListener('submit', procesarReasignacion);
+    }
+    
+    // ===== PROCESAMIENTO DE FORMULARIOS =====
+    async function crearNuevaAsignacion(e) {
+        e.preventDefault();
+        
+        try {
+            const formData = {
+                id_promotor: document.getElementById('select-promotor').value,
+                id_tienda: document.getElementById('select-tienda').value,
+                fecha_inicio: document.getElementById('fecha-inicio').value,
+                motivo_asignacion: document.getElementById('motivo-asignacion').value
+            };
+            
+            console.log('💾 Creando nueva asignación:', formData);
+            
+            const response = await fetch('../../api/create_asignacion.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
+            
+            const result = await response.json();
+            
+            if (!response.ok || !result.success) {
+                throw new Error(result.message || 'Error al crear asignación');
+            }
+            
+            mostrarNotificacion('✅ Asignación creada correctamente', 'success');
+            cerrarModal(document.getElementById('modal-nueva-asignacion'));
+            cargarAsignaciones();
+            
+        } catch (error) {
+            console.error('❌ Error creando asignación:', error);
+            mostrarNotificacion('Error: ' + error.message, 'error');
+        }
+    }
+    
+    async function procesarFinalizacion(e) {
+        e.preventDefault();
+        
+        try {
+            const formData = {
+                id_asignacion: document.getElementById('finalizar-id-asignacion').value,
+                fecha_fin: document.getElementById('fecha-fin').value,
+                motivo_cambio: document.getElementById('motivo-finalizacion').value,
+                desactivar: document.getElementById('desactivar-asignacion').checked ? 'true' : 'false'
+            };
+            
+            console.log('🛑 Finalizando asignación:', formData);
+            
+            const response = await fetch('../../api/finalizar_asignacion.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
+            
+            const result = await response.json();
+            
+            if (!response.ok || !result.success) {
+                throw new Error(result.message || 'Error al finalizar asignación');
+            }
+            
+            mostrarNotificacion('✅ Asignación finalizada correctamente', 'success');
+            cerrarModal(document.getElementById('modal-finalizar'));
+            cargarAsignaciones();
+            
+        } catch (error) {
+            console.error('❌ Error finalizando asignación:', error);
+            mostrarNotificacion('Error: ' + error.message, 'error');
+        }
+    }
+    
+    async function procesarReasignacion(e) {
+        e.preventDefault();
+        
+        try {
+            const formData = {
+                id_asignacion_actual: document.getElementById('reasignar-id-asignacion').value,
+                id_tienda_nueva: document.getElementById('nueva-tienda').value,
+                fecha_cambio: document.getElementById('fecha-cambio').value,
+                motivo_cambio: document.getElementById('motivo-cambio').value,
+                motivo_nueva_asignacion: document.getElementById('motivo-nueva-asignacion').value || 'Reasignación desde otra tienda'
+            };
+            
+            console.log('🔄 Procesando reasignación:', formData);
+            
+            const response = await fetch('../../api/update_asignacion.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
+            
+            const result = await response.json();
+            
+            if (!response.ok || !result.success) {
+                throw new Error(result.message || 'Error al reasignar');
+            }
+            
+            mostrarNotificacion('✅ Reasignación completada correctamente', 'success');
+            cerrarModal(document.getElementById('modal-reasignar'));
+            cargarAsignaciones();
+            
+        } catch (error) {
+            console.error('❌ Error en reasignación:', error);
+            mostrarNotificacion('Error: ' + error.message, 'error');
+        }
+    }
+    
+    // ===== FUNCIONES AUXILIARES =====
+    function abrirModal(modal) {
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+    
+    function cerrarModal(modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+        // Limpiar formularios
+        const forms = modal.querySelectorAll('form');
+        forms.forEach(form => form.reset());
+    }
+    
+    // ===== NOTIFICACIONES =====
+    function mostrarNotificacion(mensaje, tipo = 'info') {
+        const notificacion = document.createElement('div');
+        notificacion.className = `notification ${tipo}`;
+        
+        const iconos = {
+            success: 'fas fa-check-circle',
+            error: 'fas fa-exclamation-circle',
+            warning: 'fas fa-exclamation-triangle',
+            info: 'fas fa-info-circle'
+        };
+        
+        const titulos = {
+            success: 'Éxito',
+            error: 'Error',
+            warning: 'Advertencia',
+            info: 'Información'
+        };
+        
+        notificacion.innerHTML = `
+            <i class="${iconos[tipo]} notification-icon"></i>
+            <div class="notification-content">
+                <h4>${titulos[tipo]}</h4>
+                <p>${mensaje}</p>
+            </div>
+            <button class="notification-close">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+        
+        notificacion.querySelector('.notification-close').addEventListener('click', () => {
+            notificacion.remove();
+        });
+        
+        setTimeout(() => {
+            if (notificacion.parentNode) {
+                notificacion.remove();
+            }
+        }, 5000);
+        
+        document.getElementById('notifications-container').appendChild(notificacion);
+    }
+    
+    // ===== EXPONER FUNCIONES GLOBALES =====
+    window.verHistorialPromotor = verHistorialPromotor;
+    window.finalizarAsignacion = finalizarAsignacion;
+    window.reasignarPromotor = reasignarPromotor;
+    
+    // ===== INICIALIZACIÓN =====
+    console.log('👥 Iniciando módulo Gestión de Asignaciones...');
+    init();
+    
+    setTimeout(() => {
+        console.log('⏰ Iniciando carga de datos...');
+        cargarAsignaciones();
+    }, 100);
+    
+    console.log('✅ Módulo asignaciones inicializado correctamente');
+});
+</script>
