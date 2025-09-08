@@ -248,20 +248,24 @@ try {
         exit;
     }
 
-    // ===== VERIFICAR QUE LA NUEVA TIENDA NO TENGA PROMOTOR =====
-    $sql_check_nueva_tienda = "SELECT id_asignacion, id_promotor 
-                               FROM promotor_tienda_asignaciones 
-                               WHERE id_tienda = :id_tienda 
-                               AND activo = 1 
-                               AND fecha_fin IS NULL";
+    // ===== VERIFICAR QUE EL PROMOTOR NO ESTÉ YA ASIGNADO A LA NUEVA TIENDA =====
+    $sql_check_duplicado = "SELECT id_asignacion 
+                            FROM promotor_tienda_asignaciones 
+                            WHERE id_promotor = :id_promotor 
+                            AND id_tienda = :id_tienda 
+                            AND activo = 1 
+                            AND fecha_fin IS NULL";
     
-    $conflicto_tienda = Database::selectOne($sql_check_nueva_tienda, [':id_tienda' => $id_tienda_nueva]);
+    $duplicado = Database::selectOne($sql_check_duplicado, [
+        ':id_promotor' => $asignacion_actual['id_promotor'],
+        ':id_tienda' => $id_tienda_nueva
+    ]);
 
-    if ($conflicto_tienda) {
+    if ($duplicado) {
         http_response_code(409);
         echo json_encode([
             'success' => false,
-            'message' => 'La nueva tienda ya tiene un promotor asignado'
+            'message' => 'Este promotor ya está asignado a la nueva tienda'
         ]);
         exit;
     }
@@ -334,7 +338,7 @@ try {
         }
 
         // ===== PASO 3: REGISTRAR EN LOG DE ACTIVIDADES =====
-        $detalle_log = "Reasignación: Promotor {$asignacion_actual['promotor_nombre']} {$asignacion_actual['promotor_apellido']} movido de {$asignacion_actual['tienda_actual_cadena']} #{$asignacion_actual['tienda_actual_num']} a {$tienda_nueva['cadena']} #{$tienda_nueva['num_tienda']}. Motivo: {$motivo_cambio}";
+        $detalle_log = "Reasignación de tienda: Promotor {$asignacion_actual['promotor_nombre']} {$asignacion_actual['promotor_apellido']} movido de {$asignacion_actual['tienda_actual_cadena']} #{$asignacion_actual['tienda_actual_num']} a {$tienda_nueva['cadena']} #{$tienda_nueva['num_tienda']}. Motivo: {$motivo_cambio}";
         
         $sql_log = "INSERT INTO log_actividades (tabla, accion, id_registro, usuario_id, fecha, detalles) 
                     VALUES ('promotor_tienda_asignaciones', 'REASIGNACION', :id_registro, :usuario_id, NOW(), :detalles)";
@@ -418,7 +422,9 @@ try {
             'fecha_cambio' => $fecha_cambio,
             'fecha_cambio_formateada' => $fecha_cambio_obj->format('d/m/Y'),
             'motivo_cambio' => $motivo_cambio,
-            'duracion_asignacion_anterior' => $duracion_anterior
+            'duracion_asignacion_anterior' => $duracion_anterior,
+            'tipo_operacion' => 'cambio_tienda',
+            'multiples_promotores_habilitado' => true
         ]
     ];
 

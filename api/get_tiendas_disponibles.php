@@ -79,12 +79,13 @@ try {
     }
 
     // ===== OBTENER PARÁMETROS =====
-    $incluir_asignadas = ($_GET['incluir_asignadas'] ?? 'false') === 'true';
+    $solo_sin_promotores = ($_GET['solo_sin_promotores'] ?? 'false') === 'true';
     $region = intval($_GET['region'] ?? 0);
     $cadena = trim($_GET['cadena'] ?? '');
     $search = trim($_GET['search'] ?? '');
+    $max_promotores = intval($_GET['max_promotores'] ?? 0); // Filtrar por número máximo de promotores
 
-    error_log('GET_TIENDAS_DISPONIBLES: Incluir asignadas: ' . ($incluir_asignadas ? 'true' : 'false') . ', Región: ' . $region . ', Cadena: ' . $cadena . ', Search: ' . $search);
+    error_log('GET_TIENDAS_DISPONIBLES: Solo sin promotores: ' . ($solo_sin_promotores ? 'true' : 'false') . ', Región: ' . $region . ', Cadena: ' . $cadena . ', Search: ' . $search);
 
     // ===== VERIFICAR CONEXIÓN DB =====
     try {
@@ -121,28 +122,49 @@ try {
                 t.ciudad,
                 t.estado,
                 
-                pta.id_asignacion as asignacion_activa_id,
-                pta.fecha_inicio as asignacion_fecha_inicio,
-                p.nombre as promotor_nombre,
-                p.apellido as promotor_apellido,
-                p.telefono as promotor_telefono,
-                p.estatus as promotor_estatus
+                COUNT(pta.id_asignacion) as total_promotores,
+                GROUP_CONCAT(
+                    CONCAT(p.nombre, ' ', p.apellido, ' (', pta.fecha_inicio, ')')
+                    ORDER BY pta.fecha_inicio DESC
+                    SEPARATOR '; '
+                ) as promotores_info,
+                GROUP_CONCAT(
+                    DISTINCT p.id_promotor
+                    ORDER BY pta.fecha_inicio DESC
+                ) as promotores_ids,
+                GROUP_CONCAT(
+                    DISTINCT CONCAT(p.nombre, ' ', p.apellido)
+                    ORDER BY pta.fecha_inicio DESC
+                    SEPARATOR ', '
+                ) as promotores_nombres
             FROM tiendas t
             LEFT JOIN promotor_tienda_asignaciones pta ON (
                 t.id_tienda = pta.id_tienda 
                 AND pta.activo = 1 
                 AND pta.fecha_fin IS NULL
             )
-            LEFT JOIN promotores p ON pta.id_promotor = p.id_promotor
+            LEFT JOIN promotores p ON (
+                pta.id_promotor = p.id_promotor 
+                AND p.estado = 1
+            )
             WHERE t.estado_reg = 1";
 
     $params = [];
 
     // ===== FILTROS =====
     
-    // Excluir tiendas con promotor asignado (comportamiento por defecto)
-    if (!$incluir_asignadas) {
-        $sql .= " AND pta.id_asignacion IS NULL";
+    // Filtro por número de promotores
+    if ($solo_sin_promotores) {
+        $sql = "SELECT t.id_tienda, t.region, t.cadena, t.num_tienda, t.nombre_tienda, t.ciudad, t.estado,
+                0 as total_promotores, NULL as promotores_info, NULL as promotores_ids, NULL as promotores_nombres
+                FROM tiendas t
+                WHERE t.estado_reg = 1
+                AND NOT EXISTS (
+                    SELECT 1 FROM promotor_tienda_asignaciones pta 
+                    WHERE pta.id_tienda = t.id_tienda 
+                    AND pta.activo = 1 
+                    AND pta.fecha_fin IS NULL
+                )";
     }
 
     // Filtro por región
@@ -170,6 +192,16 @@ try {
         $params[':search'] = '%' . $search . '%';
     }
 
+    if (!$solo_sin_promotores) {
+        $sql .= " GROUP BY t.id_tienda, t.region, t.cadena, t.num_tienda, t.nombre_tienda, t.ciudad, t.estado";
+        
+        // Filtro por número máximo de promotores DESPUÉS del GROUP BY
+        if ($max_promotores > 0) {
+            $sql .= " HAVING COUNT(pta.id_asignacion) <= :max_promotores";
+            $params[':max_promotores'] = $max_promotores;
+        }
+    }
+
     $sql .= " ORDER BY t.region ASC, t.cadena ASC, t.num_tienda ASC";
 
     error_log('GET_TIENDAS_DISPONIBLES: Query - ' . $sql);
@@ -181,17 +213,24 @@ try {
 
     // ===== OBTENER ESTADÍSTICAS ADICIONALES =====
     $sql_stats = "SELECT 
-                    COUNT(*) as total_tiendas,
-                    COUNT(CASE WHEN pta.id_asignacion IS NULL THEN 1 END) as tiendas_disponibles,
-                    COUNT(CASE WHEN pta.id_asignacion IS NOT NULL THEN 1 END) as tiendas_asignadas,
+                    COUNT(DISTINCT t.id_tienda) as total_tiendas,
+                    COUNT(DISTINCT CASE WHEN pta.id_asignacion IS NULL THEN t.id_tienda END) as tiendas_sin_promotores,
+                    COUNT(DISTINCT CASE WHEN pta.id_asignacion IS NOT NULL THEN t.id_tienda END) as tiendas_con_promotores,
                     COUNT(DISTINCT t.region) as regiones_distintas,
-                    COUNT(DISTINCT t.cadena) as cadenas_distintas
+                    COUNT(DISTINCT t.cadena) as cadenas_distintas,
+                    ROUND(AVG(promotores_por_tienda.total_promotores), 2) as promedio_promotores_por_tienda
                   FROM tiendas t
                   LEFT JOIN promotor_tienda_asignaciones pta ON (
                       t.id_tienda = pta.id_tienda 
                       AND pta.activo = 1 
                       AND pta.fecha_fin IS NULL
                   )
+                  LEFT JOIN (
+                      SELECT id_tienda, COUNT(*) as total_promotores
+                      FROM promotor_tienda_asignaciones
+                      WHERE activo = 1 AND fecha_fin IS NULL
+                      GROUP BY id_tienda
+                  ) promotores_por_tienda ON t.id_tienda = promotores_por_tienda.id_tienda
                   WHERE t.estado_reg = 1";
 
     $estadisticas_generales = Database::selectOne($sql_stats);
@@ -200,21 +239,35 @@ try {
     $tiendas_formateadas = [];
     $estadisticas_locales = [
         'total' => 0,
-        'disponibles' => 0,
-        'asignadas' => 0,
+        'sin_promotores' => 0,
+        'con_promotores' => 0,
         'por_region' => [],
-        'por_cadena' => []
+        'por_cadena' => [],
+        'distribucion_promotores' => [
+            '0' => 0,
+            '1' => 0,
+            '2' => 0,
+            '3+' => 0
+        ]
     ];
 
     foreach ($tiendas as $tienda) {
         $estadisticas_locales['total']++;
 
-        $tiene_promotor = !empty($tienda['asignacion_activa_id']);
+        $num_promotores = intval($tienda['total_promotores']);
         
-        if ($tiene_promotor) {
-            $estadisticas_locales['asignadas']++;
+        if ($num_promotores == 0) {
+            $estadisticas_locales['sin_promotores']++;
+            $estadisticas_locales['distribucion_promotores']['0']++;
         } else {
-            $estadisticas_locales['disponibles']++;
+            $estadisticas_locales['con_promotores']++;
+            if ($num_promotores == 1) {
+                $estadisticas_locales['distribucion_promotores']['1']++;
+            } elseif ($num_promotores == 2) {
+                $estadisticas_locales['distribucion_promotores']['2']++;
+            } else {
+                $estadisticas_locales['distribucion_promotores']['3+']++;
+            }
         }
 
         // Estadísticas por región
@@ -222,15 +275,15 @@ try {
         if (!isset($estadisticas_locales['por_region'][$region_key])) {
             $estadisticas_locales['por_region'][$region_key] = [
                 'total' => 0,
-                'disponibles' => 0,
-                'asignadas' => 0
+                'sin_promotores' => 0,
+                'con_promotores' => 0
             ];
         }
         $estadisticas_locales['por_region'][$region_key]['total']++;
-        if ($tiene_promotor) {
-            $estadisticas_locales['por_region'][$region_key]['asignadas']++;
+        if ($num_promotores == 0) {
+            $estadisticas_locales['por_region'][$region_key]['sin_promotores']++;
         } else {
-            $estadisticas_locales['por_region'][$region_key]['disponibles']++;
+            $estadisticas_locales['por_region'][$region_key]['con_promotores']++;
         }
 
         // Estadísticas por cadena
@@ -238,15 +291,35 @@ try {
         if (!isset($estadisticas_locales['por_cadena'][$cadena_key])) {
             $estadisticas_locales['por_cadena'][$cadena_key] = [
                 'total' => 0,
-                'disponibles' => 0,
-                'asignadas' => 0
+                'sin_promotores' => 0,
+                'con_promotores' => 0
             ];
         }
         $estadisticas_locales['por_cadena'][$cadena_key]['total']++;
-        if ($tiene_promotor) {
-            $estadisticas_locales['por_cadena'][$cadena_key]['asignadas']++;
+        if ($num_promotores == 0) {
+            $estadisticas_locales['por_cadena'][$cadena_key]['sin_promotores']++;
         } else {
-            $estadisticas_locales['por_cadena'][$cadena_key]['disponibles']++;
+            $estadisticas_locales['por_cadena'][$cadena_key]['con_promotores']++;
+        }
+
+        // Procesar información de promotores
+        $promotores_actuales = [];
+        if ($num_promotores > 0 && !empty($tienda['promotores_info'])) {
+            $promotores_array = explode('; ', $tienda['promotores_info']);
+            $ids_array = explode(',', $tienda['promotores_ids'] ?? '');
+            $nombres_array = explode(', ', $tienda['promotores_nombres'] ?? '');
+            
+            foreach ($promotores_array as $index => $promotor_info) {
+                if (preg_match('/^(.+) \((\d{4}-\d{2}-\d{2})\)$/', $promotor_info, $matches)) {
+                    $promotores_actuales[] = [
+                        'id_promotor' => isset($ids_array[$index]) ? intval($ids_array[$index]) : null,
+                        'nombre_completo' => $matches[1],
+                        'fecha_inicio' => $matches[2],
+                        'fecha_inicio_formatted' => date('d/m/Y', strtotime($matches[2])),
+                        'dias_asignado' => (new DateTime())->diff(new DateTime($matches[2]))->days
+                    ];
+                }
+            }
         }
 
         $item = [
@@ -259,26 +332,21 @@ try {
             'estado' => $tienda['estado'],
             'identificador' => $tienda['cadena'] . ' #' . $tienda['num_tienda'] . ' - ' . $tienda['nombre_tienda'],
             'identificador_corto' => $tienda['cadena'] . ' #' . $tienda['num_tienda'],
-            'disponible' => !$tiene_promotor,
-            'tiene_promotor' => $tiene_promotor,
-            'puede_asignar' => !$tiene_promotor
+            
+            // Información de promotores
+            'total_promotores' => $num_promotores,
+            'sin_promotores' => $num_promotores == 0,
+            'con_promotores' => $num_promotores > 0,
+            'puede_asignar_mas' => true, // Siempre se pueden asignar más promotores
+            'promotores_actuales' => $promotores_actuales,
+            
+            // Resumen de cobertura
+            'estado_cobertura' => $num_promotores == 0 ? 'sin_cobertura' : ($num_promotores == 1 ? 'cobertura_basica' : 'cobertura_multiple'),
+            'nivel_cobertura' => $num_promotores,
+            'descripcion_cobertura' => $num_promotores == 0 ? 'Sin promotores' : 
+                                     ($num_promotores == 1 ? '1 promotor asignado' : 
+                                     $num_promotores . ' promotores asignados')
         ];
-
-        // Información del promotor actual si existe
-        if ($tiene_promotor) {
-            $item['promotor_actual'] = [
-                'id_asignacion' => intval($tienda['asignacion_activa_id']),
-                'fecha_inicio' => $tienda['asignacion_fecha_inicio'],
-                'promotor_nombre_completo' => trim($tienda['promotor_nombre'] . ' ' . $tienda['promotor_apellido']),
-                'promotor_nombre' => $tienda['promotor_nombre'],
-                'promotor_apellido' => $tienda['promotor_apellido'],
-                'promotor_telefono' => $tienda['promotor_telefono'],
-                'promotor_estatus' => $tienda['promotor_estatus'],
-                'dias_asignado' => (new DateTime())->diff(new DateTime($tienda['asignacion_fecha_inicio']))->days
-            ];
-        } else {
-            $item['promotor_actual'] = null;
-        }
 
         $tiendas_formateadas[] = $item;
     }
@@ -300,10 +368,11 @@ try {
             'filtradas' => $estadisticas_locales,
             'generales' => [
                 'total_tiendas' => intval($estadisticas_generales['total_tiendas']),
-                'tiendas_disponibles' => intval($estadisticas_generales['tiendas_disponibles']),
-                'tiendas_asignadas' => intval($estadisticas_generales['tiendas_asignadas']),
+                'tiendas_sin_promotores' => intval($estadisticas_generales['tiendas_sin_promotores']),
+                'tiendas_con_promotores' => intval($estadisticas_generales['tiendas_con_promotores']),
                 'regiones_distintas' => intval($estadisticas_generales['regiones_distintas']),
-                'cadenas_distintas' => intval($estadisticas_generales['cadenas_distintas'])
+                'cadenas_distintas' => intval($estadisticas_generales['cadenas_distintas']),
+                'promedio_promotores_por_tienda' => floatval($estadisticas_generales['promedio_promotores_por_tienda'] ?? 0)
             ]
         ],
         'listas' => [
@@ -311,14 +380,16 @@ try {
             'cadenas' => $cadenas_list
         ],
         'filtros' => [
-            'incluir_asignadas' => $incluir_asignadas,
+            'solo_sin_promotores' => $solo_sin_promotores,
             'region' => $region,
             'cadena' => $cadena,
-            'search' => $search
+            'search' => $search,
+            'max_promotores' => $max_promotores
         ],
         'metadata' => [
             'total_encontradas' => count($tiendas_formateadas),
-            'timestamp' => date('Y-m-d H:i:s')
+            'timestamp' => date('Y-m-d H:i:s'),
+            'soporte_multiples_promotores' => true
         ]
     ];
 

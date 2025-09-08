@@ -135,7 +135,7 @@ try {
 
     $stats_prom_asig = Database::selectOne($sql_promotores_asignacion);
 
-    // ===== ESTADÍSTICAS DE TIENDAS =====
+    // ===== ESTADÍSTICAS DE TIENDAS CON MÚLTIPLES PROMOTORES =====
     $sql_tiendas = "SELECT 
                        COUNT(*) as total_tiendas,
                        COUNT(DISTINCT region) as regiones_distintas,
@@ -145,20 +145,30 @@ try {
 
     $stats_tiendas = Database::selectOne($sql_tiendas);
 
-    // ===== TIENDAS CON Y SIN PROMOTOR =====
-    $sql_tiendas_asignacion = "SELECT 
-                                 COUNT(DISTINCT t.id_tienda) as total,
-                                 COUNT(DISTINCT CASE WHEN pta.id_asignacion IS NOT NULL THEN t.id_tienda END) as con_promotor,
-                                 COUNT(DISTINCT CASE WHEN pta.id_asignacion IS NULL THEN t.id_tienda END) as sin_promotor
-                              FROM tiendas t
-                              LEFT JOIN promotor_tienda_asignaciones pta ON (
-                                  t.id_tienda = pta.id_tienda 
-                                  AND pta.activo = 1 
-                                  AND pta.fecha_fin IS NULL
-                              )
-                              WHERE t.estado_reg = 1";
+    // ===== DISTRIBUCIÓN DE PROMOTORES POR TIENDA =====
+    $sql_distribucion = "SELECT 
+                            COUNT(CASE WHEN total_promotores = 0 THEN 1 END) as tiendas_sin_promotores,
+                            COUNT(CASE WHEN total_promotores = 1 THEN 1 END) as tiendas_con_1_promotor,
+                            COUNT(CASE WHEN total_promotores = 2 THEN 1 END) as tiendas_con_2_promotores,
+                            COUNT(CASE WHEN total_promotores >= 3 THEN 1 END) as tiendas_con_3_mas_promotores,
+                            COUNT(CASE WHEN total_promotores > 0 THEN 1 END) as tiendas_con_promotores,
+                            ROUND(AVG(total_promotores), 2) as promedio_promotores_por_tienda,
+                            MAX(total_promotores) as max_promotores_en_tienda
+                         FROM (
+                             SELECT 
+                                 t.id_tienda,
+                                 COUNT(pta.id_asignacion) as total_promotores
+                             FROM tiendas t
+                             LEFT JOIN promotor_tienda_asignaciones pta ON (
+                                 t.id_tienda = pta.id_tienda 
+                                 AND pta.activo = 1 
+                                 AND pta.fecha_fin IS NULL
+                             )
+                             WHERE t.estado_reg = 1
+                             GROUP BY t.id_tienda
+                         ) distribucion";
 
-    $stats_tiend_asig = Database::selectOne($sql_tiendas_asignacion);
+    $stats_distribucion = Database::selectOne($sql_distribucion);
 
     // ===== MOVIMIENTOS RECIENTES (ÚLTIMOS 30 DÍAS) =====
     $sql_movimientos_recientes = "SELECT 
@@ -176,22 +186,30 @@ try {
 
     $stats_movimientos = Database::selectOne($sql_movimientos_recientes);
 
-    // ===== ESTADÍSTICAS POR REGIÓN =====
+    // ===== ESTADÍSTICAS POR REGIÓN CON MÚLTIPLES PROMOTORES =====
     $sql_por_region = "SELECT 
                           t.region,
                           COUNT(DISTINCT t.id_tienda) as total_tiendas,
                           COUNT(DISTINCT CASE WHEN pta.id_asignacion IS NOT NULL THEN t.id_tienda END) as tiendas_con_promotor,
                           COUNT(DISTINCT CASE WHEN pta.id_asignacion IS NULL THEN t.id_tienda END) as tiendas_sin_promotor,
+                          COUNT(pta.id_asignacion) as total_asignaciones_activas,
+                          ROUND(AVG(promociones_por_tienda.total_promotores), 2) as promedio_promotores_por_tienda,
                           ROUND(
                               (COUNT(DISTINCT CASE WHEN pta.id_asignacion IS NOT NULL THEN t.id_tienda END) * 100.0) / 
                               COUNT(DISTINCT t.id_tienda), 2
-                          ) as porcentaje_cobertura
+                          ) as porcentaje_tiendas_con_cobertura
                        FROM tiendas t
                        LEFT JOIN promotor_tienda_asignaciones pta ON (
                            t.id_tienda = pta.id_tienda 
                            AND pta.activo = 1 
                            AND pta.fecha_fin IS NULL
                        )
+                       LEFT JOIN (
+                           SELECT id_tienda, COUNT(*) as total_promotores
+                           FROM promotor_tienda_asignaciones
+                           WHERE activo = 1 AND fecha_fin IS NULL
+                           GROUP BY id_tienda
+                       ) promociones_por_tienda ON t.id_tienda = promociones_por_tienda.id_tienda
                        WHERE t.estado_reg = 1
                        GROUP BY t.region
                        ORDER BY t.region";
@@ -204,16 +222,24 @@ try {
                           COUNT(DISTINCT t.id_tienda) as total_tiendas,
                           COUNT(DISTINCT CASE WHEN pta.id_asignacion IS NOT NULL THEN t.id_tienda END) as tiendas_con_promotor,
                           COUNT(DISTINCT CASE WHEN pta.id_asignacion IS NULL THEN t.id_tienda END) as tiendas_sin_promotor,
+                          COUNT(pta.id_asignacion) as total_asignaciones_activas,
+                          ROUND(AVG(promociones_por_tienda.total_promotores), 2) as promedio_promotores_por_tienda,
                           ROUND(
                               (COUNT(DISTINCT CASE WHEN pta.id_asignacion IS NOT NULL THEN t.id_tienda END) * 100.0) / 
                               COUNT(DISTINCT t.id_tienda), 2
-                          ) as porcentaje_cobertura
+                          ) as porcentaje_tiendas_con_cobertura
                        FROM tiendas t
                        LEFT JOIN promotor_tienda_asignaciones pta ON (
                            t.id_tienda = pta.id_tienda 
                            AND pta.activo = 1 
                            AND pta.fecha_fin IS NULL
                        )
+                       LEFT JOIN (
+                           SELECT id_tienda, COUNT(*) as total_promotores
+                           FROM promotor_tienda_asignaciones
+                           WHERE activo = 1 AND fecha_fin IS NULL
+                           GROUP BY id_tienda
+                       ) promociones_por_tienda ON t.id_tienda = promociones_por_tienda.id_tienda
                        WHERE t.estado_reg = 1
                        GROUP BY t.cadena
                        ORDER BY total_tiendas DESC
@@ -262,15 +288,22 @@ try {
         ];
     }
 
-    // ===== CALCULAR PORCENTAJES Y RATIOS =====
+    // ===== CALCULAR RATIOS Y EFICIENCIA =====
+    $total_asignaciones_activas = intval($stats_asignaciones['asignaciones_activas'] ?? 0);
+    $total_promotores_activos = intval($stats_promotores['promotores_activos'] ?? 0);
+    $total_tiendas = intval($stats_tiendas['total_tiendas'] ?? 0);
+    
     $porcentaje_promotores_asignados = $stats_prom_asig['total'] > 0 ? 
         round(($stats_prom_asig['con_asignacion'] * 100) / $stats_prom_asig['total'], 2) : 0;
 
-    $porcentaje_tiendas_cubiertas = $stats_tiend_asig['total'] > 0 ? 
-        round(($stats_tiend_asig['con_promotor'] * 100) / $stats_tiend_asig['total'], 2) : 0;
+    $porcentaje_tiendas_cubiertas = $total_tiendas > 0 ? 
+        round(($stats_distribucion['tiendas_con_promotores'] * 100) / $total_tiendas, 2) : 0;
 
-    $ratio_promotor_tienda = $stats_prom_asig['total'] > 0 && $stats_tiend_asig['total'] > 0 ? 
-        round($stats_tiend_asig['total'] / $stats_prom_asig['total'], 2) : 0;
+    $ratio_asignaciones_promotores = $total_promotores_activos > 0 ? 
+        round($total_asignaciones_activas / $total_promotores_activos, 2) : 0;
+
+    $eficiencia_cobertura = $total_tiendas > 0 && $total_asignaciones_activas > 0 ? 
+        round(($total_asignaciones_activas / $total_tiendas), 2) : 0;
 
     // ===== PREPARAR RESPUESTA =====
     $response = [
@@ -279,14 +312,14 @@ try {
         'resumen_general' => [
             'asignaciones' => [
                 'total' => intval($stats_asignaciones['total_asignaciones'] ?? 0),
-                'activas' => intval($stats_asignaciones['asignaciones_activas'] ?? 0),
+                'activas' => $total_asignaciones_activas,
                 'finalizadas' => intval($stats_asignaciones['asignaciones_finalizadas'] ?? 0),
                 'inactivas' => intval($stats_asignaciones['asignaciones_inactivas'] ?? 0),
                 'promedio_dias' => round(floatval($stats_asignaciones['promedio_dias_asignacion'] ?? 0), 1)
             ],
             'promotores' => [
                 'total' => intval($stats_promotores['total_promotores'] ?? 0),
-                'activos' => intval($stats_promotores['promotores_activos'] ?? 0),
+                'activos' => $total_promotores_activos,
                 'baja' => intval($stats_promotores['promotores_baja'] ?? 0),
                 'vacaciones' => intval($stats_promotores['promotores_vacaciones'] ?? 0),
                 'con_asignacion' => intval($stats_prom_asig['con_asignacion'] ?? 0),
@@ -294,16 +327,25 @@ try {
                 'porcentaje_asignados' => $porcentaje_promotores_asignados
             ],
             'tiendas' => [
-                'total' => intval($stats_tiendas['total_tiendas'] ?? 0),
+                'total' => $total_tiendas,
                 'regiones' => intval($stats_tiendas['regiones_distintas'] ?? 0),
                 'cadenas' => intval($stats_tiendas['cadenas_distintas'] ?? 0),
-                'con_promotor' => intval($stats_tiend_asig['con_promotor'] ?? 0),
-                'sin_promotor' => intval($stats_tiend_asig['sin_promotor'] ?? 0),
+                'con_promotor' => intval($stats_distribucion['tiendas_con_promotores'] ?? 0),
+                'sin_promotor' => intval($stats_distribucion['tiendas_sin_promotores'] ?? 0),
                 'porcentaje_cubiertas' => $porcentaje_tiendas_cubiertas
             ],
+            'distribucion_promotores' => [
+                'tiendas_sin_promotores' => intval($stats_distribucion['tiendas_sin_promotores'] ?? 0),
+                'tiendas_con_1_promotor' => intval($stats_distribucion['tiendas_con_1_promotor'] ?? 0),
+                'tiendas_con_2_promotores' => intval($stats_distribucion['tiendas_con_2_promotores'] ?? 0),
+                'tiendas_con_3_mas_promotores' => intval($stats_distribucion['tiendas_con_3_mas_promotores'] ?? 0),
+                'promedio_promotores_por_tienda' => floatval($stats_distribucion['promedio_promotores_por_tienda'] ?? 0),
+                'max_promotores_en_tienda' => intval($stats_distribucion['max_promotores_en_tienda'] ?? 0)
+            ],
             'ratios' => [
-                'promotor_tienda' => $ratio_promotor_tienda,
-                'cobertura_general' => $porcentaje_tiendas_cubiertas
+                'asignaciones_por_promotor' => $ratio_asignaciones_promotores,
+                'cobertura_general' => $porcentaje_tiendas_cubiertas,
+                'eficiencia_cobertura' => $eficiencia_cobertura
             ]
         ],
         'actividad_reciente' => [
@@ -315,30 +357,45 @@ try {
             return [
                 'region' => intval($region['region']),
                 'total_tiendas' => intval($region['total_tiendas']),
-                'con_promotor' => intval($region['tiendas_con_promotor']),
-                'sin_promotor' => intval($region['tiendas_sin_promotor']),
-                'porcentaje_cobertura' => floatval($region['porcentaje_cobertura'])
+                'tiendas_con_promotor' => intval($region['tiendas_con_promotor']),
+                'tiendas_sin_promotor' => intval($region['tiendas_sin_promotor']),
+                'total_asignaciones_activas' => intval($region['total_asignaciones_activas']),
+                'promedio_promotores_por_tienda' => floatval($region['promedio_promotores_por_tienda'] ?? 0),
+                'porcentaje_tiendas_con_cobertura' => floatval($region['porcentaje_tiendas_con_cobertura'])
             ];
         }, $stats_regiones),
         'estadisticas_por_cadena' => array_map(function($cadena) {
             return [
                 'cadena' => $cadena['cadena'],
                 'total_tiendas' => intval($cadena['total_tiendas']),
-                'con_promotor' => intval($cadena['tiendas_con_promotor']),
-                'sin_promotor' => intval($cadena['tiendas_sin_promotor']),
-                'porcentaje_cobertura' => floatval($cadena['porcentaje_cobertura'])
+                'tiendas_con_promotor' => intval($cadena['tiendas_con_promotor']),
+                'tiendas_sin_promotor' => intval($cadena['tiendas_sin_promotor']),
+                'total_asignaciones_activas' => intval($cadena['total_asignaciones_activas']),
+                'promedio_promotores_por_tienda' => floatval($cadena['promedio_promotores_por_tienda'] ?? 0),
+                'porcentaje_tiendas_con_cobertura' => floatval($cadena['porcentaje_tiendas_con_cobertura'])
             ];
         }, $stats_cadenas),
         'asignaciones_recientes' => $recientes_formateadas,
         'alertas' => [
             'promotores_disponibles' => intval($stats_prom_asig['sin_asignacion'] ?? 0),
-            'tiendas_sin_cobertura' => intval($stats_tiend_asig['sin_promotor'] ?? 0),
+            'tiendas_sin_cobertura' => intval($stats_distribucion['tiendas_sin_promotores'] ?? 0),
             'promotores_en_vacaciones' => intval($stats_promotores['promotores_vacaciones'] ?? 0),
-            'necesita_atencion' => (intval($stats_tiend_asig['sin_promotor'] ?? 0) > 0 || intval($stats_promotores['promotores_vacaciones'] ?? 0) > 0)
+            'tiendas_con_baja_cobertura' => intval($stats_distribucion['tiendas_con_1_promotor'] ?? 0),
+            'necesita_atencion' => (
+                intval($stats_distribucion['tiendas_sin_promotores'] ?? 0) > 0 || 
+                intval($stats_promotores['promotores_vacaciones'] ?? 0) > 0 ||
+                $eficiencia_cobertura < 1.0
+            ),
+            'oportunidades_expansion' => intval($stats_distribucion['tiendas_sin_promotores'] ?? 0) + intval($stats_distribucion['tiendas_con_1_promotor'] ?? 0)
+        ],
+        'metadata' => [
+            'modelo_multiples_promotores' => true,
+            'version_api' => '2.0',
+            'soporte_distribucion_avanzada' => true
         ]
     ];
 
-    error_log('GET_DASHBOARD_STATS: Estadísticas calculadas exitosamente');
+    error_log('GET_DASHBOARD_STATS: Estadísticas calculadas exitosamente con modelo múltiples promotores');
 
     echo json_encode($response, JSON_UNESCAPED_UNICODE);
 

@@ -232,21 +232,24 @@ try {
         exit;
     }
 
-    // ===== VERIFICAR QUE LA TIENDA NO TENGA PROMOTOR ASIGNADO =====
-    $sql_check_tienda = "SELECT id_asignacion, id_promotor, fecha_inicio 
-                         FROM promotor_tienda_asignaciones 
-                         WHERE id_tienda = :id_tienda 
-                         AND activo = 1 
-                         AND fecha_fin IS NULL";
+    // ===== VERIFICAR SI EL PROMOTOR YA ESTÁ ASIGNADO A ESTA MISMA TIENDA =====
+    $sql_check_duplicado = "SELECT id_asignacion 
+                            FROM promotor_tienda_asignaciones 
+                            WHERE id_promotor = :id_promotor 
+                            AND id_tienda = :id_tienda 
+                            AND activo = 1 
+                            AND fecha_fin IS NULL";
     
-    $asignacion_activa_tienda = Database::selectOne($sql_check_tienda, [':id_tienda' => $id_tienda]);
+    $duplicado = Database::selectOne($sql_check_duplicado, [
+        ':id_promotor' => $id_promotor,
+        ':id_tienda' => $id_tienda
+    ]);
 
-    if ($asignacion_activa_tienda) {
+    if ($duplicado) {
         http_response_code(409);
         echo json_encode([
             'success' => false,
-            'message' => 'La tienda ya tiene un promotor asignado. Debe finalizar la asignación actual antes de asignar un nuevo promotor.',
-            'asignacion_activa' => $asignacion_activa_tienda
+            'message' => 'Este promotor ya está asignado a esta tienda'
         ]);
         exit;
     }

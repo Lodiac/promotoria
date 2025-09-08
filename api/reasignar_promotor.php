@@ -281,20 +281,14 @@ try {
         exit;
     }
 
-    // ===== VERIFICAR QUE LA NUEVA TIENDA EXISTE Y ESTÁ DISPONIBLE (SI ES DIFERENTE) =====
+    // ===== VERIFICAR QUE LA NUEVA TIENDA EXISTE (SI ES DIFERENTE) =====
     if ($id_nueva_tienda != $asignacion_actual['id_tienda']) {
         $sql_nueva_tienda = "SELECT 
                                t.id_tienda,
                                t.cadena,
                                t.num_tienda,
-                               t.nombre_tienda,
-                               pta.id_asignacion as asignacion_activa_id
+                               t.nombre_tienda
                              FROM tiendas t
-                             LEFT JOIN promotor_tienda_asignaciones pta ON (
-                                 t.id_tienda = pta.id_tienda 
-                                 AND pta.activo = 1 
-                                 AND pta.fecha_fin IS NULL
-                             )
                              WHERE t.id_tienda = :id_tienda AND t.estado_reg = 1";
 
         $nueva_tienda = Database::selectOne($sql_nueva_tienda, [':id_tienda' => $id_nueva_tienda]);
@@ -307,12 +301,28 @@ try {
             ]);
             exit;
         }
+    }
 
-        if ($nueva_tienda['asignacion_activa_id']) {
+    // ===== VERIFICAR QUE NO SE ESTÉ DUPLICANDO LA MISMA ASIGNACIÓN =====
+    if ($id_nueva_tienda == $asignacion_actual['id_tienda']) {
+        // Mismo promotor y misma tienda - verificar que el nuevo promotor no esté ya asignado a esta tienda
+        $sql_check_duplicado = "SELECT id_asignacion 
+                                FROM promotor_tienda_asignaciones 
+                                WHERE id_promotor = :id_promotor 
+                                AND id_tienda = :id_tienda 
+                                AND activo = 1 
+                                AND fecha_fin IS NULL";
+        
+        $duplicado = Database::selectOne($sql_check_duplicado, [
+            ':id_promotor' => $id_nuevo_promotor,
+            ':id_tienda' => $id_nueva_tienda
+        ]);
+
+        if ($duplicado) {
             http_response_code(409);
             echo json_encode([
                 'success' => false,
-                'message' => 'La nueva tienda ya tiene un promotor asignado'
+                'message' => 'El nuevo promotor ya está asignado a esta tienda'
             ]);
             exit;
         }
@@ -494,7 +504,8 @@ try {
             'fecha_cambio_formateada' => $fecha_cambio_obj->format('d/m/Y'),
             'motivo_cambio' => $motivo_cambio,
             'duracion_asignacion_anterior' => $duracion_anterior,
-            'tipo_reasignacion' => $id_nueva_tienda == $asignacion_actual['id_tienda'] ? 'solo_promotor' : 'promotor_y_tienda'
+            'tipo_reasignacion' => $id_nueva_tienda == $asignacion_actual['id_tienda'] ? 'solo_promotor' : 'promotor_y_tienda',
+            'multiples_promotores_habilitado' => true
         ]
     ];
 
