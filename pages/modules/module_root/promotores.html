@@ -1,4 +1,4 @@
-<!-- ===== MÓDULO GESTIÓN DE PROMOTORES - DISEÑO MODERNO ===== -->
+<!-- ===== MÓDULO GESTIÓN DE PROMOTORES CON HISTORIAL Y VISTA DETALLADA ===== -->
 <div class="promotores-module">
     <!-- HEADER DEL MÓDULO -->
     <div class="module-header">
@@ -96,12 +96,12 @@
     </div>
 </div>
 
-<!-- ===== MODAL CREAR/EDITAR PROMOTOR ===== -->
+<!-- ===== MODAL VER/EDITAR PROMOTOR ===== -->
 <div class="modal-overlay" id="modal-promotor">
     <div class="modal-container modal-large">
         <div class="modal-header">
             <h2 id="modal-title">
-                <i class="fas fa-user"></i> Nuevo Promotor
+                <i class="fas fa-user"></i> Información del Promotor
             </h2>
             <button class="modal-close" id="modal-close">
                 <i class="fas fa-times"></i>
@@ -111,108 +111,217 @@
         <form class="modal-form" id="form-promotor">
             <input type="hidden" id="promotor-id">
             
-            <!-- INFORMACIÓN PERSONAL -->
-            <div class="form-section">
-                <h3><i class="fas fa-user"></i> Información Personal</h3>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="promotor-nombre">Nombre *</label>
-                        <input type="text" id="promotor-nombre" maxlength="100" required
-                               placeholder="Nombre del promotor">
-                    </div>
-                    <div class="form-group">
-                        <label for="promotor-apellido">Apellido *</label>
-                        <input type="text" id="promotor-apellido" maxlength="100" required
-                               placeholder="Apellido del promotor">
+            <!-- MODO VISTA -->
+            <div class="view-mode" id="view-mode">
+                <!-- INFORMACIÓN PERSONAL -->
+                <div class="info-section">
+                    <h3><i class="fas fa-user"></i> Información Personal</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <label>Nombre Completo</label>
+                            <div class="info-value" id="view-nombre-completo">-</div>
+                        </div>
+                        <div class="info-item">
+                            <label>Teléfono</label>
+                            <div class="info-value" id="view-telefono">-</div>
+                        </div>
+                        <div class="info-item">
+                            <label>Correo Electrónico</label>
+                            <div class="info-value" id="view-correo">-</div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="promotor-telefono">Teléfono *</label>
-                        <input type="tel" id="promotor-telefono" maxlength="20" required
-                               placeholder="Ej: 5551234567">
+                <!-- INFORMACIÓN FISCAL -->
+                <div class="info-section">
+                    <h3><i class="fas fa-file-invoice"></i> Información Fiscal</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <label>RFC</label>
+                            <div class="info-value" id="view-rfc">-</div>
+                        </div>
+                        <div class="info-item">
+                            <label>NSS</label>
+                            <div class="info-value" id="view-nss">-</div>
+                        </div>
+                        <div class="info-item">
+                            <label>Clave de Asistencia</label>
+                            <div class="info-value" id="view-clave">-</div>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="promotor-correo">Correo Electrónico *</label>
-                        <input type="email" id="promotor-correo" maxlength="100" required
-                               placeholder="promotor@empresa.com">
+                </div>
+
+                <!-- INFORMACIÓN BANCARIA -->
+                <div class="info-section">
+                    <h3><i class="fas fa-university"></i> Información Bancaria</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <label>Banco</label>
+                            <div class="info-value" id="view-banco">No especificado</div>
+                        </div>
+                        <div class="info-item">
+                            <label>Número de Cuenta</label>
+                            <div class="info-value" id="view-cuenta">No especificado</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CONFIGURACIÓN Y ESTADO -->
+                <div class="info-section">
+                    <h3><i class="fas fa-cogs"></i> Estado y Configuración</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <label>Estatus</label>
+                            <div class="info-value">
+                                <span class="status-badge" id="view-estatus-badge">ACTIVO</span>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <label>En Vacaciones</label>
+                            <div class="info-value">
+                                <span class="vacaciones-badge" id="view-vacaciones-badge">No</span>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <label>Fecha de Alta</label>
+                            <div class="info-value" id="view-fecha-alta">-</div>
+                        </div>
+                        <div class="info-item">
+                            <label>Última Modificación</label>
+                            <div class="info-value" id="view-fecha-mod">-</div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- INFORMACIÓN FISCAL -->
-            <div class="form-section">
-                <h3><i class="fas fa-file-invoice"></i> Información Fiscal</h3>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="promotor-rfc">RFC *</label>
-                        <input type="text" id="promotor-rfc" maxlength="13" required
-                               placeholder="PEXJ850101XXX" style="text-transform: uppercase;">
+            <!-- MODO EDICIÓN -->
+            <div class="edit-mode" id="edit-mode" style="display: none;">
+                <!-- INFORMACIÓN PERSONAL -->
+                <div class="form-section">
+                    <h3><i class="fas fa-user"></i> Información Personal</h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="promotor-nombre">Nombre *</label>
+                            <input type="text" id="promotor-nombre" maxlength="100" required
+                                   placeholder="Nombre del promotor">
+                        </div>
+                        <div class="form-group">
+                            <label for="promotor-apellido">Apellido *</label>
+                            <input type="text" id="promotor-apellido" maxlength="100" required
+                                   placeholder="Apellido del promotor">
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="promotor-nss">NSS *</label>
-                        <input type="text" id="promotor-nss" maxlength="20" required
-                               placeholder="12345678901">
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="promotor-telefono">Teléfono *</label>
+                            <input type="tel" id="promotor-telefono" maxlength="20" required
+                                   placeholder="Ej: 5551234567">
+                        </div>
+                        <div class="form-group">
+                            <label for="promotor-correo">Correo Electrónico *</label>
+                            <input type="email" id="promotor-correo" maxlength="100" required
+                                   placeholder="promotor@empresa.com">
+                        </div>
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="promotor-clave">Clave de Asistencia *</label>
-                    <input type="text" id="promotor-clave" maxlength="50" required
-                           placeholder="Ej: EMP001, PROM123">
-                </div>
-            </div>
+                <!-- INFORMACIÓN FISCAL -->
+                <div class="form-section">
+                    <h3><i class="fas fa-file-invoice"></i> Información Fiscal</h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="promotor-rfc">RFC *</label>
+                            <input type="text" id="promotor-rfc" maxlength="13" required
+                                   placeholder="PEXJ850101XXX" style="text-transform: uppercase;">
+                        </div>
+                        <div class="form-group">
+                            <label for="promotor-nss">NSS *</label>
+                            <input type="text" id="promotor-nss" maxlength="20" required
+                                   placeholder="12345678901">
+                        </div>
+                    </div>
 
-            <!-- INFORMACIÓN BANCARIA -->
-            <div class="form-section">
-                <h3><i class="fas fa-university"></i> Información Bancaria</h3>
-                
-                <div class="form-row">
                     <div class="form-group">
-                        <label for="promotor-banco">Banco</label>
-                        <input type="text" id="promotor-banco" maxlength="100"
-                               placeholder="Ej: BBVA, Santander, Banorte">
-                    </div>
-                    <div class="form-group">
-                        <label for="promotor-cuenta">Número de Cuenta</label>
-                        <input type="text" id="promotor-cuenta" maxlength="50"
-                               placeholder="1234567890">
+                        <label for="promotor-clave">Clave de Asistencia *</label>
+                        <input type="text" id="promotor-clave" maxlength="50" required
+                               placeholder="Ej: EMP001, PROM123">
                     </div>
                 </div>
-            </div>
 
-            <!-- CONFIGURACIÓN -->
-            <div class="form-section">
-                <h3><i class="fas fa-cogs"></i> Configuración</h3>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="promotor-estatus">Estatus *</label>
-                        <select id="promotor-estatus" required>
-                            <option value="ACTIVO">Activo</option>
-                            <option value="BAJA">Baja</option>
-                        </select>
+                <!-- INFORMACIÓN BANCARIA -->
+                <div class="form-section">
+                    <h3><i class="fas fa-university"></i> Información Bancaria</h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="promotor-banco">Banco</label>
+                            <input type="text" id="promotor-banco" maxlength="100"
+                                   placeholder="Ej: BBVA, Santander, Banorte">
+                        </div>
+                        <div class="form-group">
+                            <label for="promotor-cuenta">Número de Cuenta</label>
+                            <input type="text" id="promotor-cuenta" maxlength="50"
+                                   placeholder="1234567890">
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="promotor-vacaciones">Vacaciones</label>
-                        <select id="promotor-vacaciones">
-                            <option value="0">No</option>
-                            <option value="1">Sí</option>
-                        </select>
+                </div>
+
+                <!-- CONFIGURACIÓN -->
+                <div class="form-section">
+                    <h3><i class="fas fa-cogs"></i> Configuración</h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="promotor-estatus">Estatus *</label>
+                            <select id="promotor-estatus" required>
+                                <option value="ACTIVO">Activo</option>
+                                <option value="BAJA">Baja</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="promotor-vacaciones">Vacaciones</label>
+                            <select id="promotor-vacaciones">
+                                <option value="0">No</option>
+                                <option value="1">Sí</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <div class="modal-actions">
-                <button type="button" class="btn-secondary" id="btn-cancelar">
-                    Cancelar
-                </button>
-                <button type="submit" class="btn-primary" id="btn-guardar">
-                    <i class="fas fa-save"></i> Guardar
-                </button>
+                <!-- Botones para modo vista -->
+                <div class="view-actions" id="view-actions">
+                    <button type="button" class="btn-secondary" id="btn-cerrar-vista">
+                        <i class="fas fa-times"></i> Cerrar
+                    </button>
+                    <button type="button" class="btn-primary" id="btn-editar-promotor">
+                        <i class="fas fa-edit"></i> Editar
+                    </button>
+                </div>
+
+                <!-- Botones para modo edición -->
+                <div class="edit-actions" id="edit-actions" style="display: none;">
+                    <button type="button" class="btn-secondary" id="btn-cancelar-edicion">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                    <button type="submit" class="btn-primary" id="btn-guardar">
+                        <i class="fas fa-save"></i> Guardar
+                    </button>
+                </div>
+
+                <!-- Botones para nuevo promotor -->
+                <div class="new-actions" id="new-actions" style="display: none;">
+                    <button type="button" class="btn-secondary" id="btn-cancelar-nuevo">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                    <button type="submit" class="btn-primary" id="btn-crear">
+                        <i class="fas fa-save"></i> Crear
+                    </button>
+                </div>
             </div>
         </form>
     </div>
@@ -247,25 +356,66 @@
     </div>
 </div>
 
+<!-- ===== MODAL HISTORIAL PROMOTOR ===== -->
+<div class="modal-overlay" id="modal-historial">
+    <div class="modal-container modal-large">
+        <div class="modal-header">
+            <h2><i class="fas fa-history"></i> Historial de <span id="historial-promotor-nombre"></span></h2>
+            <button class="modal-close" id="modal-close-historial">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="modal-content">
+            <div class="promotor-info" id="promotor-info">
+                <!-- Se llenará dinámicamente -->
+            </div>
+            <div class="historial-timeline" id="historial-timeline">
+                <!-- Se llenará dinámicamente -->
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- ===== SISTEMA DE NOTIFICACIONES ===== -->
 <div class="notifications-container" id="notifications-container"></div>
 
 <style>
-/* ===== ESTILOS PROMOTORES MODULE ===== */
+/* ===== ESTILOS PROMOTORES MODULE CON HISTORIAL Y VISTA DETALLADA ===== */
 .promotores-module {
     padding: 0;
     max-width: 100%;
 }
 
+/* ===== VARIABLES CSS - TEMA VERDE ===== */
+:root {
+    --primary-color: #27ae60;
+    --primary-hover: #229954;
+    --primary-light: #d5f4e6;
+    --secondary-color: #6c757d;
+    --success-color: #10b981;
+    --warning-color: #f59e0b;
+    --danger-color: #ef4444;
+    --info-color: #3b82f6;
+    --background: #f8fafc;
+    --surface: rgba(255, 255, 255, 0.95);
+    --text-primary: #2d3748;
+    --text-secondary: #718096;
+    --border-color: #e2e8f0;
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    --shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.15);
+    --radius: 12px;
+}
+
 /* ===== HEADER DEL MÓDULO ===== */
 .module-header {
-    background: rgba(255, 255, 255, 0.95);
+    background: var(--surface);
     backdrop-filter: blur(20px);
-    border-radius: 16px;
+    border-radius: var(--radius);
     padding: 2rem;
     margin-bottom: 2rem;
     border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow);
 }
 
 .header-content {
@@ -285,20 +435,21 @@
 .header-icon {
     width: 50px;
     height: 50px;
-    background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
-    border-radius: 12px;
+    background: var(--primary-color);
+    border-radius: var(--radius);
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
     font-size: 1.5rem;
+    box-shadow: 0 8px 20px rgba(39, 174, 96, 0.3);
 }
 
 .header-title h1 {
     margin: 0;
     font-size: 2rem;
     font-weight: 700;
-    color: #333;
+    color: var(--text-primary);
 }
 
 .header-actions {
@@ -309,13 +460,13 @@
 
 /* ===== CONTROLES DE BÚSQUEDA ===== */
 .search-controls {
-    background: rgba(255, 255, 255, 0.95);
+    background: var(--surface);
     backdrop-filter: blur(20px);
-    border-radius: 16px;
+    border-radius: var(--radius);
     padding: 1.5rem;
     margin-bottom: 2rem;
     border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow);
 }
 
 .search-box {
@@ -328,7 +479,7 @@
 .search-select {
     min-width: 200px;
     padding: 12px 15px;
-    border: 2px solid #e0e6ed;
+    border: 2px solid var(--border-color);
     border-radius: 8px;
     background: white;
     font-size: 0.95rem;
@@ -336,7 +487,7 @@
 }
 
 .search-select:focus {
-    border-color: #27ae60;
+    border-color: var(--primary-color);
     outline: none;
     box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.1);
 }
@@ -345,14 +496,14 @@
     flex: 1;
     min-width: 250px;
     padding: 12px 15px;
-    border: 2px solid #e0e6ed;
+    border: 2px solid var(--border-color);
     border-radius: 8px;
     font-size: 0.95rem;
     transition: all 0.3s ease;
 }
 
 .search-input:focus {
-    border-color: #27ae60;
+    border-color: var(--primary-color);
     outline: none;
     box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.1);
 }
@@ -376,20 +527,22 @@
     gap: 8px;
     text-decoration: none;
     font-size: 0.9rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+    background: var(--primary-color);
     color: white;
 }
 
 .btn-primary:hover:not(:disabled) {
+    background: var(--primary-hover);
     transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba(39, 174, 96, 0.3);
 }
 
 .btn-secondary {
-    background: #6c757d;
+    background: var(--secondary-color);
     color: white;
 }
 
@@ -399,28 +552,29 @@
 }
 
 .btn-danger {
-    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    background: var(--danger-color);
     color: white;
 }
 
 .btn-danger:hover:not(:disabled) {
+    background: #dc2626;
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(231, 76, 60, 0.3);
+    box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3);
 }
 
 .btn-search {
-    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+    background: var(--info-color);
     color: white;
     padding: 12px 16px;
 }
 
 .btn-search:hover:not(:disabled) {
+    background: #2563eb;
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(52, 152, 219, 0.3);
 }
 
 .btn-clear {
-    background: #6c757d;
+    background: var(--secondary-color);
     color: white;
     padding: 12px 16px;
 }
@@ -436,26 +590,46 @@
     margin: 0 2px;
 }
 
-.btn-action.edit {
-    background: linear-gradient(135deg, #f39c12 0%, #d68910 100%);
+.btn-action.view {
+    background: var(--info-color);
     color: white;
+}
+
+.btn-action.view:hover {
+    background: #2563eb;
+    transform: translateY(-2px);
 }
 
 .btn-action.delete {
-    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    background: var(--danger-color);
     color: white;
+}
+
+.btn-action.delete:hover {
+    background: #dc2626;
+    transform: translateY(-2px);
+}
+
+.btn-action.history {
+    background: var(--warning-color);
+    color: white;
+}
+
+.btn-action.history:hover {
+    background: #d97706;
+    transform: translateY(-2px);
 }
 
 .btn-pagination {
-    background: rgba(255, 255, 255, 0.9);
-    color: #333;
-    border: 2px solid #e0e6ed;
+    background: white;
+    color: var(--text-primary);
+    border: 2px solid var(--border-color);
 }
 
 .btn-pagination:hover:not(:disabled) {
-    background: #27ae60;
+    background: var(--primary-color);
     color: white;
-    border-color: #27ae60;
+    border-color: var(--primary-color);
     transform: translateY(-2px);
 }
 
@@ -466,13 +640,13 @@
 
 /* ===== TABLA ===== */
 .table-container {
-    background: rgba(255, 255, 255, 0.95);
+    background: var(--surface);
     backdrop-filter: blur(20px);
-    border-radius: 16px;
+    border-radius: var(--radius);
     padding: 1.5rem;
     margin-bottom: 2rem;
     border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow);
     position: relative;
     overflow: hidden;
 }
@@ -488,7 +662,7 @@
 }
 
 .promotores-table th {
-    background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+    background: var(--primary-color);
     color: white;
     padding: 15px 12px;
     text-align: left;
@@ -507,7 +681,7 @@
 
 .promotores-table td {
     padding: 15px 12px;
-    border-bottom: 1px solid #e0e6ed;
+    border-bottom: 1px solid var(--border-color);
     font-size: 0.9rem;
     vertical-align: middle;
 }
@@ -568,7 +742,7 @@
 .table-loading, .empty-state {
     text-align: center;
     padding: 60px 20px;
-    color: #666;
+    color: var(--text-secondary);
 }
 
 .loading-spinner {
@@ -576,7 +750,7 @@
     height: 40px;
     border: 4px solid rgba(39, 174, 96, 0.1);
     border-radius: 50%;
-    border-top-color: #27ae60;
+    border-top-color: var(--primary-color);
     animation: spin 1s linear infinite;
     margin: 0 auto 20px;
 }
@@ -587,13 +761,13 @@
 
 .empty-state i {
     font-size: 4rem;
-    color: #dee2e6;
+    color: var(--border-color);
     margin-bottom: 1rem;
 }
 
 .empty-state h3 {
     margin: 0 0 0.5rem 0;
-    color: #495057;
+    color: var(--text-primary);
 }
 
 /* ===== PAGINACIÓN ===== */
@@ -601,18 +775,18 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: rgba(255, 255, 255, 0.95);
+    background: var(--surface);
     backdrop-filter: blur(20px);
-    border-radius: 16px;
+    border-radius: var(--radius);
     padding: 1rem 1.5rem;
     border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow);
     flex-wrap: wrap;
     gap: 1rem;
 }
 
 .pagination-info {
-    color: #666;
+    color: var(--text-secondary);
     font-size: 0.9rem;
 }
 
@@ -623,7 +797,7 @@
 }
 
 .pagination-pages {
-    color: #333;
+    color: var(--text-primary);
     font-weight: 600;
     font-size: 0.9rem;
 }
@@ -650,7 +824,7 @@
 
 .modal-container {
     background: white;
-    border-radius: 16px;
+    border-radius: var(--radius);
     width: 100%;
     max-width: 600px;
     max-height: 90vh;
@@ -679,8 +853,10 @@
 }
 
 .modal-header {
+    background: var(--primary-color);
+    color: white;
     padding: 1.5rem 2rem;
-    border-bottom: 1px solid #e0e6ed;
+    border-radius: var(--radius) var(--radius) 0 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -690,7 +866,6 @@
     margin: 0;
     font-size: 1.5rem;
     font-weight: 600;
-    color: #333;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -700,7 +875,7 @@
     background: none;
     border: none;
     font-size: 1.5rem;
-    color: #666;
+    color: white;
     cursor: pointer;
     padding: 5px;
     border-radius: 50%;
@@ -708,30 +883,93 @@
 }
 
 .modal-close:hover {
-    background: #f8f9fa;
-    color: #333;
+    background: rgba(255, 255, 255, 0.2);
 }
 
 .modal-body {
     padding: 2rem;
 }
 
-.modal-form {
+.modal-content, .modal-form {
     padding: 2rem;
+}
+
+/* ===== ESTILOS MODO VISTA ===== */
+.view-mode {
+    display: block;
+}
+
+.info-section {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: #f8fafc;
+    border-radius: var(--radius);
+    border-left: 4px solid var(--primary-color);
+}
+
+.info-section h3 {
+    margin: 0 0 1.5rem 0;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.info-item {
+    background: white;
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.info-item:hover {
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.info-item label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.info-value {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    word-break: break-word;
+}
+
+/* ===== ESTILOS MODO EDICIÓN ===== */
+.edit-mode {
+    display: none;
 }
 
 .form-section {
     margin-bottom: 2rem;
     padding: 1.5rem;
-    background: #f8f9fa;
-    border-radius: 12px;
-    border-left: 4px solid #27ae60;
+    background: #f8fafc;
+    border-radius: var(--radius);
+    border-left: 4px solid var(--primary-color);
 }
 
 .form-section h3 {
     margin: 0 0 1rem 0;
     font-size: 1.1rem;
-    color: #333;
+    color: var(--text-primary);
     display: flex;
     align-items: center;
     gap: 8px;
@@ -752,13 +990,13 @@
     display: block;
     margin-bottom: 0.5rem;
     font-weight: 600;
-    color: #333;
+    color: var(--text-primary);
 }
 
 .form-group input, .form-group select, .form-group textarea {
     width: 100%;
     padding: 12px 15px;
-    border: 2px solid #e0e6ed;
+    border: 2px solid var(--border-color);
     border-radius: 8px;
     font-size: 0.95rem;
     transition: all 0.3s ease;
@@ -766,14 +1004,14 @@
 }
 
 .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
-    border-color: #27ae60;
+    border-color: var(--primary-color);
     outline: none;
     box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.1);
 }
 
 .modal-actions {
     padding: 1.5rem 2rem;
-    border-top: 1px solid #e0e6ed;
+    border-top: 1px solid var(--border-color);
     display: flex;
     justify-content: flex-end;
     gap: 1rem;
@@ -784,11 +1022,117 @@
     border-radius: 8px;
     padding: 1rem;
     margin: 1rem 0;
-    border-left: 4px solid #f39c12;
+    border-left: 4px solid var(--warning-color);
 }
 
 .text-warning {
-    color: #f39c12;
+    color: var(--warning-color);
+}
+
+/* ===== ESTILOS DEL HISTORIAL ===== */
+.promotor-info {
+    background: #f8fafc;
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border-left: 4px solid var(--primary-color);
+}
+
+.promotor-info h4 {
+    margin: 0 0 1rem 0;
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.stats-grid-small {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+.stat-mini {
+    background: white;
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+    border: 2px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.stat-mini:hover {
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+}
+
+.stat-mini h5 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin: 0 0 0.5rem 0;
+}
+
+.stat-mini p {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.historial-timeline {
+    position: relative;
+    padding-left: 2rem;
+}
+
+.historial-timeline::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--primary-color);
+    border-radius: 2px;
+}
+
+.historial-timeline h4 {
+    margin: 0 0 1.5rem 0;
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 2rem;
+    background: white;
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    margin-left: 1.5rem;
+    border: 1px solid var(--border-color);
+}
+
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -2.25rem;
+    top: 1.5rem;
+    width: 12px;
+    height: 12px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    border: 3px solid white;
+    box-shadow: 0 0 0 3px var(--primary-color);
+}
+
+.timeline-item.active::before {
+    background: var(--success-color);
+    box-shadow: 0 0 0 3px var(--success-color);
 }
 
 /* ===== NOTIFICACIONES ===== */
@@ -802,7 +1146,7 @@
 
 .notification {
     background: white;
-    border-radius: 12px;
+    border-radius: var(--radius);
     padding: 1rem 1.5rem;
     margin-bottom: 10px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
@@ -815,21 +1159,10 @@
     overflow: hidden;
 }
 
-.notification.success {
-    border-left-color: #27ae60;
-}
-
-.notification.error {
-    border-left-color: #e74c3c;
-}
-
-.notification.warning {
-    border-left-color: #f39c12;
-}
-
-.notification.info {
-    border-left-color: #3498db;
-}
+.notification.success { border-left-color: var(--success-color); }
+.notification.error { border-left-color: var(--danger-color); }
+.notification.warning { border-left-color: var(--warning-color); }
+.notification.info { border-left-color: var(--info-color); }
 
 @keyframes notificationSlideIn {
     from {
@@ -846,21 +1179,10 @@
     font-size: 1.2rem;
 }
 
-.notification.success .notification-icon {
-    color: #27ae60;
-}
-
-.notification.error .notification-icon {
-    color: #e74c3c;
-}
-
-.notification.warning .notification-icon {
-    color: #f39c12;
-}
-
-.notification.info .notification-icon {
-    color: #3498db;
-}
+.notification.success .notification-icon { color: var(--success-color); }
+.notification.error .notification-icon { color: var(--danger-color); }
+.notification.warning .notification-icon { color: var(--warning-color); }
+.notification.info .notification-icon { color: var(--info-color); }
 
 .notification-content h4 {
     margin: 0 0 5px 0;
@@ -871,7 +1193,7 @@
 .notification-content p {
     margin: 0;
     font-size: 0.85rem;
-    color: #666;
+    color: var(--text-secondary);
 }
 
 .notification-close {
@@ -887,7 +1209,7 @@
 }
 
 .notification-close:hover {
-    color: #333;
+    color: var(--text-primary);
 }
 
 /* ===== RESPONSIVE ===== */
@@ -915,6 +1237,10 @@
         grid-template-columns: 1fr;
     }
 
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+
     .modal-container {
         margin: 10px;
         max-width: calc(100% - 20px);
@@ -932,10 +1258,14 @@
     .promotores-table th, .promotores-table td {
         padding: 10px 8px;
     }
+
+    .stats-grid-small {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 @media (max-width: 480px) {
-    .modal-form, .modal-body {
+    .modal-form, .modal-body, .modal-content {
         padding: 1rem;
     }
 
@@ -948,10 +1278,55 @@
         flex-direction: column;
     }
 
-    .form-section {
+    .form-section, .info-section {
         padding: 1rem;
     }
+
+    .timeline-item {
+        margin-left: 1rem;
+        padding: 1rem;
+    }
+
+    .historial-timeline {
+        padding-left: 1.5rem;
+    }
+
+    .info-grid {
+        gap: 1rem;
+    }
+
+    .info-item {
+        padding: 0.75rem;
+    }
 }
+
+/* ===== ANIMACIONES ===== */
+@keyframes slideInLeft {
+    from { opacity: 0; transform: translateX(-20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+.fade-in { 
+    animation: fadeIn 0.5s ease-out; 
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== UTILIDADES ===== */
+.text-center { text-align: center; }
+.text-muted { color: var(--text-secondary); }
+.fw-bold { font-weight: 700; }
+.mb-0 { margin-bottom: 0; }
+.mt-1 { margin-top: 0.25rem; }
+.d-none { display: none; }
+.d-flex { display: flex; }
+.align-items-center { align-items: center; }
+.justify-content-between { justify-content: space-between; }
+.gap-2 { gap: 0.5rem; }
+.gap-3 { gap: 1rem; }
 </style>
 
 <script>
@@ -960,7 +1335,8 @@ let currentPage = 1;
 let totalPages = 1;
 let currentSearch = { field: '', value: '' };
 let isEditing = false;
-let editingId = null;
+let isNewPromotor = false;
+let currentPromotorData = null;
 let allPromotores = [];
 
 // ===== ELEMENTOS DOM =====
@@ -982,9 +1358,16 @@ const btnNext = document.getElementById('btn-next');
 // Modales
 const modalPromotor = document.getElementById('modal-promotor');
 const modalConfirmar = document.getElementById('modal-confirmar');
+const modalHistorial = document.getElementById('modal-historial');
 const modalTitle = document.getElementById('modal-title');
 const formPromotor = document.getElementById('form-promotor');
-const btnGuardar = document.getElementById('btn-guardar');
+
+// Modos del modal
+const viewMode = document.getElementById('view-mode');
+const editMode = document.getElementById('edit-mode');
+const viewActions = document.getElementById('view-actions');
+const editActions = document.getElementById('edit-actions');
+const newActions = document.getElementById('new-actions');
 
 // ===== FUNCIONES DE ESTADO DE UI =====
 function showLoading() {
@@ -1024,9 +1407,37 @@ function showError(message) {
     mostrarNotificacion('Error: ' + message, 'error');
 }
 
+// ===== FUNCIONES DE MODOS DEL MODAL =====
+function mostrarModoVista() {
+    viewMode.style.display = 'block';
+    editMode.style.display = 'none';
+    viewActions.style.display = 'flex';
+    editActions.style.display = 'none';
+    newActions.style.display = 'none';
+    modalTitle.innerHTML = '<i class="fas fa-eye"></i> Información del Promotor';
+}
+
+function mostrarModoEdicion() {
+    viewMode.style.display = 'none';
+    editMode.style.display = 'block';
+    viewActions.style.display = 'none';
+    editActions.style.display = 'flex';
+    newActions.style.display = 'none';
+    modalTitle.innerHTML = '<i class="fas fa-edit"></i> Editar Promotor';
+}
+
+function mostrarModoNuevo() {
+    viewMode.style.display = 'none';
+    editMode.style.display = 'block';
+    viewActions.style.display = 'none';
+    editActions.style.display = 'none';
+    newActions.style.display = 'flex';
+    modalTitle.innerHTML = '<i class="fas fa-plus"></i> Nuevo Promotor';
+}
+
 // ===== INICIALIZACIÓN =====
 function init() {
-    console.log('🚀 Inicializando módulo promotores...');
+    console.log('🚀 Inicializando módulo promotores con vista detallada...');
     configurarEventListeners();
 }
 
@@ -1045,11 +1456,17 @@ function configurarEventListeners() {
     btnPrev.addEventListener('click', () => cambiarPagina(currentPage - 1));
     btnNext.addEventListener('click', () => cambiarPagina(currentPage + 1));
     
-    // Modales
+    // Modales - cerrar
     document.getElementById('modal-close').addEventListener('click', cerrarModalPromotor);
-    document.getElementById('btn-cancelar').addEventListener('click', cerrarModalPromotor);
+    document.getElementById('btn-cerrar-vista').addEventListener('click', cerrarModalPromotor);
+    document.getElementById('btn-cancelar-edicion').addEventListener('click', cancelarEdicion);
+    document.getElementById('btn-cancelar-nuevo').addEventListener('click', cerrarModalPromotor);
     document.getElementById('btn-cancelar-delete').addEventListener('click', cerrarModalConfirmar);
     document.getElementById('btn-confirmar-delete').addEventListener('click', confirmarEliminacion);
+    document.getElementById('modal-close-historial').addEventListener('click', cerrarModalHistorial);
+    
+    // Botones de acción
+    document.getElementById('btn-editar-promotor').addEventListener('click', cambiarAModoEdicion);
     
     // Formulario
     formPromotor.addEventListener('submit', guardarPromotor);
@@ -1064,6 +1481,7 @@ function configurarEventListeners() {
         if (e.key === 'Escape') {
             cerrarModalPromotor();
             cerrarModalConfirmar();
+            cerrarModalHistorial();
         }
     });
     
@@ -1074,6 +1492,10 @@ function configurarEventListeners() {
     
     modalConfirmar.addEventListener('click', (e) => {
         if (e.target === modalConfirmar) cerrarModalConfirmar();
+    });
+
+    modalHistorial.addEventListener('click', (e) => {
+        if (e.target === modalHistorial) cerrarModalHistorial();
     });
 }
 
@@ -1219,8 +1641,11 @@ function renderizarPromotores(promotores) {
             <td><span class="vacaciones-badge ${promotor.vacaciones ? 'si' : 'no'}">${promotor.vacaciones ? 'Sí' : 'No'}</span></td>
             <td>${promotor.fecha_modificacion_formatted || 'N/A'}</td>
             <td>
-                <button class="btn-action edit" onclick="editarPromotor(${promotor.id_promotor})" title="Editar">
-                    <i class="fas fa-edit"></i>
+                <button class="btn-action history" onclick="verHistorialPromotor(${promotor.id_promotor})" title="Ver Historial">
+                    <i class="fas fa-history"></i>
+                </button>
+                <button class="btn-action view" onclick="verPromotor(${promotor.id_promotor})" title="Ver Información">
+                    <i class="fas fa-eye"></i>
                 </button>
                 <button class="btn-action delete" onclick="eliminarPromotor(${promotor.id_promotor}, '${promotor.nombre_completo}', '${promotor.correo}')" title="Eliminar">
                     <i class="fas fa-trash"></i>
@@ -1253,19 +1678,9 @@ function cambiarPagina(page) {
     cargarPromotores();
 }
 
-// ===== MODAL NUEVO/EDITAR =====
-function abrirModalNuevo() {
-    isEditing = false;
-    editingId = null;
-    modalTitle.innerHTML = '<i class="fas fa-user"></i> Nuevo Promotor';
-    btnGuardar.innerHTML = '<i class="fas fa-save"></i> Crear';
-    
-    limpiarFormulario();
-    abrirModal(modalPromotor);
-}
-
-async function editarPromotor(id) {
-    console.log('✏️ Editando promotor ID:', id);
+// ===== FUNCIONES DE PROMOTOR =====
+async function verPromotor(id) {
+    console.log('👁️ Viendo promotor ID:', id);
     
     try {
         const promotorData = allPromotores.find(p => p.id_promotor == id);
@@ -1274,31 +1689,92 @@ async function editarPromotor(id) {
             throw new Error('No se encontraron los datos del promotor');
         }
         
-        isEditing = true;
-        editingId = id;
-        modalTitle.innerHTML = '<i class="fas fa-edit"></i> Editar Promotor';
-        btnGuardar.innerHTML = '<i class="fas fa-save"></i> Actualizar';
+        currentPromotorData = promotorData;
+        isEditing = false;
+        isNewPromotor = false;
         
-        // Llenar formulario
-        document.getElementById('promotor-id').value = promotorData.id_promotor;
-        document.getElementById('promotor-nombre').value = promotorData.nombre;
-        document.getElementById('promotor-apellido').value = promotorData.apellido;
-        document.getElementById('promotor-telefono').value = promotorData.telefono;
-        document.getElementById('promotor-correo').value = promotorData.correo;
-        document.getElementById('promotor-rfc').value = promotorData.rfc;
-        document.getElementById('promotor-nss').value = promotorData.nss;
-        document.getElementById('promotor-clave').value = promotorData.clave_asistencia;
-        document.getElementById('promotor-banco').value = promotorData.banco || '';
-        document.getElementById('promotor-cuenta').value = promotorData.numero_cuenta || '';
-        document.getElementById('promotor-estatus').value = promotorData.estatus;
-        document.getElementById('promotor-vacaciones').value = promotorData.vacaciones ? '1' : '0';
+        // Llenar vista de información
+        llenarVistaPromotor(promotorData);
         
+        mostrarModoVista();
         abrirModal(modalPromotor);
         
     } catch (error) {
-        console.error('❌ Error preparando edición:', error);
-        mostrarNotificacion('Error al cargar datos para edición: ' + error.message, 'error');
+        console.error('❌ Error cargando promotor:', error);
+        mostrarNotificacion('Error al cargar información del promotor: ' + error.message, 'error');
     }
+}
+
+function llenarVistaPromotor(promotor) {
+    document.getElementById('promotor-id').value = promotor.id_promotor;
+    
+    // Información personal
+    document.getElementById('view-nombre-completo').textContent = promotor.nombre_completo;
+    document.getElementById('view-telefono').textContent = promotor.telefono;
+    document.getElementById('view-correo').textContent = promotor.correo;
+    
+    // Información fiscal
+    document.getElementById('view-rfc').textContent = promotor.rfc;
+    document.getElementById('view-nss').textContent = promotor.nss;
+    document.getElementById('view-clave').textContent = promotor.clave_asistencia;
+    
+    // Información bancaria
+    document.getElementById('view-banco').textContent = promotor.banco || 'No especificado';
+    document.getElementById('view-cuenta').textContent = promotor.numero_cuenta || 'No especificado';
+    
+    // Estado y configuración
+    const estatusBadge = document.getElementById('view-estatus-badge');
+    estatusBadge.textContent = promotor.estatus;
+    estatusBadge.className = `status-badge ${promotor.estatus.toLowerCase()}`;
+    
+    const vacacionesBadge = document.getElementById('view-vacaciones-badge');
+    vacacionesBadge.textContent = promotor.vacaciones ? 'Sí' : 'No';
+    vacacionesBadge.className = `vacaciones-badge ${promotor.vacaciones ? 'si' : 'no'}`;
+    
+    document.getElementById('view-fecha-alta').textContent = promotor.fecha_alta_formatted || 'N/A';
+    document.getElementById('view-fecha-mod').textContent = promotor.fecha_modificacion_formatted || 'N/A';
+}
+
+function llenarFormularioEdicion(promotor) {
+    document.getElementById('promotor-id').value = promotor.id_promotor;
+    document.getElementById('promotor-nombre').value = promotor.nombre;
+    document.getElementById('promotor-apellido').value = promotor.apellido;
+    document.getElementById('promotor-telefono').value = promotor.telefono;
+    document.getElementById('promotor-correo').value = promotor.correo;
+    document.getElementById('promotor-rfc').value = promotor.rfc;
+    document.getElementById('promotor-nss').value = promotor.nss;
+    document.getElementById('promotor-clave').value = promotor.clave_asistencia;
+    document.getElementById('promotor-banco').value = promotor.banco || '';
+    document.getElementById('promotor-cuenta').value = promotor.numero_cuenta || '';
+    document.getElementById('promotor-estatus').value = promotor.estatus;
+    document.getElementById('promotor-vacaciones').value = promotor.vacaciones ? '1' : '0';
+}
+
+function cambiarAModoEdicion() {
+    if (!currentPromotorData) return;
+    
+    isEditing = true;
+    llenarFormularioEdicion(currentPromotorData);
+    mostrarModoEdicion();
+}
+
+function cancelarEdicion() {
+    if (currentPromotorData) {
+        llenarVistaPromotor(currentPromotorData);
+        mostrarModoVista();
+    } else {
+        cerrarModalPromotor();
+    }
+}
+
+function abrirModalNuevo() {
+    isEditing = false;
+    isNewPromotor = true;
+    currentPromotorData = null;
+    
+    limpiarFormulario();
+    mostrarModoNuevo();
+    abrirModal(modalPromotor);
 }
 
 function limpiarFormulario() {
@@ -1317,6 +1793,9 @@ function cerrarModalPromotor() {
     modalPromotor.classList.remove('active');
     document.body.style.overflow = 'auto';
     limpiarFormulario();
+    currentPromotorData = null;
+    isEditing = false;
+    isNewPromotor = false;
 }
 
 // ===== GUARDAR PROMOTOR =====
@@ -1337,8 +1816,8 @@ async function guardarPromotor(e) {
         vacaciones: parseInt(document.getElementById('promotor-vacaciones').value)
     };
     
-    if (isEditing) {
-        formData.id_promotor = editingId;
+    if (isEditing && currentPromotorData) {
+        formData.id_promotor = currentPromotorData.id_promotor;
     }
     
     // Validaciones básicas
@@ -1361,11 +1840,14 @@ async function guardarPromotor(e) {
         return;
     }
     
+    const btnGuardar = isNewPromotor ? document.getElementById('btn-crear') : document.getElementById('btn-guardar');
+    const originalText = btnGuardar.innerHTML;
+    
     btnGuardar.disabled = true;
     btnGuardar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
     
     try {
-        const url = isEditing ? '../../api/update_promotor.php' : '../../api/create_promotor.php';
+        const url = (isEditing && !isNewPromotor) ? '../../api/update_promotor.php' : '../../api/create_promotor.php';
         
         const response = await fetch(url, {
             method: 'POST',
@@ -1389,18 +1871,18 @@ async function guardarPromotor(e) {
             throw new Error(data.message || 'Error al guardar promotor');
         }
         
-        const accion = isEditing ? 'actualizado' : 'creado';
+        const accion = isNewPromotor ? 'creado' : 'actualizado';
         mostrarNotificacion(`Promotor ${accion} correctamente`, 'success');
         
         cerrarModalPromotor();
         cargarPromotores();
         
     } catch (error) {
-        console.error(`❌ Error ${isEditing ? 'actualizando' : 'creando'} promotor:`, error);
-        mostrarNotificacion(`Error al ${isEditing ? 'actualizar' : 'crear'} promotor: ` + error.message, 'error');
+        console.error(`❌ Error ${isNewPromotor ? 'creando' : 'actualizando'} promotor:`, error);
+        mostrarNotificacion(`Error al ${isNewPromotor ? 'crear' : 'actualizar'} promotor: ` + error.message, 'error');
     } finally {
         btnGuardar.disabled = false;
-        btnGuardar.innerHTML = isEditing ? '<i class="fas fa-save"></i> Actualizar' : '<i class="fas fa-save"></i> Crear';
+        btnGuardar.innerHTML = originalText;
     }
 }
 
@@ -1469,6 +1951,95 @@ async function confirmarEliminacion() {
     }
 }
 
+// ===== FUNCIONES HISTORIAL =====
+async function verHistorialPromotor(idPromotor) {
+    try {
+        console.log('📖 Cargando historial del promotor:', idPromotor);
+        
+        const response = await fetch(`../../api/get_historial_promotor.php?id_promotor=${idPromotor}`);
+        const data = await response.json();
+        
+        if (data.success) {
+            document.getElementById('historial-promotor-nombre').textContent = data.promotor.nombre_completo;
+            
+            // Llenar información del promotor
+            document.getElementById('promotor-info').innerHTML = `
+                <h4><i class="fas fa-user"></i> Información del Promotor</h4>
+                <div class="stats-grid-small">
+                    <div class="stat-mini">
+                        <h5>${data.estadisticas.total_asignaciones}</h5>
+                        <p>Total Asignaciones</p>
+                    </div>
+                    <div class="stat-mini">
+                        <h5>${data.estadisticas.asignaciones_activas}</h5>
+                        <p>Activas</p>
+                    </div>
+                    <div class="stat-mini">
+                        <h5>${data.estadisticas.total_dias_asignado}</h5>
+                        <p>Días Totales</p>
+                    </div>
+                    <div class="stat-mini">
+                        <h5>${data.estadisticas.tiendas_distintas}</h5>
+                        <p>Tiendas Diferentes</p>
+                    </div>
+                </div>
+                <div style="margin-top: 1.5rem;">
+                    <p><strong>Nombre:</strong> ${data.promotor.nombre_completo}</p>
+                    <p><strong>Teléfono:</strong> ${data.promotor.telefono}</p>
+                    <p><strong>Email:</strong> ${data.promotor.correo}</p>
+                    <p><strong>RFC:</strong> ${data.promotor.rfc}</p>
+                    <p><strong>Estatus:</strong> ${data.promotor.estatus}</p>
+                    <p><strong>Fecha Alta:</strong> ${data.promotor.fecha_alta_formatted}</p>
+                </div>
+            `;
+            
+            // Llenar timeline del historial
+            renderHistorialTimeline(data.historial);
+            
+            abrirModal(modalHistorial);
+        } else {
+            throw new Error(data.message || 'Error al cargar historial');
+        }
+        
+    } catch (error) {
+        console.error('❌ Error cargando historial:', error);
+        mostrarNotificacion('Error al cargar historial del promotor: ' + error.message, 'error');
+    }
+}
+
+function renderHistorialTimeline(historial) {
+    const timeline = document.getElementById('historial-timeline');
+    timeline.innerHTML = '<h4><i class="fas fa-history"></i> Historial de Asignaciones</h4>';
+    
+    if (historial.length === 0) {
+        timeline.innerHTML += '<p style="text-align: center; color: var(--text-secondary);">No hay historial de asignaciones</p>';
+        return;
+    }
+    
+    historial.forEach(item => {
+        const isActive = item.actualmente_asignado;
+        timeline.innerHTML += `
+            <div class="timeline-item ${isActive ? 'active' : ''}">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <div style="font-weight: 700; color: var(--text-primary); font-size: 1.1rem;">${item.tienda_identificador}</div>
+                    <div style="color: var(--text-secondary); font-size: 0.85rem; font-weight: 600;">${item.fecha_inicio_formatted}</div>
+                </div>
+                <div>
+                    <p><strong>Duración:</strong> ${item.dias_asignado} días ${isActive ? '(activa)' : ''}</p>
+                    <p><strong>Motivo:</strong> ${item.motivo_asignacion}</p>
+                    ${item.motivo_cambio ? `<p><strong>Fin:</strong> ${item.motivo_cambio}</p>` : ''}
+                    <p><strong>Usuario:</strong> ${item.usuario_asigno}</p>
+                </div>
+            </div>
+        `;
+    });
+}
+
+function cerrarModalHistorial() {
+    modalHistorial.classList.remove('active');
+    document.body.style.overflow = 'auto';
+}
+
 // ===== NOTIFICACIONES =====
 function mostrarNotificacion(mensaje, tipo = 'info') {
     const notificacion = document.createElement('div');
@@ -1513,11 +2084,19 @@ function mostrarNotificacion(mensaje, tipo = 'info') {
 }
 
 // ===== EXPONER FUNCIONES GLOBALES =====
-window.editarPromotor = editarPromotor;
+window.verPromotor = verPromotor;
 window.eliminarPromotor = eliminarPromotor;
+window.verHistorialPromotor = verHistorialPromotor;
 
 // ===== INICIALIZACIÓN =====
-console.log('👥 Iniciando módulo Gestión de Promotores...');
+console.log('👥 Iniciando módulo Gestión de Promotores con Vista Detallada...');
+console.log('✨ Características implementadas:');
+console.log('👁️ Vista detallada completa sin forzar edición');
+console.log('✏️ Modo edición dentro del modal de vista');
+console.log('📖 Historial integrado');
+console.log('🎨 Diseño optimizado para consulta y edición');
+console.log('📱 Responsive completo');
+
 init();
 
 setTimeout(() => {
@@ -1525,5 +2104,5 @@ setTimeout(() => {
     cargarPromotores();
 }, 100);
 
-console.log('✅ Módulo promotores inicializado correctamente');
+console.log('✅ Módulo promotores con vista detallada inicializado correctamente');
 </script>
