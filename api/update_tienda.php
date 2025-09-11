@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-// 🔑 DEFINIR CONSTANTE ANTES DE INCLUIR DB_CONNECT
+// 🔐 DEFINIR CONSTANTE ANTES DE INCLUIR DB_CONNECT
 define('APP_ACCESS', true);
 
 // Incluir la API de base de datos
@@ -90,6 +90,8 @@ try {
                       estado,
                       promotorio_ideal,
                       tipo,
+                      categoria,
+                      comision,
                       estado_reg
                   FROM tiendas 
                   WHERE id_tienda = :id_tienda 
@@ -143,9 +145,13 @@ try {
     $ciudad = Database::sanitize(trim($input['ciudad']));
     $estado = Database::sanitize(trim($input['estado']));
     
-    // NUEVOS CAMPOS (OPCIONALES)
+    // CAMPOS EXISTENTES (OPCIONALES)
     $tipo = Database::sanitize(trim($input['tipo'] ?? ''));
     $promotorio_ideal = !empty($input['promotorio_ideal']) ? intval($input['promotorio_ideal']) : null;
+    
+    // NUEVOS CAMPOS
+    $categoria = Database::sanitize(trim($input['categoria'] ?? ''));
+    $comision = isset($input['comision']) ? floatval($input['comision']) : 0.00;
 
     // Validaciones básicas
     if ($region <= 0) {
@@ -175,7 +181,7 @@ try {
         exit;
     }
 
-    // Validaciones para nuevos campos
+    // Validaciones para campos existentes
     if (!empty($tipo) && strlen($tipo) > 100) {
         http_response_code(400);
         echo json_encode([
@@ -190,6 +196,25 @@ try {
         echo json_encode([
             'success' => false,
             'message' => 'El promotorio ideal debe ser un número entre 1 y 20'
+        ]);
+        exit;
+    }
+
+    // Validaciones para NUEVOS CAMPOS
+    if (!empty($categoria) && strlen($categoria) > 100) {
+        http_response_code(400);
+        echo json_encode([
+            'success' => false,
+            'message' => 'El campo categoría no puede exceder 100 caracteres'
+        ]);
+        exit;
+    }
+
+    if ($comision < 0) {
+        http_response_code(400);
+        echo json_encode([
+            'success' => false,
+            'message' => 'La comisión no puede ser negativa'
         ]);
         exit;
     }
@@ -228,6 +253,8 @@ try {
                        estado = :estado,
                        promotorio_ideal = :promotorio_ideal,
                        tipo = :tipo,
+                       categoria = :categoria,
+                       comision = :comision,
                        fecha_modificacion = NOW()
                    WHERE id_tienda = :id_tienda 
                    AND estado_reg = 1";
@@ -241,6 +268,8 @@ try {
         ':estado' => $estado,
         ':promotorio_ideal' => $promotorio_ideal,
         ':tipo' => !empty($tipo) ? $tipo : null,
+        ':categoria' => !empty($categoria) ? $categoria : null,
+        ':comision' => $comision,
         ':id_tienda' => $id_tienda
     ];
 
@@ -266,6 +295,8 @@ try {
                     estado,
                     promotorio_ideal,
                     tipo,
+                    categoria,
+                    comision,
                     fecha_alta,
                     fecha_modificacion
                 FROM tiendas 
@@ -273,16 +304,19 @@ try {
     
     $tienda_actualizada = Database::selectOne($sql_get, [':id_tienda' => $id_tienda]);
 
-    // Formatear fechas
+    // Formatear fechas y datos
     if ($tienda_actualizada['fecha_alta']) {
         $tienda_actualizada['fecha_alta_formatted'] = date('d/m/Y H:i', strtotime($tienda_actualizada['fecha_alta']));
     }
     if ($tienda_actualizada['fecha_modificacion']) {
         $tienda_actualizada['fecha_modificacion_formatted'] = date('d/m/Y H:i', strtotime($tienda_actualizada['fecha_modificacion']));
     }
+    if ($tienda_actualizada['comision'] !== null) {
+        $tienda_actualizada['comision_formatted'] = number_format($tienda_actualizada['comision'], 2);
+    }
 
     // ===== LOG DE AUDITORÍA =====
-    error_log("Tienda actualizada - ID: {$id_tienda} - Nombre: {$nombre_tienda} - Cadena: {$cadena} - Tipo: " . ($tipo ?: 'N/A') . " - Promotorio: " . ($promotorio_ideal ?: 'N/A') . " - Usuario: " . $_SESSION['username'] . " - IP: " . $_SERVER['REMOTE_ADDR']);
+    error_log("Tienda actualizada - ID: {$id_tienda} - Nombre: {$nombre_tienda} - Cadena: {$cadena} - Tipo: " . ($tipo ?: 'N/A') . " - Promotorio: " . ($promotorio_ideal ?: 'N/A') . " - Categoría: " . ($categoria ?: 'N/A') . " - Comisión: {$comision} - Usuario: " . $_SESSION['username'] . " - IP: " . $_SERVER['REMOTE_ADDR']);
 
     // ===== RESPUESTA EXITOSA (INCLUYE NUEVOS CAMPOS EN CHANGES) =====
     echo json_encode([
@@ -297,7 +331,9 @@ try {
             'ciudad' => $tienda_actual['ciudad'] !== $ciudad,
             'estado' => $tienda_actual['estado'] !== $estado,
             'promotorio_ideal' => $tienda_actual['promotorio_ideal'] !== $promotorio_ideal,
-            'tipo' => $tienda_actual['tipo'] !== (!empty($tipo) ? $tipo : null)
+            'tipo' => $tienda_actual['tipo'] !== (!empty($tipo) ? $tipo : null),
+            'categoria' => $tienda_actual['categoria'] !== (!empty($categoria) ? $categoria : null),
+            'comision' => abs($tienda_actual['comision'] - $comision) > 0.001 // Comparación de decimales
         ]
     ]);
 

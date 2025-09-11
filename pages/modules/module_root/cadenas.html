@@ -26,6 +26,7 @@
                 <option value="estado">Estado</option>
                 <option value="tipo">Tipo</option>
                 <option value="promotorio_ideal">Promotorio Ideal</option>
+                <option value="categoria">Categoría</option>
             </select>
             <input type="text" id="search-value" placeholder="Valor a buscar..." class="search-input" disabled>
             <button id="btn-buscar" class="btn-search" disabled>
@@ -52,6 +53,8 @@
                         <th>Estado</th>
                         <th>Tipo</th>
                         <th>Promotorio Ideal</th>
+                        <th>Categoría</th>
+                        <th>Comisión</th>
                         <th>Fecha Modificación</th>
                         <th>Acciones</th>
                     </tr>
@@ -148,6 +151,40 @@
                 <div class="form-group">
                     <label for="tienda-promotorio">Promotorio Ideal</label>
                     <input type="number" id="tienda-promotorio" min="1" max="20" placeholder="Número ideal de promotores">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="tienda-categoria">Categoría</label>
+                    <select id="tienda-categoria">
+                        <option value="">Seleccionar categoría...</option>
+                        <option value="A_1">A_1</option>
+                        <option value="A_2">A_2</option>
+                        <option value="A_3">A_3</option>
+                        <option value="A_4">A_4</option>
+                        <option value="A_5">A_5</option>
+                        <option value="B_1">B_1</option>
+                        <option value="B_2">B_2</option>
+                        <option value="B_3">B_3</option>
+                        <option value="B_4">B_4</option>
+                        <option value="B_5">B_5</option>
+                        <option value="C_1">C_1</option>
+                        <option value="C_2">C_2</option>
+                        <option value="C_3">C_3</option>
+                        <option value="C_4">C_4</option>
+                        <option value="C_5">C_5</option>
+                        <option value="D_1">D_1</option>
+                        <option value="D_2">D_2</option>
+                        <option value="D_3">D_3</option>
+                        <option value="D_4">D_4</option>
+                        <option value="D_5">D_5</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="tienda-comision">Comisión</label>
+                    <input type="number" id="tienda-comision" step="0.01" min="0" placeholder="0.00" value="0.00">
+                    <small class="form-helper">Formato decimal, ej: 0.25</small>
                 </div>
             </div>
 
@@ -464,6 +501,18 @@
     border-bottom: none;
 }
 
+/* ===== COLUMNAS ESPECÍFICAS ===== */
+.comision-cell {
+    font-family: 'Courier New', monospace;
+    font-weight: 600;
+    color: #27ae60;
+}
+
+.categoria-cell {
+    font-weight: 600;
+    color: #7c3aed;
+}
+
 /* ===== LOADING Y EMPTY STATES ===== */
 .table-loading, .empty-state {
     text-align: center;
@@ -648,6 +697,13 @@
     border-color: #7c3aed; /* Color morado sólido */
     outline: none;
     box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+}
+
+.form-helper {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.8rem;
+    color: #666;
 }
 
 .modal-actions {
@@ -1085,6 +1141,8 @@ function renderizarTiendas(tiendas) {
             <td>${tienda.estado}</td>
             <td>${tienda.tipo || 'N/A'}</td>
             <td>${tienda.promotorio_ideal || 'N/A'}</td>
+            <td class="categoria-cell">${tienda.categoria || 'N/A'}</td>
+            <td class="comision-cell">${tienda.comision_formatted || tienda.comision || '0.00'}</td>
             <td>${tienda.fecha_modificacion_formatted || 'N/A'}</td>
             <td>
                 <button class="btn-action edit" onclick="editarTienda(${tienda.id_tienda})">
@@ -1146,7 +1204,7 @@ async function editarTienda(id) {
         modalTitle.innerHTML = '<i class="fas fa-edit"></i> Editar Tienda';
         btnGuardar.innerHTML = '<i class="fas fa-save"></i> Actualizar';
         
-        // Llenar formulario incluyendo nuevos campos
+        // Llenar formulario incluyendo todos los campos
         document.getElementById('tienda-id').value = tiendaData.id_tienda;
         document.getElementById('tienda-region').value = tiendaData.region;
         document.getElementById('tienda-cadena').value = tiendaData.cadena;
@@ -1156,6 +1214,8 @@ async function editarTienda(id) {
         document.getElementById('tienda-estado').value = tiendaData.estado;
         document.getElementById('tienda-tipo').value = tiendaData.tipo || '';
         document.getElementById('tienda-promotorio').value = tiendaData.promotorio_ideal || '';
+        document.getElementById('tienda-categoria').value = tiendaData.categoria || '';
+        document.getElementById('tienda-comision').value = tiendaData.comision || '0.00';
         
         abrirModal(modalTienda);
         
@@ -1168,6 +1228,8 @@ async function editarTienda(id) {
 function limpiarFormulario() {
     formTienda.reset();
     document.getElementById('tienda-id').value = '';
+    // Establecer valores por defecto
+    document.getElementById('tienda-comision').value = '0.00';
 }
 
 function abrirModal(modal) {
@@ -1193,7 +1255,9 @@ async function guardarTienda(e) {
         ciudad: document.getElementById('tienda-ciudad').value.trim(),
         estado: document.getElementById('tienda-estado').value.trim(),
         tipo: document.getElementById('tienda-tipo').value.trim() || null,
-        promotorio_ideal: document.getElementById('tienda-promotorio').value ? parseInt(document.getElementById('tienda-promotorio').value) : null
+        promotorio_ideal: document.getElementById('tienda-promotorio').value ? parseInt(document.getElementById('tienda-promotorio').value) : null,
+        categoria: document.getElementById('tienda-categoria').value.trim() || null,
+        comision: parseFloat(document.getElementById('tienda-comision').value) || 0.00
     };
     
     if (isEditing) {
@@ -1203,6 +1267,12 @@ async function guardarTienda(e) {
     // Validaciones básicas
     if (!formData.region || !formData.num_tienda || !formData.cadena || !formData.nombre_tienda || !formData.ciudad || !formData.estado) {
         mostrarNotificacion('Los campos marcados con * son requeridos', 'warning');
+        return;
+    }
+    
+    // Validación de comisión
+    if (formData.comision < 0) {
+        mostrarNotificacion('La comisión no puede ser negativa', 'warning');
         return;
     }
     

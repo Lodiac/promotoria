@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-// 🔑 DEFINIR CONSTANTE ANTES DE INCLUIR DB_CONNECT
+// 🔐 DEFINIR CONSTANTE ANTES DE INCLUIR DB_CONNECT
 define('APP_ACCESS', true);
 
 // Incluir la API de base de datos
@@ -82,9 +82,13 @@ try {
     $ciudad = Database::sanitize(trim($input['ciudad']));
     $estado = Database::sanitize(trim($input['estado']));
     
-    // NUEVOS CAMPOS (OPCIONALES)
+    // CAMPOS EXISTENTES (OPCIONALES)
     $tipo = Database::sanitize(trim($input['tipo'] ?? ''));
     $promotorio_ideal = !empty($input['promotorio_ideal']) ? intval($input['promotorio_ideal']) : null;
+    
+    // NUEVOS CAMPOS
+    $categoria = Database::sanitize(trim($input['categoria'] ?? ''));
+    $comision = isset($input['comision']) ? floatval($input['comision']) : 0.00;
 
     // Validaciones básicas
     if ($region <= 0) {
@@ -114,7 +118,7 @@ try {
         exit;
     }
 
-    // Validaciones para nuevos campos
+    // Validaciones para campos existentes
     if (!empty($tipo) && strlen($tipo) > 100) {
         http_response_code(400);
         echo json_encode([
@@ -129,6 +133,25 @@ try {
         echo json_encode([
             'success' => false,
             'message' => 'El promotorio ideal debe ser un número entre 1 y 20'
+        ]);
+        exit;
+    }
+
+    // Validaciones para NUEVOS CAMPOS
+    if (!empty($categoria) && strlen($categoria) > 100) {
+        http_response_code(400);
+        echo json_encode([
+            'success' => false,
+            'message' => 'El campo categoría no puede exceder 100 caracteres'
+        ]);
+        exit;
+    }
+
+    if ($comision < 0) {
+        http_response_code(400);
+        echo json_encode([
+            'success' => false,
+            'message' => 'La comisión no puede ser negativa'
         ]);
         exit;
     }
@@ -165,6 +188,8 @@ try {
                         estado,
                         promotorio_ideal,
                         tipo,
+                        categoria,
+                        comision,
                         estado_reg,
                         fecha_alta,
                         fecha_modificacion
@@ -177,6 +202,8 @@ try {
                         :estado,
                         :promotorio_ideal,
                         :tipo,
+                        :categoria,
+                        :comision,
                         1,
                         NOW(),
                         NOW()
@@ -190,7 +217,9 @@ try {
         ':ciudad' => $ciudad,
         ':estado' => $estado,
         ':promotorio_ideal' => $promotorio_ideal,
-        ':tipo' => !empty($tipo) ? $tipo : null
+        ':tipo' => !empty($tipo) ? $tipo : null,
+        ':categoria' => !empty($categoria) ? $categoria : null,
+        ':comision' => $comision
     ];
 
     $new_id = Database::insert($sql_insert, $params);
@@ -215,6 +244,8 @@ try {
                     estado,
                     promotorio_ideal,
                     tipo,
+                    categoria,
+                    comision,
                     fecha_alta,
                     fecha_modificacion
                 FROM tiendas 
@@ -222,16 +253,19 @@ try {
     
     $nueva_tienda = Database::selectOne($sql_get, [':id_tienda' => $new_id]);
 
-    // Formatear fechas
+    // Formatear fechas y datos
     if ($nueva_tienda['fecha_alta']) {
         $nueva_tienda['fecha_alta_formatted'] = date('d/m/Y H:i', strtotime($nueva_tienda['fecha_alta']));
     }
     if ($nueva_tienda['fecha_modificacion']) {
         $nueva_tienda['fecha_modificacion_formatted'] = date('d/m/Y H:i', strtotime($nueva_tienda['fecha_modificacion']));
     }
+    if ($nueva_tienda['comision'] !== null) {
+        $nueva_tienda['comision_formatted'] = number_format($nueva_tienda['comision'], 2);
+    }
 
     // ===== LOG DE AUDITORÍA =====
-    error_log("Tienda creada - ID: {$new_id} - Nombre: {$nombre_tienda} - Cadena: {$cadena} - Tipo: " . ($tipo ?: 'N/A') . " - Promotorio: " . ($promotorio_ideal ?: 'N/A') . " - Usuario: " . $_SESSION['username'] . " - IP: " . $_SERVER['REMOTE_ADDR']);
+    error_log("Tienda creada - ID: {$new_id} - Nombre: {$nombre_tienda} - Cadena: {$cadena} - Tipo: " . ($tipo ?: 'N/A') . " - Promotorio: " . ($promotorio_ideal ?: 'N/A') . " - Categoría: " . ($categoria ?: 'N/A') . " - Comisión: {$comision} - Usuario: " . $_SESSION['username'] . " - IP: " . $_SERVER['REMOTE_ADDR']);
 
     // ===== RESPUESTA EXITOSA =====
     http_response_code(201);

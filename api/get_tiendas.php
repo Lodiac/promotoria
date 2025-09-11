@@ -7,7 +7,7 @@ error_reporting(E_ALL);
 
 session_start();
 
-// 🔑 DEFINIR CONSTANTE ANTES DE INCLUIR DB_CONNECT
+// 🔐 DEFINIR CONSTANTE ANTES DE INCLUIR DB_CONNECT
 define('APP_ACCESS', true);
 
 // Headers de seguridad y CORS
@@ -86,7 +86,7 @@ try {
 
     error_log('GET_TIENDAS: Parámetros - page: ' . $page . ', limit: ' . $limit . ', search: ' . $search_field . '=' . $search_value);
 
-    // ===== CAMPOS VÁLIDOS PARA BÚSQUEDA (INCLUYE NUEVOS CAMPOS) =====
+    // ===== CAMPOS VÁLIDOS PARA BÚSQUEDA (INCLUYE CATEGORIA, NO COMISION) =====
     $valid_search_fields = [
         'region',
         'cadena', 
@@ -95,7 +95,9 @@ try {
         'ciudad',
         'estado',
         'tipo',
-        'promotorio_ideal'
+        'promotorio_ideal',
+        'categoria'  // NUEVO: incluir categoria en búsquedas
+        // NO incluir comision en búsquedas
     ];
 
     // ===== VERIFICAR CONEXIÓN DB =====
@@ -138,7 +140,7 @@ try {
                 $sql_base .= " AND {$search_field} = :search_value";
                 $params[':search_value'] = intval($search_value);
             } else {
-                // Búsqueda LIKE para campos de texto
+                // Búsqueda LIKE para campos de texto (incluye categoria)
                 $sql_base .= " AND {$search_field} LIKE :search_value";
                 $params[':search_value'] = '%' . $search_value . '%';
             }
@@ -176,6 +178,8 @@ try {
                     estado,
                     promotorio_ideal,
                     tipo,
+                    categoria,
+                    comision,
                     fecha_alta,
                     fecha_modificacion
                  " . $sql_base . "
@@ -196,13 +200,18 @@ try {
         throw new Exception('Error obteniendo datos: ' . $select_error->getMessage());
     }
 
-    // ===== FORMATEAR FECHAS =====
+    // ===== FORMATEAR FECHAS Y DATOS =====
     foreach ($tiendas as &$tienda) {
         if ($tienda['fecha_alta']) {
             $tienda['fecha_alta_formatted'] = date('d/m/Y H:i', strtotime($tienda['fecha_alta']));
         }
         if ($tienda['fecha_modificacion']) {
             $tienda['fecha_modificacion_formatted'] = date('d/m/Y H:i', strtotime($tienda['fecha_modificacion']));
+        }
+        
+        // Formatear comisión con 2 decimales
+        if ($tienda['comision'] !== null) {
+            $tienda['comision_formatted'] = number_format($tienda['comision'], 2);
         }
     }
 
