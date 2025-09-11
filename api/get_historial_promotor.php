@@ -7,7 +7,7 @@ error_reporting(E_ALL);
 
 session_start();
 
-// 🔑 DEFINIR CONSTANTE ANTES DE INCLUIR DB_CONNECT
+// 🔒 DEFINIR CONSTANTE ANTES DE INCLUIR DB_CONNECT
 define('APP_ACCESS', true);
 
 // Headers de seguridad y CORS
@@ -106,7 +106,7 @@ try {
         throw new Exception('Error de conexión a la base de datos: ' . $conn_error->getMessage());
     }
 
-    // ===== VERIFICAR QUE EL PROMOTOR EXISTE =====
+    // ===== VERIFICAR QUE EL PROMOTOR EXISTE (CON NUEVOS CAMPOS) =====
     $sql_promotor = "SELECT 
                         id_promotor, 
                         nombre, 
@@ -115,6 +115,10 @@ try {
                         correo, 
                         rfc, 
                         estatus, 
+                        vacaciones,
+                        incidencias,
+                        fecha_ingreso,
+                        tipo_trabajo,
                         estado,
                         fecha_alta
                      FROM promotores 
@@ -272,6 +276,12 @@ try {
         }
     }
 
+    // ===== FORMATEAR DATOS DEL PROMOTOR (CON NUEVOS CAMPOS) =====
+    $tipos_trabajo = [
+        'fijo' => 'Fijo',
+        'cubredescansos' => 'Cubre Descansos'
+    ];
+
     // ===== PREPARAR RESPUESTA =====
     $response = [
         'success' => true,
@@ -284,6 +294,12 @@ try {
             'correo' => $promotor['correo'],
             'rfc' => $promotor['rfc'],
             'estatus' => $promotor['estatus'],
+            'vacaciones' => (bool)$promotor['vacaciones'],
+            'incidencias' => (bool)$promotor['incidencias'],
+            'fecha_ingreso' => $promotor['fecha_ingreso'],
+            'fecha_ingreso_formatted' => $promotor['fecha_ingreso'] ? date('d/m/Y', strtotime($promotor['fecha_ingreso'])) : 'N/A',
+            'tipo_trabajo' => $promotor['tipo_trabajo'],
+            'tipo_trabajo_formatted' => $tipos_trabajo[$promotor['tipo_trabajo']] ?? $promotor['tipo_trabajo'],
             'estado' => intval($promotor['estado']),
             'fecha_alta' => $promotor['fecha_alta'],
             'fecha_alta_formatted' => date('d/m/Y', strtotime($promotor['fecha_alta']))

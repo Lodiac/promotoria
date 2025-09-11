@@ -13,7 +13,7 @@ if (!defined('APP_ACCESS')) {
 class Database {
     
     // Configuración de conexión
-    private static $host = '192.168.0.106';
+    private static $host = '192.168.0.105';
     private static $port = 3306;
     private static $database = 'promotoria';
     private static $username = 'evo_promotor';        // Cambiar por tu usuario

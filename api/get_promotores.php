@@ -7,7 +7,7 @@ error_reporting(E_ALL);
 
 session_start();
 
-// 🔑 DEFINIR CONSTANTE ANTES DE INCLUIR DB_CONNECT
+// 🔒 DEFINIR CONSTANTE ANTES DE INCLUIR DB_CONNECT
 define('APP_ACCESS', true);
 
 // Headers de seguridad y CORS
@@ -86,7 +86,7 @@ try {
 
     error_log('GET_PROMOTORES: Parámetros - page: ' . $page . ', limit: ' . $limit . ', search: ' . $search_field . '=' . $search_value);
 
-    // ===== CAMPOS VÁLIDOS PARA BÚSQUEDA =====
+    // ===== CAMPOS VÁLIDOS PARA BÚSQUEDA (INCLUIR NUEVOS) =====
     $valid_search_fields = [
         'nombre',
         'apellido', 
@@ -97,7 +97,9 @@ try {
         'clave_asistencia',
         'banco',
         'numero_cuenta',
-        'estatus'
+        'estatus',
+        'fecha_ingreso',    // NUEVO
+        'tipo_trabajo'      // NUEVO
     ];
 
     // ===== VERIFICAR CONEXIÓN DB =====
@@ -135,10 +137,14 @@ try {
         $search_value = Database::sanitize($search_value);
         
         if (in_array($search_field, $valid_search_fields)) {
-            if ($search_field === 'vacaciones') {
+            if (in_array($search_field, ['vacaciones', 'incidencias'])) {
                 // Búsqueda exacta para campos numéricos
                 $sql_base .= " AND {$search_field} = :search_value";
                 $params[':search_value'] = intval($search_value);
+            } elseif ($search_field === 'fecha_ingreso') {
+                // Búsqueda de fecha (puede ser exacta o rango)
+                $sql_base .= " AND DATE({$search_field}) = :search_value";
+                $params[':search_value'] = $search_value;
             } else {
                 // Búsqueda LIKE para campos de texto
                 $sql_base .= " AND {$search_field} LIKE :search_value";
@@ -165,7 +171,7 @@ try {
         throw new Exception('Error contando registros: ' . $count_error->getMessage());
     }
 
-    // ===== OBTENER REGISTROS CON PAGINACIÓN =====
+    // ===== OBTENER REGISTROS CON PAGINACIÓN (INCLUIR NUEVOS CAMPOS) =====
     $offset = ($page - 1) * $limit;
     
     $sql_data = "SELECT 
@@ -181,6 +187,9 @@ try {
                     numero_cuenta,
                     estatus,
                     vacaciones,
+                    incidencias,
+                    fecha_ingreso,
+                    tipo_trabajo,
                     estado,
                     fecha_alta,
                     fecha_modificacion
@@ -211,9 +220,13 @@ try {
         if ($promotor['fecha_modificacion']) {
             $promotor['fecha_modificacion_formatted'] = date('d/m/Y H:i', strtotime($promotor['fecha_modificacion']));
         }
+        if ($promotor['fecha_ingreso']) {
+            $promotor['fecha_ingreso_formatted'] = date('d/m/Y', strtotime($promotor['fecha_ingreso']));
+        }
         
         // Formatear campos booleanos
         $promotor['vacaciones'] = (bool)$promotor['vacaciones'];
+        $promotor['incidencias'] = (bool)$promotor['incidencias'];
         $promotor['estado'] = (bool)$promotor['estado'];
         
         // Formatear ID como entero
@@ -221,6 +234,13 @@ try {
         
         // Añadir nombre completo
         $promotor['nombre_completo'] = trim($promotor['nombre'] . ' ' . $promotor['apellido']);
+        
+        // Formatear tipo_trabajo para mostrar
+        $tipos_trabajo = [
+            'fijo' => 'Fijo',
+            'cubredescansos' => 'Cubre Descansos'
+        ];
+        $promotor['tipo_trabajo_formatted'] = $tipos_trabajo[$promotor['tipo_trabajo']] ?? $promotor['tipo_trabajo'];
     }
 
     error_log('GET_PROMOTORES: Formateo exitoso - Preparando respuesta');

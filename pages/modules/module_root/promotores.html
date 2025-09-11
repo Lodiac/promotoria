@@ -30,6 +30,8 @@
                 <option value="banco">Banco</option>
                 <option value="numero_cuenta">Número Cuenta</option>
                 <option value="estatus">Estatus</option>
+                <option value="fecha_ingreso">Fecha Ingreso</option>
+                <option value="tipo_trabajo">Tipo Trabajo</option>
             </select>
             <input type="text" id="search-value" placeholder="Valor a buscar..." class="search-input" disabled>
             <button id="btn-buscar" class="btn-search" disabled>
@@ -129,6 +131,14 @@
                             <label>Correo Electrónico</label>
                             <div class="info-value" id="view-correo">-</div>
                         </div>
+                        <div class="info-item">
+                            <label>Fecha de Ingreso</label>
+                            <div class="info-value" id="view-fecha-ingreso">-</div>
+                        </div>
+                        <div class="info-item">
+                            <label>Tipo de Trabajo</label>
+                            <div class="info-value" id="view-tipo-trabajo">-</div>
+                        </div>
                     </div>
                 </div>
 
@@ -177,9 +187,9 @@
                             </div>
                         </div>
                         <div class="info-item">
-                            <label>En Vacaciones</label>
-                            <div class="info-value">
-                                <span class="vacaciones-badge" id="view-vacaciones-badge">No</span>
+                            <label>Estado Especial</label>
+                            <div class="info-value" id="view-badges-container">
+                                <!-- Los badges se agregarán dinámicamente aquí -->
                             </div>
                         </div>
                         <div class="info-item">
@@ -223,6 +233,21 @@
                             <label for="promotor-correo">Correo Electrónico *</label>
                             <input type="email" id="promotor-correo" maxlength="100" required
                                    placeholder="promotor@empresa.com">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="promotor-fecha-ingreso">Fecha de Ingreso *</label>
+                            <input type="date" id="promotor-fecha-ingreso" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="promotor-tipo-trabajo">Tipo de Trabajo *</label>
+                            <select id="promotor-tipo-trabajo" required>
+                                <option value="">Seleccionar tipo...</option>
+                                <option value="fijo">Fijo</option>
+                                <option value="cubredescansos">Cubre Descansos</option>
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -282,11 +307,13 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="promotor-vacaciones">Vacaciones</label>
-                            <select id="promotor-vacaciones">
-                                <option value="0">No</option>
-                                <option value="1">Sí</option>
-                            </select>
+                            <label>Estados Especiales</label>
+                            <div class="readonly-badges" id="edit-badges-container">
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle"></i>
+                                    Los estados de vacaciones e incidencias son de solo lectura
+                                </small>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -736,6 +763,41 @@
     background: #d1ecf1;
     color: #0c5460;
     border: 1px solid #bee5eb;
+}
+
+/* ===== NUEVOS ESTILOS PARA BADGES ESPECIALES ===== */
+.special-badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-right: 5px;
+    margin-bottom: 5px;
+    display: inline-block;
+}
+
+.special-badge.vacaciones {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+.special-badge.incidencias {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.readonly-badges {
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.readonly-badges .text-muted {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
 }
 
 /* ===== LOADING Y EMPTY STATES ===== */
@@ -1581,10 +1643,24 @@ function handleSearchFieldChange() {
     searchValue.disabled = !hasField;
     btnBuscar.disabled = !hasField;
     
-    if (!hasField) {
-        searchValue.value = '';
-    } else {
+    // Cambiar placeholder según el tipo de campo
+    if (hasField) {
+        const field = searchField.value;
+        let placeholder = 'Valor a buscar...';
+        
+        if (field === 'fecha_ingreso') {
+            placeholder = 'Formato: YYYY-MM-DD (ej: 2024-01-15)';
+        } else if (field === 'tipo_trabajo') {
+            placeholder = 'fijo o cubredescansos';
+        } else if (field === 'estatus') {
+            placeholder = 'ACTIVO o BAJA';
+        }
+        
+        searchValue.placeholder = placeholder;
         searchValue.focus();
+    } else {
+        searchValue.value = '';
+        searchValue.placeholder = 'Valor a buscar...';
     }
 }
 
@@ -1613,6 +1689,7 @@ function limpiarBusqueda() {
     searchValue.value = '';
     searchValue.disabled = true;
     btnBuscar.disabled = true;
+    searchValue.placeholder = 'Valor a buscar...';
     currentSearch = { field: '', value: '' };
     currentPage = 1;
     cargarPromotores();
@@ -1705,13 +1782,34 @@ async function verPromotor(id) {
     }
 }
 
+// ===== FUNCIÓN PARA GENERAR BADGES ESPECIALES =====
+function generarBadgesEspeciales(promotor) {
+    let badges = '';
+    
+    if (promotor.vacaciones) {
+        badges += '<span class="special-badge vacaciones">En Vacaciones</span>';
+    }
+    
+    if (promotor.incidencias) {
+        badges += '<span class="special-badge incidencias">Con Incidencias</span>';
+    }
+    
+    if (!badges) {
+        badges = '<span class="text-muted">Sin estados especiales</span>';
+    }
+    
+    return badges;
+}
+
 function llenarVistaPromotor(promotor) {
     document.getElementById('promotor-id').value = promotor.id_promotor;
     
-    // Información personal
+    // Información personal (INCLUIR NUEVOS CAMPOS)
     document.getElementById('view-nombre-completo').textContent = promotor.nombre_completo;
     document.getElementById('view-telefono').textContent = promotor.telefono;
     document.getElementById('view-correo').textContent = promotor.correo;
+    document.getElementById('view-fecha-ingreso').textContent = promotor.fecha_ingreso_formatted || 'No especificado';
+    document.getElementById('view-tipo-trabajo').textContent = promotor.tipo_trabajo_formatted || promotor.tipo_trabajo || 'No especificado';
     
     // Información fiscal
     document.getElementById('view-rfc').textContent = promotor.rfc;
@@ -1727,9 +1825,9 @@ function llenarVistaPromotor(promotor) {
     estatusBadge.textContent = promotor.estatus;
     estatusBadge.className = `status-badge ${promotor.estatus.toLowerCase()}`;
     
-    const vacacionesBadge = document.getElementById('view-vacaciones-badge');
-    vacacionesBadge.textContent = promotor.vacaciones ? 'Sí' : 'No';
-    vacacionesBadge.className = `vacaciones-badge ${promotor.vacaciones ? 'si' : 'no'}`;
+    // NUEVOS BADGES ESPECIALES
+    const badgesContainer = document.getElementById('view-badges-container');
+    badgesContainer.innerHTML = generarBadgesEspeciales(promotor);
     
     document.getElementById('view-fecha-alta').textContent = promotor.fecha_alta_formatted || 'N/A';
     document.getElementById('view-fecha-mod').textContent = promotor.fecha_modificacion_formatted || 'N/A';
@@ -1747,7 +1845,22 @@ function llenarFormularioEdicion(promotor) {
     document.getElementById('promotor-banco').value = promotor.banco || '';
     document.getElementById('promotor-cuenta').value = promotor.numero_cuenta || '';
     document.getElementById('promotor-estatus').value = promotor.estatus;
-    document.getElementById('promotor-vacaciones').value = promotor.vacaciones ? '1' : '0';
+    
+    // NUEVOS CAMPOS EDITABLES
+    document.getElementById('promotor-fecha-ingreso').value = promotor.fecha_ingreso || '';
+    document.getElementById('promotor-tipo-trabajo').value = promotor.tipo_trabajo || 'fijo';
+    
+    // MOSTRAR BADGES DE SOLO LECTURA EN MODO EDICIÓN
+    const editBadgesContainer = document.getElementById('edit-badges-container');
+    editBadgesContainer.innerHTML = `
+        <div style="margin-bottom: 10px;">
+            ${generarBadgesEspeciales(promotor)}
+        </div>
+        <small class="text-muted">
+            <i class="fas fa-info-circle"></i>
+            Los estados de vacaciones e incidencias son de solo lectura
+        </small>
+    `;
 }
 
 function cambiarAModoEdicion() {
@@ -1781,7 +1894,16 @@ function limpiarFormulario() {
     formPromotor.reset();
     document.getElementById('promotor-id').value = '';
     document.getElementById('promotor-estatus').value = 'ACTIVO';
-    document.getElementById('promotor-vacaciones').value = '0';
+    document.getElementById('promotor-tipo-trabajo').value = 'fijo'; // DEFAULT
+    
+    // Limpiar badges de solo lectura en modo nuevo
+    const editBadgesContainer = document.getElementById('edit-badges-container');
+    editBadgesContainer.innerHTML = `
+        <small class="text-muted">
+            <i class="fas fa-info-circle"></i>
+            Los estados de vacaciones e incidencias se configuran automáticamente
+        </small>
+    `;
 }
 
 function abrirModal(modal) {
@@ -1798,7 +1920,7 @@ function cerrarModalPromotor() {
     isNewPromotor = false;
 }
 
-// ===== GUARDAR PROMOTOR =====
+// ===== GUARDAR PROMOTOR (ACTUALIZADO CON NUEVOS CAMPOS) =====
 async function guardarPromotor(e) {
     e.preventDefault();
     
@@ -1813,15 +1935,17 @@ async function guardarPromotor(e) {
         banco: document.getElementById('promotor-banco').value.trim(),
         numero_cuenta: document.getElementById('promotor-cuenta').value.trim(),
         estatus: document.getElementById('promotor-estatus').value,
-        vacaciones: parseInt(document.getElementById('promotor-vacaciones').value)
+        // NUEVOS CAMPOS REQUERIDOS
+        fecha_ingreso: document.getElementById('promotor-fecha-ingreso').value,
+        tipo_trabajo: document.getElementById('promotor-tipo-trabajo').value
     };
     
     if (isEditing && currentPromotorData) {
         formData.id_promotor = currentPromotorData.id_promotor;
     }
     
-    // Validaciones básicas
-    const required = ['nombre', 'apellido', 'telefono', 'correo', 'rfc', 'nss', 'clave_asistencia'];
+    // Validaciones básicas (INCLUIR NUEVOS CAMPOS)
+    const required = ['nombre', 'apellido', 'telefono', 'correo', 'rfc', 'nss', 'clave_asistencia', 'fecha_ingreso', 'tipo_trabajo'];
     for (const field of required) {
         if (!formData[field]) {
             mostrarNotificacion(`El campo '${field}' es requerido`, 'warning');
@@ -1837,6 +1961,18 @@ async function guardarPromotor(e) {
     
     if (!formData.correo.includes('@')) {
         mostrarNotificacion('Email inválido', 'warning');
+        return;
+    }
+    
+    // Validar fecha de ingreso
+    if (!formData.fecha_ingreso) {
+        mostrarNotificacion('Fecha de ingreso es requerida', 'warning');
+        return;
+    }
+    
+    // Validar tipo de trabajo
+    if (!['fijo', 'cubredescansos'].includes(formData.tipo_trabajo)) {
+        mostrarNotificacion('Tipo de trabajo inválido', 'warning');
         return;
     }
     
@@ -1951,7 +2087,7 @@ async function confirmarEliminacion() {
     }
 }
 
-// ===== FUNCIONES HISTORIAL =====
+// ===== FUNCIONES HISTORIAL (ACTUALIZADO CON NUEVOS CAMPOS) =====
 async function verHistorialPromotor(idPromotor) {
     try {
         console.log('📖 Cargando historial del promotor:', idPromotor);
@@ -1962,7 +2098,7 @@ async function verHistorialPromotor(idPromotor) {
         if (data.success) {
             document.getElementById('historial-promotor-nombre').textContent = data.promotor.nombre_completo;
             
-            // Llenar información del promotor
+            // Llenar información del promotor (CON NUEVOS CAMPOS)
             document.getElementById('promotor-info').innerHTML = `
                 <h4><i class="fas fa-user"></i> Información del Promotor</h4>
                 <div class="stats-grid-small">
@@ -1988,7 +2124,10 @@ async function verHistorialPromotor(idPromotor) {
                     <p><strong>Teléfono:</strong> ${data.promotor.telefono}</p>
                     <p><strong>Email:</strong> ${data.promotor.correo}</p>
                     <p><strong>RFC:</strong> ${data.promotor.rfc}</p>
+                    <p><strong>Fecha Ingreso:</strong> ${data.promotor.fecha_ingreso_formatted}</p>
+                    <p><strong>Tipo Trabajo:</strong> ${data.promotor.tipo_trabajo_formatted}</p>
                     <p><strong>Estatus:</strong> ${data.promotor.estatus}</p>
+                    <p><strong>Estados Especiales:</strong> ${generarBadgesEspeciales(data.promotor)}</p>
                     <p><strong>Fecha Alta:</strong> ${data.promotor.fecha_alta_formatted}</p>
                 </div>
             `;
@@ -2089,13 +2228,17 @@ window.eliminarPromotor = eliminarPromotor;
 window.verHistorialPromotor = verHistorialPromotor;
 
 // ===== INICIALIZACIÓN =====
-console.log('👥 Iniciando módulo Gestión de Promotores con Vista Detallada...');
-console.log('✨ Características implementadas:');
-console.log('👁️ Vista detallada completa sin forzar edición');
-console.log('✏️ Modo edición dentro del modal de vista');
-console.log('📖 Historial integrado');
+console.log('👥 Iniciando módulo Gestión de Promotores con Vista Detallada ACTUALIZADO...');
+console.log('✨ Nuevas características implementadas:');
+console.log('📅 Fecha de ingreso obligatoria');
+console.log('💼 Tipo de trabajo (fijo/cubre descansos)');
+console.log('🏖️ Badges de vacaciones e incidencias (solo lectura)');
+console.log('🔍 Búsqueda ampliada con nuevos campos');
+console.log('👁️ Vista detallada completa con nuevos campos');
+console.log('✏️ Modo edición actualizado (vacaciones/incidencias protegidas)');
+console.log('📖 Historial integrado con información completa');
 console.log('🎨 Diseño optimizado para consulta y edición');
-console.log('📱 Responsive completo');
+console.log('📱 Responsive completo mantenido');
 
 init();
 
@@ -2104,5 +2247,5 @@ setTimeout(() => {
     cargarPromotores();
 }, 100);
 
-console.log('✅ Módulo promotores con vista detallada inicializado correctamente');
+console.log('✅ Módulo promotores con vista detallada y nuevos campos inicializado correctamente');
 </script>

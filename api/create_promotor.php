@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-// 🔑 DEFINIR CONSTANTE ANTES DE INCLUIR DB_CONNECT
+// 🔒 DEFINIR CONSTANTE ANTES DE INCLUIR DB_CONNECT
 define('APP_ACCESS', true);
 
 // Incluir la API de base de datos
@@ -64,8 +64,18 @@ try {
         exit;
     }
 
-    // ===== VALIDAR CAMPOS REQUERIDOS =====
-    $required_fields = ['nombre', 'apellido', 'telefono', 'correo', 'rfc', 'nss', 'clave_asistencia'];
+    // ===== VALIDAR CAMPOS REQUERIDOS (AGREGAR NUEVOS) =====
+    $required_fields = [
+        'nombre', 
+        'apellido', 
+        'telefono', 
+        'correo', 
+        'rfc', 
+        'nss', 
+        'clave_asistencia',
+        'fecha_ingreso',    // NUEVO CAMPO REQUERIDO
+        'tipo_trabajo'      // NUEVO CAMPO REQUERIDO
+    ];
     $errors = [];
 
     foreach ($required_fields as $field) {
@@ -95,10 +105,17 @@ try {
     $banco = Database::sanitize(trim($input['banco'] ?? ''));
     $numero_cuenta = Database::sanitize(trim($input['numero_cuenta'] ?? ''));
     $estatus = Database::sanitize(trim($input['estatus'] ?? 'ACTIVO'));
-    $vacaciones = intval($input['vacaciones'] ?? 0);
-    $estado = intval($input['estado'] ?? 1);
+    
+    // NUEVOS CAMPOS
+    $fecha_ingreso = Database::sanitize(trim($input['fecha_ingreso']));
+    $tipo_trabajo = Database::sanitize(trim($input['tipo_trabajo']));
+    
+    // CAMPOS DE SOLO LECTURA (valores por defecto)
+    $vacaciones = 0;        // Por defecto no está de vacaciones
+    $incidencias = 0;       // Por defecto sin incidencias
+    $estado = 1;            // Por defecto activo
 
-    // Validaciones específicas
+    // Validaciones específicas existentes
     if (strlen($nombre) < 2 || strlen($nombre) > 100) {
         http_response_code(400);
         echo json_encode([
@@ -144,6 +161,28 @@ try {
         exit;
     }
 
+    // ===== NUEVAS VALIDACIONES =====
+    
+    // Validar fecha_ingreso
+    if (!DateTime::createFromFormat('Y-m-d', $fecha_ingreso)) {
+        http_response_code(400);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Fecha de ingreso inválida. Formato requerido: YYYY-MM-DD'
+        ]);
+        exit;
+    }
+
+    // Validar tipo_trabajo
+    if (!in_array($tipo_trabajo, ['fijo', 'cubredescansos'])) {
+        http_response_code(400);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Tipo de trabajo inválido. Valores permitidos: fijo, cubredescansos'
+        ]);
+        exit;
+    }
+
     // ===== VERIFICAR DUPLICADOS =====
     $sql_check = "SELECT id_promotor 
                   FROM promotores 
@@ -166,7 +205,7 @@ try {
         exit;
     }
 
-    // ===== INSERTAR NUEVO PROMOTOR =====
+    // ===== INSERTAR NUEVO PROMOTOR (CON NUEVOS CAMPOS) =====
     $sql_insert = "INSERT INTO promotores (
                         nombre, 
                         apellido, 
@@ -178,7 +217,10 @@ try {
                         banco, 
                         numero_cuenta, 
                         estatus, 
-                        vacaciones, 
+                        vacaciones,
+                        incidencias,
+                        fecha_ingreso,
+                        tipo_trabajo,
                         estado,
                         fecha_alta,
                         fecha_modificacion
@@ -194,6 +236,9 @@ try {
                         :numero_cuenta,
                         :estatus,
                         :vacaciones,
+                        :incidencias,
+                        :fecha_ingreso,
+                        :tipo_trabajo,
                         :estado,
                         NOW(),
                         NOW()
@@ -211,6 +256,9 @@ try {
         ':numero_cuenta' => $numero_cuenta,
         ':estatus' => $estatus,
         ':vacaciones' => $vacaciones,
+        ':incidencias' => $incidencias,
+        ':fecha_ingreso' => $fecha_ingreso,
+        ':tipo_trabajo' => $tipo_trabajo,
         ':estado' => $estado
     ];
 
@@ -225,7 +273,7 @@ try {
         exit;
     }
 
-    // ===== OBTENER EL PROMOTOR CREADO =====
+    // ===== OBTENER EL PROMOTOR CREADO (CON NUEVOS CAMPOS) =====
     $sql_get = "SELECT 
                     id_promotor,
                     nombre,
@@ -239,6 +287,9 @@ try {
                     numero_cuenta,
                     estatus,
                     vacaciones,
+                    incidencias,
+                    fecha_ingreso,
+                    tipo_trabajo,
                     estado,
                     fecha_alta,
                     fecha_modificacion
@@ -254,9 +305,27 @@ try {
     if ($nuevo_promotor['fecha_modificacion']) {
         $nuevo_promotor['fecha_modificacion_formatted'] = date('d/m/Y H:i', strtotime($nuevo_promotor['fecha_modificacion']));
     }
+    if ($nuevo_promotor['fecha_ingreso']) {
+        $nuevo_promotor['fecha_ingreso_formatted'] = date('d/m/Y', strtotime($nuevo_promotor['fecha_ingreso']));
+    }
+
+    // Formatear tipos de trabajo
+    $tipos_trabajo = [
+        'fijo' => 'Fijo',
+        'cubredescansos' => 'Cubre Descansos'
+    ];
+    $nuevo_promotor['tipo_trabajo_formatted'] = $tipos_trabajo[$nuevo_promotor['tipo_trabajo']] ?? $nuevo_promotor['tipo_trabajo'];
+    
+    // Formatear campos booleanos
+    $nuevo_promotor['vacaciones'] = (bool)$nuevo_promotor['vacaciones'];
+    $nuevo_promotor['incidencias'] = (bool)$nuevo_promotor['incidencias'];
+    $nuevo_promotor['estado'] = (bool)$nuevo_promotor['estado'];
+    
+    // Añadir nombre completo
+    $nuevo_promotor['nombre_completo'] = trim($nuevo_promotor['nombre'] . ' ' . $nuevo_promotor['apellido']);
 
     // ===== LOG DE AUDITORÍA =====
-    error_log("Promotor creado - ID: {$new_id} - Nombre: {$nombre} {$apellido} - Usuario: " . $_SESSION['username'] . " - IP: " . $_SERVER['REMOTE_ADDR']);
+    error_log("Promotor creado - ID: {$new_id} - Nombre: {$nombre} {$apellido} - Tipo: {$tipo_trabajo} - Usuario: " . $_SESSION['username'] . " - IP: " . $_SERVER['REMOTE_ADDR']);
 
     // ===== RESPUESTA EXITOSA =====
     http_response_code(201);
