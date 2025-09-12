@@ -46,6 +46,7 @@ $allowedModules = [
         'bienvenida',
         'promotores',
         'cadenas',
+        'horas',
         'usuarios',
         'asignacion'
     ],

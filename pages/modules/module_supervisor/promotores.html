@@ -8,7 +8,7 @@
 <body class="bg-light">
 
 <div class="container py-5">
-  <div class="d-flex justify-content-between align-items-center mb-4">
+  <div class="d-flex justify-content-between align-items-center mb-4 bg-light" style="border: 5ch 5px;">
     <h2>Gestión de Promotores</h2>
     <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNuevo">
       ➕ Nuevo Promotor
@@ -183,7 +183,7 @@ async function cargarPromotores() {
 
 // Abre el modal de edición con los datos del promotor
 function abrirEditar(p) {
-  document.getElementById("edit_id_promotor").value = p.id;
+  document.getElementById("edit_id_promotor").value = p.id; 
   document.getElementById("edit_nombre").value = p.nombre;
   document.getElementById("edit_apellido").value = p.apellido;
   document.getElementById("edit_telefono").value = p.telefono;
@@ -250,3 +250,4 @@ document.getElementById("formNuevo").addEventListener("submit", async (e) => {
 // Cargar lista al abrir
 cargarPromotores();
 </script>
+
