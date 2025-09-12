@@ -7,7 +7,7 @@ error_reporting(E_ALL);
 
 session_start();
 
-// 🔑 DEFINIR CONSTANTE ANTES DE INCLUIR DB_CONNECT
+// 🔒 DEFINIR CONSTANTE ANTES DE INCLUIR DB_CONNECT
 define('APP_ACCESS', true);
 
 // Headers de seguridad y CORS
@@ -35,11 +35,11 @@ try {
         'session_status' => session_status(),
         'session_id' => session_id()
     ];
-    error_log('CREATE_ASIGNACION: Iniciando - ' . json_encode($debug_info));
+    error_log('CREATE_ASIGNACION_V2: Iniciando - ' . json_encode($debug_info));
 
     // ===== VERIFICAR SESIÓN BÁSICA =====
     if (!isset($_SESSION['user_id']) || empty($_SESSION['user_id'])) {
-        error_log('CREATE_ASIGNACION: Sin sesión - user_id no encontrado');
+        error_log('CREATE_ASIGNACION_V2: Sin sesión - user_id no encontrado');
         http_response_code(403);
         echo json_encode([
             'success' => false,
@@ -51,7 +51,7 @@ try {
 
     // ===== VERIFICAR ROL =====
     if (!isset($_SESSION['rol']) || !in_array($_SESSION['rol'], ['supervisor', 'root'])) {
-        error_log('CREATE_ASIGNACION: Rol incorrecto - ' . ($_SESSION['rol'] ?? 'NO_SET'));
+        error_log('CREATE_ASIGNACION_V2: Rol incorrecto - ' . ($_SESSION['rol'] ?? 'NO_SET'));
         http_response_code(403);
         echo json_encode([
             'success' => false,
@@ -61,12 +61,12 @@ try {
         exit;
     }
 
-    error_log('CREATE_ASIGNACION: Sesión válida - Usuario: ' . ($_SESSION['username'] ?? 'NO_USERNAME') . ', Rol: ' . $_SESSION['rol']);
+    error_log('CREATE_ASIGNACION_V2: Sesión válida - Usuario: ' . ($_SESSION['username'] ?? 'NO_USERNAME') . ', Rol: ' . $_SESSION['rol']);
 
     // ===== INCLUIR CONEXIÓN DB =====
     $db_path = __DIR__ . '/../config/db_connect.php';
     if (!file_exists($db_path)) {
-        error_log('CREATE_ASIGNACION: Archivo db_connect.php no encontrado en: ' . $db_path);
+        error_log('CREATE_ASIGNACION_V2: Archivo db_connect.php no encontrado en: ' . $db_path);
         throw new Exception('Configuración de base de datos no encontrada');
     }
 
@@ -74,7 +74,7 @@ try {
 
     // ===== VERIFICAR CLASE DATABASE =====
     if (!class_exists('Database')) {
-        error_log('CREATE_ASIGNACION: Clase Database no encontrada');
+        error_log('CREATE_ASIGNACION_V2: Clase Database no encontrada');
         throw new Exception('Clase Database no disponible');
     }
 
@@ -101,7 +101,7 @@ try {
     $fecha_inicio = trim($input['fecha_inicio'] ?? '');
     $motivo_asignacion = trim($input['motivo_asignacion'] ?? '');
 
-    error_log('CREATE_ASIGNACION: Datos recibidos - Promotor: ' . $id_promotor . ', Tienda: ' . $id_tienda . ', Fecha: ' . $fecha_inicio);
+    error_log('CREATE_ASIGNACION_V2: Datos recibidos - Promotor: ' . $id_promotor . ', Tienda: ' . $id_tienda . ', Fecha: ' . $fecha_inicio);
 
     // ===== VALIDACIONES BÁSICAS =====
     if ($id_promotor <= 0) {
@@ -166,9 +166,9 @@ try {
         if (!$test_connection) {
             throw new Exception('No se pudo establecer conexión con la base de datos');
         }
-        error_log('CREATE_ASIGNACION: Conexión DB exitosa');
+        error_log('CREATE_ASIGNACION_V2: Conexión DB exitosa');
     } catch (Exception $conn_error) {
-        error_log('CREATE_ASIGNACION: Error de conexión DB - ' . $conn_error->getMessage());
+        error_log('CREATE_ASIGNACION_V2: Error de conexión DB - ' . $conn_error->getMessage());
         throw new Exception('Error de conexión a la base de datos: ' . $conn_error->getMessage());
     }
 
@@ -213,46 +213,56 @@ try {
         exit;
     }
 
-    // ===== VERIFICAR QUE EL PROMOTOR NO TENGA ASIGNACIÓN ACTIVA =====
-    $sql_check_promotor = "SELECT id_asignacion, id_tienda, fecha_inicio 
-                           FROM promotor_tienda_asignaciones 
-                           WHERE id_promotor = :id_promotor 
-                           AND activo = 1 
-                           AND fecha_fin IS NULL";
+    // ===== 🆕 NUEVA VALIDACIÓN: SOLO VERIFICAR SI YA ESTÁ EN ESA TIENDA ESPECÍFICA =====
+    $sql_check_tienda_especifica = "SELECT 
+                                       pta.id_asignacion, 
+                                       pta.fecha_inicio,
+                                       t.cadena,
+                                       t.num_tienda,
+                                       t.nombre_tienda
+                                    FROM promotor_tienda_asignaciones pta
+                                    INNER JOIN tiendas t ON pta.id_tienda = t.id_tienda
+                                    WHERE pta.id_promotor = :id_promotor 
+                                    AND pta.id_tienda = :id_tienda 
+                                    AND pta.activo = 1 
+                                    AND pta.fecha_fin IS NULL";
     
-    $asignacion_activa_promotor = Database::selectOne($sql_check_promotor, [':id_promotor' => $id_promotor]);
-
-    if ($asignacion_activa_promotor) {
-        http_response_code(409);
-        echo json_encode([
-            'success' => false,
-            'message' => 'El promotor ya tiene una asignación activa. Debe finalizar la asignación actual antes de crear una nueva.',
-            'asignacion_activa' => $asignacion_activa_promotor
-        ]);
-        exit;
-    }
-
-    // ===== VERIFICAR SI EL PROMOTOR YA ESTÁ ASIGNADO A ESTA MISMA TIENDA =====
-    $sql_check_duplicado = "SELECT id_asignacion 
-                            FROM promotor_tienda_asignaciones 
-                            WHERE id_promotor = :id_promotor 
-                            AND id_tienda = :id_tienda 
-                            AND activo = 1 
-                            AND fecha_fin IS NULL";
-    
-    $duplicado = Database::selectOne($sql_check_duplicado, [
+    $asignacion_en_tienda = Database::selectOne($sql_check_tienda_especifica, [
         ':id_promotor' => $id_promotor,
         ':id_tienda' => $id_tienda
     ]);
 
-    if ($duplicado) {
+    if ($asignacion_en_tienda) {
         http_response_code(409);
         echo json_encode([
             'success' => false,
-            'message' => 'Este promotor ya está asignado a esta tienda'
+            'message' => 'Este promotor ya está asignado a esta tienda específica',
+            'asignacion_existente' => [
+                'id_asignacion' => $asignacion_en_tienda['id_asignacion'],
+                'fecha_inicio' => $asignacion_en_tienda['fecha_inicio'],
+                'tienda' => $asignacion_en_tienda['cadena'] . ' #' . $asignacion_en_tienda['num_tienda'] . ' - ' . $asignacion_en_tienda['nombre_tienda']
+            ]
         ]);
         exit;
     }
+
+    // ===== 🆕 INFORMACIÓN ADICIONAL: OBTENER ASIGNACIONES ACTUALES DEL PROMOTOR =====
+    $sql_asignaciones_actuales = "SELECT 
+                                     pta.id_asignacion,
+                                     pta.fecha_inicio,
+                                     t.cadena,
+                                     t.num_tienda,
+                                     t.nombre_tienda
+                                  FROM promotor_tienda_asignaciones pta
+                                  INNER JOIN tiendas t ON pta.id_tienda = t.id_tienda
+                                  WHERE pta.id_promotor = :id_promotor 
+                                  AND pta.activo = 1 
+                                  AND pta.fecha_fin IS NULL
+                                  ORDER BY pta.fecha_inicio DESC";
+    
+    $asignaciones_actuales = Database::select($sql_asignaciones_actuales, [':id_promotor' => $id_promotor]);
+
+    error_log('CREATE_ASIGNACION_V2: Promotor tiene ' . count($asignaciones_actuales) . ' asignaciones activas en otras tiendas');
 
     // ===== CREAR LA NUEVA ASIGNACIÓN =====
     $sql_insert = "INSERT INTO promotor_tienda_asignaciones (
@@ -302,10 +312,11 @@ try {
 
     // ===== REGISTRAR EN LOG DE ACTIVIDADES =====
     try {
-        $detalle_log = "Asignación creada: Promotor {$promotor['nombre']} {$promotor['apellido']} asignado a tienda {$tienda['cadena']} #{$tienda['num_tienda']} - {$tienda['nombre_tienda']}. Motivo: {$motivo_asignacion}";
+        $total_asignaciones_despues = count($asignaciones_actuales) + 1;
+        $detalle_log = "Asignación múltiple creada: Promotor {$promotor['nombre']} {$promotor['apellido']} asignado a tienda {$tienda['cadena']} #{$tienda['num_tienda']} - {$tienda['nombre_tienda']}. Motivo: {$motivo_asignacion}. Total asignaciones activas: {$total_asignaciones_despues}";
         
         $sql_log = "INSERT INTO log_actividades (tabla, accion, id_registro, usuario_id, fecha, detalles) 
-                    VALUES ('promotor_tienda_asignaciones', 'CREATE', :id_registro, :usuario_id, NOW(), :detalles)";
+                    VALUES ('promotor_tienda_asignaciones', 'CREATE_MULTIPLE', :id_registro, :usuario_id, NOW(), :detalles)";
         
         Database::insert($sql_log, [
             ':id_registro' => $new_id,
@@ -313,7 +324,7 @@ try {
             ':detalles' => $detalle_log
         ]);
         
-        error_log("LOG_ASIGNACION: " . $detalle_log . " - Usuario: " . $_SESSION['username']);
+        error_log("LOG_ASIGNACION_MULTIPLE: " . $detalle_log . " - Usuario: " . $_SESSION['username']);
     } catch (Exception $log_error) {
         // Log del error pero no fallar la operación principal
         error_log("Error registrando en log_actividades: " . $log_error->getMessage());
@@ -353,37 +364,50 @@ try {
     
     $asignacion_creada = Database::selectOne($sql_get_created, [':id_asignacion' => $new_id]);
 
+    // ===== OBTENER LISTA ACTUALIZADA DE TODAS LAS ASIGNACIONES DEL PROMOTOR =====
+    $asignaciones_actuales_actualizadas = Database::select($sql_asignaciones_actuales, [':id_promotor' => $id_promotor]);
+
     // Formatear respuesta
     $response_data = [
-        'id_asignacion' => intval($asignacion_creada['id_asignacion']),
-        'promotor_nombre_completo' => trim($asignacion_creada['promotor_nombre'] . ' ' . $asignacion_creada['promotor_apellido']),
-        'promotor_telefono' => $asignacion_creada['promotor_telefono'],
-        'promotor_correo' => $asignacion_creada['promotor_correo'],
-        'tienda_identificador' => $asignacion_creada['cadena'] . ' #' . $asignacion_creada['num_tienda'] . ' - ' . $asignacion_creada['nombre_tienda'],
-        'tienda_region' => intval($asignacion_creada['region']),
-        'tienda_cadena' => $asignacion_creada['cadena'],
-        'tienda_num_tienda' => intval($asignacion_creada['num_tienda']),
-        'tienda_nombre_tienda' => $asignacion_creada['nombre_tienda'],
-        'tienda_ciudad' => $asignacion_creada['ciudad'],
-        'tienda_estado' => $asignacion_creada['tienda_estado'],
-        'fecha_inicio' => $asignacion_creada['fecha_inicio'],
-        'motivo_asignacion' => $asignacion_creada['motivo_asignacion'],
-        'activo' => intval($asignacion_creada['activo']),
-        'fecha_registro' => $asignacion_creada['fecha_registro'],
-        'usuario_asigno' => trim($asignacion_creada['usuario_nombre'] . ' ' . $asignacion_creada['usuario_apellido'])
+        'asignacion_nueva' => [
+            'id_asignacion' => intval($asignacion_creada['id_asignacion']),
+            'promotor_nombre_completo' => trim($asignacion_creada['promotor_nombre'] . ' ' . $asignacion_creada['promotor_apellido']),
+            'promotor_telefono' => $asignacion_creada['promotor_telefono'],
+            'promotor_correo' => $asignacion_creada['promotor_correo'],
+            'tienda_identificador' => $asignacion_creada['cadena'] . ' #' . $asignacion_creada['num_tienda'] . ' - ' . $asignacion_creada['nombre_tienda'],
+            'tienda_region' => intval($asignacion_creada['region']),
+            'tienda_cadena' => $asignacion_creada['cadena'],
+            'tienda_num_tienda' => intval($asignacion_creada['num_tienda']),
+            'tienda_nombre_tienda' => $asignacion_creada['nombre_tienda'],
+            'tienda_ciudad' => $asignacion_creada['ciudad'],
+            'tienda_estado' => $asignacion_creada['tienda_estado'],
+            'fecha_inicio' => $asignacion_creada['fecha_inicio'],
+            'motivo_asignacion' => $asignacion_creada['motivo_asignacion'],
+            'activo' => intval($asignacion_creada['activo']),
+            'fecha_registro' => $asignacion_creada['fecha_registro'],
+            'usuario_asigno' => trim($asignacion_creada['usuario_nombre'] . ' ' . $asignacion_creada['usuario_apellido'])
+        ],
+        'resumen_asignaciones' => [
+            'total_asignaciones_activas' => count($asignaciones_actuales_actualizadas),
+            'es_primera_asignacion' => count($asignaciones_actuales_actualizadas) === 1,
+            'permite_multiples' => true,
+            'lista_tiendas_asignadas' => array_map(function($asig) {
+                return $asig['cadena'] . ' #' . $asig['num_tienda'];
+            }, $asignaciones_actuales_actualizadas)
+        ]
     ];
 
     // ===== RESPUESTA EXITOSA =====
     http_response_code(201);
     echo json_encode([
         'success' => true,
-        'message' => 'Asignación creada correctamente',
+        'message' => 'Asignación creada correctamente. El promotor ahora está asignado a ' . count($asignaciones_actuales_actualizadas) . ' tienda' . (count($asignaciones_actuales_actualizadas) > 1 ? 's' : ''),
         'data' => $response_data
     ], JSON_UNESCAPED_UNICODE);
 
 } catch (Exception $e) {
     // Log del error
-    error_log("Error en create_asignacion.php: " . $e->getMessage() . " - Usuario: " . ($_SESSION['username'] ?? 'desconocido') . " - IP: " . $_SERVER['REMOTE_ADDR']);
+    error_log("Error en create_asignacion_v2.php: " . $e->getMessage() . " - Usuario: " . ($_SESSION['username'] ?? 'desconocido') . " - IP: " . $_SERVER['REMOTE_ADDR']);
     
     http_response_code(500);
     echo json_encode([

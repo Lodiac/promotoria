@@ -7,7 +7,7 @@ error_reporting(E_ALL);
 
 session_start();
 
-// 🔑 DEFINIR CONSTANTE ANTES DE INCLUIR DB_CONNECT
+// 🔒 DEFINIR CONSTANTE ANTES DE INCLUIR DB_CONNECT
 define('APP_ACCESS', true);
 
 // Headers de seguridad y CORS
@@ -35,11 +35,11 @@ try {
         'session_status' => session_status(),
         'session_id' => session_id()
     ];
-    error_log('UPDATE_ASIGNACION: Iniciando - ' . json_encode($debug_info));
+    error_log('UPDATE_ASIGNACION_V2: Iniciando - ' . json_encode($debug_info));
 
     // ===== VERIFICAR SESIÓN BÁSICA =====
     if (!isset($_SESSION['user_id']) || empty($_SESSION['user_id'])) {
-        error_log('UPDATE_ASIGNACION: Sin sesión - user_id no encontrado');
+        error_log('UPDATE_ASIGNACION_V2: Sin sesión - user_id no encontrado');
         http_response_code(403);
         echo json_encode([
             'success' => false,
@@ -51,7 +51,7 @@ try {
 
     // ===== VERIFICAR ROL =====
     if (!isset($_SESSION['rol']) || !in_array($_SESSION['rol'], ['supervisor', 'root'])) {
-        error_log('UPDATE_ASIGNACION: Rol incorrecto - ' . ($_SESSION['rol'] ?? 'NO_SET'));
+        error_log('UPDATE_ASIGNACION_V2: Rol incorrecto - ' . ($_SESSION['rol'] ?? 'NO_SET'));
         http_response_code(403);
         echo json_encode([
             'success' => false,
@@ -61,12 +61,12 @@ try {
         exit;
     }
 
-    error_log('UPDATE_ASIGNACION: Sesión válida - Usuario: ' . ($_SESSION['username'] ?? 'NO_USERNAME') . ', Rol: ' . $_SESSION['rol']);
+    error_log('UPDATE_ASIGNACION_V2: Sesión válida - Usuario: ' . ($_SESSION['username'] ?? 'NO_USERNAME') . ', Rol: ' . $_SESSION['rol']);
 
     // ===== INCLUIR CONEXIÓN DB =====
     $db_path = __DIR__ . '/../config/db_connect.php';
     if (!file_exists($db_path)) {
-        error_log('UPDATE_ASIGNACION: Archivo db_connect.php no encontrado en: ' . $db_path);
+        error_log('UPDATE_ASIGNACION_V2: Archivo db_connect.php no encontrado en: ' . $db_path);
         throw new Exception('Configuración de base de datos no encontrada');
     }
 
@@ -74,7 +74,7 @@ try {
 
     // ===== VERIFICAR CLASE DATABASE =====
     if (!class_exists('Database')) {
-        error_log('UPDATE_ASIGNACION: Clase Database no encontrada');
+        error_log('UPDATE_ASIGNACION_V2: Clase Database no encontrada');
         throw new Exception('Clase Database no disponible');
     }
 
@@ -102,7 +102,7 @@ try {
     $motivo_cambio = trim($input['motivo_cambio'] ?? '');
     $motivo_nueva_asignacion = trim($input['motivo_nueva_asignacion'] ?? '');
 
-    error_log('UPDATE_ASIGNACION: Asignación actual: ' . $id_asignacion_actual . ', Nueva tienda: ' . $id_tienda_nueva . ', Fecha: ' . $fecha_cambio);
+    error_log('UPDATE_ASIGNACION_V2: Asignación actual: ' . $id_asignacion_actual . ', Nueva tienda: ' . $id_tienda_nueva . ', Fecha: ' . $fecha_cambio);
 
     // ===== VALIDACIONES BÁSICAS =====
     if ($id_asignacion_actual <= 0) {
@@ -162,9 +162,9 @@ try {
         if (!$test_connection) {
             throw new Exception('No se pudo establecer conexión con la base de datos');
         }
-        error_log('UPDATE_ASIGNACION: Conexión DB exitosa');
+        error_log('UPDATE_ASIGNACION_V2: Conexión DB exitosa');
     } catch (Exception $conn_error) {
-        error_log('UPDATE_ASIGNACION: Error de conexión DB - ' . $conn_error->getMessage());
+        error_log('UPDATE_ASIGNACION_V2: Error de conexión DB - ' . $conn_error->getMessage());
         throw new Exception('Error de conexión a la base de datos: ' . $conn_error->getMessage());
     }
 
@@ -270,6 +270,28 @@ try {
         exit;
     }
 
+    // ===== 🆕 OBTENER INFORMACIÓN DE OTRAS ASIGNACIONES ACTIVAS DEL PROMOTOR =====
+    $sql_otras_asignaciones = "SELECT 
+                                  pta.id_asignacion,
+                                  pta.fecha_inicio,
+                                  t.cadena,
+                                  t.num_tienda,
+                                  t.nombre_tienda
+                               FROM promotor_tienda_asignaciones pta
+                               INNER JOIN tiendas t ON pta.id_tienda = t.id_tienda
+                               WHERE pta.id_promotor = :id_promotor 
+                               AND pta.activo = 1 
+                               AND pta.fecha_fin IS NULL
+                               AND pta.id_asignacion != :id_asignacion_actual
+                               ORDER BY pta.fecha_inicio DESC";
+    
+    $otras_asignaciones = Database::select($sql_otras_asignaciones, [
+        ':id_promotor' => $asignacion_actual['id_promotor'],
+        ':id_asignacion_actual' => $id_asignacion_actual
+    ]);
+
+    error_log('UPDATE_ASIGNACION_V2: Promotor tiene ' . count($otras_asignaciones) . ' otras asignaciones activas');
+
     // ===== INICIAR TRANSACCIÓN =====
     $connection = Database::connect();
     $connection->beginTransaction();
@@ -337,11 +359,12 @@ try {
             throw new Exception('No se pudo crear la nueva asignación');
         }
 
-        // ===== PASO 3: REGISTRAR EN LOG DE ACTIVIDADES =====
-        $detalle_log = "Reasignación de tienda: Promotor {$asignacion_actual['promotor_nombre']} {$asignacion_actual['promotor_apellido']} movido de {$asignacion_actual['tienda_actual_cadena']} #{$asignacion_actual['tienda_actual_num']} a {$tienda_nueva['cadena']} #{$tienda_nueva['num_tienda']}. Motivo: {$motivo_cambio}";
+        // ===== PASO 3: REGISTRAR EN LOG DE ACTIVIDADES (MEJORADO) =====
+        $total_asignaciones_activas = count($otras_asignaciones) + 1; // +1 por la nueva asignación
+        $detalle_log = "Reasignación múltiple: Promotor {$asignacion_actual['promotor_nombre']} {$asignacion_actual['promotor_apellido']} movido de {$asignacion_actual['tienda_actual_cadena']} #{$asignacion_actual['tienda_actual_num']} a {$tienda_nueva['cadena']} #{$tienda_nueva['num_tienda']}. Motivo: {$motivo_cambio}. Total asignaciones activas: {$total_asignaciones_activas}";
         
         $sql_log = "INSERT INTO log_actividades (tabla, accion, id_registro, usuario_id, fecha, detalles) 
-                    VALUES ('promotor_tienda_asignaciones', 'REASIGNACION', :id_registro, :usuario_id, NOW(), :detalles)";
+                    VALUES ('promotor_tienda_asignaciones', 'REASIGNACION_MULTIPLE', :id_registro, :usuario_id, NOW(), :detalles)";
         
         Database::insert($sql_log, [
             ':id_registro' => $nueva_asignacion_id,
@@ -352,7 +375,7 @@ try {
         // ===== CONFIRMAR TRANSACCIÓN =====
         $connection->commit();
         
-        error_log("REASIGNACION_EXITOSA: " . $detalle_log . " - Usuario: " . $_SESSION['username']);
+        error_log("REASIGNACION_MULTIPLE_EXITOSA: " . $detalle_log . " - Usuario: " . $_SESSION['username']);
 
     } catch (Exception $transaction_error) {
         // Revertir transacción
@@ -394,6 +417,23 @@ try {
     // ===== CALCULAR DURACIÓN DE LA ASIGNACIÓN ANTERIOR =====
     $duracion_anterior = $fecha_cambio_obj->diff($fecha_inicio_obj)->days;
 
+    // ===== OBTENER LISTA ACTUALIZADA DE TODAS LAS ASIGNACIONES ACTIVAS =====
+    $sql_asignaciones_actualizadas = "SELECT 
+                                         t.cadena,
+                                         t.num_tienda,
+                                         t.nombre_tienda,
+                                         pta.fecha_inicio
+                                      FROM promotor_tienda_asignaciones pta
+                                      INNER JOIN tiendas t ON pta.id_tienda = t.id_tienda
+                                      WHERE pta.id_promotor = :id_promotor 
+                                      AND pta.activo = 1 
+                                      AND pta.fecha_fin IS NULL
+                                      ORDER BY pta.fecha_inicio DESC";
+    
+    $asignaciones_actualizadas = Database::select($sql_asignaciones_actualizadas, [
+        ':id_promotor' => $asignacion_actual['id_promotor']
+    ]);
+
     // ===== FORMATEAR RESPUESTA =====
     $response_data = [
         'asignacion_finalizada' => [
@@ -424,20 +464,26 @@ try {
             'motivo_cambio' => $motivo_cambio,
             'duracion_asignacion_anterior' => $duracion_anterior,
             'tipo_operacion' => 'cambio_tienda',
-            'multiples_promotores_habilitado' => true
+            'multiples_promotores_habilitado' => true,
+            // 🆕 NUEVA INFORMACIÓN PARA MÚLTIPLES ASIGNACIONES
+            'total_asignaciones_activas' => count($asignaciones_actualizadas),
+            'otras_asignaciones_activas' => count($otras_asignaciones),
+            'lista_tiendas_actuales' => array_map(function($asig) {
+                return $asig['cadena'] . ' #' . $asig['num_tienda'];
+            }, $asignaciones_actualizadas)
         ]
     ];
 
     // ===== RESPUESTA EXITOSA =====
     echo json_encode([
         'success' => true,
-        'message' => 'Reasignación completada correctamente',
+        'message' => 'Reasignación completada correctamente. El promotor ahora está asignado a ' . count($asignaciones_actualizadas) . ' tienda' . (count($asignaciones_actualizadas) > 1 ? 's' : ''),
         'data' => $response_data
     ], JSON_UNESCAPED_UNICODE);
 
 } catch (Exception $e) {
     // Log del error
-    error_log("Error en update_asignacion.php: " . $e->getMessage() . " - Usuario: " . ($_SESSION['username'] ?? 'desconocido') . " - IP: " . $_SERVER['REMOTE_ADDR']);
+    error_log("Error en update_asignacion_v2.php: " . $e->getMessage() . " - Usuario: " . ($_SESSION['username'] ?? 'desconocido') . " - IP: " . $_SERVER['REMOTE_ADDR']);
     
     http_response_code(500);
     echo json_encode([

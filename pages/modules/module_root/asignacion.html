@@ -1,4 +1,4 @@
-<!-- ===== MÓDULO GESTIÓN DE ASIGNACIONES - VERSIÓN COMPLETA MEJORADA ===== -->
+<!-- ===== MÓDULO GESTIÓN DE ASIGNACIONES - COMPLETO MEJORADO ===== -->
 <div class="asignaciones-module">
     <!-- HEADER DEL MÓDULO -->
     <div class="module-header">
@@ -61,8 +61,31 @@
                 </div>
                 <div class="stat-content">
                     <h3 id="stat-promedio-promotores">0.0</h3>
-                    <p>Promedio Promotores/Tienda</p>
+                    <p>Promedio Asignaciones/Tienda</p>
                     <div class="stat-trend" id="trend-promedio">Distribución</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Métricas Múltiples -->
+        <div class="metricas-multiples-container">
+            <h3><i class="fas fa-layer-group"></i> Métricas de Asignaciones Múltiples</h3>
+            <div class="metricas-grid">
+                <div class="metrica-card">
+                    <div class="metrica-number" id="total-asignaciones-sistema">0</div>
+                    <div class="metrica-label">Total Asignaciones</div>
+                </div>
+                <div class="metrica-card">
+                    <div class="metrica-number" id="promotores-unicos">0</div>
+                    <div class="metrica-label">Promotores Únicos</div>
+                </div>
+                <div class="metrica-card">
+                    <div class="metrica-number" id="ratio-asignaciones">0.0</div>
+                    <div class="metrica-label">Asignaciones/Promotor</div>
+                </div>
+                <div class="metrica-card">
+                    <div class="metrica-number" id="max-asignaciones">0</div>
+                    <div class="metrica-label">Máx por Promotor</div>
                 </div>
             </div>
         </div>
@@ -199,7 +222,7 @@
                     <select id="agregar-promotor" required>
                         <option value="">Seleccionar promotor...</option>
                     </select>
-                    <div class="form-help">Todos los promotores activos disponibles</div>
+                    <div class="form-help">Promotores activos (pueden tener otras asignaciones)</div>
                 </div>
                 <div class="form-group">
                     <label for="agregar-tienda">Tienda *</label>
@@ -422,23 +445,13 @@
     color: var(--text-primary);
 }
 
-.module-version {
-    background: var(--primary-light);
-    color: var(--primary-color);
-    padding: 0.25rem 0.75rem;
-    border-radius: 20px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    margin-left: 10px;
-}
-
 .header-actions {
     display: flex;
     gap: 1rem;
     align-items: center;
 }
 
-/* ===== BOTONES MEJORADOS (SIN DEGRADADOS) ===== */
+/* ===== BOTONES MEJORADOS ===== */
 .btn-primary, .btn-secondary, .btn-danger, .btn-warning, .btn-search, .btn-clear, .btn-action, .btn-pagination {
     border: none;
     border-radius: 8px;
@@ -659,6 +672,57 @@
     color: var(--success-color);
     font-weight: 600;
     margin-top: 0.25rem;
+}
+
+/* ===== MÉTRICAS MÚLTIPLES ===== */
+.metricas-multiples-container {
+    background: var(--surface);
+    backdrop-filter: blur(20px);
+    border-radius: var(--radius);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    box-shadow: var(--shadow);
+    border-left: 4px solid var(--primary-color);
+}
+
+.metricas-multiples-container h3 {
+    margin: 0 0 1.5rem 0;
+    color: var(--text-primary);
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.metricas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+}
+
+.metrica-card {
+    background: linear-gradient(135deg, #f97316, #ea580c);
+    color: white;
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.metrica-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(249, 115, 22, 0.4);
+}
+
+.metrica-number {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+}
+
+.metrica-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    opacity: 0.9;
 }
 
 /* ===== DISTRIBUCIÓN ===== */
@@ -1433,6 +1497,10 @@
         gap: 4px;
         align-items: flex-start;
     }
+
+    .metricas-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 @media (max-width: 480px) {
@@ -1458,6 +1526,10 @@
     .promotor-actions {
         margin-left: 0;
         justify-content: center;
+    }
+
+    .metricas-grid {
+        grid-template-columns: 1fr;
     }
 }
 
@@ -1567,7 +1639,7 @@ function showError(message) {
 
 // ===== INICIALIZACIÓN =====
 function init() {
-    console.log('🚀 Inicializando módulo asignaciones v2.0...');
+    console.log('🚀 Iniciando módulo asignaciones...');
     configurarEventListeners();
 }
 
@@ -1909,7 +1981,7 @@ function limpiarBusqueda() {
     cargarTiendasConPromotores();
 }
 
-// ===== FUNCIONES DASHBOARD (CORREGIDAS) =====
+// ===== FUNCIONES DASHBOARD =====
 function toggleDashboard() {
     if (currentView === 'main') {
         currentView = 'dashboard';
@@ -2011,6 +2083,21 @@ function actualizarDashboardStats(data) {
         document.getElementById('dist-2').textContent = distribucion.tiendas_con_2_promotores || 0;
         document.getElementById('dist-3').textContent = distribucion.tiendas_con_3_mas_promotores || 0;
         
+        // Actualizar métricas múltiples si existen
+        if (data.metricas_multiples) {
+            const metricas = data.metricas_multiples;
+            
+            const totalAsignacionesEl = document.getElementById('total-asignaciones-sistema');
+            const promotoresUnicosEl = document.getElementById('promotores-unicos');
+            const ratioAsignacionesEl = document.getElementById('ratio-asignaciones');
+            const maxAsignacionesEl = document.getElementById('max-asignaciones');
+            
+            if (totalAsignacionesEl) totalAsignacionesEl.textContent = metricas.total_asignaciones_activas || 0;
+            if (promotoresUnicosEl) promotoresUnicosEl.textContent = metricas.promotores_unicos_asignados || 0;
+            if (ratioAsignacionesEl) ratioAsignacionesEl.textContent = (metricas.ratio_asignaciones_promotores || 0).toFixed(1);
+            if (maxAsignacionesEl) maxAsignacionesEl.textContent = metricas.max_asignaciones_por_promotor || 0;
+        }
+        
         // Actualizar alertas
         const alertas = data.alertas || {};
         actualizarAlertas(alertas);
@@ -2056,13 +2143,13 @@ function actualizarAlertas(alertas) {
         `;
     }
     
-    if (alertas.oportunidades_expansion > 0) {
+    if (alertas.promotores_con_multiples_asignaciones > 0) {
         alertsContainer.innerHTML += `
             <div class="alert alert-success">
-                <i class="fas fa-chart-line"></i>
+                <i class="fas fa-layer-group"></i>
                 <div class="alert-content">
-                    <div class="alert-title">Oportunidades de Expansión</div>
-                    <div class="alert-message">${alertas.oportunidades_expansion} tiendas podrían beneficiarse de promotores adicionales</div>
+                    <div class="alert-title">Asignaciones Múltiples</div>
+                    <div class="alert-message">${alertas.promotores_con_multiples_asignaciones} promotores tienen múltiples asignaciones activas</div>
                 </div>
             </div>
         `;
@@ -2086,8 +2173,8 @@ async function abrirModalAgregar() {
     try {
         console.log('🔄 Abriendo modal agregar promotor...');
         
-        // Cargar promotores disponibles (incluir todos para ver disponibilidad)
-        const promResponse = await fetch('../../api/get_promotores_disponibles.php?incluir_asignados=true&solo_activos=true');
+        // Cargar promotores disponibles (ahora incluye todos los activos)
+        const promResponse = await fetch('../../api/get_promotores_disponibles.php?solo_activos=true');
         const promData = await promResponse.json();
         
         // Cargar todas las tiendas
@@ -2105,8 +2192,8 @@ async function abrirModalAgregar() {
             promData.data.forEach(promotor => {
                 if (promotor.activo) {
                     let status = '';
-                    if (promotor.tiene_asignacion) {
-                        status = ' (Ya asignado)';
+                    if (promotor.total_asignaciones_activas > 0) {
+                        status = ` (${promotor.total_asignaciones_activas} asignación${promotor.total_asignaciones_activas > 1 ? 'es' : ''})`;
                     } else if (promotor.en_vacaciones) {
                         status = ' (En vacaciones)';
                     } else {
@@ -2117,8 +2204,8 @@ async function abrirModalAgregar() {
                     option.value = promotor.id_promotor;
                     option.textContent = promotor.nombre_completo + status;
                     
-                    // Deshabilitar si no puede asignar
-                    if (!promotor.puede_asignar) {
+                    // Solo deshabilitar si no está disponible para asignación
+                    if (!promotor.disponible_para_asignacion) {
                         option.disabled = true;
                         option.style.color = '#999';
                     }
@@ -2219,7 +2306,13 @@ async function guardarAgregarPromotor(e) {
             throw new Error(result.message || 'Error al agregar promotor');
         }
         
-        mostrarNotificacion('Promotor agregado correctamente a la tienda', 'success');
+        // Mensaje mejorado para múltiples asignaciones
+        let mensaje = 'Promotor agregado correctamente a la tienda';
+        if (result.data && result.data.resumen_asignaciones && result.data.resumen_asignaciones.total_asignaciones_activas > 1) {
+            mensaje += `. El promotor ahora tiene ${result.data.resumen_asignaciones.total_asignaciones_activas} asignaciones activas`;
+        }
+        
+        mostrarNotificacion(mensaje, 'success');
         cerrarModalAgregar();
         cargarTiendasConPromotores(); // Recargar toda la tabla
         
@@ -2244,8 +2337,8 @@ async function reasignarPromotor(idAsignacion) {
             throw new Error('No se encontró la asignación');
         }
         
-        // Cargar tiendas disponibles
-        const response = await fetch('../../api/get_tiendas_disponibles.php');
+        // Cargar tiendas disponibles (excluyendo donde ya está asignado el promotor)
+        const response = await fetch(`../../api/get_tiendas_disponibles.php`);
         const data = await response.json();
         
         if (!data.success) {
@@ -2338,7 +2431,13 @@ async function confirmarReasignar(e) {
             throw new Error(result.message || 'Error al reasignar promotor');
         }
         
-        mostrarNotificacion('Promotor reasignado correctamente', 'success');
+        // Mensaje mejorado para múltiples asignaciones
+        let mensaje = 'Promotor reasignado correctamente';
+        if (result.data && result.data.resumen && result.data.resumen.total_asignaciones_activas) {
+            mensaje += `. El promotor mantiene ${result.data.resumen.total_asignaciones_activas} asignación${result.data.resumen.total_asignaciones_activas > 1 ? 'es activas' : ' activa'}`;
+        }
+        
+        mostrarNotificacion(mensaje, 'success');
         cerrarModalReasignar();
         cargarTiendasConPromotores();
         
@@ -2371,6 +2470,7 @@ async function quitarPromotor(idAsignacion) {
             <p><strong>Fecha inicio:</strong> ${asignacionActual.fecha_inicio_formatted}</p>
             <p><strong>Duración actual:</strong> ${asignacionActual.duracion_dias} días</p>
             <p><strong>Motivo asignación:</strong> ${asignacionActual.motivo_asignacion}</p>
+            <p class="text-muted"><em>Nota: Solo se finalizará esta asignación específica. Otras asignaciones del promotor continuarán activas.</em></p>
         `;
         
         // Establecer ID y fecha por defecto
@@ -2437,7 +2537,7 @@ async function confirmarQuitar(e) {
             throw new Error(result.message || 'Error al quitar promotor');
         }
         
-        mostrarNotificacion('Promotor removido correctamente de la tienda', 'success');
+        mostrarNotificacion('Asignación finalizada correctamente. El promotor ha sido removido de esta tienda específica', 'success');
         cerrarModalQuitar();
         cargarTiendasConPromotores();
         
@@ -2489,6 +2589,7 @@ async function verHistorialPromotor(idPromotor) {
                     <p><strong>RFC:</strong> ${data.promotor.rfc}</p>
                     <p><strong>Estatus:</strong> ${data.promotor.estatus}</p>
                     <p><strong>Fecha Alta:</strong> ${data.promotor.fecha_alta_formatted}</p>
+                    ${data.estadisticas.asignaciones_activas > 1 ? `<p><strong>Asignaciones múltiples:</strong> <span style="color: var(--primary-color); font-weight: 600;">Sí (${data.estadisticas.asignaciones_activas} activas)</span></p>` : ''}
                 </div>
             `;
             
@@ -2590,14 +2691,14 @@ window.agregarPromotorATienda = agregarPromotorATienda;
 window.limpiarBusqueda = limpiarBusqueda;
 
 // ===== INICIALIZACIÓN =====
-console.log('🚀 Iniciando módulo Gestión de Asignaciones v2.0...');
-console.log('✨ Características nuevas:');
-console.log('🎨 Nueva paleta naranja sin degradados');
+console.log('🚀 Iniciando módulo Gestión de Asignaciones...');
+console.log('✨ Características:');
+console.log('🎨 Paleta naranja profesional');
 console.log('📋 Tabla expandible con filas de promotores');
-console.log('🔍 Búsqueda por número de tienda');
-console.log('📊 Dashboard corregido con manejo de errores');
-console.log('💫 Animaciones suaves y responsive mejorado');
-console.log('🎯 UX optimizada para múltiples promotores');
+console.log('🔍 Búsqueda avanzada');
+console.log('📊 Dashboard con métricas múltiples');
+console.log('💫 Animaciones suaves y responsive');
+console.log('🎯 Soporte completo para asignaciones múltiples');
 
 init();
 
@@ -2607,5 +2708,5 @@ setTimeout(() => {
     cargarTiendasConPromotores();
 }, 100);
 
-console.log('✅ Módulo asignaciones v2.0 inicializado correctamente');
+console.log('✅ Módulo asignaciones inicializado correctamente');
 </script>
