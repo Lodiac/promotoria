@@ -10,6 +10,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
+   <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.css' rel='stylesheet' />
+
     <!-- Font Awesome para iconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -410,6 +412,7 @@
         </main>
     </div>
 
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.js'></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             console.log('🚀 Iniciando Dashboard ROOT Sistema Promotoria...');
@@ -436,7 +439,7 @@
                 { id: 'promotores', name: 'Promotoria', icon: 'fas fa-users' },
                 { id: 'cadenas', name: 'Cadenas Comerciales', icon: 'fas fa-link' },
                 { id: 'asignacion', name: 'Asignación', icon: 'fas fa-tasks' },
-                { id: 'horas', name: 'Hojas de Horas', icon: 'fas fa-user-cog' },
+                { id: 'horas', name: 'Hojas de Horas', icon: 'far fa-address-card' },
                 { id: 'usuarios', name: 'Usuarios', icon: 'fas fa-user-cog' }
             ];
             
