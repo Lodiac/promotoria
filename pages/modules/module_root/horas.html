@@ -1,1421 +1,2348 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Módulo SPA - Gestión de Promotores</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.css' rel='stylesheet' />
-    
-    <style>
-        :root {
-            --primary-color: #667eea;
-            --secondary-color: #764ba2;
-            --accent-color: #4CAF50;
-            --danger-color: #f44336;
-            --warning-color: #ff9800;
-            --info-color: #2196F3;
-            --background-color: #f5f7fa;
-            --surface-color: #ffffff;
-            --text-primary: #333333;
-            --text-secondary: #666666;
-            --border-color: #e0e0e0;
-            --shadow: 0 4px 15px rgba(0,0,0,0.08);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--background-color);
-            color: var(--text-primary);
-        }
-
-        /* ===== SPA MODULE CONTAINER ===== */
-        .spa-module {
-            width: 100%;
-            min-height: 100vh;
-            background: var(--background-color);
-        }
-
-        .module-wrapper {
-            max-width: 1800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        /* ===== MODULE HEADER ===== */
-        .module-header {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 30px;
-            box-shadow: var(--shadow);
-        }
-
-        .header-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            color: white;
-        }
-
-        .header-title {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .header-title h1 {
-            font-size: 1.8rem;
-            font-weight: 600;
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        /* ===== NAVIGATION TABS ===== */
-        .module-nav {
-            background: var(--surface-color);
-            border-radius: 12px;
-            padding: 5px;
-            margin-bottom: 20px;
-            box-shadow: var(--shadow);
-            display: flex;
-            gap: 5px;
-        }
-
-        .nav-tab {
-            flex: 1;
-            padding: 12px 20px;
-            border: none;
-            border-radius: 8px;
-            background: transparent;
-            color: var(--text-secondary);
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .nav-tab:hover {
-            background: rgba(102, 126, 234, 0.1);
-            color: var(--primary-color);
-        }
-
-        .nav-tab.active {
-            background: var(--primary-color);
-            color: white;
-            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
-        }
-
-        /* ===== VIEW CONTAINER ===== */
-        .view-container {
-            background: var(--surface-color);
-            border-radius: 12px;
-            box-shadow: var(--shadow);
-            overflow: hidden;
-        }
-
-        .view-content {
-            display: none;
-            padding: 20px;
-        }
-
-        .view-content.active {
-            display: block;
-        }
-
-        /* ===== CALENDAR VIEW ===== */
-        .calendar-layout {
-            display: grid;
-            grid-template-columns: 300px 1fr;
-            gap: 20px;
-        }
-
-        .sidebar {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .sidebar-card {
-            background: var(--surface-color);
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            overflow: hidden;
-        }
-
-        .sidebar-header {
-            padding: 15px;
-            font-weight: 600;
-            color: white;
-        }
-
-        .promotor-fijo .sidebar-header {
-            background: linear-gradient(135deg, #1976d2, #1565c0);
-        }
-
-        .promotor-cubredescansos .sidebar-header {
-            background: linear-gradient(135deg, #f57c00, #ef6c00);
-        }
-
-        .sidebar-content {
-            padding: 15px;
-        }
-
-        .promotor-name {
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        .promotor-details {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            margin-bottom: 12px;
-        }
-
-        .tienda-info {
-            background: #f8f9fa;
-            padding: 10px;
-            border-radius: 6px;
-            font-size: 0.9rem;
-        }
-
-        .calendar-container {
-            min-height: 600px;
-        }
-
-        #calendar {
-            height: 700px;
-        }
-
-        /* ===== LIST VIEW ===== */
-        .assignments-list {
-            display: grid;
-            gap: 15px;
-        }
-
-        .assignment-card {
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 15px;
-            transition: all 0.3s ease;
-        }
-
-        .assignment-card:hover {
-            box-shadow: var(--shadow);
-            transform: translateY(-2px);
-        }
-
-        .assignment-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .assignment-title {
-            font-weight: 600;
-            font-size: 1.1rem;
-        }
-
-        .assignment-date {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-
-        .assignment-details {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-
-        .detail-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.9rem;
-        }
-
-        .assignment-actions {
-            display: flex;
-            gap: 8px;
-            justify-content: flex-end;
-        }
-
-        /* ===== STATS VIEW ===== */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .stat-card {
-            background: var(--surface-color);
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            text-align: center;
-        }
-
-        .stat-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 15px;
-            font-size: 1.5rem;
-            color: white;
-        }
-
-        .stat-value {
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 5px;
-            color: var(--primary-color);
-        }
-
-        .stat-label {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-
-        .chart-container {
-            background: var(--surface-color);
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        }
-
-        /* ===== SETTINGS VIEW ===== */
-        .settings-grid {
-            display: grid;
-            gap: 20px;
-        }
-
-        .settings-section {
-            background: var(--surface-color);
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        }
-
-        .settings-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-bottom: 15px;
-            color: var(--text-primary);
-        }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 15px;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .form-label {
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .form-input, .form-select {
-            padding: 10px 12px;
-            border: 2px solid var(--border-color);
-            border-radius: 6px;
-            font-size: 1rem;
-            transition: border-color 0.3s ease;
-        }
-
-        .form-input:focus, .form-select:focus {
-            outline: none;
-            border-color: var(--primary-color);
-        }
-
-        /* ===== BUTTONS ===== */
-        .btn {
-            padding: 10px 16px;
-            border: none;
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            text-decoration: none;
-            font-size: 0.9rem;
-        }
-
-        .btn-primary {
-            background: var(--primary-color);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #5a6fd8;
-            transform: translateY(-2px);
-        }
-
-        .btn-secondary {
-            background: var(--text-secondary);
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background: #555;
-        }
-
-        .btn-success {
-            background: var(--accent-color);
-            color: white;
-        }
-
-        .btn-success:hover {
-            background: #45a049;
-        }
-
-        .btn-danger {
-            background: var(--danger-color);
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: #d32f2f;
-        }
-
-        .btn-sm {
-            padding: 6px 12px;
-            font-size: 0.8rem;
-        }
-
-        /* ===== MODAL ===== */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 10000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-        }
-
-        .modal-content {
-            background: var(--surface-color);
-            margin: 5% auto;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 500px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-
-        .modal-header {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white;
-            padding: 20px;
-            border-radius: 12px 12px 0 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal-title {
-            font-size: 1.3rem;
-            font-weight: 600;
-        }
-
-        .close {
-            color: white;
-            font-size: 2rem;
-            cursor: pointer;
-            border: none;
-            background: none;
-        }
-
-        .modal-body {
-            padding: 20px;
-        }
-
-        .modal-footer {
-            padding: 20px;
-            text-align: right;
-            border-top: 1px solid var(--border-color);
-            display: flex;
-            gap: 10px;
-            justify-content: flex-end;
-        }
-
-        /* ===== FULLCALENDAR CUSTOMIZATION ===== */
-        .fc-event {
-            border: none !important;
-            border-radius: 6px !important;
-            font-size: 0.8rem !important;
-            font-weight: 600 !important;
-            padding: 2px 6px !important;
-        }
-
-        .event-fijo-principal {
-            background: linear-gradient(135deg, #1976d2, #1565c0) !important;
-            color: white !important;
-        }
-
-        .event-fijo-rotacion {
-            background: linear-gradient(135deg, #7b1fa2, #6a1b9a) !important;
-            color: white !important;
-        }
-
-        .event-cubredescansos-apoyo {
-            background: linear-gradient(135deg, #f57c00, #ef6c00) !important;
-            color: white !important;
-        }
-
-        .event-cubredescansos-otros {
-            background: linear-gradient(135deg, #388e3c, #2e7d32) !important;
-            color: white !important;
-        }
-
-        .event-descanso {
-            background: #f5f5f5 !important;
-            color: #999 !important;
-        }
-
-        /* ===== LOADING SPINNER ===== */
-        .loading {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 40px;
-        }
-
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid var(--border-color);
-            border-top: 4px solid var(--primary-color);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* ===== RESPONSIVE ===== */
-        @media (max-width: 1024px) {
-            .calendar-layout {
-                grid-template-columns: 1fr;
-            }
-
-            .sidebar {
-                flex-direction: row;
-                overflow-x: auto;
-                gap: 10px;
-            }
-
-            .sidebar-card {
-                min-width: 250px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .module-wrapper {
-                padding: 10px;
-            }
-
-            .header-content {
-                flex-direction: column;
-                gap: 15px;
-                text-align: center;
-            }
-
-            .header-actions {
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-
-            .nav-tab {
-                padding: 10px 15px;
-                font-size: 0.9rem;
-            }
-
-            #calendar {
-                height: 500px;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div id="promotor-spa" class="spa-module">
-        <div class="module-wrapper">
-            <!-- HEADER DEL MÓDULO -->
-            <div class="module-header">
-                <div class="header-content">
-                    <div class="header-title">
+<!-- ===== MÓDULO HOJAS DE HORAS CON FULLCALENDAR SPA CORREGIDO ===== -->
+<div class="horas-module">
+    <!-- HEADER DEL MÓDULO -->
+    <div class="module-header">
+        <div class="header-content">
+            <div class="header-title">
+                <i class="fas fa-calendar-alt header-icon"></i>
+                <h1>Hojas de Horas - Sistema Interactivo</h1>
+            </div>
+            <div class="header-actions">
+                <button class="btn-secondary" id="btn-dashboard-horas">
+                    <i class="fas fa-chart-pie"></i> Dashboard
+                </button>
+                <button class="btn-primary" id="btn-nueva-asignacion">
+                    <i class="fas fa-plus"></i> Nueva Asignación
+                </button>
+                <button class="btn-primary" id="btn-generar-horarios">
+                    <i class="fas fa-sync-alt"></i> Generar Horarios
+                </button>
+            </div>
+        </div>
+    </div>
+<br>
+    <!-- NAVEGACIÓN POR PESTAÑAS -->
+    <div class="tabs-navigation">
+        <div class="tab-item active" data-tab="calendario">
+            <i class="fas fa-calendar-alt"></i>
+            <span>Calendario</span>
+        </div>
+        <div class="tab-item" data-tab="asignaciones">
+            <i class="fas fa-list"></i>
+            <span>Asignaciones</span>
+        </div>
+        <div class="tab-item" data-tab="dashboard">
+            <i class="fas fa-chart-pie"></i>
+            <span>Dashboard</span>
+        </div>
+        <div class="tab-item" data-tab="reportes">
+            <i class="fas fa-file-alt"></i>
+            <span>Reportes</span>
+        </div>
+    </div>
+
+    <!-- LOADING DEPENDENCIES -->
+    <div class="dependencies-loading" id="dependencies-loading">
+        <div class="loading-container">
+            <div class="loading-spinner"></div>
+            <h3>Cargando FullCalendar...</h3>
+            <p>Preparando calendario interactivo...</p>
+        </div>
+    </div>
+
+    <!-- CONTENIDO PRINCIPAL - CONTAINER PARA TODAS LAS PESTAÑAS -->
+    <div class="main-content" id="main-content-horas" style="display: none;">
+
+        <!-- PESTAÑA CALENDARIO -->
+        <div class="tab-content active" id="tab-calendario">
+            <!-- SIDEBAR DE RELACIONES -->
+            <div class="relationships-sidebar">
+                <!-- PROMOTOR FIJO -->
+                <div class="promotor-card promotor-fijo">
+                    <div class="promotor-header">
+                        <i class="fas fa-user-tie"></i>
+                        PROMOTOR FIJO
+                    </div>
+                    <div class="promotor-info">
+                        <div class="promotor-name">Juan Carlos González</div>
+                        <div class="promotor-details">RFC: GOCJ850315ABC<br>Tel: 811-234-5678</div>
+                        
+                        <div class="tienda-principal">
+                            <div class="tienda-principal-label">TIENDA PRINCIPAL</div>
+                            <div class="tienda-principal-name">OXXO Centro (#1048)</div>
+                            <div style="font-size: 0.8rem; color: #666;">Monterrey, Nuevo León</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- INDICADOR DE RELACIÓN -->
+                <div class="relationship-indicator">
+                    <div class="relationship-title">RELACIÓN DE APOYO</div>
+                    <div class="relationship-visual">
+                        <div class="promotor-icon fijo-icon">
+                            <i class="fas fa-user-tie"></i>
+                        </div>
+                        <div class="arrow">
+                            <i class="fas fa-handshake"></i>
+                        </div>
+                        <div class="promotor-icon cubredescansos-icon">
+                            <i class="fas fa-user-plus"></i>
+                        </div>
+                    </div>
+                    <div style="font-size: 0.9rem; color: #666;">
+                        María cubre los descansos de Juan<br>
+                        y apoya en otras tiendas según necesidad
+                    </div>
+                </div>
+
+                <!-- PROMOTOR CUBREDESCANSOS -->
+                <div class="promotor-card promotor-cubredescansos">
+                    <div class="promotor-header">
+                        <i class="fas fa-user-plus"></i>
+                        CUBREDESCANSOS
+                    </div>
+                    <div class="promotor-info">
+                        <div class="promotor-name">María Elena Rodríguez</div>
+                        <div class="promotor-details">RFC: ROMM900202DEF<br>Tel: 555-123-4567</div>
+                        
+                        <div class="tienda-principal" style="background: #fff3e0;">
+                            <div class="tienda-principal-label" style="color: #f57c00;">ASIGNACIÓN PRINCIPAL</div>
+                            <div class="tienda-principal-name">Apoyo a Juan C. González</div>
+                            <div style="font-size: 0.8rem; color: #666;">+ Rotación múltiples tiendas</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ÁREA DEL CALENDARIO -->
+            <div class="calendar-area">
+                <div class="calendar-header">
+                    <div class="calendar-title">
                         <i class="fas fa-calendar-alt"></i>
-                        <h1>Gestión de Promotores</h1>
+                        Calendario de Asignaciones
                     </div>
-                    <div class="header-actions">
-                        <button class="btn btn-secondary" id="btn-configuracion">
-                            <i class="fas fa-cog"></i> Configuración
-                        </button>
-                        <button class="btn btn-primary" id="btn-nueva-asignacion">
-                            <i class="fas fa-plus"></i> Nueva Asignación
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- NAVEGACIÓN DEL MÓDULO -->
-            <div class="module-nav">
-                <button class="nav-tab active" data-view="calendar">
-                    <i class="fas fa-calendar-alt"></i> Calendario
-                </button>
-                <button class="nav-tab" data-view="assignments">
-                    <i class="fas fa-list"></i> Asignaciones
-                </button>
-                <button class="nav-tab" data-view="stats">
-                    <i class="fas fa-chart-bar"></i> Estadísticas
-                </button>
-                <button class="nav-tab" data-view="settings">
-                    <i class="fas fa-cog"></i> Configuración
-                </button>
-            </div>
-
-            <!-- CONTENEDOR DE VISTAS -->
-            <div class="view-container">
-                <!-- VISTA CALENDARIO -->
-                <div id="calendar-view" class="view-content active">
-                    <div class="calendar-layout">
-                        <div class="sidebar">
-                            <!-- PROMOTOR FIJO -->
-                            <div class="sidebar-card promotor-fijo">
-                                <div class="sidebar-header">
-                                    <i class="fas fa-user-tie"></i> Promotor Fijo
-                                </div>
-                                <div class="sidebar-content">
-                                    <div class="promotor-name">Juan Carlos González</div>
-                                    <div class="promotor-details">
-                                        RFC: GOCJ850315ABC<br>
-                                        Tel: 811-234-5678
-                                    </div>
-                                    <div class="tienda-info">
-                                        <strong>Tienda Principal:</strong><br>
-                                        OXXO Centro (#1048)<br>
-                                        Monterrey, N.L.
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- PROMOTOR CUBREDESCANSOS -->
-                            <div class="sidebar-card promotor-cubredescansos">
-                                <div class="sidebar-header">
-                                    <i class="fas fa-user-plus"></i> Cubredescansos
-                                </div>
-                                <div class="sidebar-content">
-                                    <div class="promotor-name">María Elena Rodríguez</div>
-                                    <div class="promotor-details">
-                                        RFC: ROMM900202DEF<br>
-                                        Tel: 555-123-4567
-                                    </div>
-                                    <div class="tienda-info">
-                                        <strong>Función:</strong><br>
-                                        Apoyo a Juan C. González<br>
-                                        Rotación múltiple
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="calendar-container">
-                            <div id="calendar"></div>
-                        </div>
+                    <div class="calendar-controls">
+                        <button class="view-btn active" data-view="dayGridMonth">Mes</button>
+                        <button class="view-btn" data-view="timeGridWeek">Semana</button>
+                        <button class="view-btn" data-view="timeGridDay">Día</button>
+                        <button class="view-btn" data-view="listWeek">Lista</button>
                     </div>
                 </div>
 
-                <!-- VISTA ASIGNACIONES -->
-                <div id="assignments-view" class="view-content">
-                    <div class="assignments-list" id="assignments-list">
-                        <!-- Las asignaciones se cargarán dinámicamente -->
-                    </div>
-                </div>
+                <div class="calendar-container">
+                    <div id="calendar-horas"></div>
 
-                <!-- VISTA ESTADÍSTICAS -->
-                <div id="stats-view" class="view-content">
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="stat-icon" style="background: var(--primary-color);">
-                                <i class="fas fa-calendar-check"></i>
+                    <!-- LEYENDA -->
+                    <div class="legend">
+                        <div class="legend-title">Leyenda de Asignaciones</div>
+                        <div class="legend-grid">
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: linear-gradient(135deg, #1976d2, #1565c0);"></div>
+                                <span>Juan - Tienda Principal (OXXO Centro)</span>
                             </div>
-                            <div class="stat-value" id="stat-total-assignments">42</div>
-                            <div class="stat-label">Asignaciones Totales</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon" style="background: var(--accent-color);">
-                                <i class="fas fa-percentage"></i>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: linear-gradient(135deg, #7b1fa2, #6a1b9a);"></div>
+                                <span>Juan - Rotación en otras tiendas</span>
                             </div>
-                            <div class="stat-value" id="stat-coverage">95%</div>
-                            <div class="stat-label">Cobertura Efectiva</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon" style="background: var(--warning-color);">
-                                <i class="fas fa-clock"></i>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: linear-gradient(135deg, #f57c00, #ef6c00);"></div>
+                                <span>María - Apoyo directo a Juan</span>
                             </div>
-                            <div class="stat-value" id="stat-hours">336h</div>
-                            <div class="stat-label">Horas Programadas</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon" style="background: var(--info-color);">
-                                <i class="fas fa-store"></i>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: linear-gradient(135deg, #388e3c, #2e7d32);"></div>
+                                <span>María - Otras asignaciones</span>
                             </div>
-                            <div class="stat-value" id="stat-stores">5</div>
-                            <div class="stat-label">Tiendas Activas</div>
-                        </div>
-                    </div>
-
-                    <div class="chart-container">
-                        <h3>Distribución de Asignaciones por Semana</h3>
-                        <div id="chart-placeholder" style="height: 300px; display: flex; align-items: center; justify-content: center; background: #f8f9fa; border-radius: 8px;">
-                            <span style="color: var(--text-secondary);">Gráfico de estadísticas</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- VISTA CONFIGURACIÓN -->
-                <div id="settings-view" class="view-content">
-                    <div class="settings-grid">
-                        <div class="settings-section">
-                            <h3 class="settings-title">Configuración General</h3>
-                            <div class="form-grid">
-                                <div class="form-group">
-                                    <label class="form-label">Zona Horaria</label>
-                                    <select class="form-select" id="timezone">
-                                        <option value="America/Mexico_City">México (GMT-6)</option>
-                                        <option value="America/New_York">New York (GMT-5)</option>
-                                        <option value="Europe/Madrid">Madrid (GMT+1)</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Vista por Defecto</label>
-                                    <select class="form-select" id="default-view">
-                                        <option value="dayGridMonth">Vista Mensual</option>
-                                        <option value="timeGridWeek">Vista Semanal</option>
-                                        <option value="timeGridDay">Vista Diaria</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="settings-section">
-                            <h3 class="settings-title">Configuración de Horarios</h3>
-                            <div class="form-grid">
-                                <div class="form-group">
-                                    <label class="form-label">Hora Inicio Matutino</label>
-                                    <input type="time" class="form-input" id="morning-start" value="06:00">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Hora Inicio Vespertino</label>
-                                    <input type="time" class="form-input" id="afternoon-start" value="14:00">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Hora Inicio Nocturno</label>
-                                    <input type="time" class="form-input" id="night-start" value="22:00">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Duración Turno (horas)</label>
-                                    <input type="number" class="form-input" id="shift-duration" value="8" min="6" max="12">
-                                </div>
-                            </div>
-                            <div style="margin-top: 15px;">
-                                <button class="btn btn-primary" id="save-schedule-config">
-                                    <i class="fas fa-save"></i> Guardar Configuración
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="settings-section">
-                            <h3 class="settings-title">Gestión de Datos</h3>
-                            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                                <button class="btn btn-secondary" id="export-data">
-                                    <i class="fas fa-download"></i> Exportar Datos
-                                </button>
-                                <button class="btn btn-secondary" id="import-data">
-                                    <i class="fas fa-upload"></i> Importar Datos
-                                </button>
-                                <button class="btn btn-danger" id="clear-data">
-                                    <i class="fas fa-trash"></i> Limpiar Datos
-                                </button>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: #f5f5f5; border: 1px solid #ccc;"></div>
+                                <span>Días de descanso</span>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- MODAL PARA ASIGNACIONES -->
-    <div id="assignment-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">Nueva Asignación</h2>
-                <button class="close">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label class="form-label">Promotor</label>
-                        <select class="form-select" id="modal-promotor">
+        <!-- PESTAÑA ASIGNACIONES -->
+        <div class="tab-content" id="tab-asignaciones">
+            <div class="tab-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-list"></i> Gestión de Asignaciones</h2>
+                    <p>Administra todas las asignaciones de los promotores</p>
+                </div>
+                
+                <div class="filters-bar">
+                    <div class="filter-group">
+                        <label>Promotor:</label>
+                        <select id="filter-promotor" class="form-select">
+                            <option value="">Todos</option>
                             <option value="juan">Juan Carlos González</option>
                             <option value="maria">María Elena Rodríguez</option>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Tienda</label>
-                        <select class="form-select" id="modal-tienda">
-                            <option value="oxxo-centro">OXXO Centro (#1048)</option>
-                            <option value="seven-eleven">7-Eleven Plaza (#1077)</option>
-                            <option value="circle-k">Circle K Revolución (#1014)</option>
-                            <option value="oxxo-universidad">OXXO Universidad (#1038)</option>
+                    <div class="filter-group">
+                        <label>Tienda:</label>
+                        <select id="filter-tienda" class="form-select">
+                            <option value="">Todas</option>
+                            <option value="oxxo-centro">OXXO Centro</option>
+                            <option value="seven-eleven">7-Eleven Plaza</option>
+                            <option value="circle-k">Circle K Revolución</option>
+                            <option value="oxxo-universidad">OXXO Universidad</option>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Fecha</label>
-                        <input type="date" class="form-input" id="modal-fecha">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Turno</label>
-                        <select class="form-select" id="modal-turno">
-                            <option value="matutino">Matutino (6:00-14:00)</option>
-                            <option value="vespertino">Vespertino (14:00-22:00)</option>
-                            <option value="nocturno">Nocturno (22:00-6:00)</option>
+                    <div class="filter-group">
+                        <label>Periodo:</label>
+                        <select id="filter-periodo" class="form-select">
+                            <option value="semana">Esta semana</option>
+                            <option value="mes">Este mes</option>
+                            <option value="trimestre">Trimestre</option>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Tipo</label>
-                        <select class="form-select" id="modal-tipo">
-                            <option value="fijo-principal">Fijo - Principal</option>
-                            <option value="fijo-rotacion">Fijo - Rotación</option>
-                            <option value="cubredescansos-apoyo">Cubredescansos - Apoyo</option>
-                            <option value="cubredescansos-otros">Cubredescansos - Otros</option>
-                        </select>
+                    <button class="btn-primary" onclick="actualizarListaAsignaciones()">
+                        <i class="fas fa-sync-alt"></i> Actualizar
+                    </button>
+                </div>
+
+                <div class="assignments-list" id="assignments-list">
+                    <!-- Las asignaciones se cargan dinámicamente aquí -->
+                </div>
+            </div>
+        </div>
+
+        <!-- PESTAÑA DASHBOARD -->
+        <div class="tab-content" id="tab-dashboard">
+            <div class="tab-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-chart-pie"></i> Dashboard Operativo</h2>
+                    <p>Métricas y análisis en tiempo real</p>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="metric-card">
+                        <div class="metric-icon" style="background: var(--primary-color);">
+                            <i class="fas fa-calendar-check"></i>
+                        </div>
+                        <div class="metric-content">
+                            <div class="metric-value" id="total-assignments">0</div>
+                            <div class="metric-label">Asignaciones Total</div>
+                        </div>
                     </div>
-                    <div class="form-group" style="grid-column: 1 / -1;">
-                        <label class="form-label">Notas</label>
-                        <input type="text" class="form-input" id="modal-notas" placeholder="Notas adicionales...">
+
+                    <div class="metric-card">
+                        <div class="metric-icon" style="background: var(--success-color);">
+                            <i class="fas fa-percentage"></i>
+                        </div>
+                        <div class="metric-content">
+                            <div class="metric-value" id="coverage-percentage">0%</div>
+                            <div class="metric-label">Cobertura Efectiva</div>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-icon" style="background: var(--warning-color);">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="metric-content">
+                            <div class="metric-value" id="total-hours">0h</div>
+                            <div class="metric-label">Horas Programadas</div>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-icon" style="background: var(--info-color);">
+                            <i class="fas fa-store"></i>
+                        </div>
+                        <div class="metric-content">
+                            <div class="metric-value" id="active-stores">0</div>
+                            <div class="metric-label">Tiendas Activas</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-section">
+                    <h3>Distribución por Promotor</h3>
+                    <div class="chart-placeholder">
+                        <div class="chart-visual">
+                            <div class="promotor-chart-item">
+                                <div class="chart-bar juan-bar" style="width: 65%;">
+                                    <span>Juan - 65%</span>
+                                </div>
+                            </div>
+                            <div class="promotor-chart-item">
+                                <div class="chart-bar maria-bar" style="width: 35%;">
+                                    <span>María - 35%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="summary-section">
+                    <h3>Resumen Semanal</h3>
+                    <div class="summary-grid">
+                        <div class="summary-item">
+                            <strong>Lunes a Viernes:</strong> Juan en OXXO Centro (Matutino), María rotación vespertina
+                        </div>
+                        <div class="summary-item">
+                            <strong>Fines de Semana:</strong> María cubre descansos de Juan en tienda principal
+                        </div>
+                        <div class="summary-item">
+                            <strong>Productividad:</strong> 91.5% general, superando objetivo del 90%
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" id="modal-cancel">Cancelar</button>
-                <button class="btn btn-primary" id="modal-save">Guardar</button>
-                <button class="btn btn-danger" id="modal-delete" style="display: none;">Eliminar</button>
+        </div>
+
+        <!-- PESTAÑA REPORTES -->
+        <div class="tab-content" id="tab-reportes">
+            <div class="tab-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-file-alt"></i> Centro de Reportes</h2>
+                    <p>Genera y consulta reportes detallados</p>
+                </div>
+
+                <div class="report-controls">
+                    <div class="control-group">
+                        <label>Tipo de Reporte:</label>
+                        <select id="report-type" class="form-select">
+                            <option value="general">Reporte General</option>
+                            <option value="promotor">Por Promotor</option>
+                            <option value="tienda">Por Tienda</option>
+                            <option value="horario">Análisis de Horarios</option>
+                            <option value="cobertura">Análisis de Cobertura</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label>Periodo:</label>
+                        <select id="report-period" class="form-select">
+                            <option value="semana">Última Semana</option>
+                            <option value="mes">Último Mes</option>
+                            <option value="trimestre">Último Trimestre</option>
+                            <option value="custom">Personalizado</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label>Formato:</label>
+                        <select id="report-format" class="form-select">
+                            <option value="html">Ver en pantalla</option>
+                            <option value="pdf">Exportar PDF</option>
+                            <option value="excel">Exportar Excel</option>
+                            <option value="csv">Exportar CSV</option>
+                        </select>
+                    </div>
+                    <button class="btn-primary" onclick="generarReporte()">
+                        <i class="fas fa-chart-line"></i> Generar Reporte
+                    </button>
+                </div>
+
+                <div class="report-output" id="report-output">
+                    <div class="report-placeholder">
+                        <i class="fas fa-file-alt" style="font-size: 3rem; color: #ccc;"></i>
+                        <h3>Selecciona los parámetros y genera tu reporte</h3>
+                        <p>Los reportes aparecerán aquí una vez generados</p>
+                    </div>
+                </div>
+
+                <div class="reports-history">
+                    <h3>Reportes Recientes</h3>
+                    <div class="history-list">
+                        <div class="history-item">
+                            <i class="fas fa-file-pdf"></i>
+                            <span>Reporte General - Septiembre 2025.pdf</span>
+                            <small>Generado hace 2 horas</small>
+                        </div>
+                        <div class="history-item">
+                            <i class="fas fa-file-excel"></i>
+                            <span>Análisis Promotores - Agosto 2025.xlsx</span>
+                            <small>Generado hace 1 día</small>
+                        </div>
+                        <div class="history-item">
+                            <i class="fas fa-file-csv"></i>
+                            <span>Cobertura Tiendas - Q3 2025.csv</span>
+                            <small>Generado hace 3 días</small>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- SCRIPTS -->
-    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.js'></script>
-    <script>
-        // ===== PROMOTOR SPA MODULE =====
-        class PromotorSPA {
-            constructor(containerId, options = {}) {
-                this.container = document.getElementById(containerId);
-                this.options = {
-                    apiEndpoint: '/api/promotores',
-                    locale: 'es',
-                    timezone: 'America/Mexico_City',
-                    defaultView: 'dayGridMonth',
-                    ...options
-                };
-                
-                this.state = {
-                    currentView: 'calendar',
-                    events: [],
-                    promotores: [],
-                    tiendas: [],
-                    config: {}
-                };
-                
-                this.calendar = null;
-                this.currentEvent = null;
-                
-                this.init();
-            }
+    <!-- ERROR STATE -->
+    <div class="error-state" id="error-state" style="display: none;">
+        <div class="error-container">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h3>Error cargando FullCalendar</h3>
+            <p id="error-message">No se pudieron cargar las dependencias necesarias.</p>
+            <button class="btn-primary" onclick="location.reload()">
+                <i class="fas fa-redo"></i> Reintentar
+            </button>
+        </div>
+    </div>
+</div>
 
-            init() {
-                this.loadInitialData();
-                this.setupEventListeners();
-                this.initializeCalendar();
-                this.loadView('calendar');
-            }
+<!-- MODAL DE EVENTO -->
+<div id="modal-evento-horas" class="modal-horas">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">Detalles de Asignación</h2>
+            <button class="close-horas">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label class="form-label">Promotor:</label>
+                <select class="form-select" id="event-promotor-horas">
+                    <option value="juan">Juan Carlos González (Fijo)</option>
+                    <option value="maria">María Elena Rodríguez (Cubredescansos)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Tienda:</label>
+                <select class="form-select" id="event-tienda-horas">
+                    <option value="oxxo-centro">OXXO Centro (#1048)</option>
+                    <option value="seven-eleven">7-Eleven Plaza (#1077)</option>
+                    <option value="circle-k">Circle K Revolución (#1014)</option>
+                    <option value="oxxo-universidad">OXXO Universidad (#1038)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Tipo de Asignación:</label>
+                <select class="form-select" id="event-tipo-horas">
+                    <option value="fijo-principal">Principal (Fijo)</option>
+                    <option value="fijo-rotacion">Rotación (Fijo)</option>
+                    <option value="cubredescansos-apoyo">Apoyo Directo</option>
+                    <option value="cubredescansos-otros">Otras Asignaciones</option>
+                    <option value="descanso">Día de Descanso</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Horario:</label>
+                <select class="form-select" id="event-horario-horas">
+                    <option value="6-14">Matutino (6:00 - 14:00)</option>
+                    <option value="14-22">Vespertino (14:00 - 22:00)</option>
+                    <option value="22-6">Nocturno (22:00 - 6:00)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Fecha:</label>
+                <input type="date" class="form-input" id="event-fecha-horas">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Notas:</label>
+                <input type="text" class="form-input" id="event-notas-horas" placeholder="Notas adicionales...">
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel-horas" id="btn-cancelar-horas">Cancelar</button>
+            <button class="btn-primary" id="btn-guardar-horas">Guardar</button>
+            <button class="btn-primary" id="btn-eliminar-horas" style="background: #f44336; display: none;">Eliminar</button>
+        </div>
+    </div>
+</div>
 
-            // ===== DATA MANAGEMENT =====
-            loadInitialData() {
-                // Datos de ejemplo - En producción vendría de API
-                this.state.events = [
-                    {
-                        id: '1',
-                        title: 'Juan - OXXO Centro',
-                        start: '2025-09-15T06:00:00',
-                        end: '2025-09-15T14:00:00',
-                        className: 'event-fijo-principal',
-                        extendedProps: {
-                            promotor: 'juan',
-                            tipo: 'fijo-principal',
-                            tienda: 'oxxo-centro'
-                        }
-                    },
-                    {
-                        id: '2',
-                        title: 'María (Apoyo Juan)',
-                        start: '2025-09-15T14:00:00',
-                        end: '2025-09-15T22:00:00',
-                        className: 'event-cubredescansos-apoyo',
-                        extendedProps: {
-                            promotor: 'maria',
-                            tipo: 'cubredescansos-apoyo',
-                            tienda: 'oxxo-centro'
-                        }
-                    }
-                ];
+<style>
+/* ===== VARIABLES CSS ===== */
+:root {
+    --primary-color: #667eea;
+    --secondary-color: #764ba2;
+    --success-color: #4CAF50;
+    --warning-color: #ff9800;
+    --danger-color: #f44336;
+    --info-color: #2196F3;
+    --background: #f5f7fa;
+    --surface: rgba(255, 255, 255, 0.95);
+    --text-primary: #333;
+    --text-secondary: #666;
+    --border-color: #e0e0e0;
+    --shadow: 0 4px 15px rgba(0,0,0,0.08);
+    --radius: 12px;
+}
 
-                this.state.promotores = [
-                    { id: 'juan', nombre: 'Juan Carlos González', tipo: 'fijo' },
-                    { id: 'maria', nombre: 'María Elena Rodríguez', tipo: 'cubredescansos' }
-                ];
+/* ===== RESET Y BASE ===== */
+.horas-module * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
-                this.state.tiendas = [
-                    { id: 'oxxo-centro', nombre: 'OXXO Centro', numero: '1048' },
-                    { id: 'seven-eleven', nombre: '7-Eleven Plaza', numero: '1077' },
-                    { id: 'circle-k', nombre: 'Circle K Revolución', numero: '1014' },
-                    { id: 'oxxo-universidad', nombre: 'OXXO Universidad', numero: '1038' }
-                ];
-            }
+.horas-module {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: var(--background);
+    color: var(--text-primary);
+    min-height: 100vh;
+}
 
-            async saveData() {
-                if (this.options.apiEndpoint) {
-                    try {
-                        const response = await fetch(this.options.apiEndpoint, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(this.state)
-                        });
-                        return await response.json();
-                    } catch (error) {
-                        console.error('Error saving data:', error);
-                        return false;
-                    }
-                } else {
-                    // Guardar en localStorage como fallback
-                    localStorage.setItem('promotor-spa-data', JSON.stringify(this.state));
-                    return true;
+/* ===== HEADER STYLES ===== */
+.horas-module .module-header {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    padding: 20px 0;
+    box-shadow: var(--shadow);
+}
+
+.horas-module .header-content {
+    max-width: 1800px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.horas-module .header-title {
+    display: flex;
+    align-items: center;
+    color: white;
+}
+
+.horas-module .header-icon {
+    font-size: 2rem;
+    margin-right: 15px;
+}
+
+.horas-module .header-title h1 {
+    font-size: 2rem;
+    font-weight: 600;
+}
+
+.horas-module .header-actions {
+    display: flex;
+    gap: 15px;
+}
+
+.horas-module .btn-primary, 
+.horas-module .btn-secondary {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+}
+
+.horas-module .btn-primary {
+    background-color: var(--success-color);
+    color: white;
+}
+
+.horas-module .btn-primary:hover:not(:disabled) {
+    background-color: #45a049;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(76, 175, 80, 0.3);
+}
+
+.horas-module .btn-secondary {
+    background-color: rgba(255,255,255,0.2);
+    color: white;
+    backdrop-filter: blur(10px);
+}
+
+.horas-module .btn-secondary:hover:not(:disabled) {
+    background-color: rgba(255,255,255,0.3);
+    transform: translateY(-2px);
+}
+
+/* ===== NAVEGACIÓN POR PESTAÑAS ===== */
+.horas-module .tabs-navigation {
+    background: var(--surface);
+    border-radius: 0;
+    padding: 0;
+    margin: 0;
+    box-shadow: var(--shadow);
+    display: flex;
+    max-width: 1800px;
+    margin: 0 auto;
+}
+
+.horas-module .tab-item {
+    flex: 1;
+    padding: 16px 20px;
+    background: #f8f9fa;
+    color: var(--text-secondary);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border-bottom: 3px solid transparent;
+    font-size: 0.9rem;
+}
+
+.horas-module .tab-item:hover {
+    background: #e9ecef;
+    color: var(--primary-color);
+}
+
+.horas-module .tab-item.active {
+    background: var(--primary-color);
+    color: white;
+    border-bottom-color: var(--secondary-color);
+    box-shadow: inset 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.horas-module .tab-item i {
+    font-size: 1.1rem;
+}
+
+/* ===== SISTEMA DE PESTAÑAS CORREGIDO ===== */
+.horas-module .main-content {
+    max-width: 1800px;
+    margin: 0 auto;
+    position: relative;
+}
+
+/* IMPORTANTE: Cada pestaña debe ocupar todo el espacio disponible */
+.horas-module .tab-content {
+    display: none !important;
+    width: 100%;
+    min-height: 500px;
+    animation: fadeInTab 0.3s ease;
+}
+
+.horas-module .tab-content.active {
+    display: block !important;
+}
+
+@keyframes fadeInTab {
+    from { 
+        opacity: 0; 
+        transform: translateY(10px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
+}
+
+/* ===== PESTAÑA CALENDARIO - GRID LAYOUT CORREGIDO ===== */
+.horas-module #tab-calendario {
+    display: none;
+    padding: 30px 20px;
+    grid-template-columns: 350px 1fr;
+    gap: 30px;
+    align-items: start;
+}
+
+.horas-module #tab-calendario.active {
+    display: grid !important;
+}
+
+.horas-module .relationships-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+}
+
+.horas-module .calendar-area {
+    width: 100%;
+}
+
+/* ===== OTRAS PESTAÑAS - PADDING CONSISTENTE ===== */
+.horas-module .tab-section {
+    padding: 30px 20px;
+    width: 100%;
+}
+
+.horas-module .section-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.horas-module .section-header h2 {
+    font-size: 1.8rem;
+    color: var(--text-primary);
+    margin-bottom: 10px;
+}
+
+.horas-module .section-header p {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+}
+
+/* ===== LOADING DEPENDENCIES ===== */
+.horas-module .dependencies-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+    padding: 40px;
+}
+
+.horas-module .loading-container {
+    text-align: center;
+    background: var(--surface);
+    backdrop-filter: blur(20px);
+    border-radius: var(--radius);
+    padding: 3rem;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.horas-module .loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(102, 126, 234, 0.1);
+    border-radius: 50%;
+    border-top-color: var(--primary-color);
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.horas-module .loading-container h3 {
+    margin-bottom: 10px;
+    color: var(--text-primary);
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+.horas-module .loading-container p {
+    color: var(--text-secondary);
+    font-size: 1rem;
+}
+
+/* ===== ERROR STATE ===== */
+.horas-module .error-state {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+    padding: 40px;
+}
+
+.horas-module .error-container {
+    text-align: center;
+    background: var(--surface);
+    backdrop-filter: blur(20px);
+    border-radius: var(--radius);
+    padding: 3rem;
+    box-shadow: var(--shadow);
+    border: 2px solid var(--danger-color);
+}
+
+.horas-module .error-container i {
+    font-size: 4rem;
+    color: var(--danger-color);
+    margin-bottom: 1rem;
+}
+
+.horas-module .error-container h3 {
+    color: var(--danger-color);
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+.horas-module .error-container p {
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+}
+
+/* ===== PROMOTOR CARDS ===== */
+.horas-module .promotor-card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.horas-module .promotor-header {
+    padding: 20px;
+    color: white;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.horas-module .promotor-fijo .promotor-header {
+    background: linear-gradient(135deg, #1976d2, #1565c0);
+}
+
+.horas-module .promotor-cubredescansos .promotor-header {
+    background: linear-gradient(135deg, #f57c00, #ef6c00);
+}
+
+.horas-module .promotor-info {
+    padding: 20px;
+}
+
+.horas-module .promotor-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: var(--text-primary);
+}
+
+.horas-module .promotor-details {
+    color: var(--text-secondary);
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+}
+
+.horas-module .tienda-principal {
+    background: #e3f2fd;
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+}
+
+.horas-module .tienda-principal-label {
+    font-size: 0.8rem;
+    color: #1976d2;
+    font-weight: 600;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+}
+
+.horas-module .tienda-principal-name {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* ===== RELATIONSHIP INDICATOR ===== */
+.horas-module .relationship-indicator {
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 20px;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.horas-module .relationship-title {
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+}
+
+.horas-module .relationship-visual {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.horas-module .promotor-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+}
+
+.horas-module .fijo-icon {
+    background: linear-gradient(135deg, #1976d2, #1565c0);
+}
+
+.horas-module .cubredescansos-icon {
+    background: linear-gradient(135deg, #f57c00, #ef6c00);
+}
+
+.horas-module .arrow {
+    font-size: 2rem;
+    color: var(--success-color);
+}
+
+/* ===== CALENDAR AREA ===== */
+.horas-module .calendar-area {
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.horas-module .calendar-header {
+    background: linear-gradient(135deg, #26c6da, #00acc1);
+    color: white;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.horas-module .calendar-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.horas-module .calendar-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.horas-module .view-btn {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.horas-module .view-btn.active {
+    background: rgba(255,255,255,0.4);
+}
+
+.horas-module .view-btn:hover {
+    background: rgba(255,255,255,0.3);
+}
+
+/* ===== CALENDAR CONTAINER ===== */
+.horas-module .calendar-container {
+    padding: 20px;
+}
+
+.horas-module #calendar-horas {
+    height: 700px;
+}
+
+/* ===== FILTROS Y CONTROLES ===== */
+.horas-module .filters-bar {
+    display: flex;
+    gap: 20px;
+    align-items: end;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    flex-wrap: wrap;
+}
+
+.horas-module .filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 150px;
+}
+
+.horas-module .filter-group label {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+/* ===== LISTA DE ASIGNACIONES ===== */
+.horas-module .assignments-list {
+    display: grid;
+    gap: 15px;
+}
+
+.horas-module .assignment-card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.horas-module .assignment-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+}
+
+/* ===== DASHBOARD ===== */
+.horas-module .dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.horas-module .metric-card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    border: 1px solid var(--border-color);
+    transition: transform 0.3s ease;
+}
+
+.horas-module .metric-card:hover {
+    transform: translateY(-3px);
+}
+
+.horas-module .metric-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+}
+
+.horas-module .metric-content {
+    flex: 1;
+}
+
+.horas-module .metric-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1;
+}
+
+.horas-module .metric-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-top: 5px;
+}
+
+.horas-module .chart-section {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+}
+
+.horas-module .chart-placeholder {
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.horas-module .chart-visual {
+    width: 100%;
+    max-width: 400px;
+}
+
+.horas-module .promotor-chart-item {
+    margin-bottom: 15px;
+}
+
+.horas-module .chart-bar {
+    height: 40px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    padding: 0 15px;
+    color: white;
+    font-weight: 600;
+    transition: width 0.8s ease;
+}
+
+.horas-module .juan-bar {
+    background: linear-gradient(135deg, #1976d2, #1565c0);
+}
+
+.horas-module .maria-bar {
+    background: linear-gradient(135deg, #f57c00, #ef6c00);
+}
+
+.horas-module .summary-section {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+}
+
+.horas-module .summary-grid {
+    display: grid;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.horas-module .summary-item {
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border-left: 4px solid var(--primary-color);
+}
+
+/* ===== REPORTES ===== */
+.horas-module .report-controls {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    align-items: end;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+}
+
+.horas-module .control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.horas-module .control-group label {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+.horas-module .report-output {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 40px;
+    box-shadow: var(--shadow);
+    margin-bottom: 30px;
+    min-height: 300px;
+}
+
+.horas-module .report-placeholder {
+    text-align: center;
+    color: var(--text-secondary);
+}
+
+.horas-module .report-placeholder h3 {
+    margin: 15px 0 10px;
+}
+
+.horas-module .reports-history {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+}
+
+.horas-module .history-list {
+    display: grid;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.horas-module .history-item {
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    transition: background 0.3s ease;
+}
+
+.horas-module .history-item:hover {
+    background: #e9ecef;
+    cursor: pointer;
+}
+
+.horas-module .history-item i {
+    font-size: 1.2rem;
+    color: var(--primary-color);
+}
+
+.horas-module .history-item span {
+    flex: 1;
+    font-weight: 500;
+}
+
+.horas-module .history-item small {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+}
+
+/* ===== FULLCALENDAR CUSTOMIZATION ===== */
+.horas-module .fc-event {
+    border: none !important;
+    border-radius: 6px !important;
+    font-size: 0.8rem !important;
+    font-weight: 600 !important;
+    padding: 2px 6px !important;
+    margin: 1px 0 !important;
+}
+
+/* Eventos del promotor fijo - tienda principal */
+.horas-module .event-fijo-principal {
+    background: linear-gradient(135deg, #1976d2, #1565c0) !important;
+    color: white !important;
+    border-left: 4px solid #0d47a1 !important;
+}
+
+/* Eventos del promotor fijo - rotación */
+.horas-module .event-fijo-rotacion {
+    background: linear-gradient(135deg, #7b1fa2, #6a1b9a) !important;
+    color: white !important;
+    border-left: 4px solid #4a148c !important;
+}
+
+/* Eventos cubredescansos - apoyo */
+.horas-module .event-cubredescansos-apoyo {
+    background: linear-gradient(135deg, #f57c00, #ef6c00) !important;
+    color: white !important;
+    border-left: 4px solid #e65100 !important;
+}
+
+/* Eventos cubredescansos - otros */
+.horas-module .event-cubredescansos-otros {
+    background: linear-gradient(135deg, #388e3c, #2e7d32) !important;
+    color: white !important;
+    border-left: 4px solid #1b5e20 !important;
+}
+
+/* Días de descanso */
+.horas-module .event-descanso {
+    background: #f5f5f5 !important;
+    color: #999 !important;
+    border-left: 4px solid #ccc !important;
+}
+
+/* ===== LEGEND ===== */
+.horas-module .legend {
+    margin-top: 20px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.horas-module .legend-title {
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: var(--text-primary);
+}
+
+.horas-module .legend-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+}
+
+.horas-module .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.horas-module .legend-color {
+    width: 20px;
+    height: 15px;
+    border-radius: 3px;
+}
+
+/* ===== MODAL STYLES ===== */
+.modal-horas {
+    display: none;
+    position: fixed;
+    z-index: 10000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    backdrop-filter: blur(10px);
+}
+
+.modal-content {
+    background-color: white;
+    margin: 5% auto;
+    padding: 0;
+    border-radius: var(--radius);
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    animation: modalSlideIn 0.3s ease;
+}
+
+@keyframes modalSlideIn {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-header {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    padding: 20px;
+    border-radius: var(--radius) var(--radius) 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+.close-horas {
+    color: white;
+    font-size: 2rem;
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
+    background: none;
+    padding: 5px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.close-horas:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.form-input, 
+.form-select {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+
+.form-input:focus, 
+.form-select:focus {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.modal-footer {
+    padding: 20px;
+    text-align: right;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.btn-cancel-horas {
+    padding: 10px 20px;
+    background: #ccc;
+    color: var(--text-primary);
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-cancel-horas:hover {
+    background: #bbb;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+    .horas-module #tab-calendario.active {
+        grid-template-columns: 1fr;
+        padding: 20px 10px;
+    }
+    
+    .horas-module .relationships-sidebar {
+        flex-direction: row;
+        overflow-x: auto;
+        width: 100%;
+        gap: 15px;
+    }
+    
+    .horas-module .promotor-card {
+        min-width: 280px;
+        flex-shrink: 0;
+    }
+
+    .horas-module .dashboard-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+
+    .horas-module .filters-bar,
+    .horas-module .report-controls {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+}
+
+@media (max-width: 768px) {
+    .horas-module .header-content {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .horas-module .header-actions {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .horas-module .tabs-navigation {
+        flex-direction: column;
+    }
+
+    .horas-module .tab-item {
+        padding: 12px 15px;
+    }
+
+    .horas-module .calendar-header {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .horas-module #calendar-horas {
+        height: 500px;
+    }
+
+    .horas-module .tab-section {
+        padding: 20px 10px;
+    }
+
+    .horas-module .metric-card {
+        flex-direction: column;
+        text-align: center;
+        gap: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .modal-content {
+        margin: 2% 5%;
+        max-width: calc(100% - 10px);
+    }
+
+    .modal-footer {
+        flex-direction: column;
+    }
+
+    .btn-primary,
+    .btn-cancel-horas {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .horas-module .relationships-sidebar {
+        flex-direction: column;
+    }
+
+    .horas-module .tab-item span {
+        display: none;
+    }
+
+    .horas-module .chart-visual {
+        font-size: 0.8rem;
+    }
+}
+</style>
+
+<script>
+(function() {
+    'use strict';
+    
+    console.log('🚀 Iniciando módulo Hojas de Horas con pestañas CORREGIDO...');
+    
+    // ===== VARIABLES GLOBALES =====
+    let calendar = null;
+    let currentEvent = null;
+    let isFullCalendarLoaded = false;
+    let loadingPromise = null;
+    let cleanupListeners = [];
+    let currentTab = 'calendario';
+    
+    // ===== ELEMENTOS DOM =====
+    const elements = {
+        dependenciesLoading: document.getElementById('dependencies-loading'),
+        mainContentHoras: document.getElementById('main-content-horas'),
+        errorState: document.getElementById('error-state'),
+        errorMessage: document.getElementById('error-message')
+    };
+    
+    // ===== REGISTRAR CLEANUP EN EL SISTEMA SPA =====
+    if (window.registerModuleCleanup) {
+        window.registerModuleCleanup(function() {
+            console.log('🧹 Limpiando módulo Hojas de Horas...');
+            
+            // Destruir FullCalendar
+            if (calendar) {
+                try {
+                    calendar.destroy();
+                } catch (error) {
+                    console.warn('⚠️ Error destruyendo calendar:', error);
                 }
+                calendar = null;
             }
-
-            // ===== EVENT LISTENERS =====
-            setupEventListeners() {
-                // Navigation tabs
-                document.querySelectorAll('.nav-tab').forEach(tab => {
-                    tab.addEventListener('click', (e) => {
-                        this.loadView(e.target.closest('.nav-tab').dataset.view);
-                    });
-                });
-
-                // Header buttons
-                document.getElementById('btn-nueva-asignacion').addEventListener('click', () => {
-                    this.openAssignmentModal();
-                });
-
-                document.getElementById('btn-configuracion').addEventListener('click', () => {
-                    this.loadView('settings');
-                });
-
-                // Modal events
-                document.querySelector('.close').addEventListener('click', () => {
-                    this.closeModal();
-                });
-
-                document.getElementById('modal-cancel').addEventListener('click', () => {
-                    this.closeModal();
-                });
-
-                document.getElementById('modal-save').addEventListener('click', () => {
-                    this.saveAssignment();
-                });
-
-                document.getElementById('modal-delete').addEventListener('click', () => {
-                    this.deleteAssignment();
-                });
-
-                // Settings buttons
-                document.getElementById('save-schedule-config').addEventListener('click', () => {
-                    this.saveScheduleConfig();
-                });
-
-                document.getElementById('export-data').addEventListener('click', () => {
-                    this.exportData();
-                });
-
-                document.getElementById('import-data').addEventListener('click', () => {
-                    this.importData();
-                });
-
-                document.getElementById('clear-data').addEventListener('click', () => {
-                    this.clearData();
-                });
+            
+            // Limpiar event listeners
+            cleanupListeners.forEach(cleanup => {
+                try { cleanup(); } catch (e) { console.warn('Error limpiando listener:', e); }
+            });
+            cleanupListeners = [];
+            
+            // Cerrar modal
+            const modal = document.getElementById('modal-evento-horas');
+            if (modal) modal.style.display = 'none';
+            
+            // Reset variables
+            currentEvent = null;
+            isFullCalendarLoaded = false;
+            loadingPromise = null;
+            currentTab = 'calendario';
+            
+            console.log('✅ Módulo Hojas de Horas limpiado');
+        });
+    }
+    
+    // ===== HELPER PARA EVENT LISTENERS =====
+    function addListener(element, event, handler, options) {
+        if (!element) return;
+        element.addEventListener(event, handler, options);
+        cleanupListeners.push(() => element.removeEventListener(event, handler, options));
+    }
+    
+    // ===== DATOS DE EVENTOS =====
+    const eventos = [
+        // Juan - Tienda Principal
+        { id: 'j1', title: 'Juan - OXXO Centro', start: '2025-09-01T06:00:00', end: '2025-09-01T14:00:00', className: 'event-fijo-principal', extendedProps: { promotor: 'juan', tipo: 'fijo-principal', tienda: 'oxxo-centro' }},
+        { id: 'j2', title: 'Juan - OXXO Centro', start: '2025-09-02T06:00:00', end: '2025-09-02T14:00:00', className: 'event-fijo-principal', extendedProps: { promotor: 'juan', tipo: 'fijo-principal', tienda: 'oxxo-centro' }},
+        { id: 'j3', title: 'Juan - OXXO Centro', start: '2025-09-03T06:00:00', end: '2025-09-03T14:00:00', className: 'event-fijo-principal', extendedProps: { promotor: 'juan', tipo: 'fijo-principal', tienda: 'oxxo-centro' }},
+        { id: 'j4', title: 'Juan - OXXO Centro', start: '2025-09-04T06:00:00', end: '2025-09-04T14:00:00', className: 'event-fijo-principal', extendedProps: { promotor: 'juan', tipo: 'fijo-principal', tienda: 'oxxo-centro' }},
+        { id: 'j5', title: 'Juan - OXXO Centro', start: '2025-09-05T06:00:00', end: '2025-09-05T14:00:00', className: 'event-fijo-principal', extendedProps: { promotor: 'juan', tipo: 'fijo-principal', tienda: 'oxxo-centro' }},
+        
+        // María - Apoyo y otras asignaciones
+        { id: 'm1', title: 'María - 7-Eleven', start: '2025-09-01T14:00:00', end: '2025-09-01T22:00:00', className: 'event-cubredescansos-otros', extendedProps: { promotor: 'maria', tipo: 'cubredescansos-otros', tienda: 'seven-eleven' }},
+        { id: 'm2', title: 'María - Circle K', start: '2025-09-02T14:00:00', end: '2025-09-02T22:00:00', className: 'event-cubredescansos-otros', extendedProps: { promotor: 'maria', tipo: 'cubredescansos-otros', tienda: 'circle-k' }},
+        { id: 'm3', title: 'María - OXXO Univ', start: '2025-09-03T14:00:00', end: '2025-09-03T22:00:00', className: 'event-cubredescansos-otros', extendedProps: { promotor: 'maria', tipo: 'cubredescansos-otros', tienda: 'oxxo-universidad' }},
+        { id: 'm4', title: 'María (Apoyo Juan)', start: '2025-09-04T14:00:00', end: '2025-09-04T22:00:00', className: 'event-cubredescansos-apoyo', extendedProps: { promotor: 'maria', tipo: 'cubredescansos-apoyo', tienda: 'oxxo-centro' }},
+        { id: 'm5', title: 'María - 7-Eleven', start: '2025-09-05T14:00:00', end: '2025-09-05T22:00:00', className: 'event-cubredescansos-otros', extendedProps: { promotor: 'maria', tipo: 'cubredescansos-otros', tienda: 'seven-eleven' }},
+        
+        // Fin de semana - María cubre a Juan
+        { id: 'm6', title: 'María (Cobertura Juan)', start: '2025-09-07T06:00:00', end: '2025-09-07T14:00:00', className: 'event-cubredescansos-apoyo', extendedProps: { promotor: 'maria', tipo: 'cubredescansos-apoyo', tienda: 'oxxo-centro' }},
+        { id: 'm7', title: 'María (Cobertura Juan)', start: '2025-09-08T06:00:00', end: '2025-09-08T14:00:00', className: 'event-cubredescansos-apoyo', extendedProps: { promotor: 'maria', tipo: 'cubredescansos-apoyo', tienda: 'oxxo-centro' }},
+        { id: 'jd1', title: 'Juan - Descanso', start: '2025-09-07', className: 'event-descanso', extendedProps: { promotor: 'juan', tipo: 'descanso' }},
+        { id: 'jd2', title: 'Juan - Descanso', start: '2025-09-08', className: 'event-descanso', extendedProps: { promotor: 'juan', tipo: 'descanso' }},
+        
+        // Segunda semana
+        { id: 'j9', title: 'Juan - OXXO Centro', start: '2025-09-09T06:00:00', end: '2025-09-09T14:00:00', className: 'event-fijo-principal', extendedProps: { promotor: 'juan', tipo: 'fijo-principal', tienda: 'oxxo-centro' }},
+        { id: 'j10', title: 'Juan - OXXO Centro', start: '2025-09-10T06:00:00', end: '2025-09-10T14:00:00', className: 'event-fijo-principal', extendedProps: { promotor: 'juan', tipo: 'fijo-principal', tienda: 'oxxo-centro' }},
+        { id: 'j11', title: 'Juan - Circle K', start: '2025-09-11T06:00:00', end: '2025-09-11T14:00:00', className: 'event-fijo-rotacion', extendedProps: { promotor: 'juan', tipo: 'fijo-rotacion', tienda: 'circle-k' }},
+        { id: 'j12', title: 'Juan - 7-Eleven', start: '2025-09-12T06:00:00', end: '2025-09-12T14:00:00', className: 'event-fijo-rotacion', extendedProps: { promotor: 'juan', tipo: 'fijo-rotacion', tienda: 'seven-eleven' }},
+        
+        // María segunda semana
+        { id: 'm9', title: 'María - Circle K', start: '2025-09-09T14:00:00', end: '2025-09-09T22:00:00', className: 'event-cubredescansos-otros', extendedProps: { promotor: 'maria', tipo: 'cubredescansos-otros', tienda: 'circle-k' }},
+        { id: 'm10', title: 'María - 7-Eleven', start: '2025-09-10T14:00:00', end: '2025-09-10T22:00:00', className: 'event-cubredescansos-otros', extendedProps: { promotor: 'maria', tipo: 'cubredescansos-otros', tienda: 'seven-eleven' }},
+        { id: 'm11', title: 'María (Cubre Principal)', start: '2025-09-11T06:00:00', end: '2025-09-11T14:00:00', className: 'event-cubredescansos-apoyo', extendedProps: { promotor: 'maria', tipo: 'cubredescansos-apoyo', tienda: 'oxxo-centro' }},
+        { id: 'm12', title: 'María (Cubre Principal)', start: '2025-09-12T06:00:00', end: '2025-09-12T14:00:00', className: 'event-cubredescansos-apoyo', extendedProps: { promotor: 'maria', tipo: 'cubredescansos-apoyo', tienda: 'oxxo-centro' }}
+    ];
+    
+    // ===== FUNCIONES DE CARGA DE DEPENDENCIAS SIMPLIFICADAS =====
+    async function loadCSS(url) {
+        return new Promise((resolve, reject) => {
+            const existingLink = document.querySelector(`link[href="${url}"]`);
+            if (existingLink) {
+                console.log('✅ CSS ya cargado');
+                resolve();
+                return;
             }
-
-            // ===== VIEW MANAGEMENT =====
-            loadView(viewName) {
-                // Update navigation
-                document.querySelectorAll('.nav-tab').forEach(tab => {
-                    tab.classList.remove('active');
-                });
-                document.querySelector(`[data-view="${viewName}"]`).classList.add('active');
-
-                // Update content
-                document.querySelectorAll('.view-content').forEach(content => {
-                    content.classList.remove('active');
-                });
-                document.getElementById(`${viewName}-view`).classList.add('active');
-
-                this.state.currentView = viewName;
-
-                // Load view-specific data
-                switch (viewName) {
-                    case 'assignments':
-                        this.loadAssignmentsList();
-                        break;
-                    case 'stats':
-                        this.loadStats();
-                        break;
-                    case 'settings':
-                        this.loadSettings();
-                        break;
-                }
+            
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = url;
+            link.onload = () => { 
+                console.log('✅ CSS cargado exitosamente'); 
+                resolve(); 
+            };
+            link.onerror = (e) => {
+                console.error('❌ Error cargando CSS:', e);
+                reject(new Error('Error cargando CSS'));
+            };
+            document.head.appendChild(link);
+        });
+    }
+    
+    async function loadJS(url) {
+        return new Promise((resolve, reject) => {
+            if (window.FullCalendar) {
+                console.log('✅ FullCalendar ya disponible');
+                resolve();
+                return;
             }
-
-            // ===== CALENDAR MANAGEMENT =====
-            initializeCalendar() {
-                const calendarEl = document.getElementById('calendar');
-                
-                this.calendar = new FullCalendar.Calendar(calendarEl, {
-                    initialView: this.options.defaultView,
-                    locale: this.options.locale,
-                    timeZone: this.options.timezone,
-                    headerToolbar: {
-                        left: 'prev,next today',
-                        center: 'title',
-                        right: 'dayGridMonth,timeGridWeek,timeGridDay'
-                    },
-                    events: this.state.events,
-                    editable: true,
-                    selectable: true,
-                    eventClick: (info) => {
-                        this.openAssignmentModal(info.event);
-                    },
-                    select: (info) => {
-                        this.openAssignmentModal(null, info.start);
-                    },
-                    eventDrop: (info) => {
-                        this.updateEvent(info.event);
-                    },
-                    eventResize: (info) => {
-                        this.updateEvent(info.event);
-                    }
-                });
-
-                this.calendar.render();
-            }
-
-            updateEvent(event) {
-                console.log('Event updated:', event.title);
-                this.saveData();
-            }
-
-            // ===== MODAL MANAGEMENT =====
-            openAssignmentModal(event = null, startDate = null) {
-                const modal = document.getElementById('assignment-modal');
-                this.currentEvent = event;
-
-                if (event) {
-                    document.querySelector('.modal-title').textContent = 'Editar Asignación';
-                    document.getElementById('modal-promotor').value = event.extendedProps.promotor;
-                    document.getElementById('modal-tienda').value = event.extendedProps.tienda;
-                    document.getElementById('modal-tipo').value = event.extendedProps.tipo;
-                    document.getElementById('modal-fecha').value = event.start.toISOString().split('T')[0];
-                    document.getElementById('modal-notas').value = event.extendedProps.notas || '';
-                    document.getElementById('modal-delete').style.display = 'inline-block';
-                } else {
-                    document.querySelector('.modal-title').textContent = 'Nueva Asignación';
-                    document.getElementById('modal-promotor').value = 'juan';
-                    document.getElementById('modal-tienda').value = 'oxxo-centro';
-                    document.getElementById('modal-tipo').value = 'fijo-principal';
-                    document.getElementById('modal-turno').value = 'matutino';
-                    document.getElementById('modal-notas').value = '';
-                    
-                    if (startDate) {
-                        document.getElementById('modal-fecha').value = startDate.toISOString().split('T')[0];
+            
+            const existingScript = document.querySelector(`script[src*="fullcalendar"]`);
+            if (existingScript) {
+                console.log('✅ Script FullCalendar ya existe');
+                setTimeout(() => {
+                    if (window.FullCalendar) {
+                        resolve();
                     } else {
-                        document.getElementById('modal-fecha').value = new Date().toISOString().split('T')[0];
+                        reject(new Error('FullCalendar no disponible'));
                     }
-                    
-                    document.getElementById('modal-delete').style.display = 'none';
-                }
-
-                modal.style.display = 'block';
+                }, 500);
+                return;
             }
-
-            closeModal() {
-                document.getElementById('assignment-modal').style.display = 'none';
-                this.currentEvent = null;
+            
+            const script = document.createElement('script');
+            script.src = url;
+            script.onload = () => {
+                setTimeout(() => {
+                    if (window.FullCalendar) {
+                        console.log('✅ FullCalendar cargado y disponible');
+                        resolve();
+                    } else {
+                        reject(new Error('FullCalendar no disponible'));
+                    }
+                }, 300);
+            };
+            script.onerror = (e) => {
+                console.error('❌ Error cargando FullCalendar JS:', e);
+                reject(new Error('Error cargando FullCalendar JS'));
+            };
+            document.head.appendChild(script);
+        });
+    }
+    
+    async function loadFullCalendarDependencies() {
+        if (loadingPromise) return loadingPromise;
+        if (isFullCalendarLoaded && window.FullCalendar) return Promise.resolve();
+        
+        console.log('🔄 Cargando dependencias de FullCalendar...');
+        
+        loadingPromise = Promise.all([
+            loadCSS('https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.css'),
+            loadJS('https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.js')
+        ]).then(() => {
+            console.log('✅ FullCalendar cargado exitosamente');
+            isFullCalendarLoaded = true;
+            return true;
+        }).catch((error) => {
+            console.error('❌ Error cargando FullCalendar:', error);
+            loadingPromise = null;
+            throw error;
+        });
+        
+        return loadingPromise;
+    }
+    
+    // ===== FUNCIONES DE NAVEGACIÓN POR PESTAÑAS CORREGIDAS =====
+    function switchTab(tabName) {
+        console.log(`🔄 Cambiando a pestaña: ${tabName}`);
+        
+        // Remover clase active de todas las pestañas
+        document.querySelectorAll('.tab-item').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        
+        // Agregar clase active a la pestaña seleccionada
+        const selectedTab = document.querySelector(`[data-tab="${tabName}"]`);
+        if (selectedTab) {
+            selectedTab.classList.add('active');
+        }
+        
+        // OCULTAR TODO EL CONTENIDO PRIMERO
+        document.querySelectorAll('.tab-content').forEach(content => {
+            content.classList.remove('active');
+        });
+        
+        // MOSTRAR SOLO EL CONTENIDO SELECCIONADO
+        const targetTab = document.getElementById(`tab-${tabName}`);
+        if (targetTab) {
+            targetTab.classList.add('active');
+            console.log(`✅ Mostrando contenido de: ${tabName}`);
+        } else {
+            console.error(`❌ No se encontró el contenido para: ${tabName}`);
+        }
+        
+        currentTab = tabName;
+        
+        // Ejecutar acciones específicas por pestaña después de mostrar el contenido
+        setTimeout(() => {
+            switch (tabName) {
+                case 'calendario':
+                    if (calendar) {
+                        console.log('📅 Redimensionando calendario');
+                        calendar.updateSize();
+                    }
+                    break;
+                case 'asignaciones':
+                    console.log('📝 Cargando lista de asignaciones');
+                    cargarListaAsignaciones();
+                    break;
+                case 'dashboard':
+                    console.log('📊 Actualizando dashboard');
+                    actualizarDashboard();
+                    break;
+                case 'reportes':
+                    console.log('📄 Pestaña reportes activada');
+                    break;
+                default:
+                    console.log(`📋 Pestaña ${tabName} activada`);
             }
-
-            saveAssignment() {
-                const promotor = document.getElementById('modal-promotor').value;
-                const tienda = document.getElementById('modal-tienda').value;
-                const tipo = document.getElementById('modal-tipo').value;
-                const fecha = document.getElementById('modal-fecha').value;
-                const turno = document.getElementById('modal-turno').value;
-                const notas = document.getElementById('modal-notas').value;
-
-                // Create event data
-                const eventData = this.createEventData(promotor, tienda, tipo, fecha, turno, notas);
-
-                if (this.currentEvent) {
-                    // Update existing event
-                    this.currentEvent.setProp('title', eventData.title);
-                    this.currentEvent.setStart(eventData.start);
-                    this.currentEvent.setEnd(eventData.end);
-                    this.currentEvent.setProp('className', eventData.className);
-                    Object.keys(eventData.extendedProps).forEach(key => {
-                        this.currentEvent.setExtendedProp(key, eventData.extendedProps[key]);
-                    });
-                } else {
-                    // Create new event
-                    eventData.id = Date.now().toString();
-                    this.calendar.addEvent(eventData);
-                }
-
-                this.saveData();
-                this.closeModal();
-            }
-
-            deleteAssignment() {
-                if (this.currentEvent && confirm('¿Eliminar esta asignación?')) {
-                    this.currentEvent.remove();
-                    this.saveData();
-                    this.closeModal();
-                }
-            }
-
-            createEventData(promotor, tienda, tipo, fecha, turno, notas) {
-                const promotorNames = { 'juan': 'Juan', 'maria': 'María' };
-                const tiendaNames = {
-                    'oxxo-centro': 'OXXO Centro',
-                    'seven-eleven': '7-Eleven',
-                    'circle-k': 'Circle K',
-                    'oxxo-universidad': 'OXXO Univ'
-                };
-
-                const turnos = {
-                    'matutino': { start: '06:00', end: '14:00' },
-                    'vespertino': { start: '14:00', end: '22:00' },
-                    'nocturno': { start: '22:00', end: '06:00' }
-                };
-
-                const title = `${promotorNames[promotor]} - ${tiendaNames[tienda]}`;
-                const turnoData = turnos[turno];
-                const startTime = `${fecha}T${turnoData.start}:00`;
-                let endTime = `${fecha}T${turnoData.end}:00`;
-
-                // Adjust for night shift
-                if (turno === 'nocturno') {
-                    const endDate = new Date(fecha);
-                    endDate.setDate(endDate.getDate() + 1);
-                    endTime = endDate.toISOString().split('T')[0] + `T${turnoData.end}:00`;
-                }
-
-                return {
-                    title,
-                    start: startTime,
-                    end: endTime,
-                    className: `event-${tipo}`,
-                    extendedProps: { promotor, tipo, tienda, notas }
-                };
-            }
-
-            // ===== LIST VIEW =====
-            loadAssignmentsList() {
-                const container = document.getElementById('assignments-list');
-                const events = this.calendar.getEvents();
-                
-                container.innerHTML = '';
-                
-                events.forEach(event => {
-                    const card = this.createAssignmentCard(event);
-                    container.appendChild(card);
+        }, 100);
+    }
+    
+    // ===== FUNCIONES ESPECÍFICAS DE PESTAÑAS =====
+    function cargarListaAsignaciones() {
+        const assignmentsList = document.getElementById('assignments-list');
+        if (!assignmentsList) {
+            console.error('❌ No se encontró assignments-list');
+            return;
+        }
+        
+        const events = calendar ? calendar.getEvents() : eventos;
+        let html = '';
+        
+        events.forEach(event => {
+            const startDate = event.start || new Date(event.start);
+            const endDate = event.end || null;
+            
+            const formatDate = (date) => {
+                return date.toLocaleDateString('es-ES', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
                 });
-            }
+            };
 
-            createAssignmentCard(event) {
-                const card = document.createElement('div');
-                card.className = 'assignment-card';
-                
-                const formatDate = (date) => {
-                    return date.toLocaleDateString('es-ES', {
-                        weekday: 'long',
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                    });
-                };
+            const formatTime = (date) => {
+                return date.toLocaleTimeString('es-ES', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            };
 
-                const formatTime = (date) => {
-                    return date.toLocaleTimeString('es-ES', {
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    });
-                };
+            const tiendaNames = {
+                'oxxo-centro': 'OXXO Centro (#1048)',
+                'seven-eleven': '7-Eleven Plaza (#1077)',
+                'circle-k': 'Circle K Revolución (#1014)',
+                'oxxo-universidad': 'OXXO Universidad (#1038)'
+            };
 
-                card.innerHTML = `
-                    <div class="assignment-header">
-                        <div class="assignment-title">${event.title}</div>
-                        <div class="assignment-date">${formatDate(event.start)}</div>
+            const promotorNames = {
+                'juan': 'Juan Carlos González',
+                'maria': 'María Elena Rodríguez'
+            };
+
+            const tipoLabels = {
+                'fijo-principal': 'Fijo - Principal',
+                'fijo-rotacion': 'Fijo - Rotación',
+                'cubredescansos-apoyo': 'Cubredescansos - Apoyo',
+                'cubredescansos-otros': 'Cubredescansos - Otros',
+                'descanso': 'Día de Descanso'
+            };
+
+            html += `
+                <div class="assignment-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h3 style="margin: 0; color: var(--text-primary);">${event.title}</h3>
+                        <span style="color: var(--text-secondary); font-size: 0.9rem;">${formatDate(startDate)}</span>
                     </div>
-                    <div class="assignment-details">
-                        <div class="detail-item">
-                            <i class="fas fa-clock"></i>
-                            ${formatTime(event.start)} - ${event.end ? formatTime(event.end) : 'Todo el día'}
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <i class="fas fa-clock" style="color: var(--primary-color);"></i>
+                            <span>${endDate ? formatTime(startDate) + ' - ' + formatTime(endDate) : 'Todo el día'}</span>
                         </div>
-                        <div class="detail-item">
-                            <i class="fas fa-user"></i>
-                            ${event.extendedProps.promotor === 'juan' ? 'Juan C. González' : 'María E. Rodríguez'}
+                        
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <i class="fas fa-user" style="color: var(--primary-color);"></i>
+                            <span>${promotorNames[event.extendedProps?.promotor] || 'Sin asignar'}</span>
                         </div>
-                        <div class="detail-item">
-                            <i class="fas fa-store"></i>
-                            ${this.getTiendaName(event.extendedProps.tienda)}
+                        
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <i class="fas fa-store" style="color: var(--primary-color);"></i>
+                            <span>${tiendaNames[event.extendedProps?.tienda] || 'Sin tienda'}</span>
                         </div>
-                        <div class="detail-item">
-                            <i class="fas fa-tag"></i>
-                            ${this.getTipoLabel(event.extendedProps.tipo)}
+                        
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <i class="fas fa-tag" style="color: var(--primary-color);"></i>
+                            <span>${tipoLabels[event.extendedProps?.tipo] || 'Sin tipo'}</span>
                         </div>
                     </div>
-                    <div class="assignment-actions">
-                        <button class="btn btn-sm btn-primary" onclick="app.openAssignmentModal(app.calendar.getEventById('${event.id}'))">
+                    
+                    ${event.extendedProps?.notas ? `
+                        <div style="background: #f8f9fa; padding: 10px; border-radius: 6px; margin-bottom: 15px;">
+                            <strong>Notas:</strong> ${event.extendedProps.notas}
+                        </div>
+                    ` : ''}
+                    
+                    <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                        <button class="btn-primary" style="padding: 6px 12px; font-size: 0.8rem;" onclick="editarEvento('${event.id}')">
                             <i class="fas fa-edit"></i> Editar
                         </button>
-                        <button class="btn btn-sm btn-danger" onclick="app.deleteEventById('${event.id}')">
+                        <button style="padding: 6px 12px; font-size: 0.8rem; background: var(--danger-color); color: white; border: none; border-radius: 6px; cursor: pointer;" onclick="eliminarEvento('${event.id}')">
                             <i class="fas fa-trash"></i> Eliminar
                         </button>
                     </div>
-                `;
-
-                return card;
+                </div>
+            `;
+        });
+        
+        if (html === '') {
+            html = '<div style="text-align: center; padding: 40px; color: var(--text-secondary);">No hay asignaciones registradas</div>';
+        }
+        
+        assignmentsList.innerHTML = html;
+        console.log(`✅ Lista cargada con ${events.length} asignaciones`);
+    }
+    
+    function actualizarDashboard() {
+        const events = calendar ? calendar.getEvents() : eventos;
+        
+        // Calcular métricas
+        const totalAssignments = events.length;
+        const totalHours = events.reduce((total, event) => {
+            if (event.end && event.start) {
+                const duration = (new Date(event.end) - new Date(event.start)) / (1000 * 60 * 60);
+                return total + duration;
             }
-
-            deleteEventById(eventId) {
-                if (confirm('¿Eliminar esta asignación?')) {
-                    const event = this.calendar.getEventById(eventId);
-                    if (event) {
-                        event.remove();
-                        this.saveData();
-                        this.loadAssignmentsList();
-                    }
-                }
-            }
-
-            getTiendaName(tiendaId) {
-                const tienda = this.state.tiendas.find(t => t.id === tiendaId);
-                return tienda ? `${tienda.nombre} (#${tienda.numero})` : tiendaId;
-            }
-
-            getTipoLabel(tipo) {
-                const labels = {
-                    'fijo-principal': 'Fijo - Principal',
-                    'fijo-rotacion': 'Fijo - Rotación',
-                    'cubredescansos-apoyo': 'Cubredescansos - Apoyo',
-                    'cubredescansos-otros': 'Cubredescansos - Otros'
-                };
-                return labels[tipo] || tipo;
-            }
-
-            // ===== STATS VIEW =====
-            loadStats() {
-                const events = this.calendar.getEvents();
-                const stats = this.calculateStats(events);
-                
-                document.getElementById('stat-total-assignments').textContent = stats.totalAssignments;
-                document.getElementById('stat-coverage').textContent = stats.coverage + '%';
-                document.getElementById('stat-hours').textContent = stats.totalHours + 'h';
-                document.getElementById('stat-stores').textContent = stats.activeStores;
-            }
-
-            calculateStats(events) {
-                const totalAssignments = events.length;
-                const totalHours = events.reduce((total, event) => {
-                    if (event.end) {
-                        const duration = (event.end - event.start) / (1000 * 60 * 60);
-                        return total + duration;
-                    }
-                    return total;
-                }, 0);
-                
-                const activeStores = new Set(events.map(e => e.extendedProps.tienda)).size;
-                const coverage = Math.round(Math.random() * 20 + 80); // Simulated
-
-                return {
-                    totalAssignments,
-                    totalHours: Math.round(totalHours),
-                    activeStores,
-                    coverage
-                };
-            }
-
-            // ===== SETTINGS =====
-            loadSettings() {
-                // Load current configuration
-                document.getElementById('timezone').value = this.options.timezone;
-                document.getElementById('default-view').value = this.options.defaultView;
-            }
-
-            saveScheduleConfig() {
-                const config = {
-                    timezone: document.getElementById('timezone').value,
-                    defaultView: document.getElementById('default-view').value,
-                    morningStart: document.getElementById('morning-start').value,
-                    afternoonStart: document.getElementById('afternoon-start').value,
-                    nightStart: document.getElementById('night-start').value,
-                    shiftDuration: document.getElementById('shift-duration').value
-                };
-
-                this.options = { ...this.options, ...config };
-                this.saveData();
-                
-                alert('Configuración guardada exitosamente');
-            }
-
-            exportData() {
-                const data = {
-                    events: this.calendar.getEvents().map(event => ({
-                        id: event.id,
-                        title: event.title,
-                        start: event.start,
-                        end: event.end,
-                        extendedProps: event.extendedProps
-                    })),
-                    config: this.options
-                };
-
-                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'promotores-data.json';
-                a.click();
-                URL.revokeObjectURL(url);
-            }
-
-            importData() {
-                const input = document.createElement('input');
-                input.type = 'file';
-                input.accept = '.json';
-                input.onchange = (e) => {
-                    const file = e.target.files[0];
-                    if (file) {
-                        const reader = new FileReader();
-                        reader.onload = (e) => {
-                            try {
-                                const data = JSON.parse(e.target.result);
-                                this.calendar.removeAllEvents();
-                                data.events.forEach(event => {
-                                    this.calendar.addEvent(event);
-                                });
-                                alert('Datos importados exitosamente');
-                            } catch (error) {
-                                alert('Error al importar datos: ' + error.message);
-                            }
-                        };
-                        reader.readAsText(file);
-                    }
-                };
-                input.click();
-            }
-
-            clearData() {
-                if (confirm('¿Estás seguro de que quieres limpiar todos los datos?')) {
-                    this.calendar.removeAllEvents();
-                    this.saveData();
-                    alert('Datos limpiados exitosamente');
-                }
-            }
-
-            // ===== PUBLIC API =====
-            addEvent(eventData) {
-                return this.calendar.addEvent(eventData);
-            }
-
-            removeEvent(eventId) {
-                const event = this.calendar.getEventById(eventId);
+            return total;
+        }, 0);
+        
+        const activeStores = new Set(events.map(e => e.extendedProps?.tienda).filter(t => t)).size;
+        const coverage = Math.min(100, Math.round((totalAssignments / 30) * 100));
+        
+        // Actualizar elementos del DOM
+        const totalElement = document.getElementById('total-assignments');
+        const hoursElement = document.getElementById('total-hours');
+        const storesElement = document.getElementById('active-stores');
+        const coverageElement = document.getElementById('coverage-percentage');
+        
+        if (totalElement) totalElement.textContent = totalAssignments;
+        if (hoursElement) hoursElement.textContent = Math.round(totalHours) + 'h';
+        if (storesElement) storesElement.textContent = activeStores;
+        if (coverageElement) coverageElement.textContent = coverage + '%';
+        
+        console.log('📊 Dashboard actualizado:', { totalAssignments, totalHours, activeStores, coverage });
+    }
+    
+    // ===== FUNCIONES GLOBALES PARA BOTONES =====
+    window.editarEvento = function(eventId) {
+        if (calendar) {
+            const event = calendar.getEventById(eventId);
+            if (event) openEventModal(event);
+        }
+    };
+    
+    window.eliminarEvento = function(eventId) {
+        if (confirm('¿Está seguro de eliminar esta asignación?')) {
+            if (calendar) {
+                const event = calendar.getEventById(eventId);
                 if (event) {
                     event.remove();
-                    return true;
+                    cargarListaAsignaciones();
+                    actualizarDashboard();
+                    console.log('✅ Evento eliminado:', eventId);
                 }
-                return false;
-            }
-
-            getEvents() {
-                return this.calendar.getEvents();
-            }
-
-            updateConfig(newConfig) {
-                this.options = { ...this.options, ...newConfig };
-                this.saveData();
-            }
-
-            destroy() {
-                if (this.calendar) {
-                    this.calendar.destroy();
-                }
-                this.container.innerHTML = '';
             }
         }
-
-        // ===== INICIALIZACIÓN =====
-        let app;
-
-        document.addEventListener('DOMContentLoaded', function() {
-            // Inicializar la aplicación SPA
-            app = new PromotorSPA('promotor-spa', {
-                apiEndpoint: null, // Set to your API endpoint
-                locale: 'es',
-                timezone: 'America/Mexico_City',
-                defaultView: 'dayGridMonth'
-            });
-
-            // Exponer globalmente para debugging
-            window.PromotorApp = app;
+    };
+    
+    window.actualizarListaAsignaciones = function() {
+        cargarListaAsignaciones();
+        console.log('🔄 Lista de asignaciones actualizada');
+    };
+    
+    window.generarReporte = function() {
+        const reportType = document.getElementById('report-type')?.value || 'general';
+        const reportPeriod = document.getElementById('report-period')?.value || 'mes';
+        const reportFormat = document.getElementById('report-format')?.value || 'html';
+        const reportOutput = document.getElementById('report-output');
+        
+        if (!reportOutput) return;
+        
+        const events = calendar ? calendar.getEvents() : eventos;
+        
+        let reportContent = `
+            <div style="text-align: center; margin-bottom: 30px;">
+                <h2 style="color: var(--primary-color);">📊 Reporte ${reportType.charAt(0).toUpperCase() + reportType.slice(1)}</h2>
+                <p style="color: var(--text-secondary);">Período: ${reportPeriod} | Formato: ${reportFormat.toUpperCase()}</p>
+                <hr style="margin: 20px 0; border: none; border-top: 2px solid var(--border-color);">
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px;">
+                <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; text-align: center;">
+                    <h4 style="color: #1976d2; margin-bottom: 10px;">Total Asignaciones</h4>
+                    <div style="font-size: 2rem; font-weight: bold;">${events.length}</div>
+                </div>
+                <div style="background: #e8f5e8; padding: 15px; border-radius: 8px; text-align: center;">
+                    <h4 style="color: var(--success-color); margin-bottom: 10px;">Horas Programadas</h4>
+                    <div style="font-size: 2rem; font-weight: bold;">312h</div>
+                </div>
+                <div style="background: #fff3e0; padding: 15px; border-radius: 8px; text-align: center;">
+                    <h4 style="color: var(--warning-color); margin-bottom: 10px;">Cobertura</h4>
+                    <div style="font-size: 2rem; font-weight: bold;">91.5%</div>
+                </div>
+                <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; text-align: center;">
+                    <h4 style="color: var(--info-color); margin-bottom: 10px;">Tiendas</h4>
+                    <div style="font-size: 2rem; font-weight: bold;">4</div>
+                </div>
+            </div>
+            
+            <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid var(--border-color);">
+                <h3 style="margin-bottom: 15px; color: var(--text-primary);">Resumen Ejecutivo</h3>
+                <ul style="line-height: 1.8; color: var(--text-secondary);">
+                    <li>✅ <strong>Cobertura completa</strong> en tienda principal (OXXO Centro)</li>
+                    <li>✅ <strong>María Rodríguez</strong> mantiene excelente flexibilidad de horarios</li>
+                    <li>⚠️ Se recomienda <strong>optimizar rotación</strong> en tiendas secundarias</li>
+                    <li>📈 <strong>Productividad general</strong> supera objetivos en 1.5%</li>
+                    <li>🎯 <strong>Sin conflictos detectados</strong> en la programación actual</li>
+                </ul>
+            </div>
+            
+            <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; text-align: center;">
+                <small style="color: var(--text-secondary);">
+                    Reporte generado el ${new Date().toLocaleDateString('es-ES', { 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    })}
+                </small>
+            </div>
+        `;
+        
+        reportOutput.innerHTML = reportContent;
+        console.log(`📄 Reporte generado: ${reportType} - ${reportPeriod}`);
+    };
+    
+    // ===== INICIALIZACIÓN DEL MÓDULO =====
+    async function initModule() {
+        try {
+            console.log('🚀 Iniciando módulo...');
+            
+            // Verificar elementos críticos
+            if (!elements.dependenciesLoading || !elements.mainContentHoras || !elements.errorState) {
+                throw new Error('Elementos DOM críticos no encontrados');
+            }
+            
+            // Mostrar loading
+            elements.dependenciesLoading.style.display = 'flex';
+            elements.mainContentHoras.style.display = 'none';
+            elements.errorState.style.display = 'none';
+            
+            // Cargar dependencias
+            await loadFullCalendarDependencies();
+            
+            // Mostrar contenido
+            elements.dependenciesLoading.style.display = 'none';
+            elements.mainContentHoras.style.display = 'block';
+            
+            // Inicializar calendar y eventos
+            await initializeCalendar();
+            initializeEventListeners();
+            
+            // Cargar contenido inicial del dashboard
+            actualizarDashboard();
+            
+            // Asegurar que se muestre la pestaña correcta al inicio
+            setTimeout(() => {
+                switchTab('calendario');
+            }, 100);
+            
+            console.log('✅ Módulo inicializado correctamente');
+            
+        } catch (error) {
+            console.error('❌ Error inicializando módulo:', error);
+            showError(error.message);
+        }
+    }
+    
+    function showError(message) {
+        elements.dependenciesLoading.style.display = 'none';
+        elements.mainContentHoras.style.display = 'none';
+        elements.errorState.style.display = 'flex';
+        if (elements.errorMessage) elements.errorMessage.textContent = message;
+    }
+    
+    // ===== INICIALIZACIÓN DE FULLCALENDAR =====
+    async function initializeCalendar() {
+        if (!window.FullCalendar) throw new Error('FullCalendar no disponible');
+        
+        const calendarEl = document.getElementById('calendar-horas');
+        if (!calendarEl) throw new Error('Elemento calendario no encontrado');
+        
+        console.log('📅 Inicializando FullCalendar...');
+        
+        calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            locale: 'es',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: ''
+            },
+            events: eventos,
+            editable: true,
+            droppable: true,
+            selectable: true,
+            
+            eventClick: function(info) {
+                openEventModal(info.event);
+            },
+            
+            select: function(info) {
+                openEventModal(null, info.start, info.end);
+            },
+            
+            eventDrop: function(info) {
+                console.log('📅 Evento movido:', info.event.title);
+                actualizarDashboard();
+                if (currentTab === 'asignaciones') {
+                    cargarListaAsignaciones();
+                }
+            },
+            
+            eventResize: function(info) {
+                console.log('📅 Evento redimensionado:', info.event.title);
+                actualizarDashboard();
+                if (currentTab === 'asignaciones') {
+                    cargarListaAsignaciones();
+                }
+            },
+            
+            dayMaxEvents: 3,
+            moreLinkClick: 'popover',
+            slotMinTime: '06:00:00',
+            slotMaxTime: '24:00:00',
+            allDaySlot: true,
+            firstDay: 1,
+            height: 'auto',
+            aspectRatio: 1.35
         });
-
-        // ===== API PARA INTEGRACIÓN =====
-        // Uso en otras aplicaciones:
-        // const promotorModule = new PromotorSPA('mi-contenedor', { ... });
-    </script>
-</body>
-</html>
+        
+        calendar.render();
+        console.log('✅ FullCalendar renderizado');
+    }
+    
+    // ===== EVENT LISTENERS =====
+    function initializeEventListeners() {
+        console.log('🎯 Configurando event listeners...');
+        
+        // NAVEGACIÓN POR PESTAÑAS - CORREGIDO
+        document.querySelectorAll('.tab-item').forEach(tab => {
+            addListener(tab, 'click', function() {
+                const tabName = this.dataset.tab;
+                console.log(`🖱️ Clic en pestaña: ${tabName}`);
+                switchTab(tabName);
+            });
+        });
+        
+        // Botones de vista del calendario
+        document.querySelectorAll('.view-btn').forEach(btn => {
+            addListener(btn, 'click', function() {
+                document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                if (calendar) calendar.changeView(this.dataset.view);
+            });
+        });
+        
+        // Botón nueva asignación
+        const btnNueva = document.getElementById('btn-nueva-asignacion');
+        if (btnNueva) addListener(btnNueva, 'click', () => openEventModal());
+        
+        // Generar horarios automáticos
+        const btnGenerar = document.getElementById('btn-generar-horarios');
+        if (btnGenerar) {
+            addListener(btnGenerar, 'click', () => {
+                if (confirm('¿Generar horarios automáticos para el mes?')) {
+                    generateAutomaticSchedule();
+                }
+            });
+        }
+        
+        // Botón dashboard en header
+        const btnDashboard = document.getElementById('btn-dashboard-horas');
+        if (btnDashboard) addListener(btnDashboard, 'click', () => switchTab('dashboard'));
+        
+        // Modal controls
+        const closeBtn = document.querySelector('.close-horas');
+        const cancelBtn = document.getElementById('btn-cancelar-horas');
+        const saveBtn = document.getElementById('btn-guardar-horas');
+        const deleteBtn = document.getElementById('btn-eliminar-horas');
+        
+        if (closeBtn) addListener(closeBtn, 'click', closeModal);
+        if (cancelBtn) addListener(cancelBtn, 'click', closeModal);
+        if (saveBtn) addListener(saveBtn, 'click', saveEvent);
+        if (deleteBtn) addListener(deleteBtn, 'click', deleteEvent);
+        
+        // Cerrar modal al hacer clic fuera
+        addListener(window, 'click', function(event) {
+            const modal = document.getElementById('modal-evento-horas');
+            if (event.target === modal) closeModal();
+        });
+        
+        console.log('✅ Event listeners configurados');
+    }
+    
+    // ===== FUNCIONES DE MODAL =====
+    function openEventModal(event = null, startDate = null, endDate = null) {
+        const modal = document.getElementById('modal-evento-horas');
+        if (!modal) return;
+        
+        currentEvent = event;
+        
+        // Elementos del formulario
+        const titleEl = modal.querySelector('.modal-title');
+        const promotorEl = document.getElementById('event-promotor-horas');
+        const tiendaEl = document.getElementById('event-tienda-horas');
+        const tipoEl = document.getElementById('event-tipo-horas');
+        const horarioEl = document.getElementById('event-horario-horas');
+        const fechaEl = document.getElementById('event-fecha-horas');
+        const notasEl = document.getElementById('event-notas-horas');
+        const deleteBtn = document.getElementById('btn-eliminar-horas');
+        
+        if (event) {
+            // Editar evento existente
+            if (titleEl) titleEl.textContent = 'Editar Asignación';
+            if (promotorEl) promotorEl.value = event.extendedProps.promotor || 'juan';
+            if (tiendaEl) tiendaEl.value = event.extendedProps.tienda || 'oxxo-centro';
+            if (tipoEl) tipoEl.value = event.extendedProps.tipo || 'fijo-principal';
+            if (fechaEl && event.start) fechaEl.value = event.start.toISOString().split('T')[0];
+            if (notasEl) notasEl.value = event.extendedProps.notas || '';
+            
+            // Determinar horario
+            if (horarioEl && event.start) {
+                const hour = event.start.getHours();
+                if (hour >= 6 && hour < 14) horarioEl.value = '6-14';
+                else if (hour >= 14 && hour < 22) horarioEl.value = '14-22';
+                else horarioEl.value = '22-6';
+            }
+            
+            if (deleteBtn) deleteBtn.style.display = 'inline-block';
+        } else {
+            // Nuevo evento
+            if (titleEl) titleEl.textContent = 'Nueva Asignación';
+            if (promotorEl) promotorEl.value = 'juan';
+            if (tiendaEl) tiendaEl.value = 'oxxo-centro';
+            if (tipoEl) tipoEl.value = 'fijo-principal';
+            if (horarioEl) horarioEl.value = '6-14';
+            if (notasEl) notasEl.value = '';
+            
+            if (fechaEl) {
+                if (startDate) {
+                    fechaEl.value = startDate.toISOString().split('T')[0];
+                } else {
+                    fechaEl.value = new Date().toISOString().split('T')[0];
+                }
+            }
+            
+            if (deleteBtn) deleteBtn.style.display = 'none';
+        }
+        
+        modal.style.display = 'block';
+    }
+    
+    function closeModal() {
+        const modal = document.getElementById('modal-evento-horas');
+        if (modal) modal.style.display = 'none';
+        currentEvent = null;
+    }
+    
+    function saveEvent() {
+        const promotorEl = document.getElementById('event-promotor-horas');
+        const tiendaEl = document.getElementById('event-tienda-horas');
+        const tipoEl = document.getElementById('event-tipo-horas');
+        const horarioEl = document.getElementById('event-horario-horas');
+        const fechaEl = document.getElementById('event-fecha-horas');
+        const notasEl = document.getElementById('event-notas-horas');
+        
+        if (!promotorEl || !tiendaEl || !tipoEl || !horarioEl || !fechaEl || !calendar) {
+            console.error('❌ Elementos del formulario o calendar no disponibles');
+            return;
+        }
+        
+        const promotor = promotorEl.value;
+        const tienda = tiendaEl.value;
+        const tipo = tipoEl.value;
+        const horario = horarioEl.value;
+        const fecha = fechaEl.value;
+        const notas = notasEl ? notasEl.value : '';
+        
+        // Mapear nombres
+        const tiendaNames = {
+            'oxxo-centro': 'OXXO Centro',
+            'seven-eleven': '7-Eleven Plaza',
+            'circle-k': 'Circle K Revolución',
+            'oxxo-universidad': 'OXXO Universidad'
+        };
+        
+        const promotorNames = { 'juan': 'Juan', 'maria': 'María' };
+        
+        // Crear título
+        let title = '';
+        if (tipo === 'descanso') {
+            title = `${promotorNames[promotor]} - Descanso`;
+        } else if (tipo === 'cubredescansos-apoyo') {
+            title = `${promotorNames[promotor]} (Apoyo Juan)`;
+        } else {
+            title = `${promotorNames[promotor]} - ${tiendaNames[tienda]}`;
+        }
+        
+        // Calcular fechas/horas
+        const [startHour, endHour] = horario.split('-').map(Number);
+        const startDateTime = new Date(fecha + 'T' + startHour.toString().padStart(2, '0') + ':00:00');
+        const endDateTime = new Date(fecha + 'T' + endHour.toString().padStart(2, '0') + ':00:00');
+        
+        if (endHour <= startHour) {
+            endDateTime.setDate(endDateTime.getDate() + 1);
+        }
+        
+        const eventData = {
+            title: title,
+            start: tipo === 'descanso' ? fecha : startDateTime.toISOString(),
+            end: tipo === 'descanso' ? undefined : endDateTime.toISOString(),
+            className: `event-${tipo}`,
+            extendedProps: { promotor, tipo, tienda, notas }
+        };
+        
+        try {
+            if (currentEvent) {
+                // Actualizar evento existente
+                currentEvent.setProp('title', eventData.title);
+                currentEvent.setStart(eventData.start);
+                if (eventData.end) currentEvent.setEnd(eventData.end);
+                currentEvent.setProp('className', eventData.className);
+                Object.keys(eventData.extendedProps).forEach(key => {
+                    currentEvent.setExtendedProp(key, eventData.extendedProps[key]);
+                });
+            } else {
+                // Crear nuevo evento
+                eventData.id = 'new_' + Date.now();
+                calendar.addEvent(eventData);
+            }
+            
+            closeModal();
+            actualizarDashboard();
+            
+            if (currentTab === 'asignaciones') {
+                cargarListaAsignaciones();
+            }
+            
+            console.log('✅ Evento guardado');
+        } catch (error) {
+            console.error('❌ Error guardando evento:', error);
+            alert('Error guardando el evento. Intenta de nuevo.');
+        }
+    }
+    
+    function deleteEvent() {
+        if (currentEvent && confirm('¿Eliminar esta asignación?')) {
+            try {
+                currentEvent.remove();
+                closeModal();
+                actualizarDashboard();
+                
+                if (currentTab === 'asignaciones') {
+                    cargarListaAsignaciones();
+                }
+                
+                console.log('✅ Evento eliminado');
+            } catch (error) {
+                console.error('❌ Error eliminando evento:', error);
+                alert('Error eliminando el evento. Intenta de nuevo.');
+            }
+        }
+    }
+    
+    function generateAutomaticSchedule() {
+        if (!calendar) {
+            console.error('❌ Calendar no disponible');
+            return;
+        }
+        
+        const today = new Date();
+        const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+        let eventsAdded = 0;
+        
+        for (let d = new Date(today); d <= endOfMonth; d.setDate(d.getDate() + 1)) {
+            const dayOfWeek = d.getDay();
+            const dateStr = d.toISOString().split('T')[0];
+            
+            if (dayOfWeek >= 1 && dayOfWeek <= 5) {
+                const existingEvents = calendar.getEvents().filter(event => 
+                    event.start && event.start.toISOString().split('T')[0] === dateStr
+                );
+                
+                if (existingEvents.length === 0) {
+                    // Juan matutino
+                    calendar.addEvent({
+                        id: 'auto_j_' + dateStr,
+                        title: 'Juan - OXXO Centro',
+                        start: dateStr + 'T06:00:00',
+                        end: dateStr + 'T14:00:00',
+                        className: 'event-fijo-principal',
+                        extendedProps: { promotor: 'juan', tipo: 'fijo-principal', tienda: 'oxxo-centro' }
+                    });
+                    
+                    // María vespertino
+                    const tiendas = ['seven-eleven', 'circle-k', 'oxxo-universidad'];
+                    const tienda = tiendas[Math.floor(Math.random() * tiendas.length)];
+                    const tiendaNames = {
+                        'seven-eleven': '7-Eleven',
+                        'circle-k': 'Circle K',
+                        'oxxo-universidad': 'OXXO Univ'
+                    };
+                    
+                    calendar.addEvent({
+                        id: 'auto_m_' + dateStr,
+                        title: 'María - ' + tiendaNames[tienda],
+                        start: dateStr + 'T14:00:00',
+                        end: dateStr + 'T22:00:00',
+                        className: 'event-cubredescansos-otros',
+                        extendedProps: { promotor: 'maria', tipo: 'cubredescansos-otros', tienda: tienda }
+                    });
+                    
+                    eventsAdded += 2;
+                }
+            }
+        }
+        
+        actualizarDashboard();
+        if (currentTab === 'asignaciones') {
+            cargarListaAsignaciones();
+        }
+        
+        alert(`Se generaron ${eventsAdded} eventos automáticamente`);
+        console.log(`✅ ${eventsAdded} eventos generados`);
+    }
+    
+    // ===== INICIAR MÓDULO =====
+    initModule();
+    
+})();
+</script>
