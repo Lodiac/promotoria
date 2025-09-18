@@ -1,3 +1,13 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hojas de Horas - Sistema Interactivo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
 <!-- ===== MÓDULO HOJAS DE HORAS CON FULLCALENDAR SPA CORREGIDO ===== -->
 <div class="horas-module">
     <!-- HEADER DEL MÓDULO -->
@@ -55,43 +65,23 @@
 
         <!-- PESTAÑA CALENDARIO -->
         <div class="tab-content active" id="tab-calendario">
-            <!-- SIDEBAR DE RELACIONES -->
-            <div class="relationships-sidebar">
+            <!-- SIDEBAR DE RELACIONES CON BOTÓN TOGGLE -->
+            <div class="relationships-sidebar" id="relationships-sidebar">
                 <!-- PROMOTOR FIJO -->
                 <div class="promotor-card promotor-fijo">
                     <div class="promotor-header">
                         <i class="fas fa-user-tie"></i>
                         PROMOTOR FIJO
                     </div>
-                    <div class="promotor-info">
-                        <div class="promotor-name">Juan Carlos González</div>
-                        <div class="promotor-details">RFC: GOCJ850315ABC<br>Tel: 811-234-5678</div>
+                    <div class="promotor-info" id="promotor-fijo-info">
+                        <div class="promotor-name">Cargando...</div>
+                        <div class="promotor-details">Obteniendo datos...</div>
                         
                         <div class="tienda-principal">
                             <div class="tienda-principal-label">TIENDA PRINCIPAL</div>
-                            <div class="tienda-principal-name">OXXO Centro (#1048)</div>
-                            <div style="font-size: 0.8rem; color: #666;">Monterrey, Nuevo León</div>
+                            <div class="tienda-principal-name">Cargando...</div>
+                            <div style="font-size: 0.8rem; color: #666;">Obteniendo ubicación...</div>
                         </div>
-                    </div>
-                </div>
-
-                <!-- INDICADOR DE RELACIÓN -->
-                <div class="relationship-indicator">
-                    <div class="relationship-title">RELACIÓN DE APOYO</div>
-                    <div class="relationship-visual">
-                        <div class="promotor-icon fijo-icon">
-                            <i class="fas fa-user-tie"></i>
-                        </div>
-                        <div class="arrow">
-                            <i class="fas fa-handshake"></i>
-                        </div>
-                        <div class="promotor-icon cubredescansos-icon">
-                            <i class="fas fa-user-plus"></i>
-                        </div>
-                    </div>
-                    <div style="font-size: 0.9rem; color: #666;">
-                        María cubre los descansos de Juan<br>
-                        y apoya en otras tiendas según necesidad
                     </div>
                 </div>
 
@@ -101,17 +91,31 @@
                         <i class="fas fa-user-plus"></i>
                         CUBREDESCANSOS
                     </div>
-                    <div class="promotor-info">
-                        <div class="promotor-name">María Elena Rodríguez</div>
-                        <div class="promotor-details">RFC: ROMM900202DEF<br>Tel: 555-123-4567</div>
+                    <div class="promotor-info" id="promotor-cubredescansos-info">
+                        <div class="promotor-name">Cargando...</div>
+                        <div class="promotor-details">Obteniendo datos...</div>
                         
                         <div class="tienda-principal" style="background: #fff3e0;">
                             <div class="tienda-principal-label" style="color: #f57c00;">ASIGNACIÓN PRINCIPAL</div>
-                            <div class="tienda-principal-name">Apoyo a Juan C. González</div>
-                            <div style="font-size: 0.8rem; color: #666;">+ Rotación múltiples tiendas</div>
+                            <div class="tienda-principal-name">Apoyo y rotación</div>
+                            <div style="font-size: 0.8rem; color: #666;">Múltiples tiendas</div>
                         </div>
                     </div>
                 </div>
+
+                <!-- BOTÓN TOGGLE SIDEBAR EN LA PARTE INFERIOR -->
+                <div class="sidebar-toggle-container">
+                    <button class="sidebar-toggle-btn" id="sidebar-toggle-btn" onclick="toggleSidebar()">
+                        <i class="fas fa-chevron-left" id="toggle-icon"></i>
+                        <span class="toggle-text" id="toggle-text">Ocultar menú</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- BOTÓN FLOTANTE PARA ABRIR SIDEBAR CUANDO ESTÁ OCULTO -->
+            <div class="sidebar-floating-btn" id="sidebar-floating-btn" onclick="toggleSidebar()">
+                <i class="fas fa-chevron-right"></i>
+                <span class="floating-text">Abrir menú</span>
             </div>
 
             <!-- ÁREA DEL CALENDARIO -->
@@ -138,19 +142,19 @@
                         <div class="legend-grid">
                             <div class="legend-item">
                                 <div class="legend-color" style="background: linear-gradient(135deg, #1976d2, #1565c0);"></div>
-                                <span>Juan - Tienda Principal (OXXO Centro)</span>
+                                <span>Promotor Fijo - Tienda Principal</span>
                             </div>
                             <div class="legend-item">
                                 <div class="legend-color" style="background: linear-gradient(135deg, #7b1fa2, #6a1b9a);"></div>
-                                <span>Juan - Rotación en otras tiendas</span>
+                                <span>Promotor Fijo - Rotación</span>
                             </div>
                             <div class="legend-item">
                                 <div class="legend-color" style="background: linear-gradient(135deg, #f57c00, #ef6c00);"></div>
-                                <span>María - Apoyo directo a Juan</span>
+                                <span>Cubredescansos - Apoyo</span>
                             </div>
                             <div class="legend-item">
                                 <div class="legend-color" style="background: linear-gradient(135deg, #388e3c, #2e7d32);"></div>
-                                <span>María - Otras asignaciones</span>
+                                <span>Cubredescansos - Otras</span>
                             </div>
                             <div class="legend-item">
                                 <div class="legend-color" style="background: #f5f5f5; border: 1px solid #ccc;"></div>
@@ -166,8 +170,8 @@
         <div class="tab-content" id="tab-asignaciones">
             <div class="tab-section">
                 <div class="section-header">
-                    <h2><i class="fas fa-list"></i> Gestión de Asignaciones</h2>
-                    <p>Administra todas las asignaciones de los promotores</p>
+                    <h2><i class="fas fa-list"></i> Gestión de Asignaciones por Promotor</h2>
+                    <p>Administra todas las asignaciones agrupadas por promotor</p>
                 </div>
                 
                 <div class="filters-bar">
@@ -175,18 +179,12 @@
                         <label>Promotor:</label>
                         <select id="filter-promotor" class="form-select">
                             <option value="">Todos</option>
-                            <option value="juan">Juan Carlos González</option>
-                            <option value="maria">María Elena Rodríguez</option>
                         </select>
                     </div>
                     <div class="filter-group">
                         <label>Tienda:</label>
                         <select id="filter-tienda" class="form-select">
                             <option value="">Todas</option>
-                            <option value="oxxo-centro">OXXO Centro</option>
-                            <option value="seven-eleven">7-Eleven Plaza</option>
-                            <option value="circle-k">Circle K Revolución</option>
-                            <option value="oxxo-universidad">OXXO Universidad</option>
                         </select>
                     </div>
                     <div class="filter-group">
@@ -261,33 +259,16 @@
                 <div class="chart-section">
                     <h3>Distribución por Promotor</h3>
                     <div class="chart-placeholder">
-                        <div class="chart-visual">
-                            <div class="promotor-chart-item">
-                                <div class="chart-bar juan-bar" style="width: 65%;">
-                                    <span>Juan - 65%</span>
-                                </div>
-                            </div>
-                            <div class="promotor-chart-item">
-                                <div class="chart-bar maria-bar" style="width: 35%;">
-                                    <span>María - 35%</span>
-                                </div>
-                            </div>
+                        <div class="chart-visual" id="chart-visual-container">
+                            <!-- Se llena dinámicamente -->
                         </div>
                     </div>
                 </div>
 
                 <div class="summary-section">
-                    <h3>Resumen Semanal</h3>
-                    <div class="summary-grid">
-                        <div class="summary-item">
-                            <strong>Lunes a Viernes:</strong> Juan en OXXO Centro (Matutino), María rotación vespertina
-                        </div>
-                        <div class="summary-item">
-                            <strong>Fines de Semana:</strong> María cubre descansos de Juan en tienda principal
-                        </div>
-                        <div class="summary-item">
-                            <strong>Productividad:</strong> 91.5% general, superando objetivo del 90%
-                        </div>
+                    <h3>Resumen Operativo</h3>
+                    <div class="summary-grid" id="summary-grid">
+                        <!-- Se llena dinámicamente -->
                     </div>
                 </div>
             </div>
@@ -391,17 +372,13 @@
             <div class="form-group">
                 <label class="form-label">Promotor:</label>
                 <select class="form-select" id="event-promotor-horas">
-                    <option value="juan">Juan Carlos González (Fijo)</option>
-                    <option value="maria">María Elena Rodríguez (Cubredescansos)</option>
+                    <option value="">Seleccionar promotor...</option>
                 </select>
             </div>
             <div class="form-group">
                 <label class="form-label">Tienda:</label>
                 <select class="form-select" id="event-tienda-horas">
-                    <option value="oxxo-centro">OXXO Centro (#1048)</option>
-                    <option value="seven-eleven">7-Eleven Plaza (#1077)</option>
-                    <option value="circle-k">Circle K Revolución (#1014)</option>
-                    <option value="oxxo-universidad">OXXO Universidad (#1038)</option>
+                    <option value="">Seleccionar tienda...</option>
                 </select>
             </div>
             <div class="form-group">
@@ -435,6 +412,41 @@
             <button class="btn-cancel-horas" id="btn-cancelar-horas">Cancelar</button>
             <button class="btn-primary" id="btn-guardar-horas">Guardar</button>
             <button class="btn-primary" id="btn-eliminar-horas" style="background: #f44336; display: none;">Eliminar</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL ASIGNAR TIENDA -->
+<div id="modal-asignar-tienda" class="modal-horas">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">Asignar Nueva Tienda</h2>
+            <button class="close-horas" onclick="cerrarModalAsignarTienda()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="promotor-selected-info" id="promotor-selected-info">
+                <!-- Se llena dinámicamente -->
+            </div>
+            <div class="form-group">
+                <label class="form-label">Tienda a asignar:</label>
+                <select class="form-select" id="nueva-tienda-select">
+                    <option value="">Seleccionar tienda disponible...</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Fecha de inicio:</label>
+                <input type="date" class="form-input" id="nueva-fecha-inicio">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Motivo de asignación:</label>
+                <input type="text" class="form-input" id="nuevo-motivo" placeholder="Describe el motivo de la asignación...">
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel-horas" onclick="cerrarModalAsignarTienda()">Cancelar</button>
+            <button class="btn-primary" onclick="confirmarAsignarTienda()">
+                <i class="fas fa-plus"></i> Asignar Tienda
+            </button>
         </div>
     </div>
 </div>
@@ -546,6 +558,11 @@
     transform: translateY(-2px);
 }
 
+.horas-module .btn-sm {
+    padding: 8px 16px;
+    font-size: 0.8rem;
+}
+
 /* ===== NAVEGACIÓN POR PESTAÑAS ===== */
 .horas-module .tabs-navigation {
     background: var(--surface);
@@ -638,6 +655,13 @@
     flex-direction: column;
     gap: 20px;
     width: 100%;
+    position: relative;
+    width: 350px;
+    min-width: 350px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateX(0);
+    opacity: 1;
+    overflow: hidden;
 }
 
 .horas-module .calendar-area {
@@ -809,6 +833,381 @@
 .horas-module .tienda-principal-name {
     font-weight: 600;
     color: var(--text-primary);
+}
+
+/* ===== ESTILOS PARA SIDEBAR COLAPSIBLE ===== */
+
+/* Estado colapsado del sidebar */
+.horas-module .relationships-sidebar.collapsed {
+    width: 0;
+    min-width: 0;
+    transform: translateX(-100%);
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Container del botón toggle en la parte inferior del sidebar */
+.horas-module .sidebar-toggle-container {
+    margin-top: 20px;
+    padding: 0;
+}
+
+/* Botón para ocultar/mostrar sidebar */
+.horas-module .sidebar-toggle-btn {
+    width: 100%;
+    padding: 15px 20px;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    box-shadow: var(--shadow);
+    font-size: 0.9rem;
+}
+
+.horas-module .sidebar-toggle-btn:hover {
+    background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+.horas-module .sidebar-toggle-btn:active {
+    transform: translateY(0);
+}
+
+/* Icono del botón toggle */
+.horas-module .sidebar-toggle-btn i {
+    font-size: 1.1rem;
+    transition: transform 0.3s ease;
+}
+
+/* Texto del botón toggle */
+.horas-module .toggle-text {
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+/* Botón flotante que aparece cuando el sidebar está oculto */
+.horas-module .sidebar-floating-btn {
+    position: fixed;
+    left: -60px;
+    bottom: 100px;
+    width: 160px;
+    height: 50px;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    border: none;
+    border-radius: 0 25px 25px 0;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 20px;
+    gap: 10px;
+    box-shadow: 2px 4px 15px rgba(102, 126, 234, 0.3);
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    font-size: 0.9rem;
+}
+
+/* Estado visible del botón flotante */
+.horas-module .sidebar-floating-btn.visible {
+    left: 0;
+    opacity: 1;
+    pointer-events: all;
+}
+
+.horas-module .sidebar-floating-btn:hover {
+    background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+    transform: translateX(10px);
+    box-shadow: 2px 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+.horas-module .sidebar-floating-btn i {
+    font-size: 1.2rem;
+    transition: transform 0.3s ease;
+}
+
+.horas-module .sidebar-floating-btn:hover i {
+    transform: translateX(3px);
+}
+
+/* Texto del botón flotante */
+.horas-module .floating-text {
+    font-size: 0.9rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* Ajustar el área del calendario cuando el sidebar está colapsado */
+.horas-module #tab-calendario {
+    transition: grid-template-columns 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.horas-module #tab-calendario.sidebar-collapsed {
+    grid-template-columns: 0px 1fr;
+}
+
+/* Ajustar el calendario para que ocupe todo el espacio */
+.horas-module .calendar-area {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.horas-module #tab-calendario.sidebar-collapsed .calendar-area {
+    margin-left: 0;
+}
+
+/* Efecto de pulse sutil para llamar la atención al botón flotante */
+.horas-module .sidebar-floating-btn.visible {
+    animation: subtle-pulse 3s infinite;
+}
+
+@keyframes subtle-pulse {
+    0%, 100% {
+        box-shadow: 2px 4px 15px rgba(102, 126, 234, 0.3);
+    }
+    50% {
+        box-shadow: 2px 4px 20px rgba(102, 126, 234, 0.5);
+    }
+}
+
+/* Prevenir overflow cuando el sidebar se está colapsando */
+.horas-module #tab-calendario {
+    overflow: hidden;
+}
+
+/* ===== NUEVOS ESTILOS PARA CARDS AGRUPADOS ===== */
+.horas-module .promotor-assignment-card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.horas-module .promotor-assignment-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+}
+
+.horas-module .promotor-header-card {
+    padding: 20px;
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.horas-module .promotor-header-card:hover {
+    background: linear-gradient(135deg, #e9ecef, #dee2e6);
+}
+
+.horas-module .promotor-info-main {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.horas-module .promotor-avatar {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+}
+
+.horas-module .promotor-details-card h3 {
+    margin: 0 0 8px 0;
+    color: var(--text-primary);
+    font-size: 1.2rem;
+}
+
+.horas-module .promotor-stats {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+}
+
+.horas-module .stat-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.horas-module .tipo-fijo {
+    color: #1976d2;
+    font-weight: 600;
+}
+
+.horas-module .tipo-cubredescansos {
+    color: #f57c00;
+    font-weight: 600;
+}
+
+.horas-module .promotor-contact {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+}
+
+.horas-module .expand-indicator {
+    transition: transform 0.3s ease;
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+}
+
+.horas-module .promotor-assignment-card.expanded .expand-indicator {
+    transform: rotate(180deg);
+}
+
+.horas-module .promotor-asignaciones-detalle {
+    padding: 0;
+    background: #f8f9fa;
+    border-top: 1px solid var(--border-color);
+}
+
+.horas-module .seccion-tiendas-asignadas,
+.horas-module .seccion-tiendas-disponibles {
+    padding: 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.horas-module .seccion-tiendas-asignadas h4,
+.horas-module .seccion-tiendas-disponibles h4 {
+    margin-bottom: 15px;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.horas-module .seccion-tiendas-asignadas h4 i {
+    color: var(--success-color);
+}
+
+.horas-module .seccion-tiendas-disponibles h4 i {
+    color: var(--info-color);
+}
+
+.horas-module .tiendas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 15px;
+}
+
+.horas-module .tienda-item {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.horas-module .tienda-item:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transform: translateY(-1px);
+}
+
+.horas-module .tienda-asignada {
+    border-left: 4px solid var(--success-color);
+}
+
+.horas-module .tienda-disponible {
+    border-left: 4px solid var(--info-color);
+}
+
+.horas-module .tienda-info h5 {
+    margin: 0 0 5px 0;
+    color: var(--text-primary);
+    font-size: 1rem;
+}
+
+.horas-module .tienda-info small {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+}
+
+.horas-module .tienda-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.horas-module .btn-tienda {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: all 0.3s ease;
+}
+
+.horas-module .btn-asignar {
+    background: var(--success-color);
+    color: white;
+}
+
+.horas-module .btn-asignar:hover {
+    background: #45a049;
+}
+
+.horas-module .btn-desasignar {
+    background: var(--danger-color);
+    color: white;
+}
+
+.horas-module .btn-desasignar:hover {
+    background: #d32f2f;
+}
+
+.horas-module .acciones-promotor {
+    padding: 20px;
+    background: white;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+/* ===== MODAL ASIGNAR TIENDA ===== */
+.horas-module .promotor-selected-info {
+    background: #e3f2fd;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border-left: 4px solid var(--primary-color);
+}
+
+.horas-module .promotor-selected-info h4 {
+    margin: 0 0 8px 0;
+    color: var(--primary-color);
+}
+
+.horas-module .promotor-selected-info p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
 }
 
 /* ===== RELATIONSHIP INDICATOR ===== */
@@ -1398,6 +1797,21 @@
         grid-template-columns: 1fr;
         gap: 15px;
     }
+
+    .horas-module .tiendas-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .horas-module .sidebar-floating-btn {
+        bottom: 80px;
+        width: 140px;
+        height: 45px;
+        font-size: 0.8rem;
+    }
+    
+    .horas-module .sidebar-floating-btn:hover {
+        transform: translateX(5px);
+    }
 }
 
 @media (max-width: 768px) {
@@ -1437,6 +1851,15 @@
         text-align: center;
         gap: 10px;
     }
+
+    .horas-module .promotor-stats {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .horas-module .acciones-promotor {
+        flex-direction: column;
+    }
 }
 
 @media (max-width: 480px) {
@@ -1466,14 +1889,139 @@
     .horas-module .chart-visual {
         font-size: 0.8rem;
     }
+
+    .horas-module .promotor-info-main {
+        flex-direction: column;
+        text-align: center;
+        gap: 10px;
+    }
 }
+
+/* ===== ESTILOS HOVER PARA DÍAS DEL CALENDARIO FULLCALENDAR ===== */
+
+/* Efecto hover básico para días del calendario */
+.horas-module .fc-day {
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.horas-module .fc-day:hover {
+    background-color: rgba(102, 126, 234, 0.1) !important;
+    transform: scale(1.02);
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
+}
+
+/* Hover específico para días en vista mensual */
+.horas-module .fc-daygrid-day:hover {
+    background-color: rgba(102, 126, 234, 0.08) !important;
+}
+
+/* Hover para el día actual */
+.horas-module .fc-day-today:hover {
+    background-color: rgba(102, 126, 234, 0.2) !important;
+}
+
+/* Hover para las celdas de días en vista semanal */
+.horas-module .fc-timegrid-col:hover {
+    background-color: rgba(102, 126, 234, 0.05) !important;
+}
+
+/* Hover para días en vista de lista */
+.horas-module .fc-list-day:hover {
+    background-color: rgba(102, 126, 234, 0.1) !important;
+}
+
+/* Efecto suave para el número del día */
+.horas-module .fc-daygrid-day-number {
+    transition: all 0.3s ease;
+    padding: 4px;
+    border-radius: 4px;
+}
+
+.horas-module .fc-day:hover .fc-daygrid-day-number {
+    background-color: var(--primary-color);
+    color: white;
+    font-weight: 600;
+    transform: scale(1.1);
+}
+
+/* Hover para el contenido de la celda del día */
+.horas-module .fc-daygrid-day-frame:hover {
+    border-color: var(--primary-color) !important;
+}
+
+/* Asegurar que el hover no afecte días deshabilitados */
+.horas-module .fc-day.fc-day-disabled:hover {
+    background-color: transparent !important;
+    transform: none !important;
+    box-shadow: none !important;
+    cursor: not-allowed;
+}
+
+/* Hover para días de otros meses (grises) */
+.horas-module .fc-day.fc-day-other:hover {
+    background-color: rgba(102, 126, 234, 0.05) !important;
+}
+
+/* Efecto hover para la parte superior de los días */
+.horas-module .fc-daygrid-day-top:hover {
+    background-color: rgba(102, 126, 234, 0.1);
+    border-radius: 4px;
+}
+
+/* Hover más sutil para vista de semana/día */
+.horas-module .fc-timegrid-slot:hover {
+    background-color: rgba(102, 126, 234, 0.03) !important;
+}
+
+/* Responsive: Reducir efectos en dispositivos móviles */
+@media (max-width: 768px) {
+    .horas-module .fc-day:hover {
+        transform: scale(1.01);
+        box-shadow: 0 1px 4px rgba(102, 126, 234, 0.1);
+    }
+    
+    .horas-module .fc-day:hover .fc-daygrid-day-number {
+        transform: scale(1.05);
+    }
+}
+
+/* Hover para botones de navegación del calendario */
+.horas-module .fc-button:hover {
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(102, 126, 234, 0.2);
+}
+
+/* Hover para el título del calendario */
+.horas-module .fc-toolbar-title:hover {
+    color: var(--primary-color);
+    cursor: default;
+}
+
+/* Asegurar que el layout de grid se ajuste correctamente */
+@media (min-width: 1025px) {
+    .horas-module #tab-calendario.active {
+        display: grid !important;
+        grid-template-columns: 350px 1fr;
+        gap: 30px;
+        align-items: start;
+    }
+    
+    .horas-module #tab-calendario.active.sidebar-collapsed {
+        grid-template-columns: 0px 1fr;
+        gap: 0;
+    }
+}
+
 </style>
 
 <script>
 (function() {
     'use strict';
     
-    console.log('🚀 Iniciando módulo Hojas de Horas con pestañas CORREGIDO...');
+    console.log('🚀 Iniciando módulo Hojas de Horas con conexión a base de datos real...');
     
     // ===== VARIABLES GLOBALES =====
     let calendar = null;
@@ -1482,6 +2030,74 @@
     let loadingPromise = null;
     let cleanupListeners = [];
     let currentTab = 'calendario';
+    let promotoresData = [];
+    let tiendasData = [];
+    let currentPromotorAsignar = null;
+    
+    // ===== FUNCIONALIDAD SIDEBAR COLAPSIBLE =====
+    let sidebarCollapsed = false;
+
+    function toggleSidebar() {
+        const sidebar = document.getElementById('relationships-sidebar');
+        const floatingBtn = document.getElementById('sidebar-floating-btn');
+        const calendarTab = document.getElementById('tab-calendario');
+        const toggleIcon = document.getElementById('toggle-icon');
+        const toggleText = document.getElementById('toggle-text');
+        
+        if (!sidebar || !floatingBtn || !calendarTab) {
+            console.error('❌ Elementos del sidebar no encontrados');
+            return;
+        }
+        
+        sidebarCollapsed = !sidebarCollapsed;
+        
+        if (sidebarCollapsed) {
+            // OCULTAR SIDEBAR - deslizamiento de derecha a izquierda
+            console.log('🔒 Ocultando sidebar...');
+            
+            sidebar.classList.add('collapsed');
+            calendarTab.classList.add('sidebar-collapsed');
+            floatingBtn.classList.add('visible');
+            
+            if (toggleIcon) toggleIcon.className = 'fas fa-chevron-right';
+            if (toggleText) toggleText.textContent = 'Mostrar menú';
+            
+            // Redimensionar calendario después de la animación
+            setTimeout(() => {
+                if (window.calendar && calendar.updateSize) {
+                    calendar.updateSize();
+                    console.log('📅 Calendario redimensionado - sidebar oculto');
+                }
+            }, 450);
+            
+        } else {
+            // MOSTRAR SIDEBAR - deslizamiento de izquierda a derecha
+            console.log('🔓 Mostrando sidebar...');
+            
+            sidebar.classList.remove('collapsed');
+            calendarTab.classList.remove('sidebar-collapsed');
+            floatingBtn.classList.remove('visible');
+            
+            if (toggleIcon) toggleIcon.className = 'fas fa-chevron-left';
+            if (toggleText) toggleText.textContent = 'Ocultar menú';
+            
+            // Redimensionar calendario después de la animación
+            setTimeout(() => {
+                if (window.calendar && calendar.updateSize) {
+                    calendar.updateSize();
+                    console.log('📅 Calendario redimensionado - sidebar visible');
+                }
+            }, 450);
+        }
+        
+        // Guardar estado en localStorage (opcional)
+        localStorage.setItem('sidebarCollapsed', sidebarCollapsed.toString());
+        
+        console.log(`✅ Sidebar ${sidebarCollapsed ? 'colapsado' : 'expandido'}`);
+    }
+
+    // Hacer la función global
+    window.toggleSidebar = toggleSidebar;
     
     // ===== ELEMENTOS DOM =====
     const elements = {
@@ -1512,15 +2128,21 @@
             });
             cleanupListeners = [];
             
-            // Cerrar modal
+            // Cerrar modales
             const modal = document.getElementById('modal-evento-horas');
+            const modalAsignar = document.getElementById('modal-asignar-tienda');
             if (modal) modal.style.display = 'none';
+            if (modalAsignar) modalAsignar.style.display = 'none';
             
             // Reset variables
             currentEvent = null;
             isFullCalendarLoaded = false;
             loadingPromise = null;
             currentTab = 'calendario';
+            promotoresData = [];
+            tiendasData = [];
+            currentPromotorAsignar = null;
+            sidebarCollapsed = false;
             
             console.log('✅ Módulo Hojas de Horas limpiado');
         });
@@ -1533,42 +2155,281 @@
         cleanupListeners.push(() => element.removeEventListener(event, handler, options));
     }
     
-    // ===== DATOS DE EVENTOS =====
-    const eventos = [
-        // Juan - Tienda Principal
-        { id: 'j1', title: 'Juan - OXXO Centro', start: '2025-09-01T06:00:00', end: '2025-09-01T14:00:00', className: 'event-fijo-principal', extendedProps: { promotor: 'juan', tipo: 'fijo-principal', tienda: 'oxxo-centro' }},
-        { id: 'j2', title: 'Juan - OXXO Centro', start: '2025-09-02T06:00:00', end: '2025-09-02T14:00:00', className: 'event-fijo-principal', extendedProps: { promotor: 'juan', tipo: 'fijo-principal', tienda: 'oxxo-centro' }},
-        { id: 'j3', title: 'Juan - OXXO Centro', start: '2025-09-03T06:00:00', end: '2025-09-03T14:00:00', className: 'event-fijo-principal', extendedProps: { promotor: 'juan', tipo: 'fijo-principal', tienda: 'oxxo-centro' }},
-        { id: 'j4', title: 'Juan - OXXO Centro', start: '2025-09-04T06:00:00', end: '2025-09-04T14:00:00', className: 'event-fijo-principal', extendedProps: { promotor: 'juan', tipo: 'fijo-principal', tienda: 'oxxo-centro' }},
-        { id: 'j5', title: 'Juan - OXXO Centro', start: '2025-09-05T06:00:00', end: '2025-09-05T14:00:00', className: 'event-fijo-principal', extendedProps: { promotor: 'juan', tipo: 'fijo-principal', tienda: 'oxxo-centro' }},
-        
-        // María - Apoyo y otras asignaciones
-        { id: 'm1', title: 'María - 7-Eleven', start: '2025-09-01T14:00:00', end: '2025-09-01T22:00:00', className: 'event-cubredescansos-otros', extendedProps: { promotor: 'maria', tipo: 'cubredescansos-otros', tienda: 'seven-eleven' }},
-        { id: 'm2', title: 'María - Circle K', start: '2025-09-02T14:00:00', end: '2025-09-02T22:00:00', className: 'event-cubredescansos-otros', extendedProps: { promotor: 'maria', tipo: 'cubredescansos-otros', tienda: 'circle-k' }},
-        { id: 'm3', title: 'María - OXXO Univ', start: '2025-09-03T14:00:00', end: '2025-09-03T22:00:00', className: 'event-cubredescansos-otros', extendedProps: { promotor: 'maria', tipo: 'cubredescansos-otros', tienda: 'oxxo-universidad' }},
-        { id: 'm4', title: 'María (Apoyo Juan)', start: '2025-09-04T14:00:00', end: '2025-09-04T22:00:00', className: 'event-cubredescansos-apoyo', extendedProps: { promotor: 'maria', tipo: 'cubredescansos-apoyo', tienda: 'oxxo-centro' }},
-        { id: 'm5', title: 'María - 7-Eleven', start: '2025-09-05T14:00:00', end: '2025-09-05T22:00:00', className: 'event-cubredescansos-otros', extendedProps: { promotor: 'maria', tipo: 'cubredescansos-otros', tienda: 'seven-eleven' }},
-        
-        // Fin de semana - María cubre a Juan
-        { id: 'm6', title: 'María (Cobertura Juan)', start: '2025-09-07T06:00:00', end: '2025-09-07T14:00:00', className: 'event-cubredescansos-apoyo', extendedProps: { promotor: 'maria', tipo: 'cubredescansos-apoyo', tienda: 'oxxo-centro' }},
-        { id: 'm7', title: 'María (Cobertura Juan)', start: '2025-09-08T06:00:00', end: '2025-09-08T14:00:00', className: 'event-cubredescansos-apoyo', extendedProps: { promotor: 'maria', tipo: 'cubredescansos-apoyo', tienda: 'oxxo-centro' }},
-        { id: 'jd1', title: 'Juan - Descanso', start: '2025-09-07', className: 'event-descanso', extendedProps: { promotor: 'juan', tipo: 'descanso' }},
-        { id: 'jd2', title: 'Juan - Descanso', start: '2025-09-08', className: 'event-descanso', extendedProps: { promotor: 'juan', tipo: 'descanso' }},
-        
-        // Segunda semana
-        { id: 'j9', title: 'Juan - OXXO Centro', start: '2025-09-09T06:00:00', end: '2025-09-09T14:00:00', className: 'event-fijo-principal', extendedProps: { promotor: 'juan', tipo: 'fijo-principal', tienda: 'oxxo-centro' }},
-        { id: 'j10', title: 'Juan - OXXO Centro', start: '2025-09-10T06:00:00', end: '2025-09-10T14:00:00', className: 'event-fijo-principal', extendedProps: { promotor: 'juan', tipo: 'fijo-principal', tienda: 'oxxo-centro' }},
-        { id: 'j11', title: 'Juan - Circle K', start: '2025-09-11T06:00:00', end: '2025-09-11T14:00:00', className: 'event-fijo-rotacion', extendedProps: { promotor: 'juan', tipo: 'fijo-rotacion', tienda: 'circle-k' }},
-        { id: 'j12', title: 'Juan - 7-Eleven', start: '2025-09-12T06:00:00', end: '2025-09-12T14:00:00', className: 'event-fijo-rotacion', extendedProps: { promotor: 'juan', tipo: 'fijo-rotacion', tienda: 'seven-eleven' }},
-        
-        // María segunda semana
-        { id: 'm9', title: 'María - Circle K', start: '2025-09-09T14:00:00', end: '2025-09-09T22:00:00', className: 'event-cubredescansos-otros', extendedProps: { promotor: 'maria', tipo: 'cubredescansos-otros', tienda: 'circle-k' }},
-        { id: 'm10', title: 'María - 7-Eleven', start: '2025-09-10T14:00:00', end: '2025-09-10T22:00:00', className: 'event-cubredescansos-otros', extendedProps: { promotor: 'maria', tipo: 'cubredescansos-otros', tienda: 'seven-eleven' }},
-        { id: 'm11', title: 'María (Cubre Principal)', start: '2025-09-11T06:00:00', end: '2025-09-11T14:00:00', className: 'event-cubredescansos-apoyo', extendedProps: { promotor: 'maria', tipo: 'cubredescansos-apoyo', tienda: 'oxxo-centro' }},
-        { id: 'm12', title: 'María (Cubre Principal)', start: '2025-09-12T06:00:00', end: '2025-09-12T14:00:00', className: 'event-cubredescansos-apoyo', extendedProps: { promotor: 'maria', tipo: 'cubredescansos-apoyo', tienda: 'oxxo-centro' }}
-    ];
+    // ===== FUNCIONES DE CONEXIÓN A BASE DE DATOS =====
+    async function fetchFromAPI(endpoint, options = {}) {
+        try {
+            const response = await fetch(`/promotoria/api/hoja_horario.php?resource=${endpoint}`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...options.headers
+                },
+                ...options
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            const result = await response.json();
+            
+            if (!result.success) {
+                throw new Error(result.message || 'Error en la respuesta de la API');
+            }
+            
+            return result.data || result;
+        } catch (error) {
+            console.error(`Error en API ${endpoint}:`, error);
+            throw error;
+        }
+    }
     
-    // ===== FUNCIONES DE CARGA DE DEPENDENCIAS SIMPLIFICADAS =====
+    // Cargar promotores desde la base de datos
+    async function cargarPromotoresReales() {
+        try {
+            console.log('👥 Cargando promotores desde base de datos...');
+            const data = await fetchFromAPI('promotores');
+            promotoresData = data;
+            
+            // Actualizar el sidebar con el primer promotor fijo
+            const promotorFijo = promotoresData.find(p => p.tipo_trabajo === 'fijo') || promotoresData[0];
+            if (promotorFijo) {
+                updatePromotorSidebar('fijo', promotorFijo);
+            }
+            
+            // Actualizar con el primer cubredescansos
+            const promotorCubre = promotoresData.find(p => p.tipo_trabajo === 'cubredescansos');
+            if (promotorCubre) {
+                updatePromotorSidebar('cubredescansos', promotorCubre);
+            }
+            
+            console.log(`✅ ${promotoresData.length} promotores cargados`);
+            return promotoresData;
+            
+        } catch (error) {
+            console.error('❌ Error cargando promotores:', error);
+            return [];
+        }
+    }
+    
+    // Cargar tiendas desde la base de datos
+    async function cargarTiendasReales() {
+        try {
+            console.log('🏪 Cargando tiendas desde base de datos...');
+            const data = await fetchFromAPI('tiendas');
+            tiendasData = data;
+            
+            console.log(`✅ ${tiendasData.length} tiendas cargadas`);
+            return tiendasData;
+            
+        } catch (error) {
+            console.error('❌ Error cargando tiendas:', error);
+            return [];
+        }
+    }
+    
+    // Actualizar la información del sidebar de promotores
+    function updatePromotorSidebar(tipo, promotor) {
+        const sidebarId = tipo === 'fijo' ? 'promotor-fijo-info' : 'promotor-cubredescansos-info';
+        const sidebar = document.getElementById(sidebarId);
+        
+        if (!sidebar || !promotor) return;
+        
+        const nombreEl = sidebar.querySelector('.promotor-name');
+        const detallesEl = sidebar.querySelector('.promotor-details');
+        const tiendaEl = sidebar.querySelector('.tienda-principal-name');
+        
+        if (nombreEl) nombreEl.textContent = `${promotor.nombre} ${promotor.apellido}`;
+        if (detallesEl) detallesEl.innerHTML = `RFC: ${promotor.rfc || 'N/A'}<br>Tel: ${promotor.telefono || 'N/A'}`;
+        
+        if (tiendaEl && tipo === 'fijo') {
+            // Para promotores fijos, mostrar una tienda principal si existe en las asignaciones
+            tiendaEl.textContent = 'Tienda asignada dinámicamente';
+        }
+    }
+    
+    // Llenar los selects del modal con datos reales
+    function llenarSelectsModal() {
+        // Llenar select de promotores
+        const promotorSelect = document.getElementById('event-promotor-horas');
+        if (promotorSelect && promotoresData.length > 0) {
+            promotorSelect.innerHTML = '<option value="">Seleccionar promotor...</option>';
+            promotoresData.forEach(promotor => {
+                const option = document.createElement('option');
+                option.value = promotor.id_promotor;
+                option.textContent = `${promotor.nombre} ${promotor.apellido} (${promotor.tipo_trabajo})`;
+                promotorSelect.appendChild(option);
+            });
+        }
+        
+        // Llenar select de tiendas
+        const tiendaSelect = document.getElementById('event-tienda-horas');
+        if (tiendaSelect && tiendasData.length > 0) {
+            tiendaSelect.innerHTML = '<option value="">Seleccionar tienda...</option>';
+            tiendasData.forEach(tienda => {
+                const option = document.createElement('option');
+                option.value = tienda.id_tienda;
+                option.textContent = `${tienda.cadena} #${tienda.num_tienda} - ${tienda.nombre_tienda}`;
+                tiendaSelect.appendChild(option);
+            });
+        }
+        
+        // Llenar filtros
+        const filterPromotor = document.getElementById('filter-promotor');
+        const filterTienda = document.getElementById('filter-tienda');
+        
+        if (filterPromotor) {
+            filterPromotor.innerHTML = '<option value="">Todos</option>';
+            promotoresData.forEach(promotor => {
+                const option = document.createElement('option');
+                option.value = promotor.id_promotor;
+                option.textContent = `${promotor.nombre} ${promotor.apellido}`;
+                filterPromotor.appendChild(option);
+            });
+        }
+        
+        if (filterTienda) {
+            filterTienda.innerHTML = '<option value="">Todas</option>';
+            tiendasData.forEach(tienda => {
+                const option = document.createElement('option');
+                option.value = tienda.id_tienda;
+                option.textContent = `${tienda.cadena} #${tienda.num_tienda}`;
+                filterTienda.appendChild(option);
+            });
+        }
+    }
+    
+    // Cargar asignaciones desde la base de datos
+    async function cargarAsignacionesReales() {
+        try {
+            console.log('📡 Cargando asignaciones desde base de datos...');
+            const data = await fetchFromAPI('asignaciones');
+            
+            // Convertir las asignaciones de la BD al formato FullCalendar
+            const eventos = data.map(asignacion => {
+                const evento = {
+                    id: `asig_${asignacion.id_asignacion}`,
+                    title: `${asignacion.nombre_promotor} - ${asignacion.nombre_tienda}`,
+                    start: asignacion.fecha_inicio,
+                    end: asignacion.fecha_fin || null,
+                    extendedProps: {
+                        id_asignacion: asignacion.id_asignacion,
+                        id_promotor: asignacion.id_promotor,
+                        id_tienda: asignacion.id_tienda,
+                        nombre_promotor: asignacion.nombre_promotor,
+                        nombre_tienda: asignacion.nombre_tienda,
+                        numero_tienda: asignacion.numero_tienda,
+                        cadena: asignacion.cadena,
+                        motivo_asignacion: asignacion.motivo_asignacion,
+                        activo: asignacion.activo
+                    }
+                };
+                
+                // Determinar className basado en los datos reales
+                const tipoTrabajo = promotoresData.find(p => p.id_promotor == asignacion.id_promotor)?.tipo_trabajo;
+                
+                if (tipoTrabajo === 'fijo') {
+                    evento.className = 'event-fijo-principal';
+                } else if (tipoTrabajo === 'cubredescansos') {
+                    evento.className = 'event-cubredescansos-apoyo';
+                } else {
+                    evento.className = 'event-cubredescansos-otros';
+                }
+                
+                return evento;
+            });
+            
+            console.log(`✅ ${eventos.length} eventos cargados desde BD`);
+            return eventos;
+            
+        } catch (error) {
+            console.error('❌ Error cargando asignaciones:', error);
+            // Fallback a array vacío si falla la conexión
+            return [];
+        }
+    }
+    
+    // Crear nueva asignación en la base de datos
+    async function crearAsignacionBD(datos) {
+        try {
+            console.log('💾 Guardando asignación en BD...', datos);
+            const resultado = await fetchFromAPI('asignaciones', {
+                method: 'POST',
+                body: JSON.stringify(datos)
+            });
+            
+            console.log('✅ Asignación creada:', resultado);
+            return resultado;
+            
+        } catch (error) {
+            console.error('❌ Error creando asignación:', error);
+            throw error;
+        }
+    }
+    
+    // Actualizar asignación con URL correcta
+    async function actualizarAsignacionBD(id, datos) {
+        try {
+            console.log('📝 Actualizando asignación en BD...', id, datos);
+            
+            const response = await fetch(`/promotoria/api/hoja_horario.php?resource=asignaciones&id=${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(datos)
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            const resultado = await response.json();
+            
+            if (!resultado.success) {
+                throw new Error(resultado.message || 'Error en la respuesta de la API');
+            }
+            
+            console.log('✅ Asignación actualizada:', resultado);
+            return resultado;
+            
+        } catch (error) {
+            console.error('❌ Error actualizando asignación:', error);
+            throw error;
+        }
+    }
+    
+    // Eliminar asignación con URL correcta
+    async function eliminarAsignacionBD(id) {
+        try {
+            console.log('🗑️ Eliminando asignación de BD...', id);
+            
+            const response = await fetch(`/promotoria/api/hoja_horario.php?resource=asignaciones&id=${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            const resultado = await response.json();
+            
+            if (!resultado.success) {
+                throw new Error(resultado.message || 'Error en la respuesta de la API');
+            }
+            
+            console.log('✅ Asignación eliminada:', resultado);
+            return resultado;
+            
+        } catch (error) {
+            console.error('❌ Error eliminando asignación:', error);
+            throw error;
+        }
+    }
+    
+    // ===== FUNCIONES DE CARGA DE DEPENDENCIAS =====
     async function loadCSS(url) {
         return new Promise((resolve, reject) => {
             const existingLink = document.querySelector(`link[href="${url}"]`);
@@ -1656,7 +2517,7 @@
         return loadingPromise;
     }
     
-    // ===== FUNCIONES DE NAVEGACIÓN POR PESTAÑAS CORREGIDAS =====
+    // ===== FUNCIONES DE NAVEGACIÓN POR PESTAÑAS =====
     function switchTab(tabName) {
         console.log(`🔄 Cambiando a pestaña: ${tabName}`);
         
@@ -1687,7 +2548,7 @@
         
         currentTab = tabName;
         
-        // Ejecutar acciones específicas por pestaña después de mostrar el contenido
+        // Ejecutar acciones específicas por pestaña
         setTimeout(() => {
             switch (tabName) {
                 case 'calendario':
@@ -1707,13 +2568,11 @@
                 case 'reportes':
                     console.log('📄 Pestaña reportes activada');
                     break;
-                default:
-                    console.log(`📋 Pestaña ${tabName} activada`);
             }
         }, 100);
     }
     
-    // ===== FUNCIONES ESPECÍFICAS DE PESTAÑAS =====
+    // ===== NUEVA FUNCIÓN PARA CARGAR ASIGNACIONES AGRUPADAS =====
     function cargarListaAsignaciones() {
         const assignmentsList = document.getElementById('assignments-list');
         if (!assignmentsList) {
@@ -1721,118 +2580,481 @@
             return;
         }
         
-        const events = calendar ? calendar.getEvents() : eventos;
+        // Obtener eventos del calendario (ya cargados desde BD)
+        const events = calendar ? calendar.getEvents() : [];
+        
+        // Aplicar filtros
+        const filtroPromotor = document.getElementById('filter-promotor')?.value || '';
+        const filtroTienda = document.getElementById('filter-tienda')?.value || '';
+        const filtroPeriodo = document.getElementById('filter-periodo')?.value || '';
+        
+        let filteredEvents = events;
+        
+        if (filtroPromotor) {
+            filteredEvents = filteredEvents.filter(event => 
+                event.extendedProps?.id_promotor == filtroPromotor
+            );
+        }
+        
+        if (filtroTienda) {
+            filteredEvents = filteredEvents.filter(event => 
+                event.extendedProps?.id_tienda == filtroTienda
+            );
+        }
+        
+        // AGRUPAR EVENTOS POR PROMOTOR
+        const promotoresAgrupados = {};
+        filteredEvents.forEach(event => {
+            const props = event.extendedProps || {};
+            const promotorId = props.id_promotor;
+            const promotorNombre = props.nombre_promotor || 'Sin asignar';
+            
+            if (!promotoresAgrupados[promotorId]) {
+                promotoresAgrupados[promotorId] = {
+                    nombre: promotorNombre,
+                    id: promotorId,
+                    asignaciones: [],
+                    tiendas: new Set()
+                };
+            }
+            
+            promotoresAgrupados[promotorId].asignaciones.push(event);
+            if (props.id_tienda) {
+                promotoresAgrupados[promotorId].tiendas.add(props.id_tienda);
+            }
+        });
+        
         let html = '';
         
-        events.forEach(event => {
-            const startDate = event.start || new Date(event.start);
-            const endDate = event.end || null;
+        // GENERAR CARDS POR PROMOTOR
+        Object.values(promotoresAgrupados).forEach(promotor => {
+            const totalAsignaciones = promotor.asignaciones.length;
+            const totalTiendas = promotor.tiendas.size;
             
-            const formatDate = (date) => {
-                return date.toLocaleDateString('es-ES', {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                });
-            };
-
-            const formatTime = (date) => {
-                return date.toLocaleTimeString('es-ES', {
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-            };
-
-            const tiendaNames = {
-                'oxxo-centro': 'OXXO Centro (#1048)',
-                'seven-eleven': '7-Eleven Plaza (#1077)',
-                'circle-k': 'Circle K Revolución (#1014)',
-                'oxxo-universidad': 'OXXO Universidad (#1038)'
-            };
-
-            const promotorNames = {
-                'juan': 'Juan Carlos González',
-                'maria': 'María Elena Rodríguez'
-            };
-
-            const tipoLabels = {
-                'fijo-principal': 'Fijo - Principal',
-                'fijo-rotacion': 'Fijo - Rotación',
-                'cubredescansos-apoyo': 'Cubredescansos - Apoyo',
-                'cubredescansos-otros': 'Cubredescansos - Otros',
-                'descanso': 'Día de Descanso'
-            };
-
+            // Encontrar datos del promotor
+            const promotorData = promotoresData.find(p => p.id_promotor == promotor.id);
+            const tipoTrabajo = promotorData?.tipo_trabajo || 'indefinido';
+            const telefono = promotorData?.telefono || 'N/A';
+            const rfc = promotorData?.rfc || 'N/A';
+            
             html += `
-                <div class="assignment-card">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                        <h3 style="margin: 0; color: var(--text-primary);">${event.title}</h3>
-                        <span style="color: var(--text-secondary); font-size: 0.9rem;">${formatDate(startDate)}</span>
+                <div class="promotor-assignment-card" data-promotor-id="${promotor.id}">
+                    <div class="promotor-header-card" onclick="togglePromotorAsignaciones(${promotor.id})">
+                        <div class="promotor-info-main">
+                            <div class="promotor-avatar">
+                                <i class="fas ${tipoTrabajo === 'fijo' ? 'fa-user-tie' : 'fa-user-plus'}"></i>
+                            </div>
+                            <div class="promotor-details-card">
+                                <h3>${promotor.nombre}</h3>
+                                <div class="promotor-stats">
+                                    <span class="stat-item">
+                                        <i class="fas fa-calendar-check"></i>
+                                        ${totalAsignaciones} asignaciones
+                                    </span>
+                                    <span class="stat-item">
+                                        <i class="fas fa-store"></i>
+                                        ${totalTiendas} tiendas
+                                    </span>
+                                    <span class="stat-item tipo-${tipoTrabajo}">
+                                        <i class="fas fa-tag"></i>
+                                        ${tipoTrabajo.charAt(0).toUpperCase() + tipoTrabajo.slice(1)}
+                                    </span>
+                                </div>
+                                <div class="promotor-contact">
+                                    <small>📞 ${telefono} | RFC: ${rfc}</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="expand-indicator">
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
                     </div>
                     
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px;">
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <i class="fas fa-clock" style="color: var(--primary-color);"></i>
-                            <span>${endDate ? formatTime(startDate) + ' - ' + formatTime(endDate) : 'Todo el día'}</span>
+                    <div class="promotor-asignaciones-detalle" id="detalle-${promotor.id}" style="display: none;">
+                        <div class="seccion-tiendas-asignadas">
+                            <h4><i class="fas fa-check-circle"></i> Tiendas Asignadas (${totalTiendas})</h4>
+                            <div class="tiendas-grid" id="tiendas-asignadas-${promotor.id}">
+                                <!-- Se llena dinámicamente -->
+                            </div>
                         </div>
                         
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <i class="fas fa-user" style="color: var(--primary-color);"></i>
-                            <span>${promotorNames[event.extendedProps?.promotor] || 'Sin asignar'}</span>
+                        <div class="seccion-tiendas-disponibles">
+                            <h4><i class="fas fa-plus-circle"></i> Tiendas Disponibles</h4>
+                            <div class="tiendas-grid" id="tiendas-disponibles-${promotor.id}">
+                                <!-- Se llena dinámicamente -->
+                            </div>
                         </div>
                         
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <i class="fas fa-store" style="color: var(--primary-color);"></i>
-                            <span>${tiendaNames[event.extendedProps?.tienda] || 'Sin tienda'}</span>
+                        <div class="acciones-promotor">
+                            <button class="btn-primary btn-sm" onclick="mostrarAsignarTienda(${promotor.id})">
+                                <i class="fas fa-plus"></i> Asignar Nueva Tienda
+                            </button>
+                            <button class="btn-secondary btn-sm" onclick="verDetalleAsignaciones(${promotor.id})">
+                                <i class="fas fa-list"></i> Ver Todas las Asignaciones
+                            </button>
                         </div>
-                        
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <i class="fas fa-tag" style="color: var(--primary-color);"></i>
-                            <span>${tipoLabels[event.extendedProps?.tipo] || 'Sin tipo'}</span>
-                        </div>
-                    </div>
-                    
-                    ${event.extendedProps?.notas ? `
-                        <div style="background: #f8f9fa; padding: 10px; border-radius: 6px; margin-bottom: 15px;">
-                            <strong>Notas:</strong> ${event.extendedProps.notas}
-                        </div>
-                    ` : ''}
-                    
-                    <div style="display: flex; gap: 8px; justify-content: flex-end;">
-                        <button class="btn-primary" style="padding: 6px 12px; font-size: 0.8rem;" onclick="editarEvento('${event.id}')">
-                            <i class="fas fa-edit"></i> Editar
-                        </button>
-                        <button style="padding: 6px 12px; font-size: 0.8rem; background: var(--danger-color); color: white; border: none; border-radius: 6px; cursor: pointer;" onclick="eliminarEvento('${event.id}')">
-                            <i class="fas fa-trash"></i> Eliminar
-                        </button>
                     </div>
                 </div>
             `;
         });
         
         if (html === '') {
-            html = '<div style="text-align: center; padding: 40px; color: var(--text-secondary);">No hay asignaciones registradas</div>';
+            html = '<div style="text-align: center; padding: 40px; color: var(--text-secondary);"><i class="fas fa-users" style="font-size: 3rem; margin-bottom: 15px;"></i><h3>No hay asignaciones registradas</h3><p>Los promotores aparecerán aquí cuando tengan asignaciones</p></div>';
         }
         
         assignmentsList.innerHTML = html;
-        console.log(`✅ Lista cargada con ${events.length} asignaciones`);
+        console.log(`✅ Lista cargada con ${Object.keys(promotoresAgrupados).length} promotores únicos`);
     }
     
-    function actualizarDashboard() {
-        const events = calendar ? calendar.getEvents() : eventos;
+    // ===== NUEVAS FUNCIONES PARA EL SISTEMA AGRUPADO =====
+    
+    // Toggle para expandir/contraer asignaciones del promotor
+    window.togglePromotorAsignaciones = function(promotorId) {
+        const card = document.querySelector(`[data-promotor-id="${promotorId}"]`);
+        const detalle = document.getElementById(`detalle-${promotorId}`);
+        const indicator = card.querySelector('.expand-indicator');
         
-        // Calcular métricas
+        if (detalle.style.display === 'none') {
+            detalle.style.display = 'block';
+            card.classList.add('expanded');
+            
+            // Cargar tiendas asignadas y disponibles
+            cargarTiendasPromotopr(promotorId);
+        } else {
+            detalle.style.display = 'none';
+            card.classList.remove('expanded');
+        }
+    };
+    
+    // Cargar tiendas asignadas y disponibles para un promotor
+    function cargarTiendasPromotopr(promotorId) {
+        const events = calendar ? calendar.getEvents() : [];
+        const asignacionesPromotor = events.filter(event => 
+            event.extendedProps?.id_promotor == promotorId
+        );
+        
+        // Tiendas asignadas a este promotor
+        const tiendasAsignadas = new Set();
+        asignacionesPromotor.forEach(event => {
+            if (event.extendedProps?.id_tienda) {
+                tiendasAsignadas.add(event.extendedProps.id_tienda);
+            }
+        });
+        
+        // Crear elementos HTML para tiendas asignadas
+        const tiendasAsignadasContainer = document.getElementById(`tiendas-asignadas-${promotorId}`);
+        if (tiendasAsignadasContainer) {
+            let htmlAsignadas = '';
+            
+            tiendasAsignadas.forEach(idTienda => {
+                const tienda = tiendasData.find(t => t.id_tienda == idTienda);
+                if (tienda) {
+                    const asignacionesTienda = asignacionesPromotor.filter(e => 
+                        e.extendedProps?.id_tienda == idTienda
+                    ).length;
+                    
+                    htmlAsignadas += `
+                        <div class="tienda-item tienda-asignada">
+                            <div class="tienda-info">
+                                <h5>${tienda.cadena} #${tienda.num_tienda}</h5>
+                                <small>${tienda.nombre_tienda}<br>${asignacionesTienda} asignaciones activas</small>
+                            </div>
+                            <div class="tienda-actions">
+                                <button class="btn-tienda btn-desasignar" onclick="desasignarTienda(${promotorId}, ${idTienda})">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            
+            if (htmlAsignadas === '') {
+                htmlAsignadas = '<div style="text-align: center; color: var(--text-secondary); padding: 20px;">No hay tiendas asignadas</div>';
+            }
+            
+            tiendasAsignadasContainer.innerHTML = htmlAsignadas;
+        }
+        
+        // Crear elementos HTML para tiendas disponibles (no asignadas a este promotor)
+        const tiendasDisponiblesContainer = document.getElementById(`tiendas-disponibles-${promotorId}`);
+        if (tiendasDisponiblesContainer) {
+            let htmlDisponibles = '';
+            
+            // Filtrar tiendas que NO están asignadas a este promotor
+            const tiendasDisponibles = tiendasData.filter(tienda => 
+                !tiendasAsignadas.has(tienda.id_tienda)
+            );
+            
+            tiendasDisponibles.forEach(tienda => {
+                htmlDisponibles += `
+                    <div class="tienda-item tienda-disponible">
+                        <div class="tienda-info">
+                            <h5>${tienda.cadena} #${tienda.num_tienda}</h5>
+                            <small>${tienda.nombre_tienda}<br>Disponible para asignar</small>
+                        </div>
+                        <div class="tienda-actions">
+                            <button class="btn-tienda btn-asignar" onclick="asignarTiendaRapida(${promotorId}, ${tienda.id_tienda})">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            if (htmlDisponibles === '') {
+                htmlDisponibles = '<div style="text-align: center; color: var(--text-secondary); padding: 20px;">Todas las tiendas están asignadas a este promotor</div>';
+            }
+            
+            tiendasDisponiblesContainer.innerHTML = htmlDisponibles;
+        }
+    }
+    
+    // Mostrar modal para asignar nueva tienda
+    window.mostrarAsignarTienda = function(promotorId) {
+        currentPromotorAsignar = promotorId;
+        const modal = document.getElementById('modal-asignar-tienda');
+        const promotorInfo = document.getElementById('promotor-selected-info');
+        const selectTienda = document.getElementById('nueva-tienda-select');
+        const fechaInput = document.getElementById('nueva-fecha-inicio');
+        
+        if (!modal) return;
+        
+        // Buscar datos del promotor
+        const promotor = promotoresData.find(p => p.id_promotor == promotorId);
+        if (!promotor) return;
+        
+        // Llenar información del promotor seleccionado
+        if (promotorInfo) {
+            promotorInfo.innerHTML = `
+                <h4>${promotor.nombre} ${promotor.apellido}</h4>
+                <p>Tipo: ${promotor.tipo_trabajo} | RFC: ${promotor.rfc}</p>
+            `;
+        }
+        
+        // Llenar select con tiendas disponibles
+        if (selectTienda) {
+            // Obtener tiendas ya asignadas
+            const events = calendar ? calendar.getEvents() : [];
+            const tiendasAsignadas = new Set();
+            events.filter(e => e.extendedProps?.id_promotor == promotorId)
+                  .forEach(e => tiendasAsignadas.add(e.extendedProps?.id_tienda));
+            
+            // Llenar select solo con tiendas disponibles
+            selectTienda.innerHTML = '<option value="">Seleccionar tienda disponible...</option>';
+            tiendasData.forEach(tienda => {
+                if (!tiendasAsignadas.has(tienda.id_tienda)) {
+                    const option = document.createElement('option');
+                    option.value = tienda.id_tienda;
+                    option.textContent = `${tienda.cadena} #${tienda.num_tienda} - ${tienda.nombre_tienda}`;
+                    selectTienda.appendChild(option);
+                }
+            });
+        }
+        
+        // Poner fecha de hoy como default
+        if (fechaInput) {
+            fechaInput.value = new Date().toISOString().split('T')[0];
+        }
+        
+        modal.style.display = 'block';
+    };
+    
+    // Cerrar modal de asignar tienda
+    window.cerrarModalAsignarTienda = function() {
+        const modal = document.getElementById('modal-asignar-tienda');
+        if (modal) modal.style.display = 'none';
+        currentPromotorAsignar = null;
+    };
+    
+    // Confirmar asignación de nueva tienda
+    window.confirmarAsignarTienda = async function() {
+        const selectTienda = document.getElementById('nueva-tienda-select');
+        const fechaInput = document.getElementById('nueva-fecha-inicio');
+        const motivoInput = document.getElementById('nuevo-motivo');
+        
+        if (!selectTienda || !fechaInput || !currentPromotorAsignar) {
+            alert('Error en el formulario');
+            return;
+        }
+        
+        if (!selectTienda.value || !fechaInput.value) {
+            alert('Selecciona una tienda y fecha');
+            return;
+        }
+        
+        try {
+            const datos = {
+                id_promotor: currentPromotorAsignar,
+                id_tienda: parseInt(selectTienda.value),
+                fecha_inicio: fechaInput.value,
+                fecha_fin: null,
+                motivo_asignacion: motivoInput.value || 'Asignación desde módulo promotores',
+                usuario_asigno: 1
+            };
+            
+            // Crear en base de datos
+            const resultado = await crearAsignacionBD(datos);
+            
+            // Agregar al calendario
+            const promotor = promotoresData.find(p => p.id_promotor == currentPromotorAsignar);
+            const tienda = tiendasData.find(t => t.id_tienda == datos.id_tienda);
+            
+            const nuevoEvento = {
+                id: `asig_${resultado.id}`,
+                title: `${promotor.nombre} ${promotor.apellido} - ${tienda.cadena} #${tienda.num_tienda}`,
+                start: datos.fecha_inicio,
+                className: promotor.tipo_trabajo === 'fijo' ? 'event-fijo-principal' : 'event-cubredescansos-apoyo',
+                extendedProps: {
+                    id_asignacion: resultado.id,
+                    id_promotor: datos.id_promotor,
+                    id_tienda: datos.id_tienda,
+                    nombre_promotor: `${promotor.nombre} ${promotor.apellido}`,
+                    nombre_tienda: tienda.nombre_tienda,
+                    numero_tienda: tienda.num_tienda,
+                    cadena: tienda.cadena,
+                    motivo_asignacion: datos.motivo_asignacion,
+                    activo: 1
+                }
+            };
+            
+            if (calendar) calendar.addEvent(nuevoEvento);
+            
+            // Cerrar modal y actualizar interfaz
+            cerrarModalAsignarTienda();
+            cargarListaAsignaciones();
+            actualizarDashboard();
+            
+            alert('¡Tienda asignada exitosamente!');
+            
+        } catch (error) {
+            console.error('❌ Error asignando tienda:', error);
+            alert('Error asignando tienda: ' + error.message);
+        }
+    };
+    
+    // Asignar tienda rápida (botón + en tiendas disponibles)
+    window.asignarTiendaRapida = async function(promotorId, tiendaId) {
+        if (!confirm('¿Asignar esta tienda al promotor para hoy?')) return;
+        
+        try {
+            const datos = {
+                id_promotor: promotorId,
+                id_tienda: tiendaId,
+                fecha_inicio: new Date().toISOString().split('T')[0],
+                fecha_fin: null,
+                motivo_asignacion: 'Asignación rápida desde lista promotores',
+                usuario_asigno: 1
+            };
+            
+            // Crear en BD
+            const resultado = await crearAsignacionBD(datos);
+            
+            // Agregar al calendario
+            const promotor = promotoresData.find(p => p.id_promotor == promotorId);
+            const tienda = tiendasData.find(t => t.id_tienda == tiendaId);
+            
+            const nuevoEvento = {
+                id: `asig_${resultado.id}`,
+                title: `${promotor.nombre} ${promotor.apellido} - ${tienda.cadena} #${tienda.num_tienda}`,
+                start: datos.fecha_inicio,
+                className: promotor.tipo_trabajo === 'fijo' ? 'event-fijo-principal' : 'event-cubredescansos-apoyo',
+                extendedProps: {
+                    id_asignacion: resultado.id,
+                    id_promotor: datos.id_promotor,
+                    id_tienda: datos.id_tienda,
+                    nombre_promotor: `${promotor.nombre} ${promotor.apellido}`,
+                    nombre_tienda: tienda.nombre_tienda,
+                    numero_tienda: tienda.num_tienda,
+                    cadena: tienda.cadena,
+                    motivo_asignacion: datos.motivo_asignacion,
+                    activo: 1
+                }
+            };
+            
+            if (calendar) calendar.addEvent(nuevoEvento);
+            
+            // Actualizar la vista del promotor
+            cargarTiendasPromotopr(promotorId);
+            actualizarDashboard();
+            
+            alert('¡Tienda asignada exitosamente!');
+            
+        } catch (error) {
+            console.error('❌ Error asignando tienda rápida:', error);
+            alert('Error: ' + error.message);
+        }
+    };
+    
+    // Desasignar tienda
+    window.desasignarTienda = async function(promotorId, tiendaId) {
+        if (!confirm('¿Desasignar todas las asignaciones de esta tienda para este promotor?')) return;
+        
+        try {
+            const events = calendar ? calendar.getEvents() : [];
+            const asignacionesParaEliminar = events.filter(event => 
+                event.extendedProps?.id_promotor == promotorId &&
+                event.extendedProps?.id_tienda == tiendaId
+            );
+            
+            for (let event of asignacionesParaEliminar) {
+                if (event.extendedProps?.id_asignacion) {
+                    await eliminarAsignacionBD(event.extendedProps.id_asignacion);
+                    event.remove();
+                }
+            }
+            
+            // Actualizar vista
+            cargarTiendasPromotopr(promotorId);
+            actualizarDashboard();
+            
+            alert(`${asignacionesParaEliminar.length} asignaciones eliminadas exitosamente`);
+            
+        } catch (error) {
+            console.error('❌ Error desasignando tienda:', error);
+            alert('Error desasignando tienda: ' + error.message);
+        }
+    };
+    
+    // Ver detalle de todas las asignaciones
+    window.verDetalleAsignaciones = function(promotorId) {
+        const events = calendar ? calendar.getEvents() : [];
+        const asignacionesPromotor = events.filter(event => 
+            event.extendedProps?.id_promotor == promotorId
+        );
+        
+        const promotor = promotoresData.find(p => p.id_promotor == promotorId);
+        
+        let detalle = `=== DETALLE DE ASIGNACIONES ===\n`;
+        detalle += `Promotor: ${promotor?.nombre} ${promotor?.apellido}\n`;
+        detalle += `Total asignaciones: ${asignacionesPromotor.length}\n\n`;
+        
+        asignacionesPromotor.forEach((event, index) => {
+            const fecha = event.start ? event.start.toLocaleDateString('es-ES') : 'Sin fecha';
+            detalle += `${index + 1}. ${event.title}\n`;
+            detalle += `   Fecha: ${fecha}\n`;
+            detalle += `   ID: ${event.extendedProps?.id_asignacion}\n`;
+            detalle += `   Motivo: ${event.extendedProps?.motivo_asignacion || 'N/A'}\n\n`;
+        });
+        
+        alert(detalle);
+    };
+    
+    // ===== RESTO DE FUNCIONES (DASHBOARD, REPORTES, ETC.) =====
+    function actualizarDashboard() {
+        const events = calendar ? calendar.getEvents() : [];
+        
+        // Calcular métricas desde datos reales
         const totalAssignments = events.length;
         const totalHours = events.reduce((total, event) => {
             if (event.end && event.start) {
-                const duration = (new Date(event.end) - new Date(event.start)) / (1000 * 60 * 60);
+                const duration = (event.end - event.start) / (1000 * 60 * 60);
                 return total + duration;
             }
-            return total;
+            return total + 8; // Asumir 8 horas por evento sin fin
         }, 0);
         
-        const activeStores = new Set(events.map(e => e.extendedProps?.tienda).filter(t => t)).size;
+        const activeStores = new Set(events.map(e => e.extendedProps?.numero_tienda).filter(t => t)).size;
         const coverage = Math.min(100, Math.round((totalAssignments / 30) * 100));
         
         // Actualizar elementos del DOM
@@ -1846,28 +3068,112 @@
         if (storesElement) storesElement.textContent = activeStores;
         if (coverageElement) coverageElement.textContent = coverage + '%';
         
-        console.log('📊 Dashboard actualizado:', { totalAssignments, totalHours, activeStores, coverage });
+        // Actualizar gráfico de distribución
+        actualizarGraficoDistribucion(events);
+        
+        // Actualizar resumen
+        actualizarResumenOperativo(events);
+        
+        console.log('📊 Dashboard actualizado con datos reales:', { totalAssignments, totalHours, activeStores, coverage });
     }
     
-    // ===== FUNCIONES GLOBALES PARA BOTONES =====
-    window.editarEvento = function(eventId) {
+    function actualizarGraficoDistribucion(events) {
+        const chartContainer = document.getElementById('chart-visual-container');
+        if (!chartContainer) return;
+        
+        // Contar asignaciones por promotor
+        const distributionMap = {};
+        events.forEach(event => {
+            const promotor = event.extendedProps?.nombre_promotor || 'Sin asignar';
+            distributionMap[promotor] = (distributionMap[promotor] || 0) + 1;
+        });
+        
+        let html = '';
+        const total = events.length || 1;
+        
+        Object.entries(distributionMap).forEach(([promotor, count]) => {
+            const percentage = Math.round((count / total) * 100);
+            const className = promotor.toLowerCase().includes('cubredescansos') || promotor.toLowerCase().includes('maria') ? 'maria-bar' : 'juan-bar';
+            
+            html += `
+                <div class="promotor-chart-item">
+                    <div class="chart-bar ${className}" style="width: ${percentage}%;">
+                        <span>${promotor} - ${percentage}%</span>
+                    </div>
+                </div>
+            `;
+        });
+        
+        if (html === '') {
+            html = '<div style="text-align: center; color: var(--text-secondary);">No hay datos para mostrar</div>';
+        }
+        
+        chartContainer.innerHTML = html;
+    }
+    
+    function actualizarResumenOperativo(events) {
+        const summaryContainer = document.getElementById('summary-grid');
+        if (!summaryContainer) return;
+        
+        const totalPromotores = new Set(events.map(e => e.extendedProps?.id_promotor).filter(p => p)).size;
+        const totalTiendas = new Set(events.map(e => e.extendedProps?.numero_tienda).filter(t => t)).size;
+        const promedioAsignaciones = totalPromotores > 0 ? Math.round(events.length / totalPromotores) : 0;
+        
+        const html = `
+            <div class="summary-item">
+                <strong>Promotores Activos:</strong> ${totalPromotores} promotores con asignaciones registradas
+            </div>
+            <div class="summary-item">
+                <strong>Tiendas Cubiertas:</strong> ${totalTiendas} tiendas diferentes con cobertura activa
+            </div>
+            <div class="summary-item">
+                <strong>Promedio de Asignaciones:</strong> ${promedioAsignaciones} asignaciones por promotor
+            </div>
+            <div class="summary-item">
+                <strong>Estado del Sistema:</strong> Conectado a base de datos - Datos en tiempo real
+            </div>
+        `;
+        
+        summaryContainer.innerHTML = html;
+    }
+    
+    // ===== FUNCIONES GLOBALES PARA MANEJO DE BASE DE DATOS =====
+    window.editarEventoBD = function(eventId) {
         if (calendar) {
             const event = calendar.getEventById(eventId);
             if (event) openEventModal(event);
         }
     };
     
-    window.eliminarEvento = function(eventId) {
-        if (confirm('¿Está seguro de eliminar esta asignación?')) {
+    window.eliminarEventoBD = async function(eventId) {
+        if (!confirm('¿Está seguro de eliminar esta asignación de la base de datos?')) {
+            return;
+        }
+        
+        try {
             if (calendar) {
                 const event = calendar.getEventById(eventId);
-                if (event) {
+                if (event && event.extendedProps?.id_asignacion) {
+                    // Eliminar de la base de datos
+                    await eliminarAsignacionBD(event.extendedProps.id_asignacion);
+                    
+                    // Eliminar del calendario
                     event.remove();
-                    cargarListaAsignaciones();
+                    
+                    // Actualizar interfaz
+                    if (currentTab === 'asignaciones') cargarListaAsignaciones();
                     actualizarDashboard();
-                    console.log('✅ Evento eliminado:', eventId);
+                    
+                    console.log('✅ Asignación eliminada de BD y calendario:', eventId);
+                    alert('Asignación eliminada exitosamente');
+                } else {
+                    console.warn('⚠️ Evento sin ID de asignación');
+                    alert('Error: No se puede eliminar esta asignación');
                 }
             }
+        } catch (error) {
+            console.error('❌ Error eliminando asignación:', error);
+            alert('Error eliminando la asignación: ' + error.message);
         }
     };
     
@@ -1884,12 +3190,26 @@
         
         if (!reportOutput) return;
         
-        const events = calendar ? calendar.getEvents() : eventos;
+        const events = calendar ? calendar.getEvents() : [];
+        
+        // Calcular estadísticas reales
+        const totalHoras = events.reduce((total, event) => {
+            if (event.end && event.start) {
+                const duration = (event.end - event.start) / (1000 * 60 * 60);
+                return total + duration;
+            }
+            return total + 8; // Asumir 8 horas por evento sin fin
+        }, 0);
+        
+        const tiendas = new Set(events.map(e => e.extendedProps?.numero_tienda).filter(t => t)).size;
+        const promotores = new Set(events.map(e => e.extendedProps?.id_promotor).filter(p => p)).size;
+        const cobertura = Math.min(100, Math.round((events.length / 30) * 100));
         
         let reportContent = `
             <div style="text-align: center; margin-bottom: 30px;">
                 <h2 style="color: var(--primary-color);">📊 Reporte ${reportType.charAt(0).toUpperCase() + reportType.slice(1)}</h2>
                 <p style="color: var(--text-secondary);">Período: ${reportPeriod} | Formato: ${reportFormat.toUpperCase()}</p>
+                <p style="color: var(--info-color);">📈 Datos extraídos de la base de datos MySQL</p>
                 <hr style="margin: 20px 0; border: none; border-top: 2px solid var(--border-color);">
             </div>
             
@@ -1900,27 +3220,38 @@
                 </div>
                 <div style="background: #e8f5e8; padding: 15px; border-radius: 8px; text-align: center;">
                     <h4 style="color: var(--success-color); margin-bottom: 10px;">Horas Programadas</h4>
-                    <div style="font-size: 2rem; font-weight: bold;">312h</div>
+                    <div style="font-size: 2rem; font-weight: bold;">${Math.round(totalHoras)}h</div>
                 </div>
                 <div style="background: #fff3e0; padding: 15px; border-radius: 8px; text-align: center;">
-                    <h4 style="color: var(--warning-color); margin-bottom: 10px;">Cobertura</h4>
-                    <div style="font-size: 2rem; font-weight: bold;">91.5%</div>
+                    <h4 style="color: var(--warning-color); margin-bottom: 10px;">Promotores</h4>
+                    <div style="font-size: 2rem; font-weight: bold;">${promotores}</div>
                 </div>
                 <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; text-align: center;">
                     <h4 style="color: var(--info-color); margin-bottom: 10px;">Tiendas</h4>
-                    <div style="font-size: 2rem; font-weight: bold;">4</div>
+                    <div style="font-size: 2rem; font-weight: bold;">${tiendas}</div>
                 </div>
             </div>
             
-            <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid var(--border-color);">
-                <h3 style="margin-bottom: 15px; color: var(--text-primary);">Resumen Ejecutivo</h3>
+            <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 20px;">
+                <h3 style="margin-bottom: 15px; color: var(--text-primary);">Análisis de Base de Datos</h3>
                 <ul style="line-height: 1.8; color: var(--text-secondary);">
-                    <li>✅ <strong>Cobertura completa</strong> en tienda principal (OXXO Centro)</li>
-                    <li>✅ <strong>María Rodríguez</strong> mantiene excelente flexibilidad de horarios</li>
-                    <li>⚠️ Se recomienda <strong>optimizar rotación</strong> en tiendas secundarias</li>
-                    <li>📈 <strong>Productividad general</strong> supera objetivos en 1.5%</li>
-                    <li>🎯 <strong>Sin conflictos detectados</strong> en la programación actual</li>
+                    <li>✅ <strong>Conexión exitosa</strong> a tablas promotor_tienda_asignaciones, promotores y tiendas</li>
+                    <li>📊 <strong>${events.length} asignaciones activas</strong> cargadas desde MySQL</li>
+                    <li>🏪 <strong>${tiendas} tiendas</strong> con asignaciones registradas</li>
+                    <li>👥 <strong>${promotores} promotores</strong> con actividad registrada</li>
+                    <li>⏱️ <strong>${Math.round(totalHoras)} horas</strong> de cobertura total calculadas</li>
+                    <li>🔄 <strong>Datos sincronizados</strong> en tiempo real con la base de datos</li>
                 </ul>
+            </div>
+            
+            <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid var(--border-color);">
+                <h3 style="margin-bottom: 15px; color: var(--text-primary);">Detalle por Tabla de Base de Datos</h3>
+                <div style="display: grid; gap: 10px;">
+                    <div><strong>promotor_tienda_asignaciones:</strong> Tabla principal con ${events.length} registros activos</div>
+                    <div><strong>promotores:</strong> ${promotoresData.length} promotores registrados (${promotoresData.filter(p => p.estatus === 'ACTIVO').length} activos)</div>
+                    <div><strong>tiendas:</strong> ${tiendasData.length} tiendas registradas (${tiendasData.filter(t => t.estado_reg == 1).length} activas)</div>
+                    <div><strong>claves_tienda:</strong> Sistema de claves de asistencia integrado</div>
+                </div>
             </div>
             
             <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; text-align: center;">
@@ -1931,19 +3262,19 @@
                         day: 'numeric',
                         hour: '2-digit',
                         minute: '2-digit'
-                    })}
+                    })} | Fuente: Base de datos MySQL (API hoja_horario.php)
                 </small>
             </div>
         `;
         
         reportOutput.innerHTML = reportContent;
-        console.log(`📄 Reporte generado: ${reportType} - ${reportPeriod}`);
+        console.log(`📄 Reporte generado con datos reales: ${reportType} - ${reportPeriod}`);
     };
     
     // ===== INICIALIZACIÓN DEL MÓDULO =====
     async function initModule() {
         try {
-            console.log('🚀 Iniciando módulo...');
+            console.log('🚀 Iniciando módulo con conexión a BD real...');
             
             // Verificar elementos críticos
             if (!elements.dependenciesLoading || !elements.mainContentHoras || !elements.errorState) {
@@ -1958,23 +3289,32 @@
             // Cargar dependencias
             await loadFullCalendarDependencies();
             
+            // Cargar datos desde BD ANTES de inicializar el calendario
+            await cargarPromotoresReales();
+            await cargarTiendasReales();
+            
+            // Llenar selects con datos reales
+            llenarSelectsModal();
+            
             // Mostrar contenido
             elements.dependenciesLoading.style.display = 'none';
             elements.mainContentHoras.style.display = 'block';
             
-            // Inicializar calendar y eventos
+            // Inicializar calendar con datos reales
             await initializeCalendar();
+            
+            // Inicializar eventos
             initializeEventListeners();
             
             // Cargar contenido inicial del dashboard
             actualizarDashboard();
             
-            // Asegurar que se muestre la pestaña correcta al inicio
+            // Asegurar que se muestre la pestaña correcta
             setTimeout(() => {
                 switchTab('calendario');
             }, 100);
             
-            console.log('✅ Módulo inicializado correctamente');
+            console.log('✅ Módulo inicializado con conexión a BD exitosamente');
             
         } catch (error) {
             console.error('❌ Error inicializando módulo:', error);
@@ -1989,14 +3329,18 @@
         if (elements.errorMessage) elements.errorMessage.textContent = message;
     }
     
-    // ===== INICIALIZACIÓN DE FULLCALENDAR =====
+    // ===== INICIALIZACIÓN DE FULLCALENDAR CON DATOS REALES =====
     async function initializeCalendar() {
         if (!window.FullCalendar) throw new Error('FullCalendar no disponible');
         
         const calendarEl = document.getElementById('calendar-horas');
         if (!calendarEl) throw new Error('Elemento calendario no encontrado');
         
-        console.log('📅 Inicializando FullCalendar...');
+        console.log('📅 Inicializando FullCalendar con datos de BD...');
+        
+        // Cargar eventos desde la base de datos
+        const eventos = await cargarAsignacionesReales();
+        console.log(`📊 ${eventos.length} eventos cargados desde BD`);
         
         calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth',
@@ -2019,16 +3363,18 @@
                 openEventModal(null, info.start, info.end);
             },
             
-            eventDrop: function(info) {
-                console.log('📅 Evento movido:', info.event.title);
+            eventDrop: async function(info) {
+                console.log('📅 Evento movido, actualizando BD:', info.event.title);
+                await actualizarEventoEnBD(info.event);
                 actualizarDashboard();
                 if (currentTab === 'asignaciones') {
                     cargarListaAsignaciones();
                 }
             },
             
-            eventResize: function(info) {
-                console.log('📅 Evento redimensionado:', info.event.title);
+            eventResize: async function(info) {
+                console.log('📅 Evento redimensionado, actualizando BD:', info.event.title);
+                await actualizarEventoEnBD(info.event);
                 actualizarDashboard();
                 if (currentTab === 'asignaciones') {
                     cargarListaAsignaciones();
@@ -2046,14 +3392,38 @@
         });
         
         calendar.render();
-        console.log('✅ FullCalendar renderizado');
+        console.log('✅ FullCalendar renderizado con datos reales');
+    }
+    
+    // Actualizar evento en BD cuando se arrastra o redimensiona
+    async function actualizarEventoEnBD(event) {
+        if (!event.extendedProps?.id_asignacion) {
+            console.warn('⚠️ Evento sin ID de asignación, no se puede actualizar en BD');
+            return;
+        }
+        
+        try {
+            const datos = {
+                fecha_inicio: event.start.toISOString().split('T')[0],
+                fecha_fin: event.end ? event.end.toISOString().split('T')[0] : null
+            };
+            
+            await actualizarAsignacionBD(event.extendedProps.id_asignacion, datos);
+            console.log('✅ Evento actualizado en BD');
+            
+        } catch (error) {
+            console.error('❌ Error actualizando evento en BD:', error);
+            alert('Error actualizando en la base de datos: ' + error.message);
+            // Revertir cambio en calendario si falla la BD
+            calendar.refetchEvents();
+        }
     }
     
     // ===== EVENT LISTENERS =====
     function initializeEventListeners() {
         console.log('🎯 Configurando event listeners...');
         
-        // NAVEGACIÓN POR PESTAÑAS - CORREGIDO
+        // NAVEGACIÓN POR PESTAÑAS
         document.querySelectorAll('.tab-item').forEach(tab => {
             addListener(tab, 'click', function() {
                 const tabName = this.dataset.tab;
@@ -2078,9 +3448,9 @@
         // Generar horarios automáticos
         const btnGenerar = document.getElementById('btn-generar-horarios');
         if (btnGenerar) {
-            addListener(btnGenerar, 'click', () => {
-                if (confirm('¿Generar horarios automáticos para el mes?')) {
-                    generateAutomaticSchedule();
+            addListener(btnGenerar, 'click', async () => {
+                if (confirm('¿Generar horarios automáticos y guardarlos en la base de datos?')) {
+                    await generateAutomaticSchedule();
                 }
             });
         }
@@ -2097,19 +3467,21 @@
         
         if (closeBtn) addListener(closeBtn, 'click', closeModal);
         if (cancelBtn) addListener(cancelBtn, 'click', closeModal);
-        if (saveBtn) addListener(saveBtn, 'click', saveEvent);
-        if (deleteBtn) addListener(deleteBtn, 'click', deleteEvent);
+        if (saveBtn) addListener(saveBtn, 'click', saveEventToDB);
+        if (deleteBtn) addListener(deleteBtn, 'click', deleteEventFromDB);
         
         // Cerrar modal al hacer clic fuera
         addListener(window, 'click', function(event) {
             const modal = document.getElementById('modal-evento-horas');
+            const modalAsignar = document.getElementById('modal-asignar-tienda');
             if (event.target === modal) closeModal();
+            if (event.target === modalAsignar) cerrarModalAsignarTienda();
         });
         
         console.log('✅ Event listeners configurados');
     }
     
-    // ===== FUNCIONES DE MODAL =====
+    // ===== FUNCIONES DE MODAL CON CONEXIÓN A BD =====
     function openEventModal(event = null, startDate = null, endDate = null) {
         const modal = document.getElementById('modal-evento-horas');
         if (!modal) return;
@@ -2127,31 +3499,38 @@
         const deleteBtn = document.getElementById('btn-eliminar-horas');
         
         if (event) {
-            // Editar evento existente
-            if (titleEl) titleEl.textContent = 'Editar Asignación';
-            if (promotorEl) promotorEl.value = event.extendedProps.promotor || 'juan';
-            if (tiendaEl) tiendaEl.value = event.extendedProps.tienda || 'oxxo-centro';
-            if (tipoEl) tipoEl.value = event.extendedProps.tipo || 'fijo-principal';
-            if (fechaEl && event.start) fechaEl.value = event.start.toISOString().split('T')[0];
-            if (notasEl) notasEl.value = event.extendedProps.notas || '';
+            // Editar evento existente - usar datos de la BD
+            if (titleEl) titleEl.textContent = 'Editar Asignación (BD)';
             
-            // Determinar horario
-            if (horarioEl && event.start) {
-                const hour = event.start.getHours();
-                if (hour >= 6 && hour < 14) horarioEl.value = '6-14';
-                else if (hour >= 14 && hour < 22) horarioEl.value = '14-22';
-                else horarioEl.value = '22-6';
+            const props = event.extendedProps || {};
+            if (promotorEl) promotorEl.value = props.id_promotor || '';
+            if (tiendaEl) tiendaEl.value = props.id_tienda || '';
+            if (fechaEl && event.start) fechaEl.value = event.start.toISOString().split('T')[0];
+            if (notasEl) notasEl.value = props.motivo_asignacion || '';
+            
+            // Determinar tipo basado en los datos del promotor
+            const promotor = promotoresData.find(p => p.id_promotor == props.id_promotor);
+            if (tipoEl && promotor) {
+                if (promotor.tipo_trabajo === 'fijo') {
+                    tipoEl.value = 'fijo-principal';
+                } else if (promotor.tipo_trabajo === 'cubredescansos') {
+                    tipoEl.value = 'cubredescansos-apoyo';
+                } else {
+                    tipoEl.value = 'fijo-principal';
+                }
             }
+            
+            if (horarioEl) horarioEl.value = '6-14'; // Default
             
             if (deleteBtn) deleteBtn.style.display = 'inline-block';
         } else {
             // Nuevo evento
-            if (titleEl) titleEl.textContent = 'Nueva Asignación';
-            if (promotorEl) promotorEl.value = 'juan';
-            if (tiendaEl) tiendaEl.value = 'oxxo-centro';
+            if (titleEl) titleEl.textContent = 'Nueva Asignación (se guardará en BD)';
+            if (promotorEl) promotorEl.value = '';
+            if (tiendaEl) tiendaEl.value = '';
             if (tipoEl) tipoEl.value = 'fijo-principal';
             if (horarioEl) horarioEl.value = '6-14';
-            if (notasEl) notasEl.value = '';
+            if (notasEl) notasEl.value = 'Asignación desde calendario';
             
             if (fechaEl) {
                 if (startDate) {
@@ -2173,78 +3552,180 @@
         currentEvent = null;
     }
     
-    function saveEvent() {
+    // Función saveEventToDB mejorada
+    async function saveEventToDB() {
         const promotorEl = document.getElementById('event-promotor-horas');
         const tiendaEl = document.getElementById('event-tienda-horas');
-        const tipoEl = document.getElementById('event-tipo-horas');
-        const horarioEl = document.getElementById('event-horario-horas');
         const fechaEl = document.getElementById('event-fecha-horas');
         const notasEl = document.getElementById('event-notas-horas');
         
-        if (!promotorEl || !tiendaEl || !tipoEl || !horarioEl || !fechaEl || !calendar) {
+        if (!promotorEl || !tiendaEl || !fechaEl || !calendar) {
             console.error('❌ Elementos del formulario o calendar no disponibles');
+            alert('Error en el formulario');
             return;
         }
         
-        const promotor = promotorEl.value;
-        const tienda = tiendaEl.value;
-        const tipo = tipoEl.value;
-        const horario = horarioEl.value;
-        const fecha = fechaEl.value;
-        const notas = notasEl ? notasEl.value : '';
-        
-        // Mapear nombres
-        const tiendaNames = {
-            'oxxo-centro': 'OXXO Centro',
-            'seven-eleven': '7-Eleven Plaza',
-            'circle-k': 'Circle K Revolución',
-            'oxxo-universidad': 'OXXO Universidad'
-        };
-        
-        const promotorNames = { 'juan': 'Juan', 'maria': 'María' };
-        
-        // Crear título
-        let title = '';
-        if (tipo === 'descanso') {
-            title = `${promotorNames[promotor]} - Descanso`;
-        } else if (tipo === 'cubredescansos-apoyo') {
-            title = `${promotorNames[promotor]} (Apoyo Juan)`;
-        } else {
-            title = `${promotorNames[promotor]} - ${tiendaNames[tienda]}`;
+        // Validar campos requeridos
+        if (!promotorEl.value || !tiendaEl.value || !fechaEl.value) {
+            alert('Por favor, completa todos los campos requeridos (Promotor, Tienda, Fecha)');
+            return;
         }
-        
-        // Calcular fechas/horas
-        const [startHour, endHour] = horario.split('-').map(Number);
-        const startDateTime = new Date(fecha + 'T' + startHour.toString().padStart(2, '0') + ':00:00');
-        const endDateTime = new Date(fecha + 'T' + endHour.toString().padStart(2, '0') + ':00:00');
-        
-        if (endHour <= startHour) {
-            endDateTime.setDate(endDateTime.getDate() + 1);
-        }
-        
-        const eventData = {
-            title: title,
-            start: tipo === 'descanso' ? fecha : startDateTime.toISOString(),
-            end: tipo === 'descanso' ? undefined : endDateTime.toISOString(),
-            className: `event-${tipo}`,
-            extendedProps: { promotor, tipo, tienda, notas }
-        };
         
         try {
-            if (currentEvent) {
-                // Actualizar evento existente
-                currentEvent.setProp('title', eventData.title);
-                currentEvent.setStart(eventData.start);
-                if (eventData.end) currentEvent.setEnd(eventData.end);
-                currentEvent.setProp('className', eventData.className);
-                Object.keys(eventData.extendedProps).forEach(key => {
-                    currentEvent.setExtendedProp(key, eventData.extendedProps[key]);
-                });
+            const datos = {
+                id_promotor: parseInt(promotorEl.value),
+                id_tienda: parseInt(tiendaEl.value),
+                fecha_inicio: fechaEl.value,
+                fecha_fin: null,
+                motivo_asignacion: notasEl.value || 'Asignación desde calendario',
+                usuario_asigno: 1
+            };
+            
+            console.log('📊 Datos a enviar:', datos);
+            console.log('🔍 currentEvent:', currentEvent);
+            
+            // CORRECCIÓN CRÍTICA: Mejor detección de edición vs creación
+            const esEdicion = currentEvent && 
+                             currentEvent.extendedProps && 
+                             currentEvent.extendedProps.id_asignacion && 
+                             currentEvent.extendedProps.id_asignacion > 0;
+            
+            console.log('🎯 Es edición?', esEdicion, 'ID asignación:', currentEvent?.extendedProps?.id_asignacion);
+            
+            if (esEdicion) {
+                // *** ACTUALIZAR EVENTO EXISTENTE ***
+                console.log('🔄 Actualizando asignación existente...');
+                const idAsignacion = currentEvent.extendedProps.id_asignacion;
+                
+                try {
+                    await actualizarAsignacionBD(idAsignacion, datos);
+                    
+                    // Encontrar promotor y tienda para actualizar título
+                    const promotor = promotoresData.find(p => p.id_promotor == datos.id_promotor);
+                    const tienda = tiendasData.find(t => t.id_tienda == datos.id_tienda);
+                    
+                    // Actualizar evento en calendario
+                    const nuevoTitulo = `${promotor?.nombre} ${promotor?.apellido} - ${tienda?.cadena} #${tienda?.num_tienda}`;
+                    currentEvent.setProp('title', nuevoTitulo);
+                    currentEvent.setStart(datos.fecha_inicio);
+                    currentEvent.setExtendedProp('motivo_asignacion', datos.motivo_asignacion);
+                    currentEvent.setExtendedProp('nombre_promotor', `${promotor?.nombre} ${promotor?.apellido}`);
+                    currentEvent.setExtendedProp('nombre_tienda', tienda?.nombre_tienda);
+                    currentEvent.setExtendedProp('numero_tienda', tienda?.num_tienda);
+                    currentEvent.setExtendedProp('cadena', tienda?.cadena);
+                    
+                    console.log('✅ Asignación actualizada exitosamente');
+                    alert('Asignación actualizada exitosamente');
+                    
+                } catch (updateError) {
+                    console.error('❌ Error en actualización:', updateError);
+                    
+                    // Manejo específico del error 409 en actualización
+                    if (updateError.message.includes('409')) {
+                        alert('CONFLICTO: Ya existe otra asignación con estos datos. ' +
+                              'Verifica que no estés duplicando información.');
+                    } else {
+                        alert('Error actualizando en la base de datos: ' + updateError.message);
+                    }
+                    return; // Salir sin cerrar modal para permitir corrección
+                }
+                
             } else {
-                // Crear nuevo evento
-                eventData.id = 'new_' + Date.now();
-                calendar.addEvent(eventData);
+                // *** CREAR NUEVO EVENTO ***
+                console.log('➕ Creando nueva asignación...');
+                
+                // VERIFICAR SI YA EXISTE EN EL CALENDARIO (prevenir duplicados locales)
+                const existenteEnCalendario = calendar.getEvents().find(event => {
+                    const props = event.extendedProps || {};
+                    const fechaEvento = event.start ? event.start.toISOString().split('T')[0] : null;
+                    return props.id_promotor == datos.id_promotor && 
+                           props.id_tienda == datos.id_tienda && 
+                           fechaEvento === datos.fecha_inicio;
+                });
+                
+                if (existenteEnCalendario) {
+                    alert('ADVERTENCIA: Ya existe una asignación visible en el calendario para este promotor, tienda y fecha. ' +
+                          'Si deseas modificarla, haz clic en el evento existente para editarlo.');
+                    return;
+                }
+                
+                try {
+                    const resultado = await crearAsignacionBD(datos);
+                    
+                    // Encontrar promotor y tienda para crear evento
+                    const promotor = promotoresData.find(p => p.id_promotor == datos.id_promotor);
+                    const tienda = tiendasData.find(t => t.id_tienda == datos.id_tienda);
+                    
+                    // Agregar evento al calendario
+                    const nuevoEvento = {
+                        id: `asig_${resultado.id}`,
+                        title: `${promotor?.nombre} ${promotor?.apellido} - ${tienda?.cadena} #${tienda?.num_tienda}`,
+                        start: datos.fecha_inicio,
+                        className: promotor?.tipo_trabajo === 'fijo' ? 'event-fijo-principal' : 'event-cubredescansos-apoyo',
+                        extendedProps: {
+                            id_asignacion: resultado.id,
+                            id_promotor: datos.id_promotor,
+                            id_tienda: datos.id_tienda,
+                            nombre_promotor: `${promotor?.nombre} ${promotor?.apellido}`,
+                            nombre_tienda: tienda?.nombre_tienda,
+                            numero_tienda: tienda?.num_tienda,
+                            cadena: tienda?.cadena,
+                            motivo_asignacion: datos.motivo_asignacion,
+                            activo: 1
+                        }
+                    };
+                    
+                    calendar.addEvent(nuevoEvento);
+                    console.log('✅ Nueva asignación creada exitosamente');
+                    alert('Nueva asignación creada exitosamente');
+                    
+                } catch (createError) {
+                    console.error('❌ Error en creación:', createError);
+                    
+                    // Manejo específico del error 409
+                    if (createError.message.includes('409')) {
+                        alert('CONFLICTO AL CREAR: Ya existe una asignación en la base de datos para este promotor, tienda y fecha.\n\n' +
+                              'Posibles soluciones:\n' +
+                              '1. Cambia la fecha de la asignación\n' +
+                              '2. Selecciona otro promotor o tienda\n' +
+                              '3. El calendario puede no estar mostrando todas las asignaciones - intenta recargar la página\n\n' +
+                              'NOTA: Es posible que esta asignación ya exista en la base de datos.');
+                        return; // No cerrar modal para permitir corrección
+                    } else {
+                        alert('Error creando la asignación: ' + createError.message);
+                        return;
+                    }
+                }
             }
+            
+            // Solo cerrar modal y actualizar si todo salió bien
+            closeModal();
+            actualizarDashboard();
+            
+            if (currentTab === 'asignaciones') {
+                cargarListaAsignaciones();
+            }
+            
+        } catch (error) {
+            console.error('❌ Error general guardando:', error);
+            alert('Error inesperado: ' + error.message);
+        }
+    }
+    
+    async function deleteEventFromDB() {
+        if (!currentEvent) return;
+        
+        if (!confirm('¿Eliminar esta asignación de la base de datos?')) return;
+        
+        try {
+            if (currentEvent.extendedProps?.id_asignacion) {
+                // Eliminar de la BD
+                await eliminarAsignacionBD(currentEvent.extendedProps.id_asignacion);
+                console.log('✅ Asignación eliminada de BD');
+            }
+            
+            // Eliminar del calendario
+            currentEvent.remove();
             
             closeModal();
             actualizarDashboard();
@@ -2253,92 +3734,145 @@
                 cargarListaAsignaciones();
             }
             
-            console.log('✅ Evento guardado');
+            alert('Asignación eliminada exitosamente');
+            
         } catch (error) {
-            console.error('❌ Error guardando evento:', error);
-            alert('Error guardando el evento. Intenta de nuevo.');
+            console.error('❌ Error eliminando de BD:', error);
+            alert('Error eliminando de la base de datos: ' + error.message);
         }
     }
     
-    function deleteEvent() {
-        if (currentEvent && confirm('¿Eliminar esta asignación?')) {
-            try {
-                currentEvent.remove();
-                closeModal();
-                actualizarDashboard();
-                
-                if (currentTab === 'asignaciones') {
-                    cargarListaAsignaciones();
-                }
-                
-                console.log('✅ Evento eliminado');
-            } catch (error) {
-                console.error('❌ Error eliminando evento:', error);
-                alert('Error eliminando el evento. Intenta de nuevo.');
-            }
-        }
-    }
-    
-    function generateAutomaticSchedule() {
+    async function generateAutomaticSchedule() {
         if (!calendar) {
             console.error('❌ Calendar no disponible');
             return;
         }
         
-        const today = new Date();
-        const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-        let eventsAdded = 0;
+        if (promotoresData.length === 0 || tiendasData.length === 0) {
+            alert('Error: No hay promotores o tiendas disponibles. Verifica la conexión a la base de datos.');
+            return;
+        }
         
-        for (let d = new Date(today); d <= endOfMonth; d.setDate(d.getDate() + 1)) {
-            const dayOfWeek = d.getDay();
-            const dateStr = d.toISOString().split('T')[0];
+        try {
+            console.log('🤖 Generando horarios automáticos en BD...');
             
-            if (dayOfWeek >= 1 && dayOfWeek <= 5) {
-                const existingEvents = calendar.getEvents().filter(event => 
-                    event.start && event.start.toISOString().split('T')[0] === dateStr
-                );
+            const today = new Date();
+            const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            let eventsAdded = 0;
+            let eventsSkipped = 0;
+            
+            // Usar el primer promotor fijo disponible
+            const promotorFijo = promotoresData.find(p => p.tipo_trabajo === 'fijo') || promotoresData[0];
+            // Usar la primera tienda disponible
+            const tiendaPrincipal = tiendasData[0];
+            
+            if (!promotorFijo || !tiendaPrincipal) {
+                alert('Error: No se encontraron promotores o tiendas para generar horarios automáticos');
+                return;
+            }
+            
+            console.log(`📋 Generando para: ${promotorFijo.nombre} ${promotorFijo.apellido} en ${tiendaPrincipal.cadena} #${tiendaPrincipal.num_tienda}`);
+            
+            // CORRECCIÓN: Verificar contra base de datos ANTES de intentar crear
+            for (let d = new Date(today); d <= endOfMonth; d.setDate(d.getDate() + 1)) {
+                const dayOfWeek = d.getDay();
+                const dateStr = d.toISOString().split('T')[0];
                 
-                if (existingEvents.length === 0) {
-                    // Juan matutino
-                    calendar.addEvent({
-                        id: 'auto_j_' + dateStr,
-                        title: 'Juan - OXXO Centro',
-                        start: dateStr + 'T06:00:00',
-                        end: dateStr + 'T14:00:00',
-                        className: 'event-fijo-principal',
-                        extendedProps: { promotor: 'juan', tipo: 'fijo-principal', tienda: 'oxxo-centro' }
+                if (dayOfWeek >= 1 && dayOfWeek <= 5) { // Lunes a viernes
+                    
+                    // PASO 1: Verificar en calendario local
+                    const existingEventsInCalendar = calendar.getEvents().filter(event => {
+                        const eventDate = event.start ? event.start.toISOString().split('T')[0] : null;
+                        return eventDate === dateStr && 
+                               event.extendedProps?.id_promotor == promotorFijo.id_promotor &&
+                               event.extendedProps?.id_tienda == tiendaPrincipal.id_tienda;
                     });
                     
-                    // María vespertino
-                    const tiendas = ['seven-eleven', 'circle-k', 'oxxo-universidad'];
-                    const tienda = tiendas[Math.floor(Math.random() * tiendas.length)];
-                    const tiendaNames = {
-                        'seven-eleven': '7-Eleven',
-                        'circle-k': 'Circle K',
-                        'oxxo-universidad': 'OXXO Univ'
-                    };
+                    if (existingEventsInCalendar.length > 0) {
+                        console.log(`⏭️ Saltando ${dateStr} - ya existe en calendario local`);
+                        eventsSkipped++;
+                        continue;
+                    }
                     
-                    calendar.addEvent({
-                        id: 'auto_m_' + dateStr,
-                        title: 'María - ' + tiendaNames[tienda],
-                        start: dateStr + 'T14:00:00',
-                        end: dateStr + 'T22:00:00',
-                        className: 'event-cubredescansos-otros',
-                        extendedProps: { promotor: 'maria', tipo: 'cubredescansos-otros', tienda: tienda }
-                    });
-                    
-                    eventsAdded += 2;
+                    // PASO 2: Intentar crear en BD (el PHP verificará duplicados)
+                    try {
+                        const datos = {
+                            id_promotor: promotorFijo.id_promotor,
+                            id_tienda: tiendaPrincipal.id_tienda,
+                            fecha_inicio: dateStr,
+                            fecha_fin: null,
+                            motivo_asignacion: `Horario automático generado - ${dateStr}`,
+                            usuario_asigno: 1
+                        };
+                        
+                        console.log(`🔄 Intentando crear asignación para ${dateStr}...`);
+                        const resultado = await crearAsignacionBD(datos);
+                        
+                        // Solo agregar al calendario si se creó exitosamente en BD
+                        calendar.addEvent({
+                            id: `auto_${resultado.id}`,
+                            title: `${promotorFijo.nombre} ${promotorFijo.apellido} - ${tiendaPrincipal.cadena} #${tiendaPrincipal.num_tienda} (Auto)`,
+                            start: dateStr + 'T06:00:00',
+                            end: dateStr + 'T14:00:00',
+                            className: 'event-fijo-principal',
+                            extendedProps: {
+                                id_asignacion: resultado.id,
+                                id_promotor: promotorFijo.id_promotor,
+                                id_tienda: tiendaPrincipal.id_tienda,
+                                nombre_promotor: `${promotorFijo.nombre} ${promotorFijo.apellido}`,
+                                nombre_tienda: tiendaPrincipal.nombre_tienda,
+                                numero_tienda: tiendaPrincipal.num_tienda,
+                                cadena: tiendaPrincipal.cadena,
+                                motivo_asignacion: datos.motivo_asignacion
+                            }
+                        });
+                        
+                        eventsAdded++;
+                        console.log(`✅ Asignación creada para ${dateStr}`);
+                        
+                        // Pequeña pausa para no sobrecargar la BD
+                        await new Promise(resolve => setTimeout(resolve, 100));
+                        
+                    } catch (createError) {
+                        console.log(`⚠️ Error/conflicto para ${dateStr}:`, createError.message);
+                        
+                        if (createError.message.includes('409') || createError.message.includes('Conflict')) {
+                            // Error 409 = asignación ya existe en BD, es normal
+                            console.log(`📝 Asignación ya existe en BD para ${dateStr} - saltando`);
+                            eventsSkipped++;
+                        } else {
+                            // Otro tipo de error
+                            console.error(`❌ Error inesperado para ${dateStr}:`, createError);
+                            throw createError; // Re-lanzar errores no esperados
+                        }
+                    }
                 }
             }
+            
+            // Actualizar interfaz
+            actualizarDashboard();
+            if (currentTab === 'asignaciones') {
+                cargarListaAsignaciones();
+            }
+            
+            // Mensaje final mejorado
+            const totalDays = Math.floor((endOfMonth - today) / (1000 * 60 * 60 * 24)) + 1;
+            const workDays = Math.floor(totalDays * 5/7); // Aproximado
+            
+            let mensaje = `📊 GENERACIÓN COMPLETADA:\n`;
+            mensaje += `✅ Asignaciones creadas: ${eventsAdded}\n`;
+            mensaje += `⏭️ Ya existentes (saltadas): ${eventsSkipped}\n`;
+            mensaje += `📅 Total días laborables: ~${workDays}\n`;
+            mensaje += `👤 Promotor: ${promotorFijo.nombre} ${promotorFijo.apellido}\n`;
+            mensaje += `🏪 Tienda: ${tiendaPrincipal.cadena} #${tiendaPrincipal.num_tienda}`;
+            
+            alert(mensaje);
+            console.log(`✅ Generación completada: ${eventsAdded} nuevas, ${eventsSkipped} saltadas`);
+            
+        } catch (error) {
+            console.error('❌ Error crítico generando horarios automáticos:', error);
+            alert(`Error generando horarios automáticos:\n\n${error.message}\n\nTip: Si hay conflictos 409, significa que algunas asignaciones ya existen en la base de datos. Esto es normal.`);
         }
-        
-        actualizarDashboard();
-        if (currentTab === 'asignaciones') {
-            cargarListaAsignaciones();
-        }
-        
-        alert(`Se generaron ${eventsAdded} eventos automáticamente`);
-        console.log(`✅ ${eventsAdded} eventos generados`);
     }
     
     // ===== INICIAR MÓDULO =====
@@ -2346,3 +3880,6 @@
     
 })();
 </script>
+
+</body>
+</html>
