@@ -27,6 +27,75 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 }
 
 try {
+    // ===== 🆕 FUNCIÓN HELPER PARA FORMATEAR NUMERO_TIENDA JSON =====
+    function formatearNumeroTiendaJSON($numero_tienda) {
+        if ($numero_tienda === null || $numero_tienda === '') {
+            return [
+                'original' => null,
+                'display' => 'N/A',
+                'parsed' => null,
+                'is_json' => false,
+                'is_legacy' => false
+            ];
+        }
+        
+        // Intentar parsear como JSON primero
+        $parsed = json_decode($numero_tienda, true);
+        if (json_last_error() === JSON_ERROR_NONE) {
+            // Es JSON válido
+            if (is_numeric($parsed)) {
+                return [
+                    'original' => $numero_tienda,
+                    'display' => (string)$parsed,
+                    'parsed' => $parsed,
+                    'is_json' => true,
+                    'is_legacy' => false,
+                    'type' => 'single_number'
+                ];
+            } elseif (is_array($parsed)) {
+                return [
+                    'original' => $numero_tienda,
+                    'display' => implode(', ', $parsed),
+                    'parsed' => $parsed,
+                    'is_json' => true,
+                    'is_legacy' => false,
+                    'type' => 'array',
+                    'count' => count($parsed)
+                ];
+            } else {
+                return [
+                    'original' => $numero_tienda,
+                    'display' => is_string($parsed) ? $parsed : json_encode($parsed),
+                    'parsed' => $parsed,
+                    'is_json' => true,
+                    'is_legacy' => false,
+                    'type' => 'object'
+                ];
+            }
+        } else {
+            // No es JSON válido, asumir que es un entero legacy
+            if (is_numeric($numero_tienda)) {
+                return [
+                    'original' => $numero_tienda,
+                    'display' => (string)$numero_tienda,
+                    'parsed' => (int)$numero_tienda,
+                    'is_json' => false,
+                    'is_legacy' => true,
+                    'type' => 'legacy_integer'
+                ];
+            } else {
+                return [
+                    'original' => $numero_tienda,
+                    'display' => (string)$numero_tienda,
+                    'parsed' => $numero_tienda,
+                    'is_json' => false,
+                    'is_legacy' => true,
+                    'type' => 'legacy_string'
+                ];
+            }
+        }
+    }
+
     // ===== LOG PARA DEBUGGING =====
     $debug_info = [
         'timestamp' => date('Y-m-d H:i:s'),
@@ -110,7 +179,7 @@ try {
         throw new Exception('Error verificando tabla promotores: ' . $table_error->getMessage());
     }
 
-    // ===== 🆕 CONSTRUIR CONSULTA BASE - NUEVO ENFOQUE PARA ASIGNACIONES MÚLTIPLES =====
+    // ===== 🆕 CONSTRUIR CONSULTA BASE - ACTUALIZADA CON NUMERO_TIENDA Y DIA_DESCANSO =====
     $sql = "SELECT 
                 p.id_promotor,
                 p.nombre,
@@ -120,6 +189,12 @@ try {
                 p.rfc,
                 p.estatus,
                 p.vacaciones,
+                p.numero_tienda,
+                p.region,
+                p.tipo_trabajo,
+                p.fecha_ingreso,
+                p.clave_asistencia,
+                p.dia_descanso,
                 
                 COUNT(pta.id_asignacion) as total_asignaciones_activas,
                 GROUP_CONCAT(
@@ -165,7 +240,7 @@ try {
         $params[':search'] = '%' . $search . '%';
     }
 
-    $sql .= " GROUP BY p.id_promotor, p.nombre, p.apellido, p.telefono, p.correo, p.rfc, p.estatus, p.vacaciones";
+    $sql .= " GROUP BY p.id_promotor, p.nombre, p.apellido, p.telefono, p.correo, p.rfc, p.estatus, p.vacaciones, p.numero_tienda, p.region, p.tipo_trabajo, p.fecha_ingreso, p.clave_asistencia, p.dia_descanso";
 
     // 🆕 FILTRO PARA EXCLUIR PROMOTORES YA ASIGNADOS A UNA TIENDA ESPECÍFICA
     if ($excluir_tienda > 0) {
@@ -193,7 +268,32 @@ try {
         'activos_con_asignaciones' => 0,
         'en_vacaciones' => 0,
         'inactivos' => 0,
-        'total_asignaciones_sistema' => 0
+        'total_asignaciones_sistema' => 0,
+        // ===== 🆕 ESTADÍSTICAS DE NUMERO_TIENDA JSON =====
+        'con_numero_tienda' => 0,
+        'sin_numero_tienda' => 0,
+        'numero_tienda_json' => 0,
+        'numero_tienda_legacy' => 0,
+        // ===== 🆕 ESTADÍSTICAS DE DÍA DE DESCANSO =====
+        'con_dia_descanso' => 0,
+        'sin_dia_descanso' => 0
+    ];
+
+    // ===== 🆕 PROCESAR TIPOS DE TRABAJO =====
+    $tipos_trabajo = [
+        'fijo' => 'Fijo',
+        'cubredescansos' => 'Cubre Descansos'
+    ];
+
+    // ===== 🆕 MAPEO DE DÍAS DE LA SEMANA =====
+    $dias_semana = [
+        '1' => 'Lunes',
+        '2' => 'Martes',
+        '3' => 'Miércoles',
+        '4' => 'Jueves',
+        '5' => 'Viernes',
+        '6' => 'Sábado',
+        '7' => 'Domingo'
     ];
 
     foreach ($promotores as $promotor) {
@@ -204,7 +304,46 @@ try {
         $esta_en_vacaciones = intval($promotor['vacaciones']) === 1;
         $esta_activo = $promotor['estatus'] === 'ACTIVO';
 
-        // Estadísticas
+        // ===== 🆕 PROCESAR NUMERO_TIENDA CON SOPORTE JSON =====
+        $numero_tienda_info = formatearNumeroTiendaJSON($promotor['numero_tienda']);
+        
+        // Actualizar estadísticas de numero_tienda
+        if ($numero_tienda_info['parsed'] !== null) {
+            $estadisticas['con_numero_tienda']++;
+            if ($numero_tienda_info['is_json']) {
+                $estadisticas['numero_tienda_json']++;
+            } else {
+                $estadisticas['numero_tienda_legacy']++;
+            }
+        } else {
+            $estadisticas['sin_numero_tienda']++;
+        }
+
+        // ===== 🆕 PROCESAR DÍA DE DESCANSO =====
+        $dia_descanso = $promotor['dia_descanso'];
+        $dia_descanso_formatted = 'No asignado';
+        $tiene_dia_descanso = false;
+        
+        if (!empty($dia_descanso) && isset($dias_semana[$dia_descanso])) {
+            $dia_descanso_formatted = $dias_semana[$dia_descanso];
+            $tiene_dia_descanso = true;
+            $estadisticas['con_dia_descanso']++;
+        } else {
+            $estadisticas['sin_dia_descanso']++;
+        }
+
+        // ===== 🆕 PROCESAR CLAVES DE ASISTENCIA =====
+        $claves_asistencia = [];
+        if (!empty($promotor['clave_asistencia'])) {
+            $parsed_claves = json_decode($promotor['clave_asistencia'], true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($parsed_claves)) {
+                $claves_asistencia = $parsed_claves;
+            } else {
+                $claves_asistencia = [$promotor['clave_asistencia']];
+            }
+        }
+
+        // Estadísticas existentes
         if ($esta_activo) {
             if ($total_asignaciones === 0) {
                 $estadisticas['activos_sin_asignacion']++;
@@ -240,6 +379,30 @@ try {
             'estatus' => $promotor['estatus'],
             'vacaciones' => $esta_en_vacaciones,
             'activo' => $esta_activo,
+            
+            // ===== 🆕 INFORMACIÓN ADICIONAL DEL PROMOTOR =====
+            'region' => (int)$promotor['region'],
+            'tipo_trabajo' => $promotor['tipo_trabajo'],
+            'tipo_trabajo_formatted' => $tipos_trabajo[$promotor['tipo_trabajo']] ?? $promotor['tipo_trabajo'],
+            'fecha_ingreso' => $promotor['fecha_ingreso'],
+            'fecha_ingreso_formatted' => $promotor['fecha_ingreso'] ? date('d/m/Y', strtotime($promotor['fecha_ingreso'])) : 'N/A',
+            
+            // ===== 🆕 NÚMERO DE TIENDA CON SOPORTE JSON =====
+            'numero_tienda' => $numero_tienda_info['original'],
+            'numero_tienda_display' => $numero_tienda_info['display'],
+            'numero_tienda_parsed' => $numero_tienda_info['parsed'],
+            'numero_tienda_info' => $numero_tienda_info,
+            
+            // ===== 🆕 DÍA DE DESCANSO =====
+            'dia_descanso' => $dia_descanso,
+            'dia_descanso_formatted' => $dia_descanso_formatted,
+            'tiene_dia_descanso' => $tiene_dia_descanso,
+            
+            // ===== 🆕 CLAVES DE ASISTENCIA PROCESADAS =====
+            'clave_asistencia' => $promotor['clave_asistencia'],
+            'claves_asistencia_parsed' => $claves_asistencia,
+            'claves_texto' => implode(', ', $claves_asistencia),
+            'total_claves' => count($claves_asistencia),
             
             // 🆕 NUEVA INFORMACIÓN DE ASIGNACIONES MÚLTIPLES
             'total_asignaciones_activas' => $total_asignaciones,
@@ -290,7 +453,11 @@ try {
         'configuracion' => [
             'permite_asignaciones_multiples' => true,
             'criterio_disponibilidad' => 'promotor_activo',
-            'incluye_promotores_con_asignaciones' => true
+            'incluye_promotores_con_asignaciones' => true,
+            // ===== 🆕 CONFIGURACIÓN JSON =====
+            'soporta_numero_tienda_json' => true,
+            'soporta_claves_multiples' => true,
+            'incluye_dia_descanso' => true
         ],
         'filtros' => [
             'solo_activos' => $solo_activos,
@@ -300,7 +467,15 @@ try {
         'metadata' => [
             'total_encontrados' => count($promotores_formateados),
             'timestamp' => date('Y-m-d H:i:s'),
-            'version' => '2.0 - Asignaciones Múltiples'
+            'version' => '2.2 - Asignaciones Múltiples + JSON Support + Día Descanso',
+            // ===== 🆕 METADATOS JSON =====
+            'campos_json' => [
+                'numero_tienda' => 'Soporta JSON array, object, y valores legacy',
+                'clave_asistencia' => 'Soporta JSON array de claves múltiples'
+            ],
+            'campos_nuevos' => [
+                'dia_descanso' => 'Día de descanso del promotor (1-7, siendo 1=Lunes, 7=Domingo)'
+            ]
         ]
     ];
 

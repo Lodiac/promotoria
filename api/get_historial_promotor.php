@@ -1,9 +1,12 @@
 <?php
 
-// Habilitar logging de errores para debugging
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
+// ===== DESHABILITAR ERRORES HTML EN PRODUCCIÓN =====
+ini_set('display_errors', 0);
+ini_set('display_startup_errors', 0);
 error_reporting(E_ALL);
+
+// ===== INICIAR OUTPUT BUFFERING PARA CAPTURAR CUALQUIER OUTPUT NO DESEADO =====
+ob_start();
 
 session_start();
 
@@ -18,6 +21,7 @@ header('X-XSS-Protection: 1; mode=block');
 
 // Verificar que sea GET
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+    ob_end_clean(); // Limpiar buffer
     http_response_code(405);
     echo json_encode([
         'success' => false,
@@ -27,6 +31,75 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 }
 
 try {
+    // ===== 🆕 FUNCIÓN HELPER PARA FORMATEAR NUMERO_TIENDA JSON =====
+    function formatearNumeroTiendaJSON($numero_tienda) {
+        if ($numero_tienda === null || $numero_tienda === '') {
+            return [
+                'original' => null,
+                'display' => 'N/A',
+                'parsed' => null,
+                'is_json' => false,
+                'is_legacy' => false
+            ];
+        }
+        
+        // Intentar parsear como JSON primero
+        $parsed = json_decode($numero_tienda, true);
+        if (json_last_error() === JSON_ERROR_NONE) {
+            // Es JSON válido
+            if (is_numeric($parsed)) {
+                return [
+                    'original' => $numero_tienda,
+                    'display' => (string)$parsed,
+                    'parsed' => $parsed,
+                    'is_json' => true,
+                    'is_legacy' => false,
+                    'type' => 'single_number'
+                ];
+            } elseif (is_array($parsed)) {
+                return [
+                    'original' => $numero_tienda,
+                    'display' => implode(', ', $parsed),
+                    'parsed' => $parsed,
+                    'is_json' => true,
+                    'is_legacy' => false,
+                    'type' => 'array',
+                    'count' => count($parsed)
+                ];
+            } else {
+                return [
+                    'original' => $numero_tienda,
+                    'display' => is_string($parsed) ? $parsed : json_encode($parsed),
+                    'parsed' => $parsed,
+                    'is_json' => true,
+                    'is_legacy' => false,
+                    'type' => 'object'
+                ];
+            }
+        } else {
+            // No es JSON válido, asumir que es un entero legacy
+            if (is_numeric($numero_tienda)) {
+                return [
+                    'original' => $numero_tienda,
+                    'display' => (string)$numero_tienda,
+                    'parsed' => (int)$numero_tienda,
+                    'is_json' => false,
+                    'is_legacy' => true,
+                    'type' => 'legacy_integer'
+                ];
+            } else {
+                return [
+                    'original' => $numero_tienda,
+                    'display' => (string)$numero_tienda,
+                    'parsed' => $numero_tienda,
+                    'is_json' => false,
+                    'is_legacy' => true,
+                    'type' => 'legacy_string'
+                ];
+            }
+        }
+    }
+
     // ===== LOG PARA DEBUGGING =====
     $debug_info = [
         'timestamp' => date('Y-m-d H:i:s'),
@@ -40,6 +113,7 @@ try {
     // ===== VERIFICAR SESIÓN BÁSICA =====
     if (!isset($_SESSION['user_id']) || empty($_SESSION['user_id'])) {
         error_log('GET_HISTORIAL_PROMOTOR: Sin sesión - user_id no encontrado');
+        ob_end_clean();
         http_response_code(403);
         echo json_encode([
             'success' => false,
@@ -52,6 +126,7 @@ try {
     // ===== VERIFICAR ROL =====
     if (!isset($_SESSION['rol']) || !in_array($_SESSION['rol'], ['usuario', 'supervisor', 'root'])) {
         error_log('GET_HISTORIAL_PROMOTOR: Rol incorrecto - ' . ($_SESSION['rol'] ?? 'NO_SET'));
+        ob_end_clean();
         http_response_code(403);
         echo json_encode([
             'success' => false,
@@ -86,6 +161,7 @@ try {
 
     // ===== VALIDACIONES BÁSICAS =====
     if ($id_promotor <= 0) {
+        ob_end_clean();
         http_response_code(400);
         echo json_encode([
             'success' => false,
@@ -106,27 +182,25 @@ try {
         throw new Exception('Error de conexión a la base de datos: ' . $conn_error->getMessage());
     }
 
-    // ===== VERIFICAR QUE EL PROMOTOR EXISTE (CON NUEVOS CAMPOS) =====
+    // ===== OBTENER INFORMACIÓN DEL PROMOTOR CON DÍA DE DESCANSO =====
     $sql_promotor = "SELECT 
-                        id_promotor, 
-                        nombre, 
-                        apellido, 
-                        telefono, 
-                        correo, 
-                        rfc, 
-                        estatus, 
-                        vacaciones,
-                        incidencias,
-                        fecha_ingreso,
-                        tipo_trabajo,
-                        estado,
-                        fecha_alta
-                     FROM promotores 
-                     WHERE id_promotor = :id_promotor";
+                        p.*,
+                        CONCAT(p.nombre, ' ', p.apellido) as nombre_completo,
+                        DATE_FORMAT(p.fecha_ingreso, '%d/%m/%Y') as fecha_ingreso_formatted,
+                        CASE 
+                            WHEN p.tipo_trabajo = 'fijo' THEN 'Promotor Fijo'
+                            WHEN p.tipo_trabajo = 'cubredescansos' THEN 'Cubre Descansos'
+                            ELSE p.tipo_trabajo
+                        END as tipo_trabajo_formatted,
+                        DATE_FORMAT(p.fecha_alta, '%d/%m/%Y %H:%i') as fecha_alta_formatted,
+                        DATE_FORMAT(p.fecha_modificacion, '%d/%m/%Y %H:%i') as fecha_modificacion_formatted
+                     FROM promotores p 
+                     WHERE p.id_promotor = :id_promotor AND p.estado = 1";
     
     $promotor = Database::selectOne($sql_promotor, [':id_promotor' => $id_promotor]);
 
     if (!$promotor) {
+        ob_end_clean();
         http_response_code(404);
         echo json_encode([
             'success' => false,
@@ -135,10 +209,42 @@ try {
         exit;
     }
 
-    // ===== CONSTRUIR CONSULTA DEL HISTORIAL =====
+    // ===== ✅ FORMATEAR DÍA DE DESCANSO =====
+    if ($promotor['dia_descanso']) {
+        $dias_semana = [
+            '1' => 'Lunes',
+            '2' => 'Martes',
+            '3' => 'Miércoles',
+            '4' => 'Jueves',
+            '5' => 'Viernes',
+            '6' => 'Sábado',
+            '7' => 'Domingo'
+        ];
+        $promotor['dia_descanso_formatted'] = $dias_semana[$promotor['dia_descanso']] ?? 'N/A';
+    } else {
+        $promotor['dia_descanso_formatted'] = 'No especificado';
+    }
+
+    // ===== OBTENER CLAVES ASIGNADAS ACTUALMENTE (NUEVA FUNCIONALIDAD) =====
+    $sql_claves_actuales = "SELECT 
+                                ct.id_clave,
+                                ct.codigo_clave,
+                                ct.numero_tienda as clave_tienda,
+                                ct.region as clave_region,
+                                ct.en_uso,
+                                ct.fecha_asignacion
+                            FROM claves_tienda ct
+                            WHERE ct.id_promotor_actual = :id_promotor
+                            AND ct.activa = 1
+                            ORDER BY ct.codigo_clave";
+    
+    $claves_actuales = Database::select($sql_claves_actuales, [':id_promotor' => $id_promotor]);
+
+    error_log('GET_HISTORIAL_PROMOTOR: ' . count($claves_actuales) . ' claves actuales encontradas');
+
+    // ===== OBTENER HISTORIAL DE ASIGNACIONES (ADAPTADO DEL API ORIGINAL CON MEJORAS) =====
     $sql_historial = "SELECT 
                         pta.id_asignacion,
-                        pta.id_promotor,
                         pta.id_tienda,
                         pta.fecha_inicio,
                         pta.fecha_fin,
@@ -148,23 +254,40 @@ try {
                         pta.fecha_registro,
                         pta.fecha_modificacion,
                         
-                        t.region,
                         t.cadena,
                         t.num_tienda,
                         t.nombre_tienda,
                         t.ciudad,
-                        t.estado as tienda_estado,
+                        t.region,
                         
-                        u1.nombre as usuario_asigno_nombre,
-                        u1.apellido as usuario_asigno_apellido,
-                        u2.nombre as usuario_cambio_nombre,
-                        u2.apellido as usuario_cambio_apellido
+                        CONCAT(t.cadena, ' #', t.num_tienda, ' - ', t.nombre_tienda) as tienda_identificador,
+                        DATE_FORMAT(pta.fecha_inicio, '%d/%m/%Y') as fecha_inicio_formatted,
+                        DATE_FORMAT(pta.fecha_fin, '%d/%m/%Y') as fecha_fin_formatted,
+                        
+                        -- Calcular si está actualmente asignado
+                        CASE 
+                            WHEN pta.fecha_fin IS NULL AND pta.activo = 1 THEN 1
+                            ELSE 0
+                        END as actualmente_asignado,
+                        
+                        -- Calcular días asignado
+                        CASE 
+                            WHEN pta.fecha_fin IS NOT NULL THEN 
+                                DATEDIFF(pta.fecha_fin, pta.fecha_inicio) + 1
+                            WHEN pta.activo = 1 THEN 
+                                DATEDIFF(CURDATE(), pta.fecha_inicio) + 1
+                            ELSE 0
+                        END as dias_asignado,
+                        
+                        u1.nombre as usuario_asigno,
+                        u2.nombre as usuario_cambio
+                        
                       FROM promotor_tienda_asignaciones pta
-                      INNER JOIN tiendas t ON pta.id_tienda = t.id_tienda
+                      LEFT JOIN tiendas t ON pta.id_tienda = t.id_tienda
                       LEFT JOIN usuarios u1 ON pta.usuario_asigno = u1.id
                       LEFT JOIN usuarios u2 ON pta.usuario_cambio = u2.id
-                      WHERE pta.id_promotor = :id_promotor
-                      AND t.estado_reg = 1";
+                      
+                      WHERE pta.id_promotor = :id_promotor";
 
     $params = [':id_promotor' => $id_promotor];
 
@@ -173,7 +296,7 @@ try {
         $sql_historial .= " AND pta.activo = 1";
     }
 
-    $sql_historial .= " ORDER BY pta.fecha_inicio DESC, pta.fecha_registro DESC";
+    $sql_historial .= " ORDER BY pta.fecha_inicio DESC, pta.id_asignacion DESC";
 
     error_log('GET_HISTORIAL_PROMOTOR: Query - ' . $sql_historial);
 
@@ -182,7 +305,7 @@ try {
 
     error_log('GET_HISTORIAL_PROMOTOR: ' . count($historial) . ' registros encontrados');
 
-    // ===== CALCULAR ESTADÍSTICAS =====
+    // ===== CALCULAR ESTADÍSTICAS (MEJORADO CON TODAS LAS FUNCIONALIDADES) =====
     $total_asignaciones = count($historial);
     $asignaciones_activas = 0;
     $asignaciones_finalizadas = 0;
@@ -191,153 +314,174 @@ try {
     $cadenas_distintas = [];
     $primera_asignacion = null;
     $ultima_asignacion = null;
+    
+    $tiendas_visitadas = [];
 
-    foreach ($historial as $asignacion) {
-        // Contar por estatus
-        if ($asignacion['activo'] && !$asignacion['fecha_fin']) {
+    foreach ($historial as &$item) {
+        // Contar por estatus (manteniendo lógica original)
+        if ($item['actualmente_asignado']) {
             $asignaciones_activas++;
         } else {
             $asignaciones_finalizadas++;
         }
 
-        // Calcular días
-        $fecha_inicio = new DateTime($asignacion['fecha_inicio']);
-        $fecha_fin = $asignacion['fecha_fin'] ? new DateTime($asignacion['fecha_fin']) : new DateTime();
-        $dias = $fecha_fin->diff($fecha_inicio)->days;
-        $total_dias_asignado += $dias;
+        // Sumar días (manteniendo lógica original)
+        $total_dias_asignado += $item['dias_asignado'];
 
-        // Tiendas y cadenas únicas
-        $tienda_key = $asignacion['cadena'] . '_' . $asignacion['num_tienda'];
+        // Contar tiendas distintas (manteniendo lógica original)
+        if (!in_array($item['id_tienda'], $tiendas_visitadas)) {
+            $tiendas_visitadas[] = $item['id_tienda'];
+        }
+
+        // Tiendas y cadenas únicas (nueva funcionalidad avanzada)
+        $tienda_key = $item['cadena'] . '_' . $item['num_tienda'];
         $tiendas_distintas[$tienda_key] = [
-            'cadena' => $asignacion['cadena'],
-            'num_tienda' => $asignacion['num_tienda'],
-            'nombre_tienda' => $asignacion['nombre_tienda']
+            'cadena' => $item['cadena'],
+            'num_tienda' => $item['num_tienda'],
+            'nombre_tienda' => $item['nombre_tienda']
         ];
-        $cadenas_distintas[$asignacion['cadena']] = $asignacion['cadena'];
+        $cadenas_distintas[$item['cadena']] = $item['cadena'];
 
-        // Primera y última asignación
-        if (!$primera_asignacion || $asignacion['fecha_inicio'] < $primera_asignacion['fecha_inicio']) {
-            $primera_asignacion = $asignacion;
+        // Primera y última asignación (nueva funcionalidad avanzada)
+        if (!$primera_asignacion || $item['fecha_inicio'] < $primera_asignacion['fecha_inicio']) {
+            $primera_asignacion = $item;
         }
-        if (!$ultima_asignacion || $asignacion['fecha_inicio'] > $ultima_asignacion['fecha_inicio']) {
-            $ultima_asignacion = $asignacion;
+        if (!$ultima_asignacion || $item['fecha_inicio'] > $ultima_asignacion['fecha_inicio']) {
+            $ultima_asignacion = $item;
         }
-    }
-
-    // ===== FORMATEAR HISTORIAL =====
-    $historial_formateado = [];
-    foreach ($historial as $asignacion) {
-        $fecha_inicio = new DateTime($asignacion['fecha_inicio']);
-        $fecha_fin = $asignacion['fecha_fin'] ? new DateTime($asignacion['fecha_fin']) : null;
-        $dias_asignado = $fecha_fin ? $fecha_fin->diff($fecha_inicio)->days : (new DateTime())->diff($fecha_inicio)->days;
-
-        $item = [
-            'id_asignacion' => intval($asignacion['id_asignacion']),
-            'id_tienda' => intval($asignacion['id_tienda']),
-            'tienda_region' => intval($asignacion['region']),
-            'tienda_cadena' => $asignacion['cadena'],
-            'tienda_num_tienda' => intval($asignacion['num_tienda']),
-            'tienda_nombre_tienda' => $asignacion['nombre_tienda'],
-            'tienda_ciudad' => $asignacion['ciudad'],
-            'tienda_estado' => $asignacion['tienda_estado'],
-            'tienda_identificador' => $asignacion['cadena'] . ' #' . $asignacion['num_tienda'] . ' - ' . $asignacion['nombre_tienda'],
-            
-            'fecha_inicio' => $asignacion['fecha_inicio'],
-            'fecha_fin' => $asignacion['fecha_fin'],
-            'dias_asignado' => $dias_asignado,
-            'actualmente_asignado' => $asignacion['activo'] && !$asignacion['fecha_fin'],
-            
-            'motivo_asignacion' => $asignacion['motivo_asignacion'],
-            'motivo_cambio' => $asignacion['motivo_cambio'],
-            
-            'usuario_asigno' => $asignacion['usuario_asigno_nombre'] ? 
-                trim($asignacion['usuario_asigno_nombre'] . ' ' . $asignacion['usuario_asigno_apellido']) : 'N/A',
-            'usuario_cambio' => $asignacion['usuario_cambio_nombre'] ? 
-                trim($asignacion['usuario_cambio_nombre'] . ' ' . $asignacion['usuario_cambio_apellido']) : null,
-            
-            'fecha_inicio_formatted' => $fecha_inicio->format('d/m/Y'),
-            'fecha_fin_formatted' => $fecha_fin ? $fecha_fin->format('d/m/Y') : null,
-            'fecha_registro_formatted' => date('d/m/Y H:i', strtotime($asignacion['fecha_registro'])),
-            
-            'activo' => intval($asignacion['activo']),
-            'estatus_texto' => $asignacion['fecha_fin'] ? 'Finalizado' : ($asignacion['activo'] ? 'Activo' : 'Inactivo'),
-            'estatus_color' => $asignacion['fecha_fin'] ? 'secondary' : ($asignacion['activo'] ? 'success' : 'warning')
-        ];
-
-        $historial_formateado[] = $item;
-    }
-
-    // ===== OBTENER ASIGNACIÓN ACTUAL (SI EXISTE) =====
-    $asignacion_actual = null;
-    foreach ($historial_formateado as $asignacion) {
-        if ($asignacion['actualmente_asignado']) {
-            $asignacion_actual = $asignacion;
-            break;
+        
+        // Formatear información adicional para mostrar fechas de fin (manteniendo lógica original)
+        if ($item['fecha_fin']) {
+            $item['periodo_completo'] = $item['fecha_inicio_formatted'] . ' - ' . $item['fecha_fin_formatted'];
+            $item['estado_asignacion'] = 'Finalizada';
+        } else if ($item['activo']) {
+            $item['periodo_completo'] = $item['fecha_inicio_formatted'] . ' - Actual';
+            $item['estado_asignacion'] = 'Activa';
+        } else {
+            $item['periodo_completo'] = $item['fecha_inicio_formatted'] . ' - Eliminada';
+            $item['estado_asignacion'] = 'Eliminada';
         }
     }
-
-    // ===== FORMATEAR DATOS DEL PROMOTOR (CON NUEVOS CAMPOS) =====
-    $tipos_trabajo = [
-        'fijo' => 'Fijo',
-        'cubredescansos' => 'Cubre Descansos'
-    ];
-
-    // ===== PREPARAR RESPUESTA =====
-    $response = [
-        'success' => true,
-        'promotor' => [
-            'id' => intval($promotor['id_promotor']),
-            'nombre_completo' => trim($promotor['nombre'] . ' ' . $promotor['apellido']),
-            'nombre' => $promotor['nombre'],
-            'apellido' => $promotor['apellido'],
-            'telefono' => $promotor['telefono'],
-            'correo' => $promotor['correo'],
-            'rfc' => $promotor['rfc'],
-            'estatus' => $promotor['estatus'],
-            'vacaciones' => (bool)$promotor['vacaciones'],
-            'incidencias' => (bool)$promotor['incidencias'],
-            'fecha_ingreso' => $promotor['fecha_ingreso'],
-            'fecha_ingreso_formatted' => $promotor['fecha_ingreso'] ? date('d/m/Y', strtotime($promotor['fecha_ingreso'])) : 'N/A',
-            'tipo_trabajo' => $promotor['tipo_trabajo'],
-            'tipo_trabajo_formatted' => $tipos_trabajo[$promotor['tipo_trabajo']] ?? $promotor['tipo_trabajo'],
-            'estado' => intval($promotor['estado']),
-            'fecha_alta' => $promotor['fecha_alta'],
-            'fecha_alta_formatted' => date('d/m/Y', strtotime($promotor['fecha_alta']))
-        ],
-        'asignacion_actual' => $asignacion_actual,
-        'historial' => $historial_formateado,
-        'estadisticas' => [
-            'total_asignaciones' => $total_asignaciones,
-            'asignaciones_activas' => $asignaciones_activas,
-            'asignaciones_finalizadas' => $asignaciones_finalizadas,
-            'total_dias_asignado' => $total_dias_asignado,
-            'promedio_dias_por_asignacion' => $total_asignaciones > 0 ? round($total_dias_asignado / $total_asignaciones, 1) : 0,
-            'tiendas_distintas' => count($tiendas_distintas),
-            'cadenas_distintas' => count($cadenas_distintas),
-            'lista_cadenas' => array_values($cadenas_distintas)
-        ],
-        'resumen_cronologico' => [
-            'primera_asignacion' => $primera_asignacion ? [
-                'fecha' => $primera_asignacion['fecha_inicio'],
-                'tienda' => $primera_asignacion['cadena'] . ' #' . $primera_asignacion['num_tienda']
-            ] : null,
-            'ultima_asignacion' => $ultima_asignacion ? [
-                'fecha' => $ultima_asignacion['fecha_inicio'],
-                'tienda' => $ultima_asignacion['cadena'] . ' #' . $ultima_asignacion['num_tienda']
-            ] : null
+    
+    // ===== ESTADÍSTICAS COMBINADAS (ORIGINAL + AVANZADAS) =====
+    $estadisticas = [
+        // Estadísticas originales
+        'total_asignaciones' => $total_asignaciones,
+        'asignaciones_activas' => $asignaciones_activas,
+        'total_dias_asignado' => $total_dias_asignado,
+        'tiendas_distintas' => count($tiendas_visitadas),
+        
+        // Nuevas estadísticas avanzadas
+        'asignaciones_finalizadas' => $asignaciones_finalizadas,
+        'promedio_dias_por_asignacion' => $total_asignaciones > 0 ? round($total_dias_asignado / $total_asignaciones, 1) : 0,
+        'cadenas_distintas' => count($cadenas_distintas),
+        'lista_cadenas' => array_values($cadenas_distintas),
+        
+        // Estadísticas de claves
+        'claves' => [
+            'total_claves_asignadas' => count($claves_actuales),
+            'claves_activas' => count(array_filter($claves_actuales, function($c) { return $c['en_uso']; })),
+            'tiendas_con_claves' => count(array_unique(array_column($claves_actuales, 'clave_tienda'))),
+            'regiones_con_claves' => count(array_unique(array_column($claves_actuales, 'clave_region')))
         ]
     ];
 
-    echo json_encode($response, JSON_UNESCAPED_UNICODE);
+    // ===== PROCESAMIENTO AVANZADO DE CLAVES MÚLTIPLES =====
+    $clave_asistencia_parsed = [];
+    $claves_desde_json = [];
+    $claves_desde_tabla = [];
+    
+    // Procesar claves desde el campo JSON
+    if ($promotor['clave_asistencia']) {
+        $clave_asistencia_parsed = json_decode($promotor['clave_asistencia'], true);
+        if (json_last_error() === JSON_ERROR_NONE && is_array($clave_asistencia_parsed)) {
+            $claves_desde_json = $clave_asistencia_parsed;
+        } else {
+            // Si no es JSON válido, podría ser una clave única antigua
+            $claves_desde_json = [$promotor['clave_asistencia']];
+        }
+    }
+    
+    // Procesar claves desde la tabla claves_tienda (datos más actualizados)
+    foreach ($claves_actuales as $clave) {
+        $claves_desde_tabla[] = [
+            'id_clave' => intval($clave['id_clave']),
+            'codigo' => $clave['codigo_clave'],
+            'numero_tienda' => intval($clave['clave_tienda']),
+            'region' => intval($clave['clave_region']),
+            'en_uso' => (bool)$clave['en_uso'],
+            'fecha_asignacion' => $clave['fecha_asignacion'],
+            'fecha_asignacion_formatted' => $clave['fecha_asignacion'] ? date('d/m/Y H:i', strtotime($clave['fecha_asignacion'])) : 'N/A'
+        ];
+    }
+    
+    // Determinar qué claves mostrar (priorizar tabla real sobre JSON)
+    $claves_a_mostrar = count($claves_desde_tabla) > 0 ? 
+        array_column($claves_desde_tabla, 'codigo') : 
+        $claves_desde_json;
 
+    // ===== PROCESAMIENTO AVANZADO DE NUMERO_TIENDA JSON =====
+    $numero_tienda_info = formatearNumeroTiendaJSON($promotor['numero_tienda']);
+    error_log('GET_HISTORIAL_PROMOTOR: numero_tienda procesado - Tipo: ' . $numero_tienda_info['type'] . ', Display: ' . $numero_tienda_info['display']);
+
+    // ===== LIMPIAR BUFFER ANTES DE ENVIAR JSON =====
+    ob_end_clean();
+
+    // ===== RESPUESTA FINAL CON DÍA DE DESCANSO =====
+    $response = [
+        'success' => true,
+        // Mantener estructura original del promotor pero con mejoras
+        'promotor' => array_merge($promotor, [
+            // Campos originales formateados mantenidos
+            'nombre_completo' => $promotor['nombre_completo'],
+            'fecha_ingreso_formatted' => $promotor['fecha_ingreso_formatted'],
+            'tipo_trabajo_formatted' => $promotor['tipo_trabajo_formatted'],
+            'fecha_alta_formatted' => $promotor['fecha_alta_formatted'],
+            'fecha_modificacion_formatted' => $promotor['fecha_modificacion_formatted'],
+            
+            // ✅ DÍA DE DESCANSO AGREGADO
+            'dia_descanso' => $promotor['dia_descanso'],
+            'dia_descanso_formatted' => $promotor['dia_descanso_formatted'],
+            
+            // Nuevas funcionalidades avanzadas
+            'region' => (int)$promotor['region'],
+            'numero_tienda_display' => $numero_tienda_info['display'],
+            'numero_tienda_parsed' => $numero_tienda_info['parsed'],
+            'numero_tienda_info' => $numero_tienda_info,
+            'clave_asistencia_parsed' => $clave_asistencia_parsed,
+            'claves_desde_json' => $claves_desde_json,
+            'claves_actuales' => $claves_desde_tabla,
+            'claves_codigos' => $claves_a_mostrar,
+            'claves_texto' => implode(', ', $claves_a_mostrar),
+            'vacaciones' => (bool)$promotor['vacaciones'],
+            'incidencias' => (bool)$promotor['incidencias'],
+            'estado' => intval($promotor['estado'])
+        ]),
+        
+        // Mantener historial original
+        'historial' => $historial,
+        
+        // Estadísticas combinadas (original + avanzadas)
+        'estadisticas' => $estadisticas
+    ];
+
+    echo json_encode($response, JSON_UNESCAPED_UNICODE);
+    
 } catch (Exception $e) {
-    // Log del error
-    error_log("Error en get_historial_promotor.php: " . $e->getMessage() . " - Usuario: " . ($_SESSION['username'] ?? 'desconocido') . " - IP: " . $_SERVER['REMOTE_ADDR']);
+    // ===== MANEJO DE ERRORES QUE SIEMPRE DEVUELVE JSON =====
+    ob_end_clean(); // Limpiar cualquier output anterior
+    
+    error_log("Error en get_historial_promotor.php: " . $e->getMessage() . " - Usuario: " . ($_SESSION['username'] ?? 'desconocido') . " - IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
     
     http_response_code(500);
     echo json_encode([
         'success' => false,
-        'message' => 'Error interno del servidor'
+        'message' => 'Error interno del servidor',
+        'debug' => [
+            'error' => $e->getMessage(),
+            'file' => basename($e->getFile()),
+            'line' => $e->getLine()
+        ]
     ]);
 }
 ?>

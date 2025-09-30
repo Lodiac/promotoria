@@ -27,6 +27,76 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 try {
+    // ===== 🆕 FUNCIÓN HELPER PARA FORMATEAR NUMERO_TIENDA JSON =====
+    function formatearNumeroTiendaJSON($numero_tienda) {
+        if ($numero_tienda === null || $numero_tienda === '') {
+            return [
+                'original' => null,
+                'display' => 'N/A',
+                'parsed' => null,
+                'is_json' => false,
+                'is_legacy' => false,
+                'type' => 'empty'
+            ];
+        }
+        
+        // Intentar parsear como JSON primero
+        $parsed = json_decode($numero_tienda, true);
+        if (json_last_error() === JSON_ERROR_NONE) {
+            // Es JSON válido
+            if (is_numeric($parsed)) {
+                return [
+                    'original' => $numero_tienda,
+                    'display' => (string)$parsed,
+                    'parsed' => $parsed,
+                    'is_json' => true,
+                    'is_legacy' => false,
+                    'type' => 'single_number'
+                ];
+            } elseif (is_array($parsed)) {
+                return [
+                    'original' => $numero_tienda,
+                    'display' => implode(', ', $parsed),
+                    'parsed' => $parsed,
+                    'is_json' => true,
+                    'is_legacy' => false,
+                    'type' => 'array',
+                    'count' => count($parsed)
+                ];
+            } else {
+                return [
+                    'original' => $numero_tienda,
+                    'display' => is_string($parsed) ? $parsed : json_encode($parsed),
+                    'parsed' => $parsed,
+                    'is_json' => true,
+                    'is_legacy' => false,
+                    'type' => 'object'
+                ];
+            }
+        } else {
+            // No es JSON válido, asumir que es un entero legacy
+            if (is_numeric($numero_tienda)) {
+                return [
+                    'original' => $numero_tienda,
+                    'display' => (string)$numero_tienda,
+                    'parsed' => (int)$numero_tienda,
+                    'is_json' => false,
+                    'is_legacy' => true,
+                    'type' => 'legacy_integer'
+                ];
+            } else {
+                return [
+                    'original' => $numero_tienda,
+                    'display' => (string)$numero_tienda,
+                    'parsed' => $numero_tienda,
+                    'is_json' => false,
+                    'is_legacy' => true,
+                    'type' => 'legacy_string'
+                ];
+            }
+        }
+    }
+
     // ===== LOG PARA DEBUGGING =====
     $debug_info = [
         'timestamp' => date('Y-m-d H:i:s'),
@@ -171,7 +241,7 @@ try {
         throw new Exception('Error de conexión a la base de datos: ' . $conn_error->getMessage());
     }
 
-    // ===== OBTENER DATOS DE LA ASIGNACIÓN ACTUAL =====
+    // ===== 🆕 OBTENER DATOS DE LA ASIGNACIÓN ACTUAL - ACTUALIZADO =====
     $sql_asignacion_actual = "SELECT 
                                 pta.id_asignacion,
                                 pta.id_promotor,
@@ -182,6 +252,10 @@ try {
                                 
                                 p.nombre as promotor_nombre,
                                 p.apellido as promotor_apellido,
+                                p.numero_tienda as promotor_numero_tienda,
+                                p.region as promotor_region,
+                                p.tipo_trabajo as promotor_tipo_trabajo,
+                                p.clave_asistencia as promotor_clave_asistencia,
                                 
                                 t.cadena as tienda_cadena,
                                 t.num_tienda as tienda_num,
@@ -217,13 +291,18 @@ try {
         $id_nueva_tienda = $asignacion_actual['id_tienda'];
     }
 
-    // ===== VERIFICAR QUE EL NUEVO PROMOTOR EXISTE Y ESTÁ DISPONIBLE =====
+    // ===== 🆕 VERIFICAR QUE EL NUEVO PROMOTOR EXISTE Y ESTÁ DISPONIBLE - ACTUALIZADO =====
     $sql_nuevo_promotor = "SELECT 
                              p.id_promotor,
                              p.nombre,
                              p.apellido,
                              p.estatus,
                              p.vacaciones,
+                             p.numero_tienda,
+                             p.region,
+                             p.tipo_trabajo,
+                             p.fecha_ingreso,
+                             p.clave_asistencia,
                              pta.id_asignacion as asignacion_activa_id
                            FROM promotores p
                            LEFT JOIN promotor_tienda_asignaciones pta ON (
@@ -431,7 +510,7 @@ try {
         throw $transaction_error;
     }
 
-    // ===== OBTENER DATOS COMPLETOS DE LA NUEVA ASIGNACIÓN =====
+    // ===== 🆕 OBTENER DATOS COMPLETOS DE LA NUEVA ASIGNACIÓN - ACTUALIZADO =====
     $sql_nueva_completa = "SELECT 
                               pta.id_asignacion,
                               pta.id_promotor,
@@ -444,6 +523,11 @@ try {
                               p.apellido as promotor_apellido,
                               p.telefono as promotor_telefono,
                               p.correo as promotor_correo,
+                              p.numero_tienda as promotor_numero_tienda,
+                              p.region as promotor_region,
+                              p.tipo_trabajo as promotor_tipo_trabajo,
+                              p.fecha_ingreso as promotor_fecha_ingreso,
+                              p.clave_asistencia as promotor_clave_asistencia,
                               
                               t.region,
                               t.cadena,
@@ -462,7 +546,39 @@ try {
     
     $nueva_asignacion_completa = Database::selectOne($sql_nueva_completa, [':id_asignacion' => $nueva_asignacion_id]);
 
-    // ===== FORMATEAR RESPUESTA =====
+    // ===== 🆕 PROCESAR INFORMACIÓN JSON DE LOS PROMOTORES =====
+    
+    // Procesar promotor anterior
+    $promotor_anterior_numero_tienda_info = formatearNumeroTiendaJSON($asignacion_actual['promotor_numero_tienda']);
+    $promotor_anterior_claves = [];
+    if (!empty($asignacion_actual['promotor_clave_asistencia'])) {
+        $parsed_claves = json_decode($asignacion_actual['promotor_clave_asistencia'], true);
+        if (json_last_error() === JSON_ERROR_NONE && is_array($parsed_claves)) {
+            $promotor_anterior_claves = $parsed_claves;
+        } else {
+            $promotor_anterior_claves = [$asignacion_actual['promotor_clave_asistencia']];
+        }
+    }
+    
+    // Procesar nuevo promotor
+    $nuevo_promotor_numero_tienda_info = formatearNumeroTiendaJSON($nueva_asignacion_completa['promotor_numero_tienda']);
+    $nuevo_promotor_claves = [];
+    if (!empty($nueva_asignacion_completa['promotor_clave_asistencia'])) {
+        $parsed_claves = json_decode($nueva_asignacion_completa['promotor_clave_asistencia'], true);
+        if (json_last_error() === JSON_ERROR_NONE && is_array($parsed_claves)) {
+            $nuevo_promotor_claves = $parsed_claves;
+        } else {
+            $nuevo_promotor_claves = [$nueva_asignacion_completa['promotor_clave_asistencia']];
+        }
+    }
+    
+    // Formatear tipos de trabajo
+    $tipos_trabajo = [
+        'fijo' => 'Fijo',
+        'cubredescansos' => 'Cubre Descansos'
+    ];
+
+    // ===== 🆕 FORMATEAR RESPUESTA - MEJORADA CON INFORMACIÓN JSON =====
     $response_data = [
         'asignacion_finalizada' => [
             'id_asignacion' => intval($id_asignacion_actual),
@@ -470,7 +586,20 @@ try {
             'tienda_identificador' => $asignacion_actual['tienda_cadena'] . ' #' . $asignacion_actual['tienda_num'] . ' - ' . $asignacion_actual['tienda_nombre'],
             'duracion_dias' => $duracion_anterior,
             'fecha_fin' => $fecha_cambio,
-            'motivo_finalizacion' => $motivo_cambio
+            'motivo_finalizacion' => $motivo_cambio,
+            
+            // ===== 🆕 INFORMACIÓN ADICIONAL DEL PROMOTOR ANTERIOR =====
+            'promotor_anterior_info' => [
+                'numero_tienda' => $promotor_anterior_numero_tienda_info['original'],
+                'numero_tienda_display' => $promotor_anterior_numero_tienda_info['display'],
+                'numero_tienda_parsed' => $promotor_anterior_numero_tienda_info['parsed'],
+                'numero_tienda_info' => $promotor_anterior_numero_tienda_info,
+                'region' => (int)$asignacion_actual['promotor_region'],
+                'tipo_trabajo' => $asignacion_actual['promotor_tipo_trabajo'],
+                'tipo_trabajo_formatted' => $tipos_trabajo[$asignacion_actual['promotor_tipo_trabajo']] ?? $asignacion_actual['promotor_tipo_trabajo'],
+                'claves_asistencia' => $promotor_anterior_claves,
+                'claves_texto' => implode(', ', $promotor_anterior_claves)
+            ]
         ],
         'asignacion_nueva' => [
             'id_asignacion' => intval($nueva_asignacion_completa['id_asignacion']),
@@ -480,6 +609,22 @@ try {
             'promotor_nombre_completo' => trim($nueva_asignacion_completa['promotor_nombre'] . ' ' . $nueva_asignacion_completa['promotor_apellido']),
             'promotor_telefono' => $nueva_asignacion_completa['promotor_telefono'],
             'promotor_correo' => $nueva_asignacion_completa['promotor_correo'],
+            
+            // ===== 🆕 INFORMACIÓN COMPLETA DEL NUEVO PROMOTOR =====
+            'promotor_info' => [
+                'numero_tienda' => $nuevo_promotor_numero_tienda_info['original'],
+                'numero_tienda_display' => $nuevo_promotor_numero_tienda_info['display'],
+                'numero_tienda_parsed' => $nuevo_promotor_numero_tienda_info['parsed'],
+                'numero_tienda_info' => $nuevo_promotor_numero_tienda_info,
+                'region' => (int)$nueva_asignacion_completa['promotor_region'],
+                'tipo_trabajo' => $nueva_asignacion_completa['promotor_tipo_trabajo'],
+                'tipo_trabajo_formatted' => $tipos_trabajo[$nueva_asignacion_completa['promotor_tipo_trabajo']] ?? $nueva_asignacion_completa['promotor_tipo_trabajo'],
+                'fecha_ingreso' => $nueva_asignacion_completa['promotor_fecha_ingreso'],
+                'fecha_ingreso_formatted' => $nueva_asignacion_completa['promotor_fecha_ingreso'] ? date('d/m/Y', strtotime($nueva_asignacion_completa['promotor_fecha_ingreso'])) : 'N/A',
+                'claves_asistencia' => $nuevo_promotor_claves,
+                'claves_texto' => implode(', ', $nuevo_promotor_claves),
+                'total_claves' => count($nuevo_promotor_claves)
+            ],
             
             'tienda_identificador' => $nueva_asignacion_completa['cadena'] . ' #' . $nueva_asignacion_completa['num_tienda'] . ' - ' . $nueva_asignacion_completa['nombre_tienda'],
             'tienda_region' => intval($nueva_asignacion_completa['region']),
@@ -505,7 +650,13 @@ try {
             'motivo_cambio' => $motivo_cambio,
             'duracion_asignacion_anterior' => $duracion_anterior,
             'tipo_reasignacion' => $id_nueva_tienda == $asignacion_actual['id_tienda'] ? 'solo_promotor' : 'promotor_y_tienda',
-            'multiples_promotores_habilitado' => true
+            'multiples_promotores_habilitado' => true,
+            // ===== 🆕 INFORMACIÓN JSON =====
+            'soporte_json' => [
+                'numero_tienda' => true,
+                'claves_asistencia' => true,
+                'version' => '1.1 - JSON Support'
+            ]
         ]
     ];
 

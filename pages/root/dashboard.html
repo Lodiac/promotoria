@@ -438,9 +438,10 @@
                 { id: 'bienvenida', name: 'Inicio', icon: 'fas fa-home' },
                 { id: 'promotores', name: 'Promotoria', icon: 'fas fa-users' },
                 { id: 'cadenas', name: 'Cadenas Comerciales', icon: 'fas fa-link' },
-                { id: 'asignacion', name: 'Asignación', icon: 'fas fa-tasks' },
+                // { id: 'asignacion', name: 'Asignación', icon: 'fas fa-tasks' },
                 { id: 'horas', name: 'Hojas de Horas', icon: 'far fa-address-card' },
-                { id: 'usuarios', name: 'Usuarios', icon: 'fas fa-user-cog' }
+                { id: 'usuarios', name: 'Usuarios', icon: 'fas fa-user-cog' },
+                { id: 'reportes', name: 'Reportes', icon: 'fas fa-chart-line' }
             ];
             
             // ===== EXPONER DATOS DE SESIÓN GLOBALMENTE =====
@@ -586,7 +587,7 @@
                     menuItem.dataset.module = module.id;
                     
                     menuItem.innerHTML = `
-                        <a href="#" data-module="${module.id}">
+                        <a href="#" data-module="${module.id}"> 
                             <i class="${module.icon} menu-icon"></i>
                             <span class="menu-text">${module.name}</span>
                         </a>

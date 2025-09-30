@@ -27,6 +27,80 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 }
 
 try {
+    // ===== FUNCIÓN HELPER PARA FORMATEAR NUMERO_TIENDA JSON =====
+    function formatearNumeroTiendaJSON($numero_tienda) {
+        if ($numero_tienda === null || $numero_tienda === '') {
+            return [
+                'original' => null,
+                'display' => 'N/A',
+                'parsed' => null,
+                'is_json' => false,
+                'is_legacy' => false,
+                'type' => 'empty'
+            ];
+        }
+        
+        // Intentar parsear como JSON primero
+        $parsed = json_decode($numero_tienda, true);
+        if (json_last_error() === JSON_ERROR_NONE) {
+            // Es JSON válido
+            if (is_numeric($parsed)) {
+                return [
+                    'original' => $numero_tienda,
+                    'display' => (string)$parsed,
+                    'parsed' => $parsed,
+                    'is_json' => true,
+                    'is_legacy' => false,
+                    'type' => 'single_number',
+                    'count' => 1
+                ];
+            } elseif (is_array($parsed)) {
+                return [
+                    'original' => $numero_tienda,
+                    'display' => implode(', ', $parsed),
+                    'parsed' => $parsed,
+                    'is_json' => true,
+                    'is_legacy' => false,
+                    'type' => 'array',
+                    'count' => count($parsed)
+                ];
+            } else {
+                return [
+                    'original' => $numero_tienda,
+                    'display' => is_string($parsed) ? $parsed : json_encode($parsed),
+                    'parsed' => $parsed,
+                    'is_json' => true,
+                    'is_legacy' => false,
+                    'type' => 'object',
+                    'count' => 1
+                ];
+            }
+        } else {
+            // No es JSON válido, asumir que es un entero legacy
+            if (is_numeric($numero_tienda)) {
+                return [
+                    'original' => $numero_tienda,
+                    'display' => (string)$numero_tienda,
+                    'parsed' => (int)$numero_tienda,
+                    'is_json' => false,
+                    'is_legacy' => true,
+                    'type' => 'legacy_integer',
+                    'count' => 1
+                ];
+            } else {
+                return [
+                    'original' => $numero_tienda,
+                    'display' => (string)$numero_tienda,
+                    'parsed' => $numero_tienda,
+                    'is_json' => false,
+                    'is_legacy' => true,
+                    'type' => 'legacy_string',
+                    'count' => 1
+                ];
+            }
+        }
+    }
+
     // ===== LOG PARA DEBUGGING =====
     $debug_info = [
         'timestamp' => date('Y-m-d H:i:s'),
@@ -83,10 +157,11 @@ try {
     $search_value = $_GET['search_value'] ?? '';
     $page = max(1, intval($_GET['page'] ?? 1));
     $limit = max(1, min(100, intval($_GET['limit'] ?? 10)));
+    $include_claves_info = ($_GET['include_claves_info'] ?? 'true') === 'true'; // Incluir info de claves
 
-    error_log('GET_PROMOTORES: Parámetros - page: ' . $page . ', limit: ' . $limit . ', search: ' . $search_field . '=' . $search_value);
+    error_log('GET_PROMOTORES: Parámetros - page: ' . $page . ', limit: ' . $limit . ', search: ' . $search_field . '=' . $search_value . ', include_claves: ' . ($include_claves_info ? 'true' : 'false'));
 
-    // ===== CAMPOS VÁLIDOS PARA BÚSQUEDA (INCLUIR NUEVOS) =====
+    // ===== CAMPOS VÁLIDOS PARA BÚSQUEDA CON DÍA DE DESCANSO =====
     $valid_search_fields = [
         'nombre',
         'apellido', 
@@ -98,8 +173,11 @@ try {
         'banco',
         'numero_cuenta',
         'estatus',
-        'fecha_ingreso',    // NUEVO
-        'tipo_trabajo'      // NUEVO
+        'fecha_ingreso',
+        'tipo_trabajo',
+        'region',
+        'numero_tienda',
+        'dia_descanso'  // ✅ AGREGADO
     ];
 
     // ===== VERIFICAR CONEXIÓN DB =====
@@ -131,20 +209,52 @@ try {
     $sql_base = "FROM promotores WHERE estado = 1";
     $params = [];
 
-    // ===== APLICAR FILTRO DE BÚSQUEDA =====
+    // ===== APLICAR FILTRO DE BÚSQUEDA - MEJORADO PARA JSON Y DÍA DE DESCANSO =====
     if (!empty($search_field) && !empty($search_value)) {
         $search_field = Database::sanitize($search_field);
         $search_value = Database::sanitize($search_value);
         
         if (in_array($search_field, $valid_search_fields)) {
-            if (in_array($search_field, ['vacaciones', 'incidencias'])) {
-                // Búsqueda exacta para campos numéricos
+            if (in_array($search_field, ['vacaciones', 'incidencias', 'region'])) {
+                // Búsqueda exacta para campos numéricos simples
                 $sql_base .= " AND {$search_field} = :search_value";
                 $params[':search_value'] = intval($search_value);
+            } elseif ($search_field === 'dia_descanso') {
+                // ✅ BÚSQUEDA POR DÍA DE DESCANSO
+                $sql_base .= " AND dia_descanso = :search_value";
+                $params[':search_value'] = $search_value;
+                error_log('GET_PROMOTORES: Filtro día de descanso aplicado - valor: ' . $search_value);
+            } elseif ($search_field === 'numero_tienda') {
+                // ===== BÚSQUEDA MEJORADA PARA NUMERO_TIENDA JSON =====
+                $sql_base .= " AND (
+                    numero_tienda = :search_value_exact
+                    OR JSON_EXTRACT(numero_tienda, '$') = :search_value_json
+                    OR JSON_CONTAINS(numero_tienda, :search_value_json_str)
+                    OR numero_tienda LIKE :search_value_like
+                )";
+                $params[':search_value_exact'] = $search_value;
+                $params[':search_value_json'] = intval($search_value);
+                $params[':search_value_json_str'] = '"' . $search_value . '"';
+                $params[':search_value_like'] = '%' . $search_value . '%';
             } elseif ($search_field === 'fecha_ingreso') {
-                // Búsqueda de fecha (puede ser exacta o rango)
+                // Búsqueda de fecha
                 $sql_base .= " AND DATE({$search_field}) = :search_value";
                 $params[':search_value'] = $search_value;
+            } elseif ($search_field === 'clave_asistencia') {
+                // MEJORADO: Búsqueda en campo JSON y en tabla claves_tienda
+                $sql_base .= " AND (
+                    JSON_EXTRACT(clave_asistencia, '$') LIKE :search_value 
+                    OR id_promotor IN (
+                        SELECT DISTINCT id_promotor_actual 
+                        FROM claves_tienda 
+                        WHERE codigo_clave LIKE :search_value_clave 
+                        AND activa = 1 
+                        AND en_uso = 1
+                        AND id_promotor_actual IS NOT NULL
+                    )
+                )";
+                $params[':search_value'] = '%' . $search_value . '%';
+                $params[':search_value_clave'] = '%' . $search_value . '%';
             } else {
                 // Búsqueda LIKE para campos de texto
                 $sql_base .= " AND {$search_field} LIKE :search_value";
@@ -171,7 +281,7 @@ try {
         throw new Exception('Error contando registros: ' . $count_error->getMessage());
     }
 
-    // ===== OBTENER REGISTROS CON PAGINACIÓN (INCLUIR NUEVOS CAMPOS) =====
+    // ===== OBTENER REGISTROS CON PAGINACIÓN Y DÍA DE DESCANSO =====
     $offset = ($page - 1) * $limit;
     
     $sql_data = "SELECT 
@@ -190,6 +300,9 @@ try {
                     incidencias,
                     fecha_ingreso,
                     tipo_trabajo,
+                    region,
+                    numero_tienda,
+                    dia_descanso,
                     estado,
                     fecha_alta,
                     fecha_modificacion
@@ -205,13 +318,98 @@ try {
         
         $promotores = Database::select($sql_data, $params);
         
-        error_log('GET_PROMOTORES: Select exitoso - ' . count($promotores) . ' registros obtenidos');
+        error_log('GET_PROMOTORES: Select exitoso - ' . count($promotores) . ' registros obtenidos con día de descanso');
     } catch (Exception $select_error) {
         error_log('GET_PROMOTORES: Error en select - ' . $select_error->getMessage());
         throw new Exception('Error obteniendo datos: ' . $select_error->getMessage());
     }
 
-    // ===== FORMATEAR FECHAS Y DATOS =====
+    // ===== ✅ CORRECCIÓN: OBTENER INFORMACIÓN REAL DE CLAVES SOLO OCUPADAS =====
+    $claves_info_map = [];
+    
+    if ($include_claves_info && !empty($promotores)) {
+        try {
+            // Obtener todos los IDs de promotores
+            $promotor_ids = array_column($promotores, 'id_promotor');
+            $placeholders = implode(',', array_fill(0, count($promotor_ids), '?'));
+            
+            // ✅ CORRECCIÓN CRÍTICA: SOLO CLAVES REALMENTE OCUPADAS Y ASIGNADAS
+            $sql_claves = "SELECT 
+                              ct.id_promotor_actual,
+                              ct.id_clave,
+                              ct.codigo_clave,
+                              ct.numero_tienda as clave_tienda,
+                              ct.region as clave_region,
+                              ct.en_uso,                      
+                              ct.fecha_asignacion,            
+                              ct.fecha_liberacion,            
+                              ct.usuario_asigno,              
+                              CASE 
+                                WHEN ct.en_uso = 1 THEN 'OCUPADA'
+                                WHEN ct.en_uso = 0 AND ct.fecha_liberacion IS NOT NULL THEN 'LIBERADA'
+                                ELSE 'DISPONIBLE'
+                              END as estado_clave             
+                           FROM claves_tienda ct
+                           WHERE ct.id_promotor_actual IN ({$placeholders})
+                           AND ct.activa = 1
+                           AND ct.en_uso = 1                          -- ✅ SOLO CLAVES REALMENTE OCUPADAS
+                           AND ct.id_promotor_actual IS NOT NULL      -- ✅ SOLO CLAVES CON PROMOTOR ASIGNADO
+                           ORDER BY ct.id_promotor_actual, ct.codigo_clave";
+            
+            $claves_result = Database::select($sql_claves, $promotor_ids);
+            
+            // Organizar claves por promotor
+            foreach ($claves_result as $clave) {
+                $promotor_id = $clave['id_promotor_actual'];
+                if (!isset($claves_info_map[$promotor_id])) {
+                    $claves_info_map[$promotor_id] = [];
+                }
+                $claves_info_map[$promotor_id][] = [
+                    'id_clave' => (int)$clave['id_clave'],
+                    'codigo' => $clave['codigo_clave'],
+                    'numero_tienda' => (int)$clave['clave_tienda'],
+                    'region' => (int)$clave['clave_region'],
+                    'en_uso' => (bool)$clave['en_uso'],                          
+                    'estado_clave' => $clave['estado_clave'],                    
+                    'fecha_asignacion' => $clave['fecha_asignacion'],            
+                    'fecha_liberacion' => $clave['fecha_liberacion'],            
+                    'usuario_asigno' => $clave['usuario_asigno']                 
+                ];
+            }
+            
+            error_log('GET_PROMOTORES: Claves REALMENTE OCUPADAS cargadas para ' . count($claves_info_map) . ' promotores');
+            
+        } catch (Exception $claves_error) {
+            error_log('GET_PROMOTORES: Error cargando claves - ' . $claves_error->getMessage());
+            // Continuar sin información de claves en caso de error
+            $claves_info_map = [];
+        }
+    }
+
+    // ===== FORMATEAR FECHAS Y DATOS - MEJORADO CON JSON Y DÍA DE DESCANSO =====
+    $estadisticas_numero_tienda = [
+        'con_numero_tienda' => 0,
+        'sin_numero_tienda' => 0,
+        'json_format' => 0,
+        'legacy_format' => 0,
+        'array_format' => 0,
+        'single_format' => 0
+    ];
+
+    // ✅ ESTADÍSTICAS DE CLAVES SOLO OCUPADAS
+    $estadisticas_claves_estado = [
+        'claves_realmente_ocupadas' => 0,
+        'promotores_con_claves_ocupadas' => 0,
+        'promotores_sin_claves_ocupadas' => 0
+    ];
+
+    // ✅ ESTADÍSTICAS DE DÍA DE DESCANSO
+    $estadisticas_dia_descanso = [
+        'con_dia_descanso' => 0,
+        'sin_dia_descanso' => 0,
+        'dias_mas_comunes' => []
+    ];
+
     foreach ($promotores as &$promotor) {
         // Formatear fechas
         if ($promotor['fecha_alta']) {
@@ -224,6 +422,30 @@ try {
             $promotor['fecha_ingreso_formatted'] = date('d/m/Y', strtotime($promotor['fecha_ingreso']));
         }
         
+        // ✅ FORMATEAR DÍA DE DESCANSO
+        if ($promotor['dia_descanso']) {
+            $dias_semana = [
+                '1' => 'Lunes',
+                '2' => 'Martes',
+                '3' => 'Miércoles',
+                '4' => 'Jueves',
+                '5' => 'Viernes',
+                '6' => 'Sábado',
+                '7' => 'Domingo'
+            ];
+            $promotor['dia_descanso_formatted'] = $dias_semana[$promotor['dia_descanso']] ?? 'N/A';
+            
+            // Actualizar estadísticas
+            $estadisticas_dia_descanso['con_dia_descanso']++;
+            if (!isset($estadisticas_dia_descanso['dias_mas_comunes'][$promotor['dia_descanso']])) {
+                $estadisticas_dia_descanso['dias_mas_comunes'][$promotor['dia_descanso']] = 0;
+            }
+            $estadisticas_dia_descanso['dias_mas_comunes'][$promotor['dia_descanso']]++;
+        } else {
+            $promotor['dia_descanso_formatted'] = 'No especificado';
+            $estadisticas_dia_descanso['sin_dia_descanso']++;
+        }
+        
         // Formatear campos booleanos
         $promotor['vacaciones'] = (bool)$promotor['vacaciones'];
         $promotor['incidencias'] = (bool)$promotor['incidencias'];
@@ -231,6 +453,87 @@ try {
         
         // Formatear ID como entero
         $promotor['id_promotor'] = (int)$promotor['id_promotor'];
+        $promotor['region'] = (int)$promotor['region'];
+        
+        // ===== PROCESAR NUMERO_TIENDA CON SOPORTE JSON =====
+        $numero_tienda_info = formatearNumeroTiendaJSON($promotor['numero_tienda']);
+        
+        // Actualizar estadísticas
+        if ($numero_tienda_info['parsed'] !== null) {
+            $estadisticas_numero_tienda['con_numero_tienda']++;
+            if ($numero_tienda_info['is_json']) {
+                $estadisticas_numero_tienda['json_format']++;
+                if ($numero_tienda_info['type'] === 'array') {
+                    $estadisticas_numero_tienda['array_format']++;
+                } else {
+                    $estadisticas_numero_tienda['single_format']++;
+                }
+            } else {
+                $estadisticas_numero_tienda['legacy_format']++;
+                $estadisticas_numero_tienda['single_format']++;
+            }
+        } else {
+            $estadisticas_numero_tienda['sin_numero_tienda']++;
+        }
+        
+        // Agregar información JSON al promotor
+        $promotor['numero_tienda'] = $numero_tienda_info['original'];
+        $promotor['numero_tienda_display'] = $numero_tienda_info['display'];
+        $promotor['numero_tienda_parsed'] = $numero_tienda_info['parsed'];
+        $promotor['numero_tienda_info'] = $numero_tienda_info;
+        
+        // ===== ✅ PROCESAMIENTO CORREGIDO DE CLAVES =====
+        $promotor_id = $promotor['id_promotor'];
+        
+        // Procesar claves desde JSON (campo original)
+        $claves_desde_json = [];
+        if ($promotor['clave_asistencia']) {
+            $parsed = json_decode($promotor['clave_asistencia'], true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($parsed)) {
+                $claves_desde_json = $parsed;
+            } else {
+                // Si no es JSON válido, podría ser una clave única
+                $claves_desde_json = [$promotor['clave_asistencia']];
+            }
+        }
+        
+        // ✅ CORRECCIÓN: Obtener claves SOLO de las que están realmente ocupadas
+        $claves_desde_tabla = isset($claves_info_map[$promotor_id]) ? $claves_info_map[$promotor_id] : [];
+        $claves_codes_desde_tabla = array_column($claves_desde_tabla, 'codigo');
+        
+        // ✅ ESTADÍSTICAS DE ESTADO DE CLAVES SOLO OCUPADAS
+        $claves_ocupadas_reales = count($claves_desde_tabla);
+        
+        if ($claves_ocupadas_reales > 0) {
+            $estadisticas_claves_estado['promotores_con_claves_ocupadas']++;
+            $estadisticas_claves_estado['claves_realmente_ocupadas'] += $claves_ocupadas_reales;
+        } else {
+            $estadisticas_claves_estado['promotores_sin_claves_ocupadas']++;
+        }
+        
+        // ✅ USAR SOLO CLAVES REALMENTE OCUPADAS DE LA TABLA
+        $claves_a_mostrar = $claves_codes_desde_tabla;
+        
+        // Agregar información procesada de claves
+        $promotor['clave_asistencia_parsed'] = $claves_desde_json;
+        $promotor['claves_actuales'] = $claves_desde_tabla;              // ✅ Información completa con estado
+        $promotor['claves_codigos'] = $claves_a_mostrar;
+        $promotor['claves_texto'] = implode(', ', $claves_a_mostrar);
+        $promotor['total_claves'] = count($claves_a_mostrar);
+        
+        // ✅ INFORMACIÓN DE ESTADO DE CLAVES SOLO OCUPADAS
+        $promotor['claves_estado'] = [
+            'ocupadas' => $claves_ocupadas_reales,
+            'total_reales' => $claves_ocupadas_reales
+        ];
+        
+        // Para compatibilidad con el frontend, mantener el formato original
+        $promotor['clave_asistencia_json'] = $promotor['clave_asistencia'];
+        
+        // ✅ INFORMACIÓN DE SINCRONIZACIÓN CORREGIDA
+        $promotor['claves_sincronizadas'] = (count($claves_codes_desde_tabla) > 0 && count($claves_desde_json) > 0) ? 
+            (count(array_intersect($claves_desde_json, $claves_codes_desde_tabla)) === count($claves_codes_desde_tabla)) : 
+            (count($claves_codes_desde_tabla) === 0 && count($claves_desde_json) === 0);
         
         // Añadir nombre completo
         $promotor['nombre_completo'] = trim($promotor['nombre'] . ' ' . $promotor['apellido']);
@@ -243,9 +546,26 @@ try {
         $promotor['tipo_trabajo_formatted'] = $tipos_trabajo[$promotor['tipo_trabajo']] ?? $promotor['tipo_trabajo'];
     }
 
-    error_log('GET_PROMOTORES: Formateo exitoso - Preparando respuesta');
+    error_log('GET_PROMOTORES: Formateo exitoso con día de descanso - Preparando respuesta');
 
-    // ===== RESPUESTA EXITOSA =====
+    // ===== ✅ ESTADÍSTICAS MEJORADAS DE CLAVES SOLO OCUPADAS =====
+    $estadisticas_claves = [];
+    if ($include_claves_info) {
+        $total_claves_sistema = $estadisticas_claves_estado['claves_realmente_ocupadas'];
+        $promotores_con_claves = $estadisticas_claves_estado['promotores_con_claves_ocupadas'];
+        $promotores_sin_claves = $estadisticas_claves_estado['promotores_sin_claves_ocupadas'];
+        
+        // ✅ ESTADÍSTICAS CORREGIDAS
+        $estadisticas_claves = [
+            'total_claves_realmente_asignadas' => $total_claves_sistema,
+            'promotores_con_claves_ocupadas' => $promotores_con_claves,
+            'promotores_sin_claves_ocupadas' => $promotores_sin_claves,
+            'promedio_claves_por_promotor' => count($promotores) > 0 ? round($total_claves_sistema / count($promotores), 2) : 0,
+            'metodo_calculo' => 'Solo claves con en_uso=1 e id_promotor_actual válido'
+        ];
+    }
+
+    // ===== ✅ RESPUESTA EXITOSA - CORREGIDA CON DÍA DE DESCANSO =====
     $response = [
         'success' => true,
         'data' => $promotores,
@@ -261,11 +581,34 @@ try {
             'field' => $search_field,
             'value' => $search_value,
             'applied' => !empty($search_field) && !empty($search_value)
+        ],
+        // ===== ESTADÍSTICAS JSON =====
+        'estadisticas_numero_tienda' => $estadisticas_numero_tienda,
+        'estadisticas_dia_descanso' => $estadisticas_dia_descanso,
+        'soporte_json' => [
+            'numero_tienda' => true,
+            'clave_asistencia' => true,
+            'dia_descanso' => true,
+            'version' => '1.4 - Con Día de Descanso'
         ]
     ];
+    
+    // Agregar estadísticas de claves si se solicitaron
+    if ($include_claves_info) {
+        $response['estadisticas_claves'] = $estadisticas_claves;
+        $response['include_claves_info'] = true;
+        
+        // ✅ INFORMACIÓN DEL FIX APLICADO
+        $response['fix_claves'] = [
+            'descripcion' => 'Mostrar solo claves realmente ocupadas (en_uso=1)',
+            'problema_solucionado' => 'Las claves liberadas ya no aparecen como asignadas',
+            'condiciones_sql' => 'en_uso=1 AND id_promotor_actual IS NOT NULL',
+            'compatible_con_frontend' => true
+        ];
+    }
 
-    error_log('GET_PROMOTORES: Respuesta preparada - Enviando JSON');
-    echo json_encode($response);
+    error_log('GET_PROMOTORES: Respuesta preparada - Enviando JSON con claves solo ocupadas y día de descanso');
+    echo json_encode($response, JSON_UNESCAPED_UNICODE);
 
 } catch (Exception $e) {
     // ===== LOG DEL ERROR COMPLETO =====
