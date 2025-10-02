@@ -18,6 +18,9 @@
                 <h1>Reportes Tiendas → Promotores</h1>
             </div>
             <div class="header-actions">
+                <button class="btn-primary" id="btn-descargar-excel">
+                    <i class="fas fa-file-excel"></i> Descargar Excel
+                </button>
                 <button class="btn-primary" id="btn-descargar-pdf">
                     <i class="fas fa-download"></i> Descargar PDF
                 </button>
@@ -1083,6 +1086,7 @@ body {
 </style>
 
 <!-- ===== SCRIPTS ===== -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 
@@ -1102,6 +1106,7 @@ const filtroTienda = document.getElementById('filtro-tienda');
 
 const btnConsultar = document.getElementById('btn-consultar');
 const btnLimpiarFiltros = document.getElementById('btn-limpiar-filtros');
+const btnDescargarExcel = document.getElementById('btn-descargar-excel');
 const btnDescargarPdf = document.getElementById('btn-descargar-pdf');
 
 const statsContainer = document.getElementById('stats-container');
@@ -1250,7 +1255,7 @@ async function cargarTiendas() {
         
     } catch (error) {
         console.error('❌ Error cargando tiendas:', error);
-        mostrarNotificación('Error al cargar tiendas', 'error');
+        mostrarNotificacion('Error al cargar tiendas', 'error');
     } finally {
         tiendaLoading.style.display = 'none';
     }
@@ -1264,6 +1269,7 @@ function configurarEventListeners() {
     // Botones principales
     btnConsultar.addEventListener('click', consultarReporte);
     btnLimpiarFiltros.addEventListener('click', limpiarFiltros);
+    btnDescargarExcel.addEventListener('click', descargarExcel);
     btnDescargarPdf.addEventListener('click', descargarPDF);
     
     // Modal
@@ -1748,6 +1754,126 @@ function limpiarFiltros() {
     mostrarNotificacion('Filtros limpiados. Haga clic en "Consultar Reporte" para cargar nuevos datos.', 'info');
 }
 
+// ===== GENERACIÓN DE EXCEL =====
+function descargarExcel() {
+    if (!reporteActual || reporteActual.length === 0) {
+        mostrarNotificacion('No hay datos para exportar', 'warning');
+        return;
+    }
+    
+    try {
+        // Crear libro de trabajo
+        const wb = XLSX.utils.book_new();
+        
+        // Preparar datos para Excel
+        const datosExcel = [];
+        
+        // Encabezados
+        datosExcel.push([
+            'Tienda',
+            'Número',
+            'Región',
+            'Cadena',
+            'Ciudad',
+            'Estado',
+            'Promotor',
+            'RFC Promotor',
+            'Fecha',
+            'Día Semana',
+            'Claves'
+        ]);
+        
+        // Agrupar por tienda
+        const tiendasGroup = {};
+        reporteActual.forEach(asignacion => {
+            if (!tiendasGroup[asignacion.tienda_id]) {
+                tiendasGroup[asignacion.tienda_id] = [];
+            }
+            tiendasGroup[asignacion.tienda_id].push(asignacion);
+        });
+        
+        // Agregar datos
+        Object.entries(tiendasGroup).forEach(([tiendaId, asignaciones]) => {
+            asignaciones.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+            
+            asignaciones.forEach(asignacion => {
+                const fechaObj = new Date(asignacion.fecha + 'T00:00:00');
+                const fechaFormateada = fechaObj.toLocaleDateString('es-MX');
+                const clavesTexto = (asignacion.claves && asignacion.claves.length > 0) 
+                    ? asignacion.claves.join(', ') 
+                    : '';
+                
+                datosExcel.push([
+                    asignacion.tienda_nombre || '',
+                    asignacion.tienda_numero || '',
+                    asignacion.tienda_region || '',
+                    asignacion.tienda_cadena || '',
+                    asignacion.tienda_ciudad || '',
+                    asignacion.tienda_estado || '',
+                    asignacion.promotor_nombre || '',
+                    asignacion.promotor_rfc || '',
+                    fechaFormateada,
+                    asignacion.dia_semana || '',
+                    clavesTexto
+                ]);
+            });
+        });
+        
+        // Crear hoja de trabajo
+        const ws = XLSX.utils.aoa_to_sheet(datosExcel);
+        
+        // Ajustar ancho de columnas
+        const columnWidths = [
+            { wch: 30 },  // Tienda
+            { wch: 10 },  // Número
+            { wch: 10 },  // Región
+            { wch: 15 },  // Cadena
+            { wch: 20 },  // Ciudad
+            { wch: 15 },  // Estado
+            { wch: 25 },  // Promotor
+            { wch: 15 },  // RFC
+            { wch: 12 },  // Fecha
+            { wch: 12 },  // Día
+            { wch: 30 }   // Claves
+        ];
+        ws['!cols'] = columnWidths;
+        
+        // Agregar hoja al libro
+        XLSX.utils.book_append_sheet(wb, ws, 'Reporte Tiendas-Promotores');
+        
+        // Crear hoja de resumen
+        const resumenData = [
+            ['RESUMEN ESTADÍSTICO'],
+            [''],
+            ['Tiendas con Cobertura', document.getElementById('stat-tiendas').textContent],
+            ['Promotores Activos', document.getElementById('stat-promotores').textContent],
+            ['Días del Período', document.getElementById('stat-dias').textContent],
+            ['Asignaciones Total', document.getElementById('stat-dias-trabajados').textContent],
+            [''],
+            ['Período Consultado', document.getElementById('reporte-subtitulo').textContent],
+            ['Fecha de Generación', new Date().toLocaleString('es-MX')]
+        ];
+        
+        const wsResumen = XLSX.utils.aoa_to_sheet(resumenData);
+        wsResumen['!cols'] = [{ wch: 25 }, { wch: 40 }];
+        XLSX.utils.book_append_sheet(wb, wsResumen, 'Resumen');
+        
+        // Generar nombre de archivo
+        const fechaInicioValor = fechaInicio.value;
+        const fechaFinValor = fechaFin.value;
+        const nombreArchivo = `reporte-tiendas-promotores-${fechaInicioValor}-${fechaFinValor}.xlsx`;
+        
+        // Descargar archivo
+        XLSX.writeFile(wb, nombreArchivo);
+        
+        mostrarNotificacion('Excel descargado exitosamente', 'success');
+        
+    } catch (error) {
+        console.error('Error generando Excel:', error);
+        mostrarNotificacion('Error al generar Excel', 'error');
+    }
+}
+
 // ===== GENERACIÓN DE PDF =====
 function descargarPDF() {
     if (!reporteActual || reporteActual.length === 0) {
@@ -1962,6 +2088,7 @@ console.log('  • Múltiples estrategias de consulta como fallback');
 console.log('  • Logging mejorado para debugging');
 console.log('  • Eliminación de duplicados');
 console.log('  • Validaciones de datos más robustas');
+console.log('  • Exportación a Excel agregada');
 
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);

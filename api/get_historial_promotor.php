@@ -242,9 +242,10 @@ try {
 
     error_log('GET_HISTORIAL_PROMOTOR: ' . count($claves_actuales) . ' claves actuales encontradas');
 
-    // ===== OBTENER HISTORIAL DE ASIGNACIONES (ADAPTADO DEL API ORIGINAL CON MEJORAS) =====
+    // ===== 🔧 CORRECCIÓN: CONSULTA DE HISTORIAL CON DETECCIÓN DE REACTIVACIONES =====
     $sql_historial = "SELECT 
                         pta.id_asignacion,
+                        pta.id_promotor,
                         pta.id_tienda,
                         pta.fecha_inicio,
                         pta.fecha_fin,
@@ -264,7 +265,7 @@ try {
                         DATE_FORMAT(pta.fecha_inicio, '%d/%m/%Y') as fecha_inicio_formatted,
                         DATE_FORMAT(pta.fecha_fin, '%d/%m/%Y') as fecha_fin_formatted,
                         
-                        -- Calcular si está actualmente asignado
+                        -- ✅ CORRECCIÓN: Detectar correctamente asignaciones activas (incluyendo reactivadas)
                         CASE 
                             WHEN pta.fecha_fin IS NULL AND pta.activo = 1 THEN 1
                             ELSE 0
@@ -279,11 +280,16 @@ try {
                             ELSE 0
                         END as dias_asignado,
                         
-                        u1.nombre as usuario_asigno,
-                        u2.nombre as usuario_cambio
+                        u1.nombre as usuario_asigno_nombre,
+                        u1.apellido as usuario_asigno_apellido,
+                        CONCAT(u1.nombre, ' ', u1.apellido) as usuario_asigno,
+                        
+                        u2.nombre as usuario_cambio_nombre,
+                        u2.apellido as usuario_cambio_apellido,
+                        CONCAT(u2.nombre, ' ', u2.apellido) as usuario_cambio
                         
                       FROM promotor_tienda_asignaciones pta
-                      LEFT JOIN tiendas t ON pta.id_tienda = t.id_tienda
+                      INNER JOIN tiendas t ON pta.id_tienda = t.id_tienda
                       LEFT JOIN usuarios u1 ON pta.usuario_asigno = u1.id
                       LEFT JOIN usuarios u2 ON pta.usuario_cambio = u2.id
                       
@@ -298,12 +304,12 @@ try {
 
     $sql_historial .= " ORDER BY pta.fecha_inicio DESC, pta.id_asignacion DESC";
 
-    error_log('GET_HISTORIAL_PROMOTOR: Query - ' . $sql_historial);
+    error_log('GET_HISTORIAL_PROMOTOR: Ejecutando consulta de historial');
 
     // ===== EJECUTAR CONSULTA =====
     $historial = Database::select($sql_historial, $params);
 
-    error_log('GET_HISTORIAL_PROMOTOR: ' . count($historial) . ' registros encontrados');
+    error_log('GET_HISTORIAL_PROMOTOR: ' . count($historial) . ' registros encontrados en historial');
 
     // ===== CALCULAR ESTADÍSTICAS (MEJORADO CON TODAS LAS FUNCIONALIDADES) =====
     $total_asignaciones = count($historial);
@@ -318,22 +324,34 @@ try {
     $tiendas_visitadas = [];
 
     foreach ($historial as &$item) {
-        // Contar por estatus (manteniendo lógica original)
-        if ($item['actualmente_asignado']) {
+        // 🔧 CORRECCIÓN: Convertir a entero para comparación segura
+        $actualmente_asignado_bool = intval($item['actualmente_asignado']) === 1;
+        $activo_bool = intval($item['activo']) === 1;
+        
+        // Log detallado para debugging
+        error_log("GET_HISTORIAL: Asignación ID {$item['id_asignacion']} - " . 
+                  "Tienda: {$item['tienda_identificador']}, " .
+                  "fecha_fin: " . ($item['fecha_fin'] ?? 'NULL') . ", " .
+                  "activo: {$item['activo']}, " .
+                  "actualmente_asignado: {$item['actualmente_asignado']}");
+        
+        // Contar por estatus
+        if ($actualmente_asignado_bool) {
             $asignaciones_activas++;
+            error_log("GET_HISTORIAL: ✅ ASIGNACIÓN ACTIVA DETECTADA - ID: {$item['id_asignacion']}");
         } else {
             $asignaciones_finalizadas++;
         }
 
-        // Sumar días (manteniendo lógica original)
-        $total_dias_asignado += $item['dias_asignado'];
+        // Sumar días
+        $total_dias_asignado += intval($item['dias_asignado']);
 
-        // Contar tiendas distintas (manteniendo lógica original)
+        // Contar tiendas distintas
         if (!in_array($item['id_tienda'], $tiendas_visitadas)) {
             $tiendas_visitadas[] = $item['id_tienda'];
         }
 
-        // Tiendas y cadenas únicas (nueva funcionalidad avanzada)
+        // Tiendas y cadenas únicas
         $tienda_key = $item['cadena'] . '_' . $item['num_tienda'];
         $tiendas_distintas[$tienda_key] = [
             'cadena' => $item['cadena'],
@@ -342,7 +360,7 @@ try {
         ];
         $cadenas_distintas[$item['cadena']] = $item['cadena'];
 
-        // Primera y última asignación (nueva funcionalidad avanzada)
+        // Primera y última asignación
         if (!$primera_asignacion || $item['fecha_inicio'] < $primera_asignacion['fecha_inicio']) {
             $primera_asignacion = $item;
         }
@@ -350,18 +368,20 @@ try {
             $ultima_asignacion = $item;
         }
         
-        // Formatear información adicional para mostrar fechas de fin (manteniendo lógica original)
+        // 🔧 CORRECCIÓN: Formatear estado usando las variables booleanas
         if ($item['fecha_fin']) {
-            $item['periodo_completo'] = $item['fecha_inicio_formatted'] . ' - ' . $item['fecha_fin_formatted'];
+            $item['periodo_completo'] = $item['fecha_inicio_formatted'] . ' hasta ' . $item['fecha_fin_formatted'];
             $item['estado_asignacion'] = 'Finalizada';
-        } else if ($item['activo']) {
-            $item['periodo_completo'] = $item['fecha_inicio_formatted'] . ' - Actual';
+        } else if ($activo_bool) {
+            $item['periodo_completo'] = 'Desde: ' . $item['fecha_inicio_formatted'];
             $item['estado_asignacion'] = 'Activa';
         } else {
-            $item['periodo_completo'] = $item['fecha_inicio_formatted'] . ' - Eliminada';
+            $item['periodo_completo'] = 'Inicio: ' . $item['fecha_inicio_formatted'];
             $item['estado_asignacion'] = 'Eliminada';
         }
     }
+    
+    error_log("GET_HISTORIAL: RESUMEN - Total: {$total_asignaciones}, Activas: {$asignaciones_activas}, Finalizadas: {$asignaciones_finalizadas}");
     
     // ===== ESTADÍSTICAS COMBINADAS (ORIGINAL + AVANZADAS) =====
     $estadisticas = [

@@ -3575,35 +3575,52 @@
 
     function renderHistorialTimeline(historial) {
         const timeline = document.getElementById('historial-timeline');
-        timeline.innerHTML = '<h4><i class="fas fa-history"></i> Historial de Asignaciones con Fechas de Fin Automáticas</h4>';
+        timeline.innerHTML = '<h4><i class="fas fa-history"></i> Historial de Asignaciones con Reactivación Automática</h4>';
 
         if (historial.length === 0) {
             timeline.innerHTML += '<p style="text-align: center; color: var(--text-secondary);">No hay historial de asignaciones</p>';
             return;
         }
 
+        const idPromotor = historial[0]?.id_promotor || currentPromotorData?.id_promotor;
+
         historial.forEach((item, index) => {
-            const isActive = item.actualmente_asignado;
-            const fechaFin = item.fecha_fin_formatted || 'Actual';
-            const motivoCambio = item.motivo_cambio || '';
+            // 🔧 CORRECCIÓN: Usar los campos que vienen de la API
+            const esActiva = (item.actualmente_asignado == 1 || item.actualmente_asignado === '1' || item.actualmente_asignado === true);
+            const tieneActivo = (item.activo == 1 || item.activo === '1' || item.activo === true);
+            const tieneFechaFin = item.fecha_fin !== null && item.fecha_fin !== undefined && item.fecha_fin !== '';
+
+            console.log(`📊 HISTORIAL ITEM ${item.id_asignacion}:`, {
+                actualmente_asignado: item.actualmente_asignado,
+                activo: item.activo,
+                fecha_fin: item.fecha_fin,
+                esActiva: esActiva,
+                tieneActivo: tieneActivo,
+                tieneFechaFin: tieneFechaFin
+            });
 
             let estadoClass = '';
             let estadoTexto = '';
             let fechaTexto = '';
 
-            if (isActive) {
+            if (esActiva) {
+                // Es la asignación activa actual
                 estadoClass = 'active';
                 estadoTexto = 'ASIGNACIÓN ACTIVA';
                 fechaTexto = `Desde: ${item.fecha_inicio_formatted}`;
-            } else if (item.fecha_fin) {
+            } else if (tieneFechaFin) {
+                // Tiene fecha de fin = fue finalizada normalmente
                 estadoClass = 'completed';
                 estadoTexto = 'ASIGNACIÓN FINALIZADA';
                 fechaTexto = `${item.fecha_inicio_formatted} hasta ${item.fecha_fin_formatted}`;
             } else {
+                // No tiene fecha fin pero no es activa = fue eliminada/reemplazada
                 estadoClass = 'deleted';
-                estadoTexto = 'ASIGNACIÓN ELIMINADA';
+                estadoTexto = 'ASIGNACIÓN REEMPLAZADA';
                 fechaTexto = `Inicio: ${item.fecha_inicio_formatted}`;
             }
+
+            const motivoCambio = item.motivo_cambio || '';
 
             timeline.innerHTML += `
             <div class="timeline-item ${estadoClass}">
@@ -3611,8 +3628,13 @@
                     <div style="font-weight: 700; color: var(--text-primary); font-size: 1.1rem;">
                         ${item.tienda_identificador}
                     </div>
-                    <div style="color: var(--text-secondary); font-size: 0.85rem; font-weight: 600;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
                         <span class="timeline-status ${estadoClass}">${estadoTexto}</span>
+                        <button class="btn-action delete" 
+                                onclick="eliminarAsignacion(${item.id_asignacion}, '${item.tienda_identificador}', ${idPromotor})"
+                                title="Eliminar asignación">
+                            <i class="fas fa-trash"></i>
+                        </button>
                     </div>
                 </div>
                 <div>
@@ -3623,11 +3645,71 @@
                     <p><strong>Usuario que asignó:</strong> ${item.usuario_asigno || 'Sistema'}</p>
                     ${item.usuario_cambio ? `<p><strong>Usuario que finalizó:</strong> ${item.usuario_cambio}</p>` : ''}
                 </div>
-                ${isActive ? '<div class="timeline-badge-active">TRABAJANDO ACTUALMENTE</div>' : ''}
+                ${esActiva ? '<div class="timeline-badge-active">TRABAJANDO ACTUALMENTE</div>' : ''}
             </div>
         `;
         });
     }
+
+
+    /// ===== ELIMINAR ASIGNACIÓN CON REACTIVACIÓN AUTOMÁTICA - VERSIÓN CORREGIDA =====
+    // ===== ELIMINAR ASIGNACIÓN CON REACTIVACIÓN AUTOMÁTICA =====
+    async function eliminarAsignacion(idAsignacion, tiendaNombre, idPromotor) {
+        if (!confirm(`¿Estás seguro de eliminar la asignación a ${tiendaNombre}?\n\nSi es la asignación activa actual, se reactivará automáticamente la asignación anterior.`)) {
+            return;
+        }
+
+        try {
+            console.log('🗑️ Eliminando asignación ID:', idAsignacion);
+
+            const response = await fetch('/promotoria/api/finalizar_asignacion.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    id_asignacion: idAsignacion
+                })
+            });
+
+            const data = await response.json();
+
+            if (!data.success) {
+                throw new Error(data.message || 'Error al eliminar asignación');
+            }
+
+            let mensaje = data.message;
+            if (data.asignacion_anterior_reactivada) {
+                mensaje += ` (Asignación anterior ID ${data.id_asignacion_anterior} reactivada)`;
+            }
+
+            mostrarNotificacion(mensaje, 'success');
+
+            // 🔧 CORRECCIÓN CRÍTICA: Cerrar modal completamente
+            console.log('🔄 Cerrando modal de historial...');
+            cerrarModalHistorial();
+
+            // Esperar 500ms para que el DOM se limpie completamente
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            // Recargar con datos frescos desde la API
+            console.log('🔄 Recargando historial desde API...');
+            await verHistorialPromotor(idPromotor);
+
+            // Recargar tabla de promotores
+            if (typeof cargarPromotores === 'function') {
+                console.log('🔄 Recargando tabla de promotores...');
+                await cargarPromotores();
+            }
+
+        } catch (error) {
+            console.error('❌ Error eliminando asignación:', error);
+            mostrarNotificacion('Error al eliminar asignación: ' + error.message, 'error');
+        }
+    }
+
+    // Exponer función globalmente
+    window.eliminarAsignacion = eliminarAsignacion;
 
     function cerrarModalHistorial() {
         modalHistorial.classList.remove('active');

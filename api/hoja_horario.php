@@ -96,7 +96,6 @@ try {
     }
 
 } catch (Exception $e) {
-    // Log del error
     error_log("Error en horas API: " . $e->getMessage() . " - Usuario: " . ($_SESSION['username'] ?? 'desconocido') . " - IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
     
     http_response_code(500);
@@ -148,11 +147,11 @@ function handleAsignaciones($method, $id) {
 }
 
 /**
- * ===== OBTENER TODAS LAS ASIGNACIONES =====
+ * ===== OBTENER TODAS LAS ASIGNACIONES CON CAMPOS DE HORARIOS =====
  */
 function getAllAsignaciones() {
     try {
-        error_log('HORAS_API: Obteniendo todas las asignaciones');
+        error_log('HORAS_API: Obteniendo todas las asignaciones con horarios');
         
         $sql = "SELECT 
                     pta.id_asignacion,
@@ -165,6 +164,12 @@ function getAllAsignaciones() {
                     pta.activo,
                     pta.fecha_registro,
                     pta.fecha_modificacion,
+                    pta.hora_entrada,
+                    pta.hora_salida,
+                    pta.hora_comida_inicio,
+                    pta.duracion_comida_minutos,
+                    pta.id_promotor_cobertura_comida,
+                    pta.notas_horario,
                     
                     p.nombre as promotor_nombre,
                     p.apellido as promotor_apellido,
@@ -180,11 +185,15 @@ function getAllAsignaciones() {
                     t.estado as tienda_estado,
                     
                     u.nombre as usuario_asigno_nombre,
-                    u.apellido as usuario_asigno_apellido
+                    u.apellido as usuario_asigno_apellido,
+                    
+                    pc.nombre as promotor_cobertura_nombre,
+                    pc.apellido as promotor_cobertura_apellido
                 FROM promotor_tienda_asignaciones pta
                 LEFT JOIN promotores p ON pta.id_promotor = p.id_promotor
                 LEFT JOIN tiendas t ON pta.id_tienda = t.id_tienda
                 LEFT JOIN usuarios u ON pta.usuario_asigno = u.id
+                LEFT JOIN promotores pc ON pta.id_promotor_cobertura_comida = pc.id_promotor
                 WHERE pta.activo = 1
                 ORDER BY pta.fecha_inicio DESC, pta.id_asignacion DESC";
         
@@ -214,11 +223,19 @@ function getAllAsignaciones() {
                 'tienda_estado' => $asignacion['tienda_estado'],
                 'usuario_asigno_nombre' => trim(($asignacion['usuario_asigno_nombre'] ?? '') . ' ' . ($asignacion['usuario_asigno_apellido'] ?? '')),
                 'fecha_registro' => $asignacion['fecha_registro'],
-                'fecha_modificacion' => $asignacion['fecha_modificacion']
+                'fecha_modificacion' => $asignacion['fecha_modificacion'],
+                // CAMPOS DE HORARIO
+                'hora_entrada' => $asignacion['hora_entrada'] ?? '09:00:00',
+                'hora_salida' => $asignacion['hora_salida'] ?? '19:00:00',
+                'hora_comida_inicio' => $asignacion['hora_comida_inicio'] ?? '14:00:00',
+                'duracion_comida_minutos' => intval($asignacion['duracion_comida_minutos'] ?? 60),
+                'id_promotor_cobertura_comida' => $asignacion['id_promotor_cobertura_comida'] ? intval($asignacion['id_promotor_cobertura_comida']) : null,
+                'promotor_cobertura_nombre' => $asignacion['promotor_cobertura_nombre'] ? trim($asignacion['promotor_cobertura_nombre'] . ' ' . ($asignacion['promotor_cobertura_apellido'] ?? '')) : null,
+                'notas_horario' => $asignacion['notas_horario']
             ];
         }
         
-        error_log("HORAS_API: {" . count($result) . "} asignaciones obtenidas exitosamente");
+        error_log("HORAS_API: {" . count($result) . "} asignaciones obtenidas exitosamente con datos de horario");
         
         http_response_code(200);
         echo json_encode([
@@ -239,11 +256,11 @@ function getAllAsignaciones() {
 }
 
 /**
- * ===== OBTENER ASIGNACIÓN POR ID =====
+ * ===== OBTENER ASIGNACIÓN POR ID CON HORARIOS =====
  */
 function getAsignacionById($id) {
     try {
-        error_log("HORAS_API: Obteniendo asignación ID: {$id}");
+        error_log("HORAS_API: Obteniendo asignación ID: {$id} con datos de horario");
         
         if ($id <= 0) {
             http_response_code(400);
@@ -260,10 +277,13 @@ function getAsignacionById($id) {
                     p.apellido as promotor_apellido,
                     t.cadena,
                     t.num_tienda,
-                    t.nombre_tienda
+                    t.nombre_tienda,
+                    pc.nombre as promotor_cobertura_nombre,
+                    pc.apellido as promotor_cobertura_apellido
                 FROM promotor_tienda_asignaciones pta
                 LEFT JOIN promotores p ON pta.id_promotor = p.id_promotor
                 LEFT JOIN tiendas t ON pta.id_tienda = t.id_tienda
+                LEFT JOIN promotores pc ON pta.id_promotor_cobertura_comida = pc.id_promotor
                 WHERE pta.id_asignacion = :id AND pta.activo = 1";
         
         $asignacion = Database::selectOne($sql, [':id' => $id]);
@@ -277,7 +297,7 @@ function getAsignacionById($id) {
             return;
         }
         
-        error_log("HORAS_API: Asignación {$id} obtenida exitosamente");
+        error_log("HORAS_API: Asignación {$id} obtenida exitosamente con horarios");
         
         http_response_code(200);
         echo json_encode([
@@ -296,11 +316,11 @@ function getAsignacionById($id) {
 }
 
 /**
- * ===== CREAR NUEVA ASIGNACIÓN CON CIERRE AUTOMÁTICO DE ASIGNACIONES ANTERIORES =====
+ * ===== CREAR NUEVA ASIGNACIÓN CON HORARIOS Y CIERRE AUTOMÁTICO =====
  */
 function createAsignacion() {
     try {
-        error_log('HORAS_API: === INICIANDO CREACIÓN DE ASIGNACIÓN CON CIERRE AUTOMÁTICO ===');
+        error_log('HORAS_API: === INICIANDO CREACIÓN DE ASIGNACIÓN CON HORARIOS ===');
         
         // ===== DEBUGGING: LOG DE INPUT RAW =====
         $raw_input = file_get_contents('php://input');
@@ -366,7 +386,51 @@ function createAsignacion() {
         $fecha_inicio = trim($input['fecha_inicio'] ?? '');
         $motivo_asignacion = trim($input['motivo_asignacion'] ?? 'Asignación desde calendario de horas');
         
-        error_log("HORAS_API: Datos extraídos - Promotor: {$id_promotor}, Tienda: {$id_tienda}, Fecha: '{$fecha_inicio}', Motivo: '{$motivo_asignacion}'");
+        // ===== OBTENER DATOS DE HORARIO CON VALIDACIÓN MEJORADA =====
+        $hora_entrada = trim($input['hora_entrada'] ?? '09:00');
+        $hora_salida = trim($input['hora_salida'] ?? '19:00');
+        $hora_comida_inicio = trim($input['hora_comida_inicio'] ?? '14:00');
+        $duracion_comida_minutos = intval($input['duracion_comida_minutos'] ?? 60);
+        
+        // Validar que no estén vacíos
+        if (empty($hora_entrada)) $hora_entrada = '09:00';
+        if (empty($hora_salida)) $hora_salida = '19:00';
+        if (empty($hora_comida_inicio)) $hora_comida_inicio = '14:00';
+        if ($duracion_comida_minutos <= 0) $duracion_comida_minutos = 60;
+        
+        // Asegurar formato correcto de tiempo (HH:MM:SS)
+        if (strlen($hora_entrada) == 5) $hora_entrada .= ':00';
+        if (strlen($hora_salida) == 5) $hora_salida .= ':00';
+        if (strlen($hora_comida_inicio) == 5) $hora_comida_inicio .= ':00';
+        
+        // Validar formato de tiempo
+        if (!preg_match('/^\d{2}:\d{2}:\d{2}$/', $hora_entrada)) {
+            $hora_entrada = '09:00:00';
+        }
+        if (!preg_match('/^\d{2}:\d{2}:\d{2}$/', $hora_salida)) {
+            $hora_salida = '19:00:00';
+        }
+        if (!preg_match('/^\d{2}:\d{2}:\d{2}$/', $hora_comida_inicio)) {
+            $hora_comida_inicio = '14:00:00';
+        }
+        
+        // Manejar cobertura de comida (puede ser NULL)
+        $id_promotor_cobertura_comida = null;
+        if (isset($input['id_promotor_cobertura_comida']) && !empty($input['id_promotor_cobertura_comida'])) {
+            $id_promotor_cobertura_comida = intval($input['id_promotor_cobertura_comida']);
+            if ($id_promotor_cobertura_comida <= 0) {
+                $id_promotor_cobertura_comida = null;
+            }
+        }
+        
+        $notas_horario = trim($input['notas_horario'] ?? '');
+        if (empty($notas_horario)) {
+            $notas_horario = $motivo_asignacion;
+        }
+        
+        error_log("HORAS_API: Datos extraídos - Promotor: {$id_promotor}, Tienda: {$id_tienda}, Fecha: '{$fecha_inicio}'");
+        error_log("HORAS_API: Horarios validados - Entrada: {$hora_entrada}, Salida: {$hora_salida}, Comida: {$hora_comida_inicio}, Duración: {$duracion_comida_minutos}min");
+        error_log("HORAS_API: Cobertura comida: " . ($id_promotor_cobertura_comida ?? 'NULL'));
         
         // Detectar tipo de asignación
         $tipo_asignacion = 'Individual'; // Por defecto
@@ -499,12 +563,13 @@ function createAsignacion() {
         
         error_log('HORAS_API: Tienda verificada exitosamente: ' . $tienda['cadena'] . ' #' . $tienda['num_tienda']);
         
-        // ===== NUEVA FUNCIONALIDAD: CERRAR AUTOMÁTICAMENTE ASIGNACIONES ANTERIORES ACTIVAS =====
+        // ===== CERRAR AUTOMÁTICAMENTE ASIGNACIONES ANTERIORES ACTIVAS =====
         error_log('HORAS_API: === CERRANDO ASIGNACIONES ANTERIORES AUTOMÁTICAMENTE ===');
         
         // Calcular fecha de fin para asignaciones anteriores (un día antes de la nueva fecha)
         $fecha_fin_anterior = date('Y-m-d', strtotime($fecha_inicio . ' -1 day'));
         
+        $asignaciones_activas = [];
         try {
             // Buscar asignaciones activas del promotor (sin fecha_fin y activas)
             $sql_asignaciones_activas = "SELECT 
@@ -579,7 +644,7 @@ function createAsignacion() {
             // No es crítico, continuar con la creación de la nueva asignación
         }
         
-        // ===== VERIFICACIÓN DE DUPLICADOS - ACTUALIZADA =====
+        // ===== VERIFICACIÓN DE DUPLICADOS =====
         error_log('HORAS_API: Verificando duplicados para la nueva asignación...');
         
         $sql_check_duplicado = "SELECT 
@@ -614,8 +679,8 @@ function createAsignacion() {
         
         error_log('HORAS_API: Verificación de duplicados pasada exitosamente');
         
-        // ===== CREAR LA NUEVA ASIGNACIÓN =====
-        error_log('HORAS_API: Procediendo a crear la nueva asignación...');
+        // ===== CREAR LA NUEVA ASIGNACIÓN CON HORARIOS =====
+        error_log('HORAS_API: Procediendo a crear la nueva asignación con horarios...');
         
         // Para asignaciones individuales, establecer fecha_fin al final del día
         $fecha_fin = null;
@@ -634,7 +699,13 @@ function createAsignacion() {
                             usuario_cambio,
                             fecha_registro,
                             fecha_modificacion,
-                            activo
+                            activo,
+                            hora_entrada,
+                            hora_salida,
+                            hora_comida_inicio,
+                            duracion_comida_minutos,
+                            id_promotor_cobertura_comida,
+                            notas_horario
                        ) VALUES (
                             :id_promotor,
                             :id_tienda,
@@ -646,7 +717,13 @@ function createAsignacion() {
                             NULL,
                             NOW(),
                             NOW(),
-                            1
+                            1,
+                            :hora_entrada,
+                            :hora_salida,
+                            :hora_comida_inicio,
+                            :duracion_comida_minutos,
+                            :id_promotor_cobertura_comida,
+                            :notas_horario
                        )";
         
         $params_insert = [
@@ -655,7 +732,13 @@ function createAsignacion() {
             ':fecha_inicio' => $fecha_inicio,
             ':fecha_fin' => $fecha_fin,
             ':motivo_asignacion' => $motivo_asignacion,
-            ':usuario_asigno' => $usuario_asigno
+            ':usuario_asigno' => $usuario_asigno,
+            ':hora_entrada' => $hora_entrada,
+            ':hora_salida' => $hora_salida,
+            ':hora_comida_inicio' => $hora_comida_inicio,
+            ':duracion_comida_minutos' => $duracion_comida_minutos,
+            ':id_promotor_cobertura_comida' => $id_promotor_cobertura_comida,
+            ':notas_horario' => $notas_horario ?: null
         ];
         
         error_log('HORAS_API: SQL Insert: ' . $sql_insert);
@@ -684,11 +767,11 @@ function createAsignacion() {
             return;
         }
         
-        error_log('HORAS_API: Asignación creada exitosamente con ID: ' . $new_id);
+        error_log('HORAS_API: Asignación creada exitosamente con ID: ' . $new_id . ' (CON HORARIOS)');
         
         // ===== REGISTRAR EN LOG DE ACTIVIDADES =====
         try {
-            $detalle_log = "Nueva asignación creada con cierre automático: Promotor {$promotor['nombre']} {$promotor['apellido']} asignado a {$tienda['cadena']} #{$tienda['num_tienda']} a partir del {$fecha_inicio}. Asignaciones anteriores cerradas automáticamente.";
+            $detalle_log = "Nueva asignación creada con horarios y cierre automático: Promotor {$promotor['nombre']} {$promotor['apellido']} asignado a {$tienda['cadena']} #{$tienda['num_tienda']} a partir del {$fecha_inicio}. Horario: {$hora_entrada} - {$hora_salida}. Asignaciones anteriores cerradas automáticamente.";
             
             $sql_check_log_table = "SHOW TABLES LIKE 'log_actividades'";
             $table_exists = Database::selectOne($sql_check_log_table);
@@ -722,10 +805,13 @@ function createAsignacion() {
                                 t.num_tienda,
                                 t.nombre_tienda,
                                 t.ciudad,
-                                t.estado as tienda_estado
+                                t.estado as tienda_estado,
+                                pc.nombre as promotor_cobertura_nombre,
+                                pc.apellido as promotor_cobertura_apellido
                             FROM promotor_tienda_asignaciones pta
                             INNER JOIN promotores p ON pta.id_promotor = p.id_promotor
                             INNER JOIN tiendas t ON pta.id_tienda = t.id_tienda
+                            LEFT JOIN promotores pc ON pta.id_promotor_cobertura_comida = pc.id_promotor
                             WHERE pta.id_asignacion = :id_asignacion";
         
         try {
@@ -736,18 +822,25 @@ function createAsignacion() {
             $asignacion_creada = null;
         }
         
-        error_log("HORAS_API: === ASIGNACIÓN CREADA EXITOSAMENTE CON CIERRE AUTOMÁTICO ===");
-        error_log("HORAS_API: ID: {$new_id}, Tipo: {$tipo_asignacion}");
+        error_log("HORAS_API: === ASIGNACIÓN CREADA EXITOSAMENTE CON CIERRE AUTOMÁTICO Y HORARIOS ===");
+        error_log("HORAS_API: ID: {$new_id}, Tipo: {$tipo_asignacion}, Horario: {$hora_entrada} - {$hora_salida}");
         
         // ===== RESPUESTA EXITOSA =====
         $response_data = [
             'success' => true,
-            'message' => 'Asignación creada correctamente. Las asignaciones anteriores fueron cerradas automáticamente.',
+            'message' => 'Asignación creada correctamente con horarios. Las asignaciones anteriores fueron cerradas automáticamente.',
             'id' => intval($new_id),
             'tipo' => $tipo_asignacion,
             'data' => $asignacion_creada,
-            'asignaciones_cerradas' => count($asignaciones_activas ?? []),
-            'fecha_fin_anterior' => $fecha_fin_anterior
+            'asignaciones_cerradas' => count($asignaciones_activas),
+            'fecha_fin_anterior' => $fecha_fin_anterior,
+            'horarios' => [
+                'entrada' => $hora_entrada,
+                'salida' => $hora_salida,
+                'comida_inicio' => $hora_comida_inicio,
+                'duracion_comida' => $duracion_comida_minutos,
+                'cobertura_comida' => $id_promotor_cobertura_comida
+            ]
         ];
         
         error_log('HORAS_API: Enviando respuesta exitosa: ' . json_encode($response_data));
@@ -768,11 +861,11 @@ function createAsignacion() {
 }
 
 /**
- * ===== ACTUALIZAR ASIGNACIÓN CON MANEJO AUTOMÁTICO DE HISTORIAL DE CAMBIOS DE TIENDA =====
+ * ===== ACTUALIZAR ASIGNACIÓN CON HORARIOS =====
  */
 function updateAsignacion($id) {
     try {
-        error_log("HORAS_API: Actualizando asignación ID: {$id}");
+        error_log("HORAS_API: Actualizando asignación ID: {$id} con soporte de horarios");
         
         if ($id <= 0) {
             http_response_code(400);
@@ -882,14 +975,46 @@ function updateAsignacion($id) {
                 
                 Database::execute($sql_cerrar, $params_cerrar);
                 
-                // 2. CREAR nueva asignación para la nueva tienda
+                // 2. CREAR nueva asignación para la nueva tienda CON HORARIOS
+                $hora_entrada = trim($input['hora_entrada'] ?? '09:00');
+                $hora_salida = trim($input['hora_salida'] ?? '19:00');
+                $hora_comida_inicio = trim($input['hora_comida_inicio'] ?? '14:00');
+                $duracion_comida_minutos = intval($input['duracion_comida_minutos'] ?? 60);
+                
+                // Validar y asegurar valores por defecto
+                if (empty($hora_entrada)) $hora_entrada = '09:00';
+                if (empty($hora_salida)) $hora_salida = '19:00';
+                if (empty($hora_comida_inicio)) $hora_comida_inicio = '14:00';
+                if ($duracion_comida_minutos <= 0) $duracion_comida_minutos = 60;
+                
+                // Asegurar formato correcto de tiempo
+                if (strlen($hora_entrada) == 5) $hora_entrada .= ':00';
+                if (strlen($hora_salida) == 5) $hora_salida .= ':00';
+                if (strlen($hora_comida_inicio) == 5) $hora_comida_inicio .= ':00';
+                
+                // Validar formato
+                if (!preg_match('/^\d{2}:\d{2}:\d{2}$/', $hora_entrada)) $hora_entrada = '09:00:00';
+                if (!preg_match('/^\d{2}:\d{2}:\d{2}$/', $hora_salida)) $hora_salida = '19:00:00';
+                if (!preg_match('/^\d{2}:\d{2}:\d{2}$/', $hora_comida_inicio)) $hora_comida_inicio = '14:00:00';
+                
+                // Manejar cobertura de comida
+                $id_promotor_cobertura_comida = null;
+                if (isset($input['id_promotor_cobertura_comida']) && !empty($input['id_promotor_cobertura_comida'])) {
+                    $id_promotor_cobertura_comida = intval($input['id_promotor_cobertura_comida']);
+                    if ($id_promotor_cobertura_comida <= 0) $id_promotor_cobertura_comida = null;
+                }
+                
                 $sql_nueva = "INSERT INTO promotor_tienda_asignaciones (
                                 id_promotor, id_tienda, fecha_inicio, motivo_asignacion, 
-                                usuario_asigno, activo, fecha_registro, fecha_modificacion
+                                usuario_asigno, activo, fecha_registro, fecha_modificacion,
+                                hora_entrada, hora_salida, hora_comida_inicio, duracion_comida_minutos,
+                                id_promotor_cobertura_comida, notas_horario
                               ) VALUES (
                                 :id_promotor, :id_tienda_nueva, :fecha_inicio, 
                                 'Reasignación desde calendario de horas',
-                                :usuario_asigno, 1, NOW(), NOW()
+                                :usuario_asigno, 1, NOW(), NOW(),
+                                :hora_entrada, :hora_salida, :hora_comida_inicio, :duracion_comida_minutos,
+                                :id_promotor_cobertura_comida, :notas_horario
                               )";
                 
                 $usuario_asigno = $_SESSION['user_id'] ?? 1;
@@ -898,7 +1023,13 @@ function updateAsignacion($id) {
                     ':id_promotor' => $existing['id_promotor'],
                     ':id_tienda_nueva' => $input['id_tienda_nueva'],
                     ':fecha_inicio' => $input['fecha_inicio'],
-                    ':usuario_asigno' => $usuario_asigno
+                    ':usuario_asigno' => $usuario_asigno,
+                    ':hora_entrada' => $hora_entrada,
+                    ':hora_salida' => $hora_salida,
+                    ':hora_comida_inicio' => $hora_comida_inicio,
+                    ':duracion_comida_minutos' => $duracion_comida_minutos,
+                    ':id_promotor_cobertura_comida' => $id_promotor_cobertura_comida,
+                    ':notas_horario' => $input['notas_horario'] ?? null
                 ]);
                 
                 $cambio_tienda = true;
@@ -909,7 +1040,7 @@ function updateAsignacion($id) {
                     $table_exists = Database::selectOne($sql_check_log_table);
                     
                     if ($table_exists && $usuario_asigno) {
-                        $detalle_log = "Cambio de tienda desde calendario: Promotor {$promotor['nombre']} {$promotor['apellido']} dejó {$tienda_anterior['cadena']} #{$tienda_anterior['num_tienda']} el {$fecha_fin_anterior} y fue reasignado a {$tienda_nueva['cadena']} #{$tienda_nueva['num_tienda']} desde {$input['fecha_inicio']}";
+                        $detalle_log = "Cambio de tienda desde calendario con horarios: Promotor {$promotor['nombre']} {$promotor['apellido']} dejó {$tienda_anterior['cadena']} #{$tienda_anterior['num_tienda']} el {$fecha_fin_anterior} y fue reasignado a {$tienda_nueva['cadena']} #{$tienda_nueva['num_tienda']} desde {$input['fecha_inicio']}. Horario: {$hora_entrada} - {$hora_salida}";
                         
                         $sql_log = "INSERT INTO log_actividades (tabla, accion, id_registro, usuario_id, fecha, detalles) 
                                     VALUES ('promotor_tienda_asignaciones', 'CAMBIO_TIENDA_CALENDARIO', :id_registro, :usuario_id, NOW(), :detalles)";
@@ -942,14 +1073,20 @@ function updateAsignacion($id) {
             }
         }
         
-        // Construir query de actualización dinámico (resto del código original)
+        // Construir query de actualización dinámico CON CAMPOS DE HORARIO
         $allowed_fields = [
             'id_promotor' => 'int',
             'id_tienda' => 'int',
             'fecha_inicio' => 'string',
             'fecha_fin' => 'string',
             'motivo_asignacion' => 'string',
-            'motivo_cambio' => 'string'
+            'motivo_cambio' => 'string',
+            'hora_entrada' => 'time',
+            'hora_salida' => 'time',
+            'hora_comida_inicio' => 'time',
+            'duracion_comida_minutos' => 'int',
+            'id_promotor_cobertura_comida' => 'int_nullable',
+            'notas_horario' => 'string'
         ];
         
         $set_parts = [];
@@ -958,8 +1095,33 @@ function updateAsignacion($id) {
         foreach ($allowed_fields as $field => $type) {
             if (array_key_exists($field, $input)) {
                 $set_parts[] = "`$field` = :$field";
+                
                 if ($type === 'int') {
                     $params[":$field"] = intval($input[$field]);
+                } elseif ($type === 'int_nullable') {
+                    $value = $input[$field];
+                    if (empty($value)) {
+                        $params[":$field"] = null;
+                    } else {
+                        $params[":$field"] = intval($value);
+                    }
+                } elseif ($type === 'time') {
+                    $value = trim($input[$field] ?? '');
+                    if (empty($value)) {
+                        // Valores por defecto para cada campo de tiempo
+                        if ($field === 'hora_entrada') $value = '09:00:00';
+                        elseif ($field === 'hora_salida') $value = '19:00:00';
+                        elseif ($field === 'hora_comida_inicio') $value = '14:00:00';
+                    }
+                    // Asegurar formato HH:MM:SS
+                    if (strlen($value) == 5) $value .= ':00';
+                    // Validar formato
+                    if (!preg_match('/^\d{2}:\d{2}:\d{2}$/', $value)) {
+                        if ($field === 'hora_entrada') $value = '09:00:00';
+                        elseif ($field === 'hora_salida') $value = '19:00:00';
+                        elseif ($field === 'hora_comida_inicio') $value = '14:00:00';
+                    }
+                    $params[":$field"] = $value;
                 } else {
                     $value = trim($input[$field] ?? '');
                     $params[":$field"] = $value === '' ? null : $value;
@@ -998,7 +1160,7 @@ function updateAsignacion($id) {
         $rows_affected = Database::execute($sql_update, $params);
         
         if ($rows_affected > 0) {
-            error_log("HORAS_API: Asignación {$id} actualizada exitosamente");
+            error_log("HORAS_API: Asignación {$id} actualizada exitosamente con horarios");
             
             // REGISTRAR EN LOG DE ACTIVIDADES
             try {
@@ -1028,7 +1190,7 @@ function updateAsignacion($id) {
             http_response_code(200);
             echo json_encode([
                 'success' => true,
-                'message' => 'Asignación actualizada correctamente',
+                'message' => 'Asignación actualizada correctamente con horarios',
                 'rows_affected' => $rows_affected
             ], JSON_UNESCAPED_UNICODE);
             
@@ -1427,7 +1589,7 @@ function handlePromotores($method, $id) {
     try {
         error_log('HORAS_API: Obteniendo promotores con fecha de ingreso');
         
-        $sql = "SELECT id_promotor, nombre, apellido, telefono, correo, estatus, rfc, tipo_trabajo, fecha_ingreso
+        $sql = "SELECT id_promotor, nombre, apellido, telefono, correo, estatus, rfc, tipo_trabajo, fecha_ingreso, dia_descanso
                 FROM promotores 
                 WHERE estado = 1 AND estatus = 'ACTIVO'
                 ORDER BY tipo_trabajo DESC, nombre, apellido";

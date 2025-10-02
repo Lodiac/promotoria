@@ -1,22 +1,18 @@
 <?php
 
-// Habilitar logging de errores para debugging
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 session_start();
 
-// 🔑 DEFINIR CONSTANTE ANTES DE INCLUIR DB_CONNECT
 define('APP_ACCESS', true);
 
-// Headers de seguridad y CORS
 header('Content-Type: application/json; charset=utf-8');
 header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: DENY');
 header('X-XSS-Protection: 1; mode=block');
 
-// Solo permitir POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
     echo json_encode([
@@ -27,86 +23,36 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 try {
-    // ===== LOG PARA DEBUGGING =====
-    $debug_info = [
-        'timestamp' => date('Y-m-d H:i:s'),
-        'method' => $_SERVER['REQUEST_METHOD'],
-        'content_type' => $_SERVER['CONTENT_TYPE'] ?? '',
-        'session_status' => session_status(),
-        'session_id' => session_id()
-    ];
-    error_log('FINALIZAR_ASIGNACION: Iniciando - ' . json_encode($debug_info));
-
-    // ===== VERIFICAR SESIÓN BÁSICA =====
+    // Verificar sesión y permisos
     if (!isset($_SESSION['user_id']) || empty($_SESSION['user_id'])) {
-        error_log('FINALIZAR_ASIGNACION: Sin sesión - user_id no encontrado');
         http_response_code(403);
         echo json_encode([
             'success' => false,
-            'message' => 'No hay sesión activa',
-            'error' => 'no_session'
+            'message' => 'No hay sesión activa'
         ]);
         exit;
     }
 
-    // ===== VERIFICAR ROL =====
     if (!isset($_SESSION['rol']) || !in_array($_SESSION['rol'], ['supervisor', 'root'])) {
-        error_log('FINALIZAR_ASIGNACION: Rol incorrecto - ' . ($_SESSION['rol'] ?? 'NO_SET'));
         http_response_code(403);
         echo json_encode([
             'success' => false,
-            'message' => 'Sin permisos para finalizar asignaciones.',
-            'error' => 'insufficient_permissions'
+            'message' => 'Sin permisos para eliminar asignaciones.'
         ]);
         exit;
     }
 
-    error_log('FINALIZAR_ASIGNACION: Sesión válida - Usuario: ' . ($_SESSION['username'] ?? 'NO_USERNAME') . ', Rol: ' . $_SESSION['rol']);
+    // Incluir conexión DB
+    require_once __DIR__ . '/../config/db_connect.php';
 
-    // ===== INCLUIR CONEXIÓN DB =====
-    $db_path = __DIR__ . '/../config/db_connect.php';
-    if (!file_exists($db_path)) {
-        error_log('FINALIZAR_ASIGNACION: Archivo db_connect.php no encontrado en: ' . $db_path);
-        throw new Exception('Configuración de base de datos no encontrada');
-    }
-
-    require_once $db_path;
-
-    // ===== VERIFICAR CLASE DATABASE =====
-    if (!class_exists('Database')) {
-        error_log('FINALIZAR_ASIGNACION: Clase Database no encontrada');
-        throw new Exception('Clase Database no disponible');
-    }
-
-    // ===== OBTENER DATOS DEL POST =====
-    $content_type = $_SERVER['CONTENT_TYPE'] ?? '';
-    if (strpos($content_type, 'application/json') !== false) {
-        $input = json_decode(file_get_contents('php://input'), true);
-    } else {
-        $input = $_POST;
-    }
-
-    if (!$input) {
-        http_response_code(400);
-        echo json_encode([
-            'success' => false,
-            'message' => 'No se recibieron datos'
-        ]);
-        exit;
-    }
-
-    // Validar datos requeridos - COMPATIBILIDAD CON AMBOS NOMBRES
+    // Obtener datos
+    $input = json_decode(file_get_contents('php://input'), true);
     $id_asignacion = intval($input['id_asignacion'] ?? 0);
-    $fecha_fin = trim($input['fecha_fin'] ?? '');
-    
-    // Aceptar tanto motivo_finalizacion (del módulo) como motivo_cambio (de la API)
-    $motivo_cambio = trim($input['motivo_finalizacion'] ?? $input['motivo_cambio'] ?? '');
-    
-    $desactivar = ($input['desactivar'] ?? 'true') === 'true'; // Por defecto desactivar
 
-    error_log('FINALIZAR_ASIGNACION: ID: ' . $id_asignacion . ', Fecha fin: ' . $fecha_fin . ', Motivo: ' . $motivo_cambio . ', Desactivar: ' . ($desactivar ? 'true' : 'false'));
+    error_log("=== INICIO DELETE ASIGNACION ===");
+    error_log("ID Asignación a eliminar: {$id_asignacion}");
+    error_log("Usuario: " . ($_SESSION['username'] ?? $_SESSION['user_id']));
 
-    // ===== VALIDACIONES BÁSICAS =====
     if ($id_asignacion <= 0) {
         http_response_code(400);
         echo json_encode([
@@ -116,74 +62,19 @@ try {
         exit;
     }
 
-    if (empty($fecha_fin)) {
-        http_response_code(400);
-        echo json_encode([
-            'success' => false,
-            'message' => 'La fecha de finalización es requerida'
-        ]);
-        exit;
-    }
-
-    // Validar formato de fecha
-    $fecha_fin_obj = DateTime::createFromFormat('Y-m-d', $fecha_fin);
-    if (!$fecha_fin_obj) {
-        http_response_code(400);
-        echo json_encode([
-            'success' => false,
-            'message' => 'Formato de fecha inválido (usar YYYY-MM-DD)'
-        ]);
-        exit;
-    }
-
-    if (empty($motivo_cambio)) {
-        http_response_code(400);
-        echo json_encode([
-            'success' => false,
-            'message' => 'El motivo de finalización es requerido'
-        ]);
-        exit;
-    }
-
-    if (strlen($motivo_cambio) > 255) {
-        http_response_code(400);
-        echo json_encode([
-            'success' => false,
-            'message' => 'El motivo no puede exceder 255 caracteres'
-        ]);
-        exit;
-    }
-
-    // ===== VERIFICAR CONEXIÓN DB =====
-    try {
-        $test_connection = Database::connect();
-        if (!$test_connection) {
-            throw new Exception('No se pudo establecer conexión con la base de datos');
-        }
-        error_log('FINALIZAR_ASIGNACION: Conexión DB exitosa');
-    } catch (Exception $conn_error) {
-        error_log('FINALIZAR_ASIGNACION: Error de conexión DB - ' . $conn_error->getMessage());
-        throw new Exception('Error de conexión a la base de datos: ' . $conn_error->getMessage());
-    }
-
-    // ===== VERIFICAR QUE LA ASIGNACIÓN EXISTE Y ESTÁ ACTIVA =====
+    // Obtener información de la asignación a eliminar
     $sql_asignacion = "SELECT 
                           pta.id_asignacion,
                           pta.id_promotor,
                           pta.id_tienda,
                           pta.fecha_inicio,
                           pta.fecha_fin,
-                          pta.motivo_asignacion,
                           pta.activo,
-                          
                           p.nombre as promotor_nombre,
                           p.apellido as promotor_apellido,
-                          
-                          t.region,
                           t.cadena,
                           t.num_tienda,
-                          t.nombre_tienda,
-                          t.ciudad
+                          t.nombre_tienda
                        FROM promotor_tienda_asignaciones pta
                        INNER JOIN promotores p ON pta.id_promotor = p.id_promotor
                        INNER JOIN tiendas t ON pta.id_tienda = t.id_tienda
@@ -192,6 +83,7 @@ try {
     $asignacion = Database::selectOne($sql_asignacion, [':id_asignacion' => $id_asignacion]);
 
     if (!$asignacion) {
+        error_log("ERROR: Asignación no encontrada");
         http_response_code(404);
         echo json_encode([
             'success' => false,
@@ -200,174 +92,237 @@ try {
         exit;
     }
 
-    // Verificar que la asignación no esté ya finalizada
-    if ($asignacion['fecha_fin']) {
-        http_response_code(400);
-        echo json_encode([
-            'success' => false,
-            'message' => 'Esta asignación ya está finalizada desde el ' . date('d/m/Y', strtotime($asignacion['fecha_fin']))
-        ]);
-        exit;
-    }
+    $id_promotor = $asignacion['id_promotor'];
+    $fecha_inicio_asignacion_actual = $asignacion['fecha_inicio'];
 
-    // Verificar que la fecha de fin no sea anterior a la fecha de inicio
-    $fecha_inicio_obj = new DateTime($asignacion['fecha_inicio']);
-    if ($fecha_fin_obj < $fecha_inicio_obj) {
-        http_response_code(400);
-        echo json_encode([
-            'success' => false,
-            'message' => 'La fecha de finalización no puede ser anterior a la fecha de inicio (' . date('d/m/Y', strtotime($asignacion['fecha_inicio'])) . ')'
-        ]);
-        exit;
-    }
+    error_log("Asignación a eliminar:");
+    error_log("  - ID Promotor: {$id_promotor}");
+    error_log("  - Fecha inicio: {$fecha_inicio_asignacion_actual}");
+    error_log("  - Fecha fin: " . ($asignacion['fecha_fin'] ?? 'NULL'));
+    error_log("  - Activo: {$asignacion['activo']}");
+    error_log("  - Tienda: {$asignacion['cadena']} #{$asignacion['num_tienda']}");
 
-    // ===== ACTUALIZAR LA ASIGNACIÓN =====
-    $sql_update = "UPDATE promotor_tienda_asignaciones 
-                   SET fecha_fin = :fecha_fin,
-                       motivo_cambio = :motivo_cambio,
-                       usuario_cambio = :usuario_cambio,
-                       fecha_modificacion = NOW()";
+    // DEBUG: Ver todas las asignaciones del promotor ANTES de eliminar
+    $sql_debug_antes = "SELECT id_asignacion, fecha_inicio, fecha_fin, activo, id_tienda 
+                        FROM promotor_tienda_asignaciones 
+                        WHERE id_promotor = :id_promotor 
+                        ORDER BY fecha_inicio ASC";
     
-    $params_update = [
-        ':fecha_fin' => $fecha_fin,
-        ':motivo_cambio' => $motivo_cambio,
-        ':usuario_cambio' => $_SESSION['user_id'],
-        ':id_asignacion' => $id_asignacion
-    ];
-
-    // Opcionalmente desactivar la asignación
-    if ($desactivar) {
-        $sql_update .= ", activo = 0";
+    $todas_antes = Database::select($sql_debug_antes, [':id_promotor' => $id_promotor]);
+    
+    error_log("=== ESTADO ANTES DE ELIMINAR ===");
+    error_log("Total asignaciones: " . count($todas_antes));
+    foreach ($todas_antes as $idx => $asig) {
+        $es_actual = ($asig['id_asignacion'] == $id_asignacion) ? " <-- ELIMINANDO ESTA" : "";
+        error_log(sprintf(
+            "%d. ID:%d | Inicio:%s | Fin:%s | Activo:%s%s",
+            $idx + 1,
+            $asig['id_asignacion'],
+            $asig['fecha_inicio'],
+            $asig['fecha_fin'] ?? 'NULL',
+            $asig['activo'],
+            $es_actual
+        ));
     }
 
-    $sql_update .= " WHERE id_asignacion = :id_asignacion";
+    // BUSCAR ASIGNACIÓN ANTERIOR CORRECTA (la que empezó antes)
+    error_log("Buscando asignación anterior a la fecha: {$fecha_inicio_asignacion_actual}");
+    
+    $sql_asignacion_anterior = "SELECT 
+                                    id_asignacion,
+                                    id_tienda,
+                                    fecha_inicio,
+                                    fecha_fin,
+                                    activo
+                                FROM promotor_tienda_asignaciones
+                                WHERE id_promotor = :id_promotor
+                                AND id_asignacion != :id_asignacion_actual
+                                AND fecha_inicio < :fecha_inicio_actual
+                                ORDER BY fecha_inicio DESC
+                                LIMIT 1";
+    
+    $asignacion_anterior = Database::selectOne($sql_asignacion_anterior, [
+        ':id_promotor' => $id_promotor,
+        ':id_asignacion_actual' => $id_asignacion,
+        ':fecha_inicio_actual' => $fecha_inicio_asignacion_actual
+    ]);
+    
+    if ($asignacion_anterior) {
+        error_log("ASIGNACIÓN ANTERIOR ENCONTRADA:");
+        error_log("  - ID: {$asignacion_anterior['id_asignacion']}");
+        error_log("  - Fecha inicio: {$asignacion_anterior['fecha_inicio']}");
+        error_log("  - Fecha fin actual: " . ($asignacion_anterior['fecha_fin'] ?? 'NULL'));
+        error_log("  - Activo actual: {$asignacion_anterior['activo']}");
+    } else {
+        error_log("NO SE ENCONTRÓ ASIGNACIÓN ANTERIOR");
+        error_log("Criterios de búsqueda:");
+        error_log("  - id_promotor: {$id_promotor}");
+        error_log("  - id_asignacion diferente de: {$id_asignacion}");
+        error_log("  - fecha_inicio menor a: {$fecha_inicio_asignacion_actual}");
+    }
 
-    $affected_rows = Database::execute($sql_update, $params_update);
+    // ELIMINAR LA ASIGNACIÓN
+    error_log("Procediendo a eliminar asignación ID: {$id_asignacion}");
+    
+    $sql_delete = "DELETE FROM promotor_tienda_asignaciones WHERE id_asignacion = :id_asignacion";
+    $affected = Database::execute($sql_delete, [':id_asignacion' => $id_asignacion]);
 
-    if ($affected_rows === 0) {
+    error_log("Filas afectadas por DELETE: {$affected}");
+
+    if ($affected === 0) {
+        error_log("ERROR: No se pudo eliminar la asignación");
         http_response_code(500);
         echo json_encode([
             'success' => false,
-            'message' => 'No se pudo actualizar la asignación'
+            'message' => 'No se pudo eliminar la asignación'
         ]);
         exit;
     }
 
-    // ===== CALCULAR DURACIÓN =====
-    $duracion_dias = $fecha_fin_obj->diff($fecha_inicio_obj)->days;
+    error_log("Asignación eliminada exitosamente");
 
-    // ===== REGISTRAR EN LOG DE ACTIVIDADES =====
+    // REACTIVAR ASIGNACIÓN ANTERIOR
+    $asignacion_reactivada = false;
+    $id_asignacion_reactivada = null;
+    
+    if ($asignacion_anterior) {
+        error_log("Procediendo a reactivar asignación anterior ID: {$asignacion_anterior['id_asignacion']}");
+        
+        $motivo_reactivacion = "Reactivada automáticamente por eliminación de asignación posterior (ID: {$id_asignacion}) el " . date('Y-m-d H:i:s');
+        
+        $sql_reactivar = "UPDATE promotor_tienda_asignaciones
+                         SET fecha_fin = NULL,
+                             activo = 1,
+                             motivo_cambio = :motivo_reactivacion,
+                             usuario_cambio = :usuario_cambio,
+                             fecha_modificacion = NOW()
+                         WHERE id_asignacion = :id_asignacion_anterior";
+        
+        error_log("Ejecutando UPDATE para reactivar...");
+        
+        $reactivada = Database::execute($sql_reactivar, [
+            ':motivo_reactivacion' => $motivo_reactivacion,
+            ':usuario_cambio' => $_SESSION['user_id'],
+            ':id_asignacion_anterior' => $asignacion_anterior['id_asignacion']
+        ]);
+        
+        error_log("Filas afectadas por UPDATE: {$reactivada}");
+        
+        if ($reactivada > 0) {
+            $asignacion_reactivada = true;
+            $id_asignacion_reactivada = $asignacion_anterior['id_asignacion'];
+            error_log("ÉXITO: Asignación anterior REACTIVADA");
+            
+            // Verificar el cambio
+            $sql_verificar = "SELECT id_asignacion, fecha_inicio, fecha_fin, activo 
+                             FROM promotor_tienda_asignaciones 
+                             WHERE id_asignacion = :id";
+            $verificacion = Database::selectOne($sql_verificar, [':id' => $asignacion_anterior['id_asignacion']]);
+            
+            if ($verificacion) {
+                error_log("Verificación post-UPDATE:");
+                error_log("  - ID: {$verificacion['id_asignacion']}");
+                error_log("  - Fecha inicio: {$verificacion['fecha_inicio']}");
+                error_log("  - Fecha fin: " . ($verificacion['fecha_fin'] ?? 'NULL'));
+                error_log("  - Activo: {$verificacion['activo']}");
+            }
+            
+            // Log de actividad
+            try {
+                $sql_log = "INSERT INTO log_actividades (tabla, accion, id_registro, usuario_id, fecha, detalles) 
+                           VALUES ('promotor_tienda_asignaciones', 'REACTIVACION_AUTO_DELETE', :id_registro, :usuario_id, NOW(), :detalles)";
+                
+                Database::insert($sql_log, [
+                    ':id_registro' => $asignacion_anterior['id_asignacion'],
+                    ':usuario_id' => $_SESSION['user_id'],
+                    ':detalles' => "Asignación ID {$asignacion_anterior['id_asignacion']} reactivada automáticamente tras eliminar asignación ID {$id_asignacion}"
+                ]);
+                
+                error_log("Log de reactivación guardado");
+            } catch (Exception $log_error) {
+                error_log("Error guardando log de reactivación: " . $log_error->getMessage());
+            }
+        } else {
+            error_log("WARNING: UPDATE no afectó ninguna fila");
+        }
+    } else {
+        error_log("No hay asignación anterior para reactivar");
+    }
+
+    // Log de eliminación
     try {
-        $detalle_log = "Asignación finalizada: Promotor {$asignacion['promotor_nombre']} {$asignacion['promotor_apellido']} finalizó asignación en tienda {$asignacion['cadena']} #{$asignacion['num_tienda']} - {$asignacion['nombre_tienda']}. Duración: {$duracion_dias} días. Motivo: {$motivo_cambio}";
+        $detalle = "Asignación eliminada: {$asignacion['promotor_nombre']} {$asignacion['promotor_apellido']} - Tienda {$asignacion['cadena']} #{$asignacion['num_tienda']}";
+        if ($asignacion_reactivada) {
+            $detalle .= " | Asignación anterior ID {$id_asignacion_reactivada} reactivada automáticamente";
+        }
         
         $sql_log = "INSERT INTO log_actividades (tabla, accion, id_registro, usuario_id, fecha, detalles) 
-                    VALUES ('promotor_tienda_asignaciones', 'FINALIZACION', :id_registro, :usuario_id, NOW(), :detalles)";
+                   VALUES ('promotor_tienda_asignaciones', 'ELIMINACION', :id_registro, :usuario_id, NOW(), :detalles)";
         
         Database::insert($sql_log, [
             ':id_registro' => $id_asignacion,
             ':usuario_id' => $_SESSION['user_id'],
-            ':detalles' => $detalle_log
+            ':detalles' => $detalle
         ]);
         
-        error_log("LOG_FINALIZACION: " . $detalle_log . " - Usuario: " . ($_SESSION['username'] ?? 'NO_USERNAME'));
+        error_log("Log de eliminación guardado");
     } catch (Exception $log_error) {
-        // Log del error pero no fallar la operación principal
-        error_log("Error registrando en log_actividades: " . $log_error->getMessage());
+        error_log("Error en log de eliminación: " . $log_error->getMessage());
     }
 
-    // ===== OBTENER DATOS ACTUALIZADOS DE LA ASIGNACIÓN =====
-    $sql_actualizada = "SELECT 
-                          pta.id_asignacion,
-                          pta.id_promotor,
-                          pta.id_tienda,
-                          pta.fecha_inicio,
-                          pta.fecha_fin,
-                          pta.motivo_asignacion,
-                          pta.motivo_cambio,
-                          pta.activo,
-                          pta.fecha_registro,
-                          pta.fecha_modificacion,
-                          
-                          p.nombre as promotor_nombre,
-                          p.apellido as promotor_apellido,
-                          p.telefono as promotor_telefono,
-                          p.correo as promotor_correo,
-                          
-                          t.region,
-                          t.cadena,
-                          t.num_tienda,
-                          t.nombre_tienda,
-                          t.ciudad,
-                          t.estado as tienda_estado,
-                          
-                          u1.nombre as usuario_asigno_nombre,
-                          u1.apellido as usuario_asigno_apellido,
-                          u2.nombre as usuario_cambio_nombre,
-                          u2.apellido as usuario_cambio_apellido
-                       FROM promotor_tienda_asignaciones pta
-                       INNER JOIN promotores p ON pta.id_promotor = p.id_promotor
-                       INNER JOIN tiendas t ON pta.id_tienda = t.id_tienda
-                       LEFT JOIN usuarios u1 ON pta.usuario_asigno = u1.id
-                       LEFT JOIN usuarios u2 ON pta.usuario_cambio = u2.id
-                       WHERE pta.id_asignacion = :id_asignacion";
+    // DEBUG: Ver todas las asignaciones del promotor DESPUÉS de reactivar
+    $sql_debug_despues = "SELECT id_asignacion, fecha_inicio, fecha_fin, activo, id_tienda 
+                          FROM promotor_tienda_asignaciones 
+                          WHERE id_promotor = :id_promotor 
+                          ORDER BY fecha_inicio ASC";
+    
+    $todas_despues = Database::select($sql_debug_despues, [':id_promotor' => $id_promotor]);
+    
+    error_log("=== ESTADO DESPUÉS DE REACTIVAR ===");
+    error_log("Total asignaciones: " . count($todas_despues));
+    foreach ($todas_despues as $idx => $asig) {
+        $es_reactivada = ($asignacion_reactivada && $asig['id_asignacion'] == $id_asignacion_reactivada) ? " <-- REACTIVADA" : "";
+        error_log(sprintf(
+            "%d. ID:%d | Inicio:%s | Fin:%s | Activo:%s%s",
+            $idx + 1,
+            $asig['id_asignacion'],
+            $asig['fecha_inicio'],
+            $asig['fecha_fin'] ?? 'NULL',
+            $asig['activo'],
+            $es_reactivada
+        ));
+    }
 
-    $asignacion_actualizada = Database::selectOne($sql_actualizada, [':id_asignacion' => $id_asignacion]);
+    // Respuesta
+    $mensaje = 'Asignación eliminada correctamente';
+    if ($asignacion_reactivada) {
+        $mensaje .= ' y asignación anterior reactivada automáticamente';
+    }
 
-    // ===== FORMATEAR RESPUESTA =====
-    $response_data = [
-        'id_asignacion' => intval($asignacion_actualizada['id_asignacion']),
-        'id_promotor' => intval($asignacion_actualizada['id_promotor']),
-        'id_tienda' => intval($asignacion_actualizada['id_tienda']),
-        
-        'promotor_nombre_completo' => trim($asignacion_actualizada['promotor_nombre'] . ' ' . $asignacion_actualizada['promotor_apellido']),
-        'promotor_telefono' => $asignacion_actualizada['promotor_telefono'],
-        'promotor_correo' => $asignacion_actualizada['promotor_correo'],
-        
-        'tienda_identificador' => $asignacion_actualizada['cadena'] . ' #' . $asignacion_actualizada['num_tienda'] . ' - ' . $asignacion_actualizada['nombre_tienda'],
-        'tienda_region' => intval($asignacion_actualizada['region']),
-        'tienda_cadena' => $asignacion_actualizada['cadena'],
-        'tienda_num_tienda' => intval($asignacion_actualizada['num_tienda']),
-        'tienda_nombre_tienda' => $asignacion_actualizada['nombre_tienda'],
-        'tienda_ciudad' => $asignacion_actualizada['ciudad'],
-        'tienda_estado' => $asignacion_actualizada['tienda_estado'],
-        
-        'fecha_inicio' => $asignacion_actualizada['fecha_inicio'],
-        'fecha_fin' => $asignacion_actualizada['fecha_fin'],
-        'duracion_dias' => $duracion_dias,
-        
-        'motivo_asignacion' => $asignacion_actualizada['motivo_asignacion'],
-        'motivo_finalizacion' => $asignacion_actualizada['motivo_cambio'], // Para compatibilidad con módulo
-        'motivo_cambio' => $asignacion_actualizada['motivo_cambio'], // Nombre original de API
-        
-        'usuario_asigno' => $asignacion_actualizada['usuario_asigno_nombre'] ? 
-            trim($asignacion_actualizada['usuario_asigno_nombre'] . ' ' . $asignacion_actualizada['usuario_asigno_apellido']) : 'N/A',
-        'usuario_finalizo' => $asignacion_actualizada['usuario_cambio_nombre'] ? 
-            trim($asignacion_actualizada['usuario_cambio_nombre'] . ' ' . $asignacion_actualizada['usuario_cambio_apellido']) : 'N/A',
-        
-        'fecha_inicio_formatted' => date('d/m/Y', strtotime($asignacion_actualizada['fecha_inicio'])),
-        'fecha_fin_formatted' => date('d/m/Y', strtotime($asignacion_actualizada['fecha_fin'])),
-        'fecha_finalizacion_formatted' => date('d/m/Y H:i', strtotime($asignacion_actualizada['fecha_modificacion'])),
-        
-        'activo' => intval($asignacion_actualizada['activo']),
-        'finalizado' => true,
-        'estatus_texto' => 'Finalizado'
-    ];
+    error_log("=== FIN DELETE ASIGNACION (EXITOSO) ===");
 
-    // ===== RESPUESTA EXITOSA =====
     echo json_encode([
         'success' => true,
-        'message' => 'Asignación finalizada correctamente',
-        'data' => $response_data
+        'message' => $mensaje,
+        'asignacion_anterior_reactivada' => $asignacion_reactivada,
+        'id_asignacion_anterior' => $id_asignacion_reactivada,
+        'debug' => [
+            'asignacion_eliminada' => $id_asignacion,
+            'promotor_id' => $id_promotor,
+            'asignacion_anterior_encontrada' => $asignacion_anterior ? true : false,
+            'total_asignaciones_restantes' => count($todas_despues)
+        ]
     ], JSON_UNESCAPED_UNICODE);
 
 } catch (Exception $e) {
-    // Log del error
-    error_log("Error en finalizar_asignacion.php: " . $e->getMessage() . " - Usuario: " . ($_SESSION['username'] ?? 'desconocido') . " - IP: " . $_SERVER['REMOTE_ADDR']);
+    error_log("ERROR CRÍTICO en finalizar_asignacion.php: " . $e->getMessage());
+    error_log("Stack trace: " . $e->getTraceAsString());
     
     http_response_code(500);
     echo json_encode([
         'success' => false,
-        'message' => 'Error interno del servidor'
+        'message' => 'Error interno del servidor',
+        'error_detail' => $e->getMessage()
     ]);
 }
 ?>
