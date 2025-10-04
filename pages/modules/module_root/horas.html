@@ -4,30 +4,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hojas de Horas - Sistema Interactivo</title>
+    <title>Hojas de Horas - Sistema Recurrente Completo</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
 <body>
 
-    <!-- ===== MÓDULO HOJAS DE HORAS CON FULLCALENDAR SPA CORREGIDO ===== -->
+    <!-- ===== MÓDULO HOJAS DE HORAS CON SISTEMA RECURRENTE COMPLETO ===== -->
     <div class="horas-module">
         <!-- HEADER DEL MÓDULO -->
         <div class="module-header">
             <div class="header-content">
                 <div class="header-title">
                     <i class="fas fa-calendar-alt header-icon"></i>
-                    <h1>Hojas de Horas - Sistema Interactivo</h1>
+                    <h1>Hojas de Horas - Sistema Recurrente</h1>
                 </div>
                 <div class="header-actions">
                     <button class="btn-secondary" id="btn-dashboard-horas">
                         <i class="fas fa-chart-pie"></i> Dashboard
                     </button>
                     <button class="btn-primary" id="btn-nueva-asignacion">
-                        <i class="fas fa-plus"></i> Nueva Asignación
+                        <i class="fas fa-plus"></i> Nuevo Contrato
                     </button>
                     <button class="btn-primary" id="btn-generar-horarios">
-                        <i class="fas fa-sync-alt"></i> Generar Horarios Adicionales
+                        <i class="fas fa-sync-alt"></i> Actualizar Vista
                     </button>
                 </div>
             </div>
@@ -105,6 +105,56 @@
                         </div>
                     </div>
 
+                    <!-- LEYENDAS EN SIDEBAR -->
+                    <div class="sidebar-legends">
+                        <div class="sidebar-legend-section">
+                            <div class="sidebar-legend-title">Leyenda de Contratos</div>
+                            <div class="sidebar-legend-item">
+                                <div class="sidebar-legend-color"
+                                    style="background: linear-gradient(135deg, #1976d2, #1565c0);"></div>
+                                <span>Promotor Fijo - Tienda Principal</span>
+                            </div>
+                            <div class="sidebar-legend-item">
+                                <div class="sidebar-legend-color"
+                                    style="background: linear-gradient(135deg, #7b1fa2, #6a1b9a);"></div>
+                                <span>Promotor Fijo - Rotación</span>
+                            </div>
+                            <div class="sidebar-legend-item">
+                                <div class="sidebar-legend-color"
+                                    style="background: linear-gradient(135deg, #f57c00, #ef6c00);"></div>
+                                <span>Cubredescansos - Apoyo</span>
+                            </div>
+                            <div class="sidebar-legend-item">
+                                <div class="sidebar-legend-color"
+                                    style="background: linear-gradient(135deg, #388e3c, #2e7d32);"></div>
+                                <span>Cubredescansos - Otras</span>
+                            </div>
+                        </div>
+
+                        <div class="sidebar-legend-section">
+                            <div class="sidebar-legend-title">Indicadores de Estado</div>
+                            <div class="sidebar-legend-item">
+                                <div class="sidebar-legend-color"
+                                    style="background: linear-gradient(135deg, #4CAF50, #2e7d32); box-shadow: 0 0 8px rgba(76, 175, 80, 0.5);">
+                                </div>
+                                <span>✅ Contrato Activo</span>
+                            </div>
+                            <div class="sidebar-legend-item">
+                                <div class="sidebar-legend-color"
+                                    style="background: linear-gradient(135deg, #f57c00, #ef6c00); border: 2px solid #FF9800;">
+                                </div>
+                                <span>⚠️ Próximo a finalizar</span>
+                            </div>
+                            <div class="sidebar-legend-item">
+                                <div class="sidebar-legend-color"
+                                    style="background: linear-gradient(135deg, #f44336, #d32f2f); border: 2px solid #F44336;">
+                                </div>
+                                <span>🔴 Crítico</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- BOTÓN TOGGLE SIDEBAR EN LA PARTE INFERIOR -->
                     <!-- BOTÓN TOGGLE SIDEBAR EN LA PARTE INFERIOR -->
                     <div class="sidebar-toggle-container">
                         <button class="sidebar-toggle-btn" id="sidebar-toggle-btn" onclick="toggleSidebar()">
@@ -125,7 +175,7 @@
                     <div class="calendar-header">
                         <div class="calendar-title">
                             <i class="fas fa-calendar-alt"></i>
-                            Calendario de Asignaciones
+                            Calendario de Contratos Recurrentes
                         </div>
                         <div class="calendar-controls">
                             <button class="view-btn active" data-view="dayGridMonth">Mes</button>
@@ -145,71 +195,11 @@
                     <div class="calendar-container">
                         <div id="calendar-horas"></div>
 
-                        <!-- LEYENDA -->
-                        <div class="legend">
-                            <div class="legend-title">Leyenda de Asignaciones</div>
-                            <div class="legend-grid">
-                                <div class="legend-item">
-                                    <div class="legend-color"
-                                        style="background: linear-gradient(135deg, #1976d2, #1565c0);"></div>
-                                    <span>Promotor Fijo - Tienda Principal</span>
-                                </div>
-                                <div class="legend-item">
-                                    <div class="legend-color"
-                                        style="background: linear-gradient(135deg, #7b1fa2, #6a1b9a);"></div>
-                                    <span>Promotor Fijo - Rotación</span>
-                                </div>
-                                <div class="legend-item">
-                                    <div class="legend-color"
-                                        style="background: linear-gradient(135deg, #f57c00, #ef6c00);"></div>
-                                    <span>Cubredescansos - Apoyo</span>
-                                </div>
-                                <div class="legend-item">
-                                    <div class="legend-color"
-                                        style="background: linear-gradient(135deg, #388e3c, #2e7d32);"></div>
-                                    <span>Cubredescansos - Otras</span>
-                                </div>
-                                <div class="legend-item">
-                                    <div class="legend-color" style="background: #f5f5f5; border: 1px solid #ccc;">
-                                    </div>
-                                    <span>Días de descanso</span>
-                                </div>
-                            </div>
+                    </div>
 
-                            <!-- LEYENDA TEMPORAL (ASIGNACIÓN ACTIVA E HISTORIAL) -->
-                            <div class="temporal-legend">
-                                <div class="legend-title"
-                                    style="margin-top: 15px; padding-top: 15px; border-top: 2px solid #e0e0e0;">
-                                    Indicadores de Estado
-                                </div>
-                                <div class="legend-grid">
-                                    <div class="legend-item">
-                                        <div class="legend-color"
-                                            style="background: linear-gradient(135deg, #9e9e9e, #757575); opacity: 0.6;">
-                                        </div>
-                                        <span>📋 Historial (asignaciones anteriores)</span>
-                                    </div>
-                                    <div class="legend-item">
-                                        <div class="legend-color"
-                                            style="background: linear-gradient(135deg, #4CAF50, #2e7d32); box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);">
-                                        </div>
-                                        <span>✅ Asignación Activa (trabajo actual)</span>
-                                    </div>
-                                    <div class="legend-item">
-                                        <div class="legend-color"
-                                            style="background: linear-gradient(135deg, #f57c00, #ef6c00); border: 3px solid #FF9800;">
-                                        </div>
-                                        <span>⚠️ Próxima a finalizar (7 días o menos)</span>
-                                    </div>
-                                    <div class="legend-item">
-                                        <div class="legend-color"
-                                            style="background: linear-gradient(135deg, #f44336, #d32f2f); border: 3px solid #F44336;">
-                                        </div>
-                                        <span>🔴 Crítica (3 días o menos)</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="loading-overlay" id="calendar-loading" style="display: none;">
+                        <div class="loading-spinner"></div>
+                        <p>Cargando eventos...</p>
                     </div>
                 </div>
             </div>
@@ -262,7 +252,7 @@
                         <div class="leyenda-grid">
                             <div class="leyenda-item">
                                 <div class="leyenda-color" style="background: var(--color-trabajo);"></div>
-                                <div class="leyenda-text"><strong>Día de Trabajo</strong> - Horario completo</div>
+                                <div class="leyenda-text"><strong>Día de Trabajo</strong> - Según contrato activo</div>
                             </div>
                             <div class="leyenda-item">
                                 <div class="leyenda-color" style="background: var(--color-descanso);"></div>
@@ -272,15 +262,7 @@
                             <div class="leyenda-item">
                                 <div class="leyenda-color" style="background: #fafafa; border: 2px solid #e0e0e0;">
                                 </div>
-                                <div class="leyenda-text"><strong>Sin Programar</strong> - No hay asignaciones</div>
-                            </div>
-                            <div class="leyenda-item">
-                                <div class="leyenda-color" style="background: var(--color-cobertura-comida);"></div>
-                                <div class="leyenda-text"><strong>Cobertura Comida</strong> - Solo 1 hora</div>
-                            </div>
-                            <div class="leyenda-item">
-                                <div class="leyenda-color" style="background: var(--color-incidencia);"></div>
-                                <div class="leyenda-text"><strong>Incidencia</strong> - Cobertura día completo</div>
+                                <div class="leyenda-text"><strong>Sin Contrato</strong> - No hay contratos activos</div>
                             </div>
                         </div>
                     </div>
@@ -289,10 +271,6 @@
                     <div class="calendario-section" id="calendario-section" style="display: none;">
                         <div class="calendario-header">
                             <div class="semana-titulo" id="semana-titulo">Semana Actual</div>
-                            <div class="header-actions">
-                                <button class="btn btn-danger" onclick="abrirModalIncidencia()">Agregar
-                                    Incidencia</button>
-                            </div>
                         </div>
 
                         <div class="calendario-grid" id="calendarioGrid">
@@ -308,16 +286,16 @@
                                     <div class="resumen-label">Días Trabajados</div>
                                 </div>
                                 <div class="resumen-item">
-                                    <div class="resumen-valor" id="incidenciasTotal">0</div>
-                                    <div class="resumen-label">Incidencias</div>
-                                </div>
-                                <div class="resumen-item">
-                                    <div class="resumen-valor" id="coberturasComida">0</div>
-                                    <div class="resumen-label">Coberturas Comida</div>
+                                    <div class="resumen-valor" id="diasDescanso">0</div>
+                                    <div class="resumen-label">Días Descanso</div>
                                 </div>
                                 <div class="resumen-item">
                                     <div class="resumen-valor" id="horasTotales">0h</div>
                                     <div class="resumen-label">Horas Totales</div>
+                                </div>
+                                <div class="resumen-item">
+                                    <div class="resumen-valor" id="contratosActivos">0</div>
+                                    <div class="resumen-label">Contratos Activos</div>
                                 </div>
                             </div>
                         </div>
@@ -340,7 +318,7 @@
                             </div>
                             <div class="metric-content">
                                 <div class="metric-value" id="total-assignments">0</div>
-                                <div class="metric-label">Asignaciones Total</div>
+                                <div class="metric-label">Contratos Activos</div>
                             </div>
                         </div>
 
@@ -360,7 +338,7 @@
                             </div>
                             <div class="metric-content">
                                 <div class="metric-value" id="total-hours">0h</div>
-                                <div class="metric-label">Horas Programadas</div>
+                                <div class="metric-label">Horas Semanales</div>
                             </div>
                         </div>
 
@@ -480,11 +458,11 @@
         </div>
     </div>
 
-    <!-- MODAL DE EVENTO MEJORADO -->
+    <!-- MODAL DE EVENTO MEJORADO - AHORA PARA CONTRATOS -->
     <div id="modal-evento-horas" class="modal-horas">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 class="modal-title">Detalles de Asignación</h2>
+                <h2 class="modal-title">Nuevo Contrato Laboral</h2>
                 <button class="close-horas">&times;</button>
             </div>
             <div class="modal-body">
@@ -507,8 +485,26 @@
                         <option value="fijo-rotacion">Rotación (Fijo)</option>
                         <option value="cubredescansos-apoyo">Apoyo Directo</option>
                         <option value="cubredescansos-otros">Otras Asignaciones</option>
-                        <option value="descanso">Día de Descanso</option>
                     </select>
+                </div>
+
+                <!-- RANGO DE FECHAS DEL CONTRATO -->
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-calendar-check"></i> Fecha de Inicio del Contrato:
+                    </label>
+                    <input type="date" class="form-input" id="event-fecha-inicio">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-calendar-times"></i> Fecha de Fin del Contrato (opcional):
+                    </label>
+                    <input type="date" class="form-input" id="event-fecha-fin">
+                    <small class="form-hint">
+                        <i class="fas fa-info-circle"></i>
+                        Si se deja vacío, el contrato será indefinido (sin fecha de fin)
+                    </small>
                 </div>
 
                 <!-- HORARIOS -->
@@ -586,174 +582,16 @@
                     </div>
                 </div>
 
-                <!-- SELECTOR DE TIPO DE ASIGNACIÓN -->
                 <div class="form-group">
-                    <label class="form-label">Modalidad de Asignación:</label>
-                    <select class="form-select" id="assignment-type-selector">
-                        <option value="single">Asignación Individual (Una fecha específica)</option>
-                        <option value="multiple">Asignación Múltiple (Varios días en rango)</option>
-                    </select>
-                </div>
-
-                <!-- ASIGNACIÓN INDIVIDUAL -->
-                <div class="form-group" id="single-date-group">
-                    <label class="form-label">Fecha:</label>
-                    <input type="date" class="form-input" id="event-fecha-horas">
-                </div>
-
-                <!-- ASIGNACIÓN MÚLTIPLE -->
-                <div id="multiple-assignment-group" style="display: none;">
-                    <div class="form-group">
-                        <label class="form-label">Rango de Fechas:</label>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                            <div>
-                                <label
-                                    style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 5px; display: block;">Fecha
-                                    inicio:</label>
-                                <input type="date" class="form-input" id="fecha-inicio-multiple">
-                            </div>
-                            <div>
-                                <label
-                                    style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 5px; display: block;">Fecha
-                                    fin:</label>
-                                <input type="date" class="form-input" id="fecha-fin-multiple">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Días de la Semana:</label>
-                        <div id="days-selector"
-                            style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 8px;">
-                            <label
-                                style="display: flex; align-items: center; gap: 5px; font-size: 0.9rem; cursor: pointer;">
-                                <input type="checkbox" value="1" style="margin: 0;"> Lunes
-                            </label>
-                            <label
-                                style="display: flex; align-items: center; gap: 5px; font-size: 0.9rem; cursor: pointer;">
-                                <input type="checkbox" value="2" style="margin: 0;"> Martes
-                            </label>
-                            <label
-                                style="display: flex; align-items: center; gap: 5px; font-size: 0.9rem; cursor: pointer;">
-                                <input type="checkbox" value="3" style="margin: 0;"> Miércoles
-                            </label>
-                            <label
-                                style="display: flex; align-items: center; gap: 5px; font-size: 0.9rem; cursor: pointer;">
-                                <input type="checkbox" value="4" style="margin: 0;"> Jueves
-                            </label>
-                            <label
-                                style="display: flex; align-items: center; gap: 5px; font-size: 0.9rem; cursor: pointer;">
-                                <input type="checkbox" value="5" style="margin: 0;"> Viernes
-                            </label>
-                            <label
-                                style="display: flex; align-items: center; gap: 5px; font-size: 0.9rem; cursor: pointer;">
-                                <input type="checkbox" value="6" style="margin: 0;"> Sábado
-                            </label>
-                            <label
-                                style="display: flex; align-items: center; gap: 5px; font-size: 0.9rem; cursor: pointer; grid-column: span 2;">
-                                <input type="checkbox" value="0" style="margin: 0;"> Domingo
-                            </label>
-                        </div>
-                        <div style="margin-top: 10px; display: flex; gap: 5px; flex-wrap: wrap;">
-                            <button type="button" id="select-all-days" class="btn-day-selector">
-                                <i class="fas fa-check-double"></i> Todos
-                            </button>
-                            <button type="button" id="select-weekdays" class="btn-day-selector">
-                                <i class="fas fa-briefcase"></i> L-V
-                            </button>
-                            <button type="button" id="select-weekend" class="btn-day-selector">
-                                <i class="fas fa-calendar-weekend"></i> Fin de semana
-                            </button>
-                            <button type="button" id="clear-days" class="btn-day-selector btn-clear">
-                                <i class="fas fa-times"></i> Limpiar
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <div class="multiple-info-box">
-                            <div class="info-header">
-                                <i class="fas fa-info-circle"></i>
-                                <strong>Asignación de Rango</strong>
-                            </div>
-                            <p class="info-text">
-                                Se creará UNA asignación desde la fecha inicio hasta la fecha fin, aplicando solo los
-                                días seleccionados.
-                                <br><strong>Ejemplo:</strong> Si seleccionas Lunes-Viernes del 1 al 31, el promotor
-                                trabajará de lunes a viernes todo el mes.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Notas:</label>
+                    <label class="form-label">Notas del Contrato:</label>
                     <input type="text" class="form-input" id="event-notas-horas" placeholder="Notas adicionales...">
                 </div>
             </div>
             <div class="modal-footer">
                 <button class="btn-cancel-horas" id="btn-cancelar-horas">Cancelar</button>
-                <button class="btn-primary" id="btn-guardar-horas">Guardar</button>
-                <button class="btn-primary" id="btn-eliminar-horas"
-                    style="background: #f44336; display: none;">Eliminar</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL INCIDENCIA -->
-    <div class="modal-horas" id="modal-incidencia">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Registrar Incidencia</h2>
-                <button class="close-horas" onclick="cerrarModalIncidencia()">&times;</button>
-            </div>
-
-            <div class="modal-body">
-                <div class="alert alert-warning">
-                    <strong>Importante:</strong> Una incidencia requiere cobertura para TODO el día (no solo comida). El
-                    promotor NO laborará en absoluto.
-                </div>
-
-                <div class="form-group">
-                    <label>Tipo de Incidencia:</label>
-                    <select id="tipo-incidencia" class="form-select" required>
-                        <option value="vacaciones">Vacaciones</option>
-                        <option value="incapacidad">Incapacidad Médica</option>
-                        <option value="permiso">Permiso Personal</option>
-                        <option value="dia_economico">Día Económico</option>
-                        <option value="falta_justificada">Falta Justificada</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Fecha:</label>
-                    <input type="date" class="form-input" id="fecha-incidencia" required>
-                </div>
-
-                <div class="form-group">
-                    <label>Promotor con Incidencia:</label>
-                    <select class="form-select" id="promotor-incidencia" required>
-                        <option value="">Seleccionar promotor...</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Promotor para Cobertura TOTAL del día:</label>
-                    <select class="form-select" id="promotor-cobertura-incidencia" required>
-                        <option value="">Seleccionar cubredescansos...</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Motivo/Notas:</label>
-                    <input type="text" class="form-input" id="motivo-incidencia" placeholder="Detalles adicionales...">
-                </div>
-            </div>
-
-            <div class="modal-footer">
-                <button class="btn-cancel-horas" onclick="cerrarModalIncidencia()">Cancelar</button>
-                <button class="btn-primary" onclick="guardarIncidencia()" style="background: #f44336;">Registrar
-                    Incidencia</button>
+                <button class="btn-primary" id="btn-guardar-horas">Crear Contrato</button>
+                <button class="btn-primary" id="btn-eliminar-horas" style="background: #f44336; display: none;">Eliminar
+                    Contrato</button>
             </div>
         </div>
     </div>
@@ -775,7 +613,7 @@
             --shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
             --radius: 12px;
 
-            /* COLORES DEL CÓDIGO CORTO */
+            /* COLORES PARA VISTA DETALLADA */
             --color-apertura: #2196F3;
             --color-comida: #FF9800;
             --color-cierre: #9C27B0;
@@ -878,26 +716,6 @@
         .horas-module .btn-sm {
             padding: 8px 16px;
             font-size: 0.8rem;
-        }
-
-        /* BOTONES PARA VISTA DETALLADA */
-        .horas-module .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 0.9rem;
-        }
-
-        .horas-module .btn-danger {
-            background: var(--color-incidencia);
-            color: white;
-        }
-
-        .horas-module .btn-danger:hover {
-            background: #d32f2f;
         }
 
         /* ===== NAVEGACIÓN POR PESTAÑAS ===== */
@@ -1381,18 +1199,24 @@
 
         .horas-module .calendar-container {
             padding: 20px;
+            padding-bottom: 30px;
+            overflow: visible;
         }
 
         .horas-module #calendar-horas {
             height: 700px;
+            margin-bottom: 60px !important;
         }
 
         /* ===== LEGEND ===== */
         .horas-module .legend {
-            margin-top: 20px;
-            padding: 20px;
+            margin-top: 80px !important;
+            padding: 25px;
             background: #f8f9fa;
             border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e0e0e0;
+            clear: both;
         }
 
         .horas-module .legend-title {
@@ -1425,7 +1249,7 @@
             border-top: 2px solid var(--border-color);
         }
 
-        /* ===== VISTA DETALLADA POR TIENDA (CÓDIGO CORTO INTEGRADO) ===== */
+        /* ===== VISTA DETALLADA POR TIENDA ===== */
         .horas-module .tienda-detail-view {
             background: white;
             border-radius: 12px;
@@ -1502,33 +1326,6 @@
             background: #4db4e4;
             padding: 0;
             border-bottom: 3px solid #4fdce1;
-        }
-
-        .horas-module .promotor-avatar {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 2rem;
-            font-weight: 700;
-        }
-
-        .horas-module .promotor-details h3 {
-            font-size: 1.3rem;
-            margin-bottom: 5px;
-            color: #333;
-        }
-
-        .horas-module .promotor-meta {
-            display: flex;
-            gap: 20px;
-            color: #666;
-            font-size: 0.9rem;
-            flex-wrap: wrap;
         }
 
         .horas-module .leyenda-section {
@@ -1651,25 +1448,15 @@
             border-bottom-color: var(--color-descanso);
         }
 
-        .horas-module .dia-card.dia-sin_programar {
+        .horas-module .dia-card.dia-sin_contrato {
             border-color: #e0e0e0;
             opacity: 0.5;
             background: #fafafa;
         }
 
-        .horas-module .dia-card.dia-sin_programar .dia-header {
+        .horas-module .dia-card.dia-sin_contrato .dia-header {
             background: #fafafa;
             border-bottom-color: #e0e0e0;
-        }
-
-        .horas-module .dia-card.dia-incidencia {
-            border-color: var(--color-incidencia);
-            border-width: 3px;
-        }
-
-        .horas-module .dia-card.dia-incidencia .dia-header {
-            background: linear-gradient(135deg, #ffebee, #ffcdd2);
-            border-bottom-color: var(--color-incidencia);
         }
 
         .horas-module .bloque-horario {
@@ -1695,12 +1482,6 @@
             border-left: 4px solid var(--color-cierre);
         }
 
-        .horas-module .bloque-incidencia {
-            background: linear-gradient(135deg, #ffebee, #ffcdd2);
-            border-left: 4px solid var(--color-incidencia);
-            border: 2px dashed var(--color-incidencia);
-        }
-
         .horas-module .bloque-horario-label {
             font-weight: 600;
             margin-bottom: 5px;
@@ -1723,25 +1504,6 @@
             color: #555;
         }
 
-        .horas-module .cobertura-badge {
-            display: inline-block;
-            padding: 3px 10px;
-            border-radius: 12px;
-            font-size: 0.7rem;
-            font-weight: 600;
-            margin-top: 5px;
-        }
-
-        .horas-module .cobertura-comida {
-            background: var(--color-cobertura-comida);
-            color: #333;
-        }
-
-        .horas-module .cobertura-total {
-            background: var(--color-cobertura-total);
-            color: white;
-        }
-
         .horas-module .estado-badge {
             position: absolute;
             top: 8px;
@@ -1754,11 +1516,6 @@
 
         .horas-module .badge-descanso {
             background: var(--color-descanso);
-            color: white;
-        }
-
-        .horas-module .badge-incidencia {
-            background: var(--color-incidencia);
             color: white;
         }
 
@@ -1800,19 +1557,6 @@
             font-size: 0.9rem;
             color: #666;
             margin-top: 8px;
-        }
-
-        .horas-module .alert {
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 6px;
-            border-left: 4px solid;
-        }
-
-        .horas-module .alert-warning {
-            background: #fff3e0;
-            border-left-color: #FF9800;
-            color: #e65100;
         }
 
         /* ===== DASHBOARD ===== */
@@ -1890,7 +1634,6 @@
             padding-right: 10px;
         }
 
-        /* Estilos del scrollbar personalizado */
         .horas-module .chart-placeholder::-webkit-scrollbar {
             width: 8px;
         }
@@ -1909,12 +1652,10 @@
             background: var(--secondary-color);
         }
 
-        /* AJUSTE RESPONSIVE CON GRID - 3 COLUMNAS EN GRANDE, 2 EN MEDIANA, 1 EN PEQUEÑA */
         .horas-module .chart-visual {
             width: 100%;
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            /* 3 columnas por defecto (pantalla grande) */
             gap: 12px;
         }
 
@@ -1945,7 +1686,6 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
-        /* Colores consistentes para las barras */
         .horas-module .juan-bar {
             background: linear-gradient(135deg, #1976d2, #1565c0) !important;
         }
@@ -1954,7 +1694,6 @@
             background: linear-gradient(135deg, #f57c00, #ef6c00) !important;
         }
 
-        /* Si no hay clase específica, color por defecto */
         .horas-module .chart-bar:not(.juan-bar):not(.maria-bar) {
             background: linear-gradient(135deg, #667eea, #764ba2) !important;
         }
@@ -2103,7 +1842,6 @@
             z-index: 100 !important;
         }
 
-        /* ===== HOVER EN LOS DÍAS DEL CALENDARIO ===== */
         .horas-module .fc-daygrid-day:hover {
             background: linear-gradient(135deg, rgba(102, 126, 234, 0.3), rgba(118, 75, 162, 0.3)) !important;
             cursor: pointer !important;
@@ -2117,20 +1855,17 @@
             transition: all 0.2s ease !important;
         }
 
-        /* Hover para vista de semana y día */
         .horas-module .fc-timegrid-slot:hover {
             background: rgba(102, 126, 234, 0.08) !important;
             cursor: pointer !important;
             transition: all 0.2s ease !important;
         }
 
-        /* Hover para el día en la cabecera */
         .horas-module .fc-col-header-cell:hover {
             background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.15)) !important;
             transition: all 0.3s ease !important;
         }
 
-        /* Hover para días en vista de lista */
         .horas-module .fc-list-day:hover {
             background: rgba(102, 126, 234, 0.1) !important;
             transition: all 0.7s ease !important;
@@ -2155,7 +1890,6 @@
             }
         }
 
-        /* Asegurar que el tooltip esté siempre visible */
         .event-tooltip * {
             pointer-events: none;
         }
@@ -2188,43 +1922,7 @@
             cursor: pointer !important;
         }
 
-        .horas-module .event-descanso {
-            background: #f5f5f5 !important;
-            color: #999 !important;
-            border-left: 4px solid #ccc !important;
-            cursor: pointer !important;
-        }
-
-        .horas-module .fc-event.event-past,
-        .horas-module .event-past {
-            opacity: 1 !important;
-            background: linear-gradient(135deg, #9e9e9e, #757575) !important;
-            border-left: 4px solid #616161 !important;
-            color: white !important;
-        }
-
-        .horas-module .fc-event.event-present,
-        .horas-module .event-present {
-            background: linear-gradient(135deg, #4CAF50, #2e7d32) !important;
-            border-left: 4px solid #1b5e20 !important;
-            color: white !important;
-            box-shadow: 0 0 10px rgba(76, 175, 80, 0.5) !important;
-            animation: pulse-present 2s infinite !important;
-        }
-
-        @keyframes pulse-present {
-
-            0%,
-            100% {
-                box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
-            }
-
-            50% {
-                box-shadow: 0 0 20px rgba(76, 175, 80, 0.8);
-            }
-        }
-
-        /* NUEVOS ESTILOS PARA PROXIMIDAD AL FIN */
+        /* INDICADORES DE PROXIMIDAD AL FIN */
         .horas-module .fc-event.event-proximo-fin {
             border: 3px solid #FF9800 !important;
             border-left-width: 6px !important;
@@ -2248,12 +1946,6 @@
             50% {
                 box-shadow: 0 0 20px rgba(244, 67, 54, 0.8);
             }
-        }
-
-        .horas-module .fc-event.event-finalizado {
-            opacity: 0.5 !important;
-            background: linear-gradient(135deg, #424242, #616161) !important;
-            text-decoration: line-through !important;
         }
 
         /* ===== MODAL STYLES ===== */
@@ -2485,65 +2177,6 @@
             font-weight: 700;
         }
 
-        .horas-module .btn-day-selector {
-            padding: 6px 12px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            color: white;
-        }
-
-        .horas-module .btn-day-selector:nth-child(1) {
-            background: var(--info-color);
-        }
-
-        .horas-module .btn-day-selector:nth-child(2) {
-            background: var(--success-color);
-        }
-
-        .horas-module .btn-day-selector:nth-child(3) {
-            background: var(--warning-color);
-        }
-
-        .horas-module .btn-day-selector.btn-clear {
-            background: var(--danger-color);
-        }
-
-        .horas-module .btn-day-selector:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        }
-
-        .horas-module .multiple-info-box {
-            background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
-            padding: 15px;
-            border-radius: 8px;
-            border-left: 4px solid var(--info-color);
-            margin: 10px 0;
-        }
-
-        .horas-module .info-header {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 8px;
-            color: var(--info-color);
-            font-weight: 600;
-        }
-
-        .horas-module .info-text {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            line-height: 1.4;
-            margin: 0;
-        }
-
         /* ===== RESPONSIVE: Ajustes para tablets ===== */
         @media (max-width: 1024px) and (min-width: 769px) {
             .horas-module #tab-calendario.active {
@@ -2565,7 +2198,6 @@
             .horas-module .promotor-card {
                 min-width: 300px;
                 flex-shrink: 0;
-                /* background-color: #00acc1; */
             }
 
             .horas-module .dashboard-grid {
@@ -2604,7 +2236,6 @@
                 grid-template-columns: 1fr;
             }
 
-            /* TABLETS: 2 COLUMNAS PARA DISTRIBUCIÓN POR PROMOTOR */
             .horas-module .chart-visual {
                 grid-template-columns: repeat(2, 1fr);
             }
@@ -2664,10 +2295,6 @@
                 max-width: calc(100% - 20px);
             }
 
-            .horas-module #days-selector {
-                grid-template-columns: 1fr;
-            }
-
             .horas-module .form-row {
                 flex-direction: column;
             }
@@ -2681,7 +2308,6 @@
                 flex-direction: column;
             }
 
-            /* MÓVILES: 1 COLUMNA PARA DISTRIBUCIÓN POR PROMOTOR */
             .horas-module .chart-visual {
                 grid-template-columns: 1fr;
             }
@@ -2723,7 +2349,6 @@
                 display: none;
             }
 
-            /* PANTALLAS MUY PEQUEÑAS: AJUSTES ADICIONALES */
             .horas-module .chart-bar {
                 height: 42px;
                 font-size: 0.75rem;
@@ -2739,13 +2364,136 @@
                 max-height: 400px;
             }
         }
+
+        /* ESTILO PARA CONTRATOS ACTIVOS (VERDE) */
+        .horas-module .fc-event.event-activo-recurrente {
+            border: 3px solid #4CAF50 !important;
+            border-left-width: 6px !important;
+            box-shadow: 0 0 10px rgba(76, 175, 80, 0.5) !important;
+        }
+
+
+        /* SCROLLBAR PARA LISTA DE EVENTOS EN CADA DÍA */
+        .horas-module .fc-daygrid-day-events {
+            max-height: 120px !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            padding-right: 4px !important;
+        }
+
+        /* Estilo del scrollbar para la lista de eventos */
+        .horas-module .fc-daygrid-day-events::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .horas-module .fc-daygrid-day-events::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 3px;
+        }
+
+        .horas-module .fc-daygrid-day-events::-webkit-scrollbar-thumb {
+            background: rgba(102, 126, 234, 0.5);
+            border-radius: 3px;
+        }
+
+        .horas-module .fc-daygrid-day-events::-webkit-scrollbar-thumb:hover {
+            background: rgba(102, 126, 234, 0.8);
+        }
+
+        /* Para Firefox */
+        .horas-module .fc-daygrid-day-events {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(102, 126, 234, 0.5) rgba(0, 0, 0, 0.05);
+        }
+
+        /* Ajustar el contenedor del día para mejor visualización */
+        .horas-module .fc-daygrid-day-frame {
+            min-height: 120px !important;
+        }
+
+        /* Asegurar que "more" link sea visible */
+        .horas-module .fc-daygrid-more-link {
+            position: sticky !important;
+            bottom: 0 !important;
+            background: white !important;
+            z-index: 2 !important;
+            padding: 2px 4px !important;
+            margin-top: 2px !important;
+            border-top: 1px solid #e0e0e0 !important;
+        }
+
+        /* ESPACIADOR ENTRE CALENDARIO Y LEYENDAS */
+        .horas-module #calendar-horas::after {
+            content: "";
+            display: block;
+            height: 60px;
+        }
+
+        .horas-module .calendar-container .legend {
+            margin-top: 80px !important;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ===== LEYENDAS EN SIDEBAR ===== */
+        .horas-module .sidebar-legends {
+            margin-top: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .horas-module .sidebar-legend-section {
+            margin-bottom: 20px;
+        }
+
+        .horas-module .sidebar-legend-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .horas-module .sidebar-legend-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 6px;
+        }
+
+        .horas-module .sidebar-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            font-size: 0.8rem;
+            line-height: 1.4;
+        }
+
+        .horas-module .sidebar-legend-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .horas-module .sidebar-legend-color {
+            width: 24px;
+            height: 16px;
+            border-radius: 3px;
+            flex-shrink: 0;
+        }
+
+        .horas-module .sidebar-legend-item span {
+            color: #555;
+            font-weight: 500;
+        }
     </style>
 
     <script>
         (function () {
             'use strict';
 
-            console.log('🚀 INICIANDO MÓDULO HOJAS DE HORAS - SISTEMA COMPLETO CORREGIDO');
+            console.log('INICIANDO MÓDULO HOJAS DE HORAS - SISTEMA RECURRENTE COMPLETO');
 
             // ===== VARIABLES GLOBALES =====
             let calendar = null;
@@ -2763,6 +2511,13 @@
             let tooltipTimeout = null;
             let currentTooltip = null;
 
+
+            // ===== VARIABLES PARA OPTIMIZACIÓN =====
+            let eventCache = new Map();
+            let isLoadingEvents = false;
+            let visibleDateRange = { start: null, end: null };
+            let renderTimeout = null;
+
             // VARIABLES PARA VISTA DETALLADA
             let tiendaSeleccionadaDetalle = null;
             let semanaActual = [];
@@ -2779,29 +2534,30 @@
             // ===== REGISTRAR CLEANUP EN EL SISTEMA SPA =====
             if (window.registerModuleCleanup) {
                 window.registerModuleCleanup(function () {
-                    console.log('🧹 Limpiando módulo Hojas de Horas...');
+                    console.log('Limpiando módulo Hojas de Horas...');
 
-                    // Limpiar tooltips
                     eliminarTooltip();
 
                     if (calendar) {
                         try {
                             calendar.destroy();
                         } catch (error) {
-                            console.warn('⚠️ Error destruyendo calendar:', error);
+                            console.warn('Error destruyendo calendar:', error);
                         }
                         calendar = null;
                     }
 
                     cleanupListeners.forEach(cleanup => {
-                        try { cleanup(); } catch (e) { console.warn('Error limpiando listener:', e); }
+                        try {
+                            cleanup();
+                        } catch (e) {
+                            console.warn('Error limpiando listener:', e);
+                        }
                     });
                     cleanupListeners = [];
 
                     const modal = document.getElementById('modal-evento-horas');
-                    const modalIncidencia = document.getElementById('modal-incidencia');
                     if (modal) modal.style.display = 'none';
-                    if (modalIncidencia) modalIncidencia.style.display = 'none';
 
                     currentEvent = null;
                     isFullCalendarLoaded = false;
@@ -2818,7 +2574,7 @@
                     tooltipTimeout = null;
                     currentTooltip = null;
 
-                    console.log('✅ Módulo Hojas de Horas limpiado');
+                    console.log('Módulo Hojas de Horas limpiado');
                 });
             }
 
@@ -2831,112 +2587,92 @@
 
             // ===== FUNCIONES DE TOOLTIP =====
             function crearTooltip(event, element) {
-                // Limpiar tooltip anterior si existe
                 eliminarTooltip();
 
                 const props = event.extendedProps;
 
-                // Crear el tooltip
                 const tooltip = document.createElement('div');
                 tooltip.className = 'event-tooltip';
                 tooltip.id = 'event-tooltip-hover';
 
-                // Determinar el estado temporal
-                const periodo = determinarPeriodoTemporal(event);
+                // Detectar proximidad al fin
+                const proximidad = detectarProximidadFin(event);
 
-                let estadoBadge = '';
-                let estadoColor = '';
+                let estadoBadge = 'Contrato Activo';
+                let estadoColor = '#4CAF50';
 
-                // CORRECCIÓN: Lógica simplificada y correcta
-                if (periodo === 'present') {
-                    // Es la asignación ACTIVA (más reciente del promotor)
-                    const proximidad = detectarProximidadFin(event);
-
-                    if (proximidad === 'critico') {
-                        estadoBadge = '✅ ACTIVA 🔴 CRÍTICA (3 días o menos)';
-                        estadoColor = '#F44336';
-                    } else if (proximidad === 'proximo') {
-                        estadoBadge = '✅ ACTIVA ⚠️ PRÓXIMA A FINALIZAR (7 días)';
-                        estadoColor = '#FF9800';
-                    } else {
-                        // Asignación activa normal
-                        estadoBadge = '✅ ACTIVA';
-                        estadoColor = '#4CAF50';
-                    }
-                } else if (periodo === 'past') {
-                    // Es historial (hay una asignación más nueva)
-                    estadoBadge = '📋 HISTORIAL';
-                    estadoColor = '#9E9E9E';
+                if (proximidad === 'critico') {
+                    estadoBadge = 'CONTRATO ACTIVO - CRÍTICO (3 días)';
+                    estadoColor = '#F44336';
+                } else if (proximidad === 'proximo') {
+                    estadoBadge = 'CONTRATO ACTIVO - PRÓXIMO A FINALIZAR';
+                    estadoColor = '#FF9800';
                 }
 
-                // Resto del código del tooltip permanece igual...
-                // Formatear horarios
                 const horaEntrada = props.hora_entrada ? props.hora_entrada.substring(0, 5) : '09:00';
                 const horaSalida = props.hora_salida ? props.hora_salida.substring(0, 5) : '19:00';
                 const horaComida = props.hora_comida_inicio ? props.hora_comida_inicio.substring(0, 5) : '14:00';
                 const duracionComida = props.duracion_comida_minutos || 60;
 
-                // Calcular horas totales
                 const [entradaH, entradaM] = horaEntrada.split(':').map(Number);
                 const [salidaH, salidaM] = horaSalida.split(':').map(Number);
                 const minutosTotal = (salidaH * 60 + salidaM) - (entradaH * 60 + entradaM);
                 const horasTrabajo = Math.floor((minutosTotal - duracionComida) / 60);
                 const minutosTrabajo = (minutosTotal - duracionComida) % 60;
 
-                // Buscar promotor de cobertura de comida
-                let coberturaComidaHTML = '<span style="color: #999;">Sin cobertura</span>';
-                if (props.id_promotor_cobertura_comida) {
-                    const promotorCobertura = promotoresData.find(p => p.id_promotor == props.id_promotor_cobertura_comida);
-                    if (promotorCobertura) {
-                        coberturaComidaHTML = `<span style="color: #FF9800; font-weight: 600;">👤 ${promotorCobertura.nombre} ${promotorCobertura.apellido}</span>`;
-                    }
-                }
+                // Determinar días laborales
+                const diasSemana = props.dias_semana || [1, 2, 3, 4, 5, 6];
+                const diasNombres = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+                const diasTexto = diasSemana.map(d => diasNombres[d]).join(', ');
 
-                // Formatear fecha fin si existe
                 let fechaFinHTML = '';
                 if (props.fecha_fin) {
                     const fechaFin = new Date(props.fecha_fin);
                     fechaFinHTML = `
                         <div style="padding: 8px 12px; background: rgba(255, 152, 0, 0.1); border-left: 3px solid #FF9800; border-radius: 4px; margin-top: 8px;">
-                            <strong style="color: #FF9800;">📅 Fecha fin:</strong> ${fechaFin.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                            <strong style="color: #FF9800;">Fecha fin:</strong> ${fechaFin.toLocaleDateString('es-ES', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    })}
+                        </div>
+                    `;
+                } else {
+                    fechaFinHTML = `
+                        <div style="padding: 8px 12px; background: rgba(76, 175, 80, 0.1); border-left: 3px solid #4CAF50; border-radius: 4px; margin-top: 8px;">
+                            <strong style="color: #4CAF50;">Contrato indefinido</strong> (sin fecha de fin)
                         </div>
                     `;
                 }
 
-                // Construir el contenido del tooltip
                 tooltip.innerHTML = `
                     <div style="background: white; border-radius: 10px; box-shadow: 0 8px 30px rgba(0,0,0,0.3); padding: 0; min-width: 320px; max-width: 400px; overflow: hidden; border: 2px solid ${estadoColor};">
                         
-                        <!-- Header con estado -->
                         <div style="background: linear-gradient(135deg, ${estadoColor} 0%, ${estadoColor}dd 100%); color: white; padding: 12px 15px; display: flex; align-items: center; justify-content: space-between;">
                             <div style="font-weight: 700; font-size: 0.95rem;">${estadoBadge}</div>
-                            <div style="opacity: 0.9; font-size: 0.8rem;">${event.start.toLocaleDateString('es-ES')}</div>
                         </div>
                         
-                        <!-- Contenido -->
                         <div style="padding: 15px;">
                             
-                            <!-- Promotor -->
                             <div style="margin-bottom: 12px; padding-bottom: 12px; border-bottom: 2px solid #f0f0f0;">
-                                <div style="color: #999; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px;">👤 Promotor</div>
+                                <div style="color: #999; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px;">Promotor</div>
                                 <div style="font-weight: 700; font-size: 1.1rem; color: #333;">${props.nombre_promotor || 'Sin asignar'}</div>
                                 <div style="color: #666; font-size: 0.85rem; margin-top: 3px;">
                                     <span style="background: #e3f2fd; padding: 2px 8px; border-radius: 4px; font-weight: 600; color: #1976d2;">
-                                        ${props.tipo_trabajo === 'fijo' ? '👔 Fijo' : '🔄 Cubredescansos'}
+                                        ${props.tipo_trabajo === 'fijo' ? 'Fijo' : 'Cubredescansos'}
                                     </span>
                                 </div>
                             </div>
                             
-                            <!-- Tienda -->
                             <div style="margin-bottom: 12px; padding-bottom: 12px; border-bottom: 2px solid #f0f0f0;">
-                                <div style="color: #999; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px;">🏪 Tienda</div>
+                                <div style="color: #999; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px;">Tienda</div>
                                 <div style="font-weight: 600; font-size: 1rem; color: #333;">${props.cadena || ''} #${props.numero_tienda || ''}</div>
                                 <div style="color: #666; font-size: 0.85rem;">${props.nombre_tienda || 'Sin nombre'}</div>
                             </div>
                             
-                            <!-- Horarios -->
                             <div style="margin-bottom: 12px; padding-bottom: 12px; border-bottom: 2px solid #f0f0f0;">
-                                <div style="color: #999; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">🕐 Horario Laboral</div>
+                                <div style="color: #999; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">Horario Laboral</div>
                                 
                                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
                                     <div style="background: #e3f2fd; padding: 8px; border-radius: 6px; text-align: center;">
@@ -2951,41 +2687,39 @@
                                 
                                 <div style="background: #fff3e0; padding: 8px 10px; border-radius: 6px; border-left: 3px solid #FF9800;">
                                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-                                        <span style="font-size: 0.8rem; color: #ef6c00; font-weight: 600;">🍽️ Comida: ${horaComida}</span>
+                                        <span style="font-size: 0.8rem; color: #ef6c00; font-weight: 600;">Comida: ${horaComida}</span>
                                         <span style="font-size: 0.75rem; color: #f57c00;">(${duracionComida} min)</span>
-                                    </div>
-                                    <div style="font-size: 0.8rem; color: #666;">
-                                        Cobertura: ${coberturaComidaHTML}
                                     </div>
                                 </div>
                             </div>
                             
-                            <!-- Resumen -->
-                            <div style="background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%); padding: 10px 12px; border-radius: 6px; border-left: 3px solid #4CAF50;">
+                            <div style="background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%); padding: 10px 12px; border-radius: 6px; border-left: 3px solid #4CAF50; margin-bottom: 12px;">
                                 <div style="display: flex; justify-content: space-between; align-items: center;">
-                                    <span style="font-size: 0.85rem; color: #2e7d32; font-weight: 600;">⏱️ Total trabajo:</span>
+                                    <span style="font-size: 0.85rem; color: #2e7d32; font-weight: 600;">Total trabajo:</span>
                                     <span style="font-size: 1.1rem; color: #1b5e20; font-weight: 700;">${horasTrabajo}h ${minutosTrabajo}min</span>
                                 </div>
                             </div>
                             
+                            <div style="padding: 8px 12px; background: rgba(33, 150, 243, 0.1); border-left: 3px solid #2196F3; border-radius: 4px; margin-bottom: 8px;">
+                                <strong style="color: #1976d2;">Días laborales:</strong> ${diasTexto}
+                            </div>
+                            
                             ${fechaFinHTML}
                             
-                            ${props.notas_horario ? `
+                            ${props.motivo_asignacion ? `
                                 <div style="margin-top: 12px; padding: 10px; background: #f8f9fa; border-radius: 6px; border-left: 3px solid #667eea;">
-                                    <div style="font-size: 0.75rem; color: #999; margin-bottom: 4px;">📝 Notas:</div>
-                                    <div style="font-size: 0.85rem; color: #555; font-style: italic;">${props.notas_horario}</div>
+                                    <div style="font-size: 0.75rem; color: #999; margin-bottom: 4px;">Notas:</div>
+                                    <div style="font-size: 0.85rem; color: #555; font-style: italic;">${props.motivo_asignacion}</div>
                                 </div>
                             ` : ''}
                         </div>
                         
-                        <!-- Footer -->
                         <div style="background: #f8f9fa; padding: 10px 15px; text-align: center; border-top: 1px solid #e0e0e0;">
-                            <div style="font-size: 0.75rem; color: #999;">💡 Haz clic en el evento para editarlo</div>
+                            <div style="font-size: 0.75rem; color: #999;">Haz clic en el evento para editarlo</div>
                         </div>
                     </div>
                 `;
 
-                // Posicionar el tooltip
                 document.body.appendChild(tooltip);
 
                 const rect = element.getBoundingClientRect();
@@ -2994,12 +2728,10 @@
                 let top = rect.top + window.scrollY - tooltipRect.height - 10;
                 let left = rect.left + window.scrollX + (rect.width / 2) - (tooltipRect.width / 2);
 
-                // Ajustar si se sale por arriba
                 if (top < window.scrollY + 10) {
                     top = rect.bottom + window.scrollY + 10;
                 }
 
-                // Ajustar si se sale por los lados
                 if (left < window.scrollX + 10) {
                     left = window.scrollX + 10;
                 } else if (left + tooltipRect.width > window.scrollX + window.innerWidth - 10) {
@@ -3035,7 +2767,7 @@
                 const toggleText = document.getElementById('toggle-text');
 
                 if (!sidebar || !floatingBtn || !calendarTab) {
-                    console.error('❌ Elementos del sidebar no encontrados');
+                    console.error('Elementos del sidebar no encontrados');
                     return;
                 }
 
@@ -3117,7 +2849,7 @@
             function llenarPromotoresCoberturaComida(promotorActualId = null) {
                 const selectCobertura = document.getElementById('event-promotor-cobertura-comida');
                 if (!selectCobertura || promotoresData.length === 0) {
-                    console.warn('⚠️ No se puede llenar select de cobertura');
+                    console.warn('No se puede llenar select de cobertura');
                     return;
                 }
 
@@ -3137,7 +2869,7 @@
                 const promotorActual = promotoresData.find(p => p.id_promotor == promotorActualId);
 
                 if (!promotorActual) {
-                    console.warn('⚠️ Promotor no encontrado:', promotorActualId);
+                    console.warn('Promotor no encontrado:', promotorActualId);
                     return;
                 }
 
@@ -3168,7 +2900,7 @@
                     const option = document.createElement('option');
                     option.value = '';
                     option.disabled = true;
-                    option.textContent = '⚠️ No hay promotores disponibles para cobertura';
+                    option.textContent = 'No hay promotores disponibles para cobertura';
                     selectCobertura.appendChild(option);
                 }
             }
@@ -3188,7 +2920,7 @@
                     const url = `${baseURL}${path}?resource=${endpoint}`;
 
                     try {
-                        console.log(`🔗 INTENTANDO RUTA ${i + 1}/${possiblePaths.length}: ${url}`);
+                        console.log(`INTENTANDO RUTA ${i + 1}/${possiblePaths.length}: ${url}`);
 
                         const requestOptions = {
                             headers: {
@@ -3202,14 +2934,14 @@
                         const response = await fetch(url, requestOptions);
 
                         if (!response.ok) {
-                            console.warn(`⚠️ HTTP ${response.status} en ${path}, probando siguiente ruta...`);
+                            console.warn(`HTTP ${response.status} en ${path}, probando siguiente ruta...`);
                             continue;
                         }
 
                         const responseText = await response.text();
 
                         if (!responseText.trim()) {
-                            console.warn('⚠️ Respuesta vacía, probando siguiente ruta...');
+                            console.warn('Respuesta vacía, probando siguiente ruta...');
                             continue;
                         }
 
@@ -3217,33 +2949,29 @@
                         try {
                             result = JSON.parse(responseText);
                         } catch (parseError) {
-                            console.error('❌ Error parseando JSON:', parseError.message);
+                            console.error('Error parseando JSON:', parseError.message);
                             continue;
                         }
 
                         if (result && typeof result === 'object') {
                             if (result.success === true) {
                                 return result.data || result;
-                            }
-                            else if (result.success === false) {
+                            } else if (result.success === false) {
                                 throw new Error(result.message || 'Error en la API');
-                            }
-                            else if (Array.isArray(result)) {
+                            } else if (Array.isArray(result)) {
                                 return result;
-                            }
-                            else if (result.data && Array.isArray(result.data)) {
+                            } else if (result.data && Array.isArray(result.data)) {
                                 return result.data;
-                            }
-                            else {
+                            } else {
                                 return result;
                             }
                         }
 
-                        console.warn('⚠️ Estructura de respuesta no reconocida, probando siguiente ruta...');
+                        console.warn('Estructura de respuesta no reconocida, probando siguiente ruta...');
                         continue;
 
                     } catch (fetchError) {
-                        console.error(`❌ ERROR EN ${path}:`, fetchError.message);
+                        console.error(`ERROR EN ${path}:`, fetchError.message);
                         if (i === possiblePaths.length - 1) {
                             throw fetchError;
                         }
@@ -3330,6 +3058,7 @@
                 }
             }
 
+
             // ===== ACTUALIZAR PROGRESO DE CARGA =====
             function updateLoadingProgress(mensaje) {
                 const progressEl = elements.loadingProgress;
@@ -3342,7 +3071,7 @@
             // ===== CARGAR PROMOTORES DESDE BASE DE DATOS =====
             async function cargarPromotoresReales() {
                 try {
-                    updateLoadingProgress('🔄 Cargando promotores...');
+                    updateLoadingProgress('Cargando promotores...');
                     const data = await fetchFromAPI('promotores');
 
                     if (!data) return [];
@@ -3355,7 +3084,7 @@
                     }
 
                     promotoresData = promotoresArray;
-                    console.log(`✅ ${promotoresData.length} PROMOTORES CARGADOS`);
+                    console.log(`${promotoresData.length} PROMOTORES CARGADOS`);
 
                     const promotorFijo = promotoresData.find(p => p.tipo_trabajo === 'fijo') || promotoresData[0];
                     const promotorCubre = promotoresData.find(p => p.tipo_trabajo === 'cubredescansos');
@@ -3363,11 +3092,11 @@
                     if (promotorFijo) updatePromotorSidebar('fijo', promotorFijo);
                     if (promotorCubre) updatePromotorSidebar('cubredescansos', promotorCubre);
 
-                    updateLoadingProgress(`✅ ${promotoresData.length} promotores cargados`);
+                    updateLoadingProgress(`${promotoresData.length} promotores cargados`);
                     return promotoresData;
 
                 } catch (error) {
-                    console.error('❌ ERROR cargando promotores:', error);
+                    console.error('ERROR cargando promotores:', error);
                     throw error;
                 }
             }
@@ -3375,7 +3104,7 @@
             // ===== CARGAR TIENDAS DESDE BASE DE DATOS =====
             async function cargarTiendasReales() {
                 try {
-                    updateLoadingProgress('🔄 Cargando tiendas...');
+                    updateLoadingProgress('Cargando tiendas...');
                     const data = await fetchFromAPI('tiendas');
 
                     if (!data) return [];
@@ -3388,18 +3117,18 @@
                     }
 
                     tiendasData = tiendasArray;
-                    console.log(`✅ ${tiendasData.length} TIENDAS CARGADAS`);
+                    console.log(`${tiendasData.length} TIENDAS CARGADAS`);
 
-                    updateLoadingProgress(`✅ ${tiendasData.length} tiendas cargadas`);
+                    updateLoadingProgress(`${tiendasData.length} tiendas cargadas`);
                     return tiendasData;
 
                 } catch (error) {
-                    console.error('❌ ERROR cargando tiendas:', error);
+                    console.error('ERROR cargando tiendas:', error);
                     throw error;
                 }
             }
 
-            // ===== CARGAR ASIGNACIONES REALES - CORREGIDO SIN FECHA_FIN =====
+            // ===== CARGAR CONTRATOS RECURRENTES =====
             async function cargarAsignacionesReales() {
                 try {
                     updateLoadingProgress('🔄 Cargando asignaciones activas...');
@@ -3424,11 +3153,52 @@
                             return null;
                         }
 
+                        // Determinar días de la semana laborales
+                        let diasSemana = null;
+
+                        if (asignacion.dias_semana) {
+                            // Ya tiene dias_semana guardados
+                            diasSemana = asignacion.dias_semana.split(',').map(d => parseInt(d));
+                        } else {
+                            // Calcular basado en el día de descanso del promotor
+                            const promotor = promotoresData.find(p => p.id_promotor == asignacion.id_promotor);
+
+                            if (promotor && promotor.dia_descanso) {
+                                let diaDescansoNum = -1;
+
+                                // MANEJAR FORMATO DEL DÍA DE DESCANSO
+                                if (typeof promotor.dia_descanso === 'number') {
+                                    diaDescansoNum = promotor.dia_descanso === 7 ? 0 : promotor.dia_descanso;
+                                } else if (typeof promotor.dia_descanso === 'string') {
+                                    const diaStr = promotor.dia_descanso.trim();
+
+                                    if (/^[1-7]$/.test(diaStr)) {
+                                        const diaNum = parseInt(diaStr);
+                                        diaDescansoNum = diaNum === 7 ? 0 : diaNum;
+                                    } else {
+                                        const diasSemanaTexto = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+                                        diaDescansoNum = diasSemanaTexto.indexOf(diaStr.toLowerCase());
+                                    }
+                                }
+
+                                if (diaDescansoNum >= 0 && diaDescansoNum <= 6) {
+                                    diasSemana = [0, 1, 2, 3, 4, 5, 6].filter(d => d !== diaDescansoNum);
+                                } else {
+                                    diasSemana = [1, 2, 3, 4, 5, 6];
+                                }
+                            } else {
+                                diasSemana = [1, 2, 3, 4, 5, 6];
+                            }
+                        }
+
                         const evento = {
                             id: `asig_real_${asignacion.id_asignacion}`,
                             title: `${asignacion.nombre_promotor || 'Sin promotor'} - ${asignacion.cadena || 'Sin cadena'} #${asignacion.numero_tienda || asignacion.num_tienda || 'S/N'}`,
-                            start: asignacion.fecha_inicio,
-                            // NO incluir 'end' para que se vea como cuadro individual
+                            startRecur: asignacion.fecha_inicio,
+                            endRecur: asignacion.fecha_fin || null,
+                            daysOfWeek: diasSemana,
+                            startTime: asignacion.hora_entrada || '09:00:00',
+                            endTime: asignacion.hora_salida || '19:00:00',
                             extendedProps: {
                                 id_asignacion: asignacion.id_asignacion,
                                 id_promotor: asignacion.id_promotor,
@@ -3446,9 +3216,9 @@
                                 duracion_comida_minutos: asignacion.duracion_comida_minutos || 60,
                                 id_promotor_cobertura_comida: asignacion.id_promotor_cobertura_comida || null,
                                 notas_horario: asignacion.notas_horario || null,
-                                // Guardar fecha_fin para lógica de proximidad
+                                fecha_inicio: asignacion.fecha_inicio,
                                 fecha_fin: asignacion.fecha_fin || null,
-                                dias_semana: asignacion.dias_semana || null
+                                dias_semana: diasSemana
                             }
                         };
 
@@ -3463,13 +3233,38 @@
                         return evento;
                     }).filter(evento => evento !== null);
 
-                    console.log(`🎯 ${eventos.length} eventos cargados`);
+                    console.log(`🎯 ${eventos.length} contratos recurrentes cargados`);
                     return eventos;
 
                 } catch (error) {
                     console.error('❌ ERROR cargando asignaciones:', error);
                     throw error;
                 }
+            }
+
+            // ===== CARGAR EVENTOS SOLO DEL RANGO VISIBLE =====
+            function obtenerEventosDelRango(fechaInicio, fechaFin) {
+                const cacheKey = `${fechaInicio}_${fechaFin}`;
+
+                if (eventCache.has(cacheKey)) {
+                    console.log('📦 Usando eventos cacheados');
+                    return eventCache.get(cacheKey);
+                }
+
+                const inicio = new Date(fechaInicio);
+                const fin = new Date(fechaFin);
+
+                const eventosFiltrados = todosLosEventos.filter(evento => {
+                    const eventoInicio = new Date(evento.startRecur || evento.start);
+                    const eventoFin = evento.endRecur ? new Date(evento.endRecur) : new Date('2099-12-31');
+
+                    return eventoInicio <= fin && eventoFin >= inicio;
+                });
+
+                eventCache.set(cacheKey, eventosFiltrados);
+                console.log(`📊 ${eventosFiltrados.length} eventos en rango ${fechaInicio} - ${fechaFin}`);
+
+                return eventosFiltrados;
             }
 
             // ===== ACTUALIZAR SIDEBAR PROMOTORES =====
@@ -3488,7 +3283,7 @@
                     detallesEl.innerHTML = `RFC: ${promotor.rfc || 'N/A'}<br>Tel: ${promotor.telefono || 'N/A'}`;
                 }
                 if (tiendaEl && tipo === 'fijo') {
-                    tiendaEl.textContent = 'Asignaciones dinámicas';
+                    tiendaEl.textContent = 'Contratos dinámicos';
                 }
             }
 
@@ -3518,7 +3313,7 @@
 
                 const calendarStoreFilter = document.getElementById('calendar-store-filter');
                 if (calendarStoreFilter && tiendasData.length > 0) {
-                    calendarStoreFilter.innerHTML = '<option value="">🏪 Todas las tiendas</option>';
+                    calendarStoreFilter.innerHTML = '<option value="">Todas las tiendas</option>';
                     tiendasData.forEach(tienda => {
                         const option = document.createElement('option');
                         option.value = tienda.id_tienda;
@@ -3548,29 +3343,6 @@
                             document.getElementById('leyenda-section').style.display = 'none';
                             document.getElementById('calendario-section').style.display = 'none';
                         }
-                    });
-                }
-
-                // LLENAR SELECTS DE INCIDENCIA
-                const promotorIncidenciaSelect = document.getElementById('promotor-incidencia');
-                if (promotorIncidenciaSelect && promotoresData.length > 0) {
-                    promotorIncidenciaSelect.innerHTML = '<option value="">Seleccionar promotor...</option>';
-                    promotoresData.forEach(promotor => {
-                        const option = document.createElement('option');
-                        option.value = promotor.id_promotor;
-                        option.textContent = `${promotor.nombre} ${promotor.apellido}`;
-                        promotorIncidenciaSelect.appendChild(option);
-                    });
-                }
-
-                const promotorCoberturaIncidenciaSelect = document.getElementById('promotor-cobertura-incidencia');
-                if (promotorCoberturaIncidenciaSelect && promotoresData.length > 0) {
-                    promotorCoberturaIncidenciaSelect.innerHTML = '<option value="">Seleccionar cubredescansos...</option>';
-                    promotoresData.filter(p => p.tipo_trabajo === 'cubredescansos').forEach(promotor => {
-                        const option = document.createElement('option');
-                        option.value = promotor.id_promotor;
-                        option.textContent = `${promotor.nombre} ${promotor.apellido}`;
-                        promotorCoberturaIncidenciaSelect.appendChild(option);
                     });
                 }
             }
@@ -3620,96 +3392,26 @@
                 if (loadingPromise) return loadingPromise;
                 if (isFullCalendarLoaded && window.FullCalendar) return Promise.resolve();
 
-                updateLoadingProgress('📚 Cargando FullCalendar...');
+                updateLoadingProgress('Cargando FullCalendar...');
 
                 loadingPromise = Promise.all([
                     loadCSS('https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.css'),
                     loadJS('https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.js')
                 ]).then(() => {
                     isFullCalendarLoaded = true;
-                    updateLoadingProgress('✅ FullCalendar cargado exitosamente');
+                    updateLoadingProgress('FullCalendar cargado exitosamente');
                     return true;
                 });
 
                 return loadingPromise;
             }
 
-            // ===== FUNCIÓN: DETERMINAR SI ES LA ASIGNACIÓN ACTIVA DEL PROMOTOR - CORREGIDA =====
-            // ===== FUNCIÓN: DETERMINAR SI ES LA ASIGNACIÓN ACTIVA DEL PROMOTOR - CORREGIDA =====
-            function determinarPeriodoTemporal(evento) {
-                const idPromotor = evento.extendedProps?.id_promotor;
-                if (!idPromotor) {
-                    return 'past';
-                }
-
-                // Obtener TODAS las asignaciones de este promotor
-                const asignacionesPromotor = todosLosEventos.filter(e =>
-                    e.extendedProps?.id_promotor === idPromotor
-                );
-
-                if (asignacionesPromotor.length === 0) {
-                    return 'present';
-                }
-
-                // Si solo tiene UNA asignación, es la activa
-                if (asignacionesPromotor.length === 1) {
-                    return 'present';
-                }
-
-                // 🔧 CORRECCIÓN PRINCIPAL: Priorizar asignaciones activas
-                // Separar asignaciones activas de las finalizadas
-                const activas = asignacionesPromotor.filter(a =>
-                    a.extendedProps?.activo === 1 ||
-                    a.extendedProps?.activo === '1' ||
-                    a.extendedProps?.activo === true
-                );
-
-                const finalizadas = asignacionesPromotor.filter(a =>
-                    !(a.extendedProps?.activo === 1 ||
-                        a.extendedProps?.activo === '1' ||
-                        a.extendedProps?.activo === true)
-                );
-
-                // Si hay asignaciones activas, solo comparar entre ellas
-                let asignacionesAComparar = activas.length > 0 ? activas : finalizadas;
-
-                // Ordenar las asignaciones a comparar por fecha (más reciente primero) Y por ID
-                asignacionesAComparar.sort((a, b) => {
-                    const fechaA = new Date(a.start);
-                    const fechaB = new Date(b.start);
-                    fechaA.setHours(0, 0, 0, 0);
-                    fechaB.setHours(0, 0, 0, 0);
-
-                    // Primero comparar por fecha
-                    const diffFecha = fechaB - fechaA;
-                    if (diffFecha !== 0) return diffFecha;
-
-                    // Si tienen la misma fecha, comparar por ID (más reciente = mayor ID)
-                    const idA = parseInt(a.id.split('_').pop()) || 0;
-                    const idB = parseInt(b.id.split('_').pop()) || 0;
-                    return idB - idA;
-                });
-
-                // La primera del array es la más reciente/activa
-                const masReciente = asignacionesAComparar[0];
-
-                // 🔧 CORRECCIÓN: Si el evento actual está en activas y masReciente está en activas
-                if (activas.length > 0) {
-                    const esActiva = evento.id === masReciente.id;
-                    return esActiva ? 'present' : 'past';
-                }
-
-                // Si no hay activas, comparar normalmente
-                const esActiva = evento.id === masReciente.id;
-                return esActiva ? 'present' : 'past';
-            }
-
-            // ===== FUNCIÓN: DETECTAR SI LA ASIGNACIÓN ESTÁ CERCA DE SU FIN =====
+            // ===== FUNCIÓN: DETECTAR SI EL CONTRATO ESTÁ CERCA DE SU FIN =====
             function detectarProximidadFin(evento) {
                 const fechaFin = evento.extendedProps?.fecha_fin;
 
                 if (!fechaFin) {
-                    return null; // No tiene fecha fin definida
+                    return null; // No tiene fecha fin (contrato indefinido)
                 }
 
                 const hoy = new Date();
@@ -3721,95 +3423,76 @@
                 const diffTime = fin - hoy;
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-                // CORRECCIÓN: Eliminamos el caso 'finalizado'
-                // Si ya pasó la fecha, simplemente retornamos null
-                // La función determinarPeriodoTemporal() ya maneja si es 'past' o 'present'
                 if (diffDays < 0) {
-                    return null; // Ya pasó, pero determinarPeriodoTemporal decide si es activa o historial
+                    return null; // Ya pasó
                 } else if (diffDays <= 3) {
                     return 'critico'; // Quedan 3 días o menos
                 } else if (diffDays <= 7) {
                     return 'proximo'; // Quedan 7 días o menos
                 }
 
-                return null; // Aún está lejos del fin
+                return null;
             }
 
-            // ===== FUNCIÓN: APLICAR CLASES TEMPORALES A EVENTOS - CORREGIDA =====
-            function aplicarClasesTemporal(evento) {
-                const periodo = determinarPeriodoTemporal(evento);
-
-                const classesOriginales = Array.isArray(evento.className) ? evento.className : [evento.className];
-
-                const classesFiltradas = classesOriginales.filter(c =>
-                    c !== 'event-past' &&
-                    c !== 'event-present' &&
-                    c !== 'event-proximo-fin' &&
-                    c !== 'event-fin-critico' &&
-                    c !== 'event-finalizado'
-                );
-
-                classesFiltradas.push(`event-${periodo}`);
-
-                // Solo aplicar indicadores de proximidad si es la asignación ACTIVA
-                if (periodo === 'present') {
-                    const proximidad = detectarProximidadFin(evento);
-
-                    if (proximidad === 'critico') {
-                        classesFiltradas.push('event-fin-critico');
-                    } else if (proximidad === 'proximo') {
-                        classesFiltradas.push('event-proximo-fin');
-                    }
-                    // NOTA: NUNCA agregamos 'event-finalizado' si es 'present'
-                }
-
-                return classesFiltradas;
-            }
-
-            // ===== FUNCIÓN: APLICAR FILTRO DE TIENDA =====
+            // ===== FUNCIÓN: APLICAR FILTRO DE TIENDA Y FECHA CON DEBOUNCING =====
             function aplicarFiltroTienda() {
-                if (!calendar) return;
-
-                console.log(`🔍 Aplicando filtro de tienda: ${tiendaSeleccionada || 'Todas'}`);
-
-                calendar.removeAllEvents();
-
-                let eventosFiltrados;
-                if (tiendaSeleccionada && tiendaSeleccionada !== '') {
-                    eventosFiltrados = todosLosEventos.filter(evento =>
-                        String(evento.extendedProps.id_tienda) === String(tiendaSeleccionada)
-                    );
-                    console.log(`✅ Mostrando ${eventosFiltrados.length} eventos de tienda ${tiendaSeleccionada}`);
-                } else {
-                    eventosFiltrados = todosLosEventos;
-                    console.log(`✅ Mostrando todos los ${eventosFiltrados.length} eventos`);
+                if (!calendar) {
+                    console.warn('Calendario no inicializado');
+                    return;
                 }
 
-                const eventosConClasesTemporal = eventosFiltrados.map(evento => {
-                    return {
-                        ...evento,
-                        className: aplicarClasesTemporal(evento)
-                    };
-                });
+                // Cancelar renderizado pendiente
+                if (renderTimeout) {
+                    clearTimeout(renderTimeout);
+                }
 
-                calendar.addEventSource(eventosConClasesTemporal);
+                // Debouncing para evitar múltiples renderizados
+                renderTimeout = setTimeout(() => {
+                    console.log(`🔍 Aplicando filtro de tienda: ${tiendaSeleccionada || 'Todas las tiendas'}`);
+
+                    // Limpiar caché antes de refrescar
+                    limpiarCache();
+
+                    // Refrescar eventos del calendario
+                    // Esto llamará automáticamente a la función 'events' definida en initializeCalendar
+                    // donde se aplica el filtro basado en tiendaSeleccionada
+                    calendar.refetchEvents();
+
+                    console.log(`✅ Filtro aplicado correctamente`);
+
+                }, 150); // Debounce de 150ms
             }
 
-            // ===== INICIALIZAR CALENDARIO CON DATOS AUTOMÁTICOS =====
-            async function initializeCalendar(eventosAutomaticos = []) {
+            // ===== FUNCIÓN: ACTUALIZAR VISTA DIARIAMENTE =====
+            function iniciarActualizacionDiaria() {
+                // Actualizar a medianoche de cada día
+                const ahora = new Date();
+                const mañana = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate() + 1, 0, 0, 1);
+                const tiempoHastaMedianoche = mañana - ahora;
+
+                setTimeout(() => {
+                    console.log('🕐 Nuevo día - Actualizando calendario...');
+                    aplicarFiltroTienda();
+
+                    // Repetir cada 24 horas
+                    setInterval(() => {
+                        console.log('🕐 Nuevo día - Actualizando calendario...');
+                        aplicarFiltroTienda();
+                    }, 24 * 60 * 60 * 1000);
+                }, tiempoHastaMedianoche);
+
+                console.log(`⏰ Actualización automática programada para medianoche (en ${Math.round(tiempoHastaMedianoche / 1000 / 60)} minutos)`);
+            }
+
+            async function initializeCalendar(eventosRecurrentes = []) {
                 if (!window.FullCalendar) throw new Error('FullCalendar no disponible');
 
                 const calendarEl = document.getElementById('calendar-horas');
                 if (!calendarEl) throw new Error('Elemento calendario no encontrado');
 
-                console.log(`📅 INICIALIZANDO CALENDARIO CON ${eventosAutomaticos.length} EVENTOS AUTOMÁTICOS`);
+                console.log(`INICIALIZANDO CALENDARIO CON ${eventosRecurrentes.length} CONTRATOS RECURRENTES`);
 
-                todosLosEventos = eventosAutomaticos;
-
-                const eventosConTemporal = eventosAutomaticos.map(evento => ({
-                    ...evento,
-                    className: aplicarClasesTemporal(evento)
-                }));
+                todosLosEventos = eventosRecurrentes;
 
                 try {
                     calendar = new FullCalendar.Calendar(calendarEl, {
@@ -3820,9 +3503,63 @@
                             center: 'title',
                             right: ''
                         },
-                        events: eventosConTemporal,
-                        editable: true,
-                        droppable: true,
+
+                        // OPTIMIZACIONES DE RENDIMIENTO
+                        lazyFetching: true,
+                        eventMaxStack: 3,
+                        progressiveEventRendering: true,
+
+                        events: function (info, successCallback, failureCallback) {
+                            try {
+                                const eventosRango = obtenerEventosDelRango(
+                                    info.startStr.split('T')[0],
+                                    info.endStr.split('T')[0]
+                                );
+
+                                let eventosFiltrados = eventosRango;
+                                if (tiendaSeleccionada && tiendaSeleccionada !== '') {
+                                    eventosFiltrados = eventosRango.filter(evento =>
+                                        String(evento.extendedProps.id_tienda) === String(tiendaSeleccionada)
+                                    );
+                                }
+
+                                const hoy = new Date();
+                                hoy.setHours(23, 59, 59, 999);
+
+                                const eventosLimitados = eventosFiltrados.map(evento => {
+                                    const eventoModificado = { ...evento };
+
+                                    if (eventoModificado.startRecur) {
+                                        if (!eventoModificado.endRecur) {
+                                            eventoModificado.endRecur = hoy.toISOString().split('T')[0];
+                                        } else {
+                                            const fechaFin = new Date(eventoModificado.endRecur);
+                                            if (fechaFin > hoy) {
+                                                eventoModificado.endRecur = hoy.toISOString().split('T')[0];
+                                            }
+                                        }
+                                    }
+
+                                    return eventoModificado;
+                                });
+
+                                successCallback(eventosLimitados);
+                            } catch (error) {
+                                console.error('Error cargando eventos:', error);
+                                failureCallback(error);
+                            }
+                        },
+
+                        datesSet: function (info) {
+                            visibleDateRange = {
+                                start: info.startStr,
+                                end: info.endStr
+                            };
+                            console.log(`Vista cambiada: ${info.startStr} - ${info.endStr}`);
+                        },
+
+                        editable: false,
+                        droppable: false,
                         selectable: true,
 
                         eventClick: function (info) {
@@ -3837,81 +3574,40 @@
                         eventMouseEnter: function (info) {
                             tooltipTimeout = setTimeout(() => {
                                 crearTooltip(info.event, info.el);
-                            }, 300); // Delay de 300ms
+                            }, 300);
                         },
 
                         eventMouseLeave: function (info) {
                             eliminarTooltip();
                         },
 
-                        eventDrop: async function (info) {
-                            eliminarTooltip();
-                            await actualizarEventoEnBD(info.event);
-
-                            const index = todosLosEventos.findIndex(e => e.id === info.event.id);
-                            if (index !== -1) {
-                                todosLosEventos[index].start = info.event.start;
-                            }
-
-                            aplicarFiltroTienda();
-                            actualizarDashboard();
-                        },
-
-                        eventResize: async function (info) {
-                            eliminarTooltip();
-                            await actualizarEventoEnBD(info.event);
-
-                            const index = todosLosEventos.findIndex(e => e.id === info.event.id);
-                            if (index !== -1) {
-                                todosLosEventos[index].start = info.event.start;
-                            }
-
-                            aplicarFiltroTienda();
-                            actualizarDashboard();
-                        },
-
-                        dayMaxEvents: 3,
+                        dayMaxEvents: true,
+                        dayMaxEventRows: 4,
                         moreLinkClick: 'popover',
                         slotMinTime: '06:00:00',
                         slotMaxTime: '24:00:00',
-                        allDaySlot: true,
+                        allDaySlot: false,
                         firstDay: 1,
                         height: 'auto',
                         aspectRatio: 1.35,
 
                         eventDidMount: function (info) {
-                            const periodo = determinarPeriodoTemporal(info.event);
                             const proximidad = detectarProximidadFin(info.event);
 
-                            let emoji = '';
-
-                            if (periodo === 'present') {
-                                emoji = '✅ ';
-                            } else if (periodo === 'past') {
-                                emoji = '📋 ';
-                            }
-
-                            // Agregar emoji de proximidad al fin
                             if (proximidad === 'critico') {
-                                emoji += '🔴 ';
+                                info.el.classList.add('event-fin-critico');
                             } else if (proximidad === 'proximo') {
-                                emoji += '⚠️ ';
-                            } else if (proximidad === 'finalizado') {
-                                emoji += '⏹️ ';
+                                info.el.classList.add('event-proximo-fin');
+                            } else {
+                                info.el.classList.add('event-activo-recurrente');
                             }
 
-                            const titleEl = info.el.querySelector('.fc-event-title');
-                            if (titleEl) {
-                                titleEl.textContent = emoji + titleEl.textContent;
-                            }
-
-                            // Agregar cursor pointer
                             info.el.style.cursor = 'pointer';
                         }
                     });
 
                     await calendar.render();
-                    console.log('✅ CALENDARIO RENDERIZADO EXITOSAMENTE');
+                    console.log('CALENDARIO RENDERIZADO EXITOSAMENTE');
 
                     window.calendar = calendar;
 
@@ -3919,24 +3615,30 @@
                     if (storeFilterSelect) {
                         storeFilterSelect.addEventListener('change', function (e) {
                             tiendaSeleccionada = e.target.value;
-                            aplicarFiltroTienda();
+                            console.log('🔍 Filtro cambiado a tienda:', tiendaSeleccionada || 'Todas');
+                            limpiarCache();
+
+                            // Forzar actualización del calendario
+                            if (calendar) {
+                                calendar.refetchEvents();
+                            }
                         });
                     }
 
                 } catch (error) {
-                    console.error('❌ ERROR en initializeCalendar:', error);
+                    console.error('ERROR en initializeCalendar:', error);
                     throw error;
                 }
             }
 
-            // ===== FUNCIONES PARA VISTA DETALLADA POR TIENDA - CORREGIDA =====
+            // ===== FUNCIONES PARA VISTA DETALLADA POR TIENDA =====
             function cargarVistaDetalleTienda(idTienda) {
-                console.log('🏪 Cargando vista detallada para tienda:', idTienda);
+                console.log('Cargando vista detallada para tienda:', idTienda);
 
                 tiendaSeleccionadaDetalle = tiendasData.find(t => t.id_tienda == idTienda);
 
                 if (!tiendaSeleccionadaDetalle) {
-                    console.error('❌ Tienda no encontrada');
+                    console.error('Tienda no encontrada');
                     return;
                 }
 
@@ -3946,24 +3648,26 @@
                 document.getElementById('tienda-seleccionada-ubicacion').textContent =
                     tiendaSeleccionadaDetalle.direccion || 'Sin dirección';
 
-                // FILTRAR ASIGNACIONES DE ESTA TIENDA
-                const asignacionesTienda = todosLosEventos.filter(e =>
-                    e.extendedProps.id_tienda == idTienda
+                // FILTRAR CONTRATOS ACTIVOS DE ESTA TIENDA
+                const contratosActivosTienda = todosLosEventos.filter(e =>
+                    e.extendedProps.id_tienda == idTienda &&
+                    (e.extendedProps.activo === 1 || e.extendedProps.activo === '1' || e.extendedProps.activo === true)
                 );
 
-                console.log(`📊 ${asignacionesTienda.length} asignaciones encontradas para esta tienda`);
+                console.log(`${contratosActivosTienda.length} contratos activos encontrados para esta tienda`);
 
                 // ACTUALIZAR HORARIOS EN EL HEADER
-                actualizarHorariosHeader(asignacionesTienda);
+                actualizarHorariosHeader(contratosActivosTienda);
 
                 // OBTENER TODOS LOS PROMOTORES ÚNICOS DE ESTA TIENDA
                 const promotoresUnicos = new Map();
-                asignacionesTienda.forEach(asig => {
-                    const idPromotor = asig.extendedProps.id_promotor;
+                contratosActivosTienda.forEach(contrato => {
+                    const idPromotor = contrato.extendedProps.id_promotor;
                     if (!promotoresUnicos.has(idPromotor)) {
                         promotoresUnicos.set(idPromotor, {
                             id: idPromotor,
-                            count: 0
+                            count: 0,
+                            diasSemana: contrato.extendedProps.dias_semana
                         });
                     }
                     promotoresUnicos.get(idPromotor).count++;
@@ -3976,7 +3680,8 @@
                     if (promotor) {
                         promotoresCompletos.push({
                             ...promotor,
-                            numAsignaciones: info.count
+                            numContratos: info.count,
+                            diasSemana: info.diasSemana
                         });
                     }
                 });
@@ -4014,6 +3719,11 @@
 
                     const iniciales = `${promotor.nombre.charAt(0)}${promotor.apellido.charAt(0)}`;
 
+                    // Determinar días laborales
+                    const diasSemana = promotor.diasSemana || [1, 2, 3, 4, 5, 6];
+                    const diasNombres = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+                    const diasTexto = diasSemana.map(d => diasNombres[d]).join(', ');
+
                     card.innerHTML = `
                         <div style="width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; font-weight: 700; flex-shrink: 0;">
                             ${iniciales}
@@ -4022,11 +3732,10 @@
                             <h3 style="font-size: 1.1rem; margin-bottom: 5px; color: #333;">${promotor.nombre} ${promotor.apellido}</h3>
                             <div style="display: flex; flex-wrap: wrap; gap: 12px; color: #666; font-size: 0.85rem;">
                                 <span><strong>Tipo:</strong> ${promotor.tipo_trabajo}</span>
-                                <span><strong>Descanso:</strong> ${promotor.dia_descanso || 'No especificado'}</span>
-                                <span><strong>Tel:</strong> ${promotor.telefono || 'N/A'}</span>
+                                <span><strong>Días:</strong> ${diasTexto}</span>
                             </div>
                             <div style="margin-top: 8px; padding: 6px 12px; background: #e3f2fd; border-radius: 4px; display: inline-block; font-size: 0.8rem; color: #1976d2; font-weight: 600;">
-                                ${promotor.numAsignaciones} asignación${promotor.numAsignaciones !== 1 ? 'es' : ''}
+                                ${promotor.numContratos} contrato${promotor.numContratos !== 1 ? 's' : ''} activo${promotor.numContratos !== 1 ? 's' : ''}
                             </div>
                         </div>
                     `;
@@ -4038,17 +3747,17 @@
                 section.style.display = 'block';
             }
 
-            function actualizarHorariosHeader(asignacionesTienda) {
+            function actualizarHorariosHeader(contratos) {
                 // Valores por defecto
                 let horaApertura = '09:00';
                 let horaCierre = '19:00';
                 let horaComidaInicio = '14:00';
                 let horaComidaFin = '15:00';
 
-                // Si hay asignaciones, tomar los horarios de la primera asignación (la más reciente)
-                if (asignacionesTienda.length > 0) {
-                    const asignacion = asignacionesTienda[0];
-                    const props = asignacion.extendedProps;
+                // Si hay contratos, tomar los horarios del primero
+                if (contratos.length > 0) {
+                    const contrato = contratos[0];
+                    const props = contrato.extendedProps;
 
                     if (props.hora_entrada) {
                         horaApertura = props.hora_entrada.substring(0, 5);
@@ -4089,65 +3798,80 @@
                     `;
                 }
 
-                console.log(`🕐 Horarios actualizados: ${horaApertura} - ${horaComidaInicio}/${horaComidaFin} - ${horaCierre}`);
+                console.log(`Horarios actualizados: ${horaApertura} - ${horaComidaInicio}/${horaComidaFin} - ${horaCierre}`);
             }
 
             function generarSemanaActual(idTienda) {
-                // Generar la semana actual (lunes a domingo)
                 const hoy = new Date();
-                const diaSemana = hoy.getDay();
-                const diff = diaSemana === 0 ? -6 : 1 - diaSemana; // Ajustar al lunes
+                hoy.setHours(12, 0, 0, 0);
 
-                const lunes = new Date(hoy);
-                lunes.setDate(hoy.getDate() + diff);
+                const diaSemana = hoy.getDay();
+                const domingo = new Date(hoy);
+                domingo.setDate(hoy.getDate() - diaSemana);
+                domingo.setHours(12, 0, 0, 0);
 
                 semanaActual = [];
-                const diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
-                const diasSemanaLower = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
+                const diasSemana = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 
-                // Obtener el promotor principal de esta tienda para verificar su día de descanso
-                const asignacionesTienda = todosLosEventos.filter(e => e.extendedProps.id_tienda == idTienda);
-                let diaDescansoPromotor = null;
+                // Obtener contratos recurrentes ACTIVOS de esta tienda
+                const contratosActivosTienda = todosLosEventos.filter(e =>
+                    e.extendedProps.id_tienda == idTienda &&
+                    (e.extendedProps.activo === 1 || e.extendedProps.activo === '1' || e.extendedProps.activo === true)
+                );
 
-                if (asignacionesTienda.length > 0) {
-                    const idPromotorPrincipal = asignacionesTienda[0].extendedProps.id_promotor;
-                    const promotorPrincipal = promotoresData.find(p => p.id_promotor == idPromotorPrincipal);
-
-                    if (promotorPrincipal && promotorPrincipal.dia_descanso) {
-                        diaDescansoPromotor = promotorPrincipal.dia_descanso.toLowerCase();
-                        console.log(`📅 Día de descanso configurado: ${diaDescansoPromotor}`);
-                    }
-                }
+                console.log(`📊 ${contratosActivosTienda.length} contratos activos encontrados para tienda ${idTienda}`);
 
                 for (let i = 0; i < 7; i++) {
-                    const fecha = new Date(lunes);
-                    fecha.setDate(lunes.getDate() + i);
+                    const fecha = new Date(domingo);
+                    fecha.setDate(domingo.getDate() + i);
+                    fecha.setHours(12, 0, 0, 0);
                     const fechaStr = fecha.toISOString().split('T')[0];
-                    const nombreDiaActual = diasSemanaLower[i];
 
-                    // Buscar asignaciones para este día
-                    const asignacionesDia = todosLosEventos.filter(e =>
-                        e.extendedProps.id_tienda == idTienda &&
-                        e.start.split('T')[0] === fechaStr
-                    );
-
-                    let tipoDia = 'sin_programar';  // Por defecto: día sin programar
+                    let tipoDia = 'sin_programar';
                     let promotor = null;
                     let promotorComida = null;
 
-                    // VERIFICAR SI ES EL DÍA DE DESCANSO CONFIGURADO DEL PROMOTOR
-                    if (diaDescansoPromotor && nombreDiaActual === diaDescansoPromotor) {
-                        // Es día de descanso configurado del promotor
-                        tipoDia = 'descanso';
-                        console.log(`🌙 ${diasSemana[i]} es día de descanso del promotor`);
-                    } else if (asignacionesDia.length > 0) {
-                        // Hay asignaciones y NO es día de descanso
-                        tipoDia = 'trabajo';
-                        const asigPrincipal = asignacionesDia[0];
-                        promotor = asigPrincipal.extendedProps.id_promotor;
-                        promotorComida = asigPrincipal.extendedProps.id_promotor_cobertura_comida;
+                    // Verificar si algún contrato recurrente cubre este día
+                    for (const contrato of contratosActivosTienda) {
+                        const diasSemanaContrato = contrato.extendedProps.dias_semana || [];
+
+                        console.log(`Día ${i} (${diasSemana[i]}):`, {
+                            tipoDia: tipoDia,
+                            promotor: promotor,
+                            diasSemanaContrato: diasSemanaContrato
+                        });
+
+                        // i es el día de la semana (0=Domingo, 1=Lunes, etc.)
+                        const esDiaLaboral = Array.isArray(diasSemanaContrato)
+                            ? diasSemanaContrato.includes(i)
+                            : false;
+
+                        // Verificar que la fecha esté dentro del rango del contrato
+                        const fechaInicio = new Date(contrato.extendedProps.fecha_inicio);
+                        fechaInicio.setHours(0, 0, 0, 0);
+
+                        const fechaFin = contrato.extendedProps.fecha_fin ? new Date(contrato.extendedProps.fecha_fin) : null;
+                        if (fechaFin) fechaFin.setHours(23, 59, 59, 999);
+
+                        const fechaActual = new Date(fechaStr);
+                        fechaActual.setHours(12, 0, 0, 0);
+
+                        const dentroDelRango = fechaActual >= fechaInicio && (!fechaFin || fechaActual <= fechaFin);
+
+                        if (dentroDelRango) {
+                            if (esDiaLaboral) {
+                                // Es día de trabajo
+                                tipoDia = 'trabajo';
+                                promotor = contrato.extendedProps.id_promotor;
+                                promotorComida = contrato.extendedProps.id_promotor_cobertura_comida;
+                                break;
+                            } else {
+                                // Es día de descanso configurado
+                                tipoDia = 'descanso';
+                                promotor = contrato.extendedProps.id_promotor;
+                            }
+                        }
                     }
-                    // Si no es día de descanso Y no hay asignaciones → se queda 'sin_programar'
 
                     semanaActual.push({
                         fecha: fechaStr,
@@ -4159,11 +3883,32 @@
                     });
                 }
 
-                // Actualizar título de semana
-                const semanaInicio = new Date(semanaActual[0].fecha);
-                const semanaFin = new Date(semanaActual[6].fecha);
-                document.getElementById('semana-titulo').textContent =
-                    `Semana del ${semanaInicio.getDate()} al ${semanaFin.getDate()} de ${semanaInicio.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}`;
+                // Actualizar título (código existente...)
+                const fechaInicio = new Date(semanaActual[0].fecha);
+                const fechaFin = new Date(semanaActual[6].fecha);
+                const primerDia = semanaActual[0].numero;
+                const ultimoDia = semanaActual[6].numero;
+                const mesInicio = fechaInicio.getMonth();
+                const mesFin = fechaFin.getMonth();
+                const añoInicio = fechaInicio.getFullYear();
+                const añoFin = fechaFin.getFullYear();
+
+                let tituloSemana;
+                if (mesInicio !== mesFin || añoInicio !== añoFin) {
+                    const mesNombreInicio = fechaInicio.toLocaleDateString('es-ES', { month: 'long' });
+                    const mesNombreFin = fechaFin.toLocaleDateString('es-ES', { month: 'long' });
+                    if (añoInicio !== añoFin) {
+                        tituloSemana = `Semana del ${primerDia} de ${mesNombreInicio} de ${añoInicio} al ${ultimoDia} de ${mesNombreFin} de ${añoFin}`;
+                    } else {
+                        tituloSemana = `Semana del ${primerDia} de ${mesNombreInicio} al ${ultimoDia} de ${mesNombreFin} de ${añoFin}`;
+                    }
+                } else {
+                    const mesNombre = fechaInicio.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+                    tituloSemana = `Semana del ${primerDia} al ${ultimoDia} de ${mesNombre}`;
+                }
+
+                document.getElementById('semana-titulo').textContent = tituloSemana;
+                console.log('📅 Semana generada:', semanaActual);
             }
 
             function renderizarCalendario() {
@@ -4187,14 +3932,14 @@
                 } else if (dia.tipo === 'trabajo') {
                     card.className = 'dia-card dia-trabajo';
                 } else {
-                    card.className = 'dia-card';  // sin_programar
+                    card.className = 'dia-card dia-sin_contrato';
                 }
 
                 let contenidoHTML = `
-                    <div class="dia-header">
-                        <div class="dia-nombre">${dia.dia}</div>
-                        <div class="dia-numero">${dia.numero}</div>
-                `;
+        <div class="dia-header">
+            <div class="dia-nombre">${dia.dia}</div>
+            <div class="dia-numero">${dia.numero}</div>
+    `;
 
                 if (dia.tipo === 'descanso') {
                     contenidoHTML += '<span class="estado-badge badge-descanso">DESCANSO</span>';
@@ -4205,106 +3950,83 @@
                 if (dia.tipo === 'descanso') {
                     // DÍA DE DESCANSO CONFIGURADO
                     contenidoHTML += `
-                        <div style="text-align: center; padding: 40px 10px; color: #999;">
-                            <div style="font-size: 3rem; margin-bottom: 10px;">🌙</div>
-                            <div style="font-weight: 600;">Día de descanso</div>
-                            <div style="font-size: 0.85rem; margin-top: 5px;">Sin actividades programadas</div>
-                        </div>
-                    `;
-                } else if (dia.tipo === 'sin_programar') {
-                    // DÍA SIN PROGRAMAR (no es descanso, simplemente no hay asignación)
+            <div style="text-align: center; padding: 40px 10px; color: #999;">
+                <div style="font-size: 3rem; margin-bottom: 10px;">🌙</div>
+                <div style="font-weight: 600;">Día de descanso</div>
+                <div style="font-size: 0.85rem; margin-top: 5px;">Sin actividades programadas</div>
+            </div>
+        `;
+                } else if (dia.tipo === 'sin_contrato') {
+                    // DÍA SIN CONTRATO
                     contenidoHTML += `
-                        <div style="text-align: center; padding: 40px 10px; color: #bbb;">
-                            <div style="font-size: 3rem; margin-bottom: 10px;">📅</div>
-                            <div style="font-weight: 600; color: #999;">Sin programar</div>
-                            <div style="font-size: 0.85rem; margin-top: 5px;">No hay asignaciones</div>
-                        </div>
-                    `;
+            <div style="text-align: center; padding: 40px 10px; color: #bbb;">
+                <div style="font-size: 3rem; margin-bottom: 10px;">📋</div>
+                <div style="font-weight: 600; color: #999;">Sin contrato activo</div>
+                <div style="font-size: 0.85rem; margin-top: 5px;">No hay asignaciones</div>
+            </div>
+        `;
                 } else {
                     // DÍA DE TRABAJO
-                    const fechaStr = dia.fecha;
-                    const asignacionesDia = todosLosEventos.filter(e =>
-                        e.extendedProps.id_tienda == tiendaSeleccionadaDetalle.id_tienda &&
-                        e.start.split('T')[0] === fechaStr
-                    );
-
                     const promotorPrincipal = promotoresData.find(p => p.id_promotor == dia.promotor);
 
-                    if (promotorPrincipal && asignacionesDia.length > 0) {
-                        const asignacion = asignacionesDia[0];
-                        const props = asignacion.extendedProps;
+                    // BUSCAR PROMOTOR DE COBERTURA DE COMIDA
+                    const promotorComida = dia.promotorComida ?
+                        promotoresData.find(p => p.id_promotor == dia.promotorComida) : null;
 
-                        // Obtener horarios reales o usar defaults
-                        const horaEntrada = props.hora_entrada ? props.hora_entrada.substring(0, 5) : '09:00';
-                        const horaSalida = props.hora_salida ? props.hora_salida.substring(0, 5) : '19:00';
-                        const horaComidaInicio = props.hora_comida_inicio ? props.hora_comida_inicio.substring(0, 5) : '14:00';
-                        const duracionComidaMinutos = props.duracion_comida_minutos || 60;
+                    if (promotorPrincipal) {
+                        // Buscar el contrato activo para obtener horarios
+                        const contratoActivo = todosLosEventos.find(e =>
+                            e.extendedProps.id_tienda == tiendaSeleccionadaDetalle.id_tienda &&
+                            e.extendedProps.id_promotor == dia.promotor &&
+                            (e.extendedProps.activo === 1 || e.extendedProps.activo === '1' || e.extendedProps.activo === true)
+                        );
 
-                        // Calcular hora fin de comida
-                        const [horaInicioH, horaInicioM] = horaComidaInicio.split(':').map(Number);
-                        const minutosInicio = horaInicioH * 60 + horaInicioM;
-                        const minutosFin = minutosInicio + duracionComidaMinutos;
-                        const horaFinH = Math.floor(minutosFin / 60);
-                        const horaFinM = minutosFin % 60;
-                        const horaComidaFin = `${String(horaFinH).padStart(2, '0')}:${String(horaFinM).padStart(2, '0')}`;
+                        if (contratoActivo) {
+                            const props = contratoActivo.extendedProps;
 
-                        // BLOQUE APERTURA
-                        contenidoHTML += `
-                            <div class="bloque-horario bloque-apertura">
-                                <div class="bloque-horario-label">Apertura</div>
-                                <div class="bloque-horario-time">${horaEntrada} - ${horaComidaInicio}</div>
-                                <div class="bloque-horario-promotor">${promotorPrincipal.nombre} ${promotorPrincipal.apellido}</div>
-                            </div>
-                            
-                            <div class="bloque-horario bloque-comida">
-                                <div class="bloque-horario-label">Comida</div>
-                                <div class="bloque-horario-time">${horaComidaInicio} - ${horaComidaFin}</div>
-                                <div class="bloque-horario-promotor">
-                        `;
+                            const horaEntrada = props.hora_entrada ? props.hora_entrada.substring(0, 5) : '09:00';
+                            const horaSalida = props.hora_salida ? props.hora_salida.substring(0, 5) : '19:00';
+                            const horaComidaInicio = props.hora_comida_inicio ? props.hora_comida_inicio.substring(0, 5) : '14:00';
+                            const duracionComidaMinutos = props.duracion_comida_minutos || 60;
 
-                        if (dia.promotorComida) {
-                            const promotorComida = promotoresData.find(p => p.id_promotor == dia.promotorComida);
-                            if (promotorComida) {
-                                contenidoHTML += `
-                                    ${promotorComida.nombre} ${promotorComida.apellido}
-                                    <span class="cobertura-badge cobertura-comida">Cubredescansos</span>
-                                `;
-                            }
-                        } else {
-                            contenidoHTML += `${promotorPrincipal.nombre} ${promotorPrincipal.apellido} (sin cobertura)`;
+                            const [horaInicioH, horaInicioM] = horaComidaInicio.split(':').map(Number);
+                            const minutosInicio = horaInicioH * 60 + horaInicioM;
+                            const minutosFin = minutosInicio + duracionComidaMinutos;
+                            const horaFinH = Math.floor(minutosFin / 60);
+                            const horaFinM = minutosFin % 60;
+                            const horaComidaFin = `${String(horaFinH).padStart(2, '0')}:${String(horaFinM).padStart(2, '0')}`;
+
+                            // BLOQUE APERTURA
+                            contenidoHTML += `
+                    <div class="bloque-horario bloque-apertura">
+                        <div class="bloque-horario-label">Apertura</div>
+                        <div class="bloque-horario-time">${horaEntrada} - ${horaComidaInicio}</div>
+                        <div class="bloque-horario-promotor">${promotorPrincipal.nombre} ${promotorPrincipal.apellido}</div>
+                    </div>
+                `;
+
+                            // BLOQUE COMIDA - MOSTRAR PROMOTOR DE COBERTURA SI EXISTE
+                            const nombrePromotorComida = promotorComida ?
+                                `${promotorComida.nombre} ${promotorComida.apellido}` :
+                                `${promotorPrincipal.nombre} ${promotorPrincipal.apellido}`;
+
+                            contenidoHTML += `
+                    <div class="bloque-horario bloque-comida">
+                        <div class="bloque-horario-label">Comida</div>
+                        <div class="bloque-horario-time">${horaComidaInicio} - ${horaComidaFin}</div>
+                        <div class="bloque-horario-promotor">${nombrePromotorComida}</div>
+                    </div>
+                `;
+
+                            // BLOQUE CIERRE
+                            contenidoHTML += `
+                    <div class="bloque-horario bloque-cierre">
+                        <div class="bloque-horario-label">Cierre</div>
+                        <div class="bloque-horario-time">${horaComidaFin} - ${horaSalida}</div>
+                        <div class="bloque-horario-promotor">${promotorPrincipal.nombre} ${promotorPrincipal.apellido}</div>
+                    </div>
+                `;
                         }
-
-                        contenidoHTML += `
-                                </div>
-                            </div>
-                            
-                            <div class="bloque-horario bloque-cierre">
-                                <div class="bloque-horario-label">Cierre</div>
-                                <div class="bloque-horario-time">${horaComidaFin} - ${horaSalida}</div>
-                                <div class="bloque-horario-promotor">${promotorPrincipal.nombre} ${promotorPrincipal.apellido}</div>
-                            </div>
-                        `;
-                    } else if (promotorPrincipal) {
-                        // Fallback si no hay asignación con datos de horario
-                        contenidoHTML += `
-                            <div class="bloque-horario bloque-apertura">
-                                <div class="bloque-horario-label">Apertura</div>
-                                <div class="bloque-horario-time">09:00 - 14:00</div>
-                                <div class="bloque-horario-promotor">${promotorPrincipal.nombre} ${promotorPrincipal.apellido}</div>
-                            </div>
-                            
-                            <div class="bloque-horario bloque-comida">
-                                <div class="bloque-horario-label">Comida</div>
-                                <div class="bloque-horario-time">14:00 - 15:00</div>
-                                <div class="bloque-horario-promotor">${promotorPrincipal.nombre} ${promotorPrincipal.apellido} (sin cobertura)</div>
-                            </div>
-                            
-                            <div class="bloque-horario bloque-cierre">
-                                <div class="bloque-horario-label">Cierre</div>
-                                <div class="bloque-horario-time">15:00 - 19:00</div>
-                                <div class="bloque-horario-promotor">${promotorPrincipal.nombre} ${promotorPrincipal.apellido}</div>
-                            </div>
-                        `;
                     }
                 }
 
@@ -4315,452 +4037,82 @@
 
             function actualizarResumenSemana() {
                 let diasTrabajados = 0;
-                let incidencias = 0;
-                let coberturasComida = 0;
+                let diasDescanso = 0;
                 let horasTotales = 0;
+                const contratosActivos = new Set();
 
                 semanaActual.forEach(dia => {
                     if (dia.tipo === 'trabajo') {
                         diasTrabajados++;
-                        horasTotales += 10;  // Aproximadamente 10 horas por día
-                        if (dia.promotorComida) coberturasComida++;
-                    } else if (dia.tipo === 'incidencia') {
-                        incidencias++;
-                        horasTotales += 10;
+                        horasTotales += 10; // Aproximado
+                        if (dia.promotor) contratosActivos.add(dia.promotor);
+                    } else if (dia.tipo === 'descanso') {
+                        diasDescanso++;
                     }
-                    // Los días 'sin_programar' y 'descanso' no se cuentan
                 });
 
                 document.getElementById('diasTrabajados').textContent = diasTrabajados;
-                document.getElementById('incidenciasTotal').textContent = incidencias;
-                document.getElementById('coberturasComida').textContent = coberturasComida;
+                document.getElementById('diasDescanso').textContent = diasDescanso;
                 document.getElementById('horasTotales').textContent = horasTotales + 'h';
-            }
-
-            // ===== FUNCIONES DE MODAL INCIDENCIA =====
-            function abrirModalIncidencia() {
-                document.getElementById('modal-incidencia').style.display = 'block';
-                const hoy = new Date();
-                hoy.setDate(hoy.getDate() + 1);
-                document.getElementById('fecha-incidencia').value = hoy.toISOString().split('T')[0];
-            }
-
-            function cerrarModalIncidencia() {
-                document.getElementById('modal-incidencia').style.display = 'none';
-                document.getElementById('tipo-incidencia').value = 'vacaciones';
-                document.getElementById('fecha-incidencia').value = '';
-                document.getElementById('promotor-incidencia').value = '';
-                document.getElementById('promotor-cobertura-incidencia').value = '';
-                document.getElementById('motivo-incidencia').value = '';
-            }
-
-            function guardarIncidencia() {
-                const fecha = document.getElementById('fecha-incidencia').value;
-                const tipo = document.getElementById('tipo-incidencia').value;
-                const promotorId = document.getElementById('promotor-incidencia').value;
-                const coberturaId = document.getElementById('promotor-cobertura-incidencia').value;
-                const motivo = document.getElementById('motivo-incidencia').value;
-
-                if (!fecha || !promotorId || !coberturaId) {
-                    alert('Por favor completa todos los campos obligatorios');
-                    return;
-                }
-
-                console.log('💾 Guardando incidencia:', { fecha, tipo, promotorId, coberturaId, motivo });
-
-                alert('Incidencia registrada exitosamente (funcionalidad de guardado pendiente)');
-
-                cerrarModalIncidencia();
-            }
-
-            // Hacer las funciones globales
-            window.abrirModalIncidencia = abrirModalIncidencia;
-            window.cerrarModalIncidencia = cerrarModalIncidencia;
-            window.guardarIncidencia = guardarIncidencia;
-
-            // ===== FUNCIÓN PARA CREAR NUEVO EVENTO =====
-            async function crearNuevoEvento(datos, promotor, tienda, tipo) {
-                try {
-                    console.log('➕ Creando nuevo evento en BD...', datos);
-
-                    const datosGarantizados = {
-                        ...datos,
-                        hora_entrada: datos.hora_entrada || '09:00',
-                        hora_salida: datos.hora_salida || '19:00',
-                        hora_comida_inicio: datos.hora_comida_inicio || '14:00',
-                        duracion_comida_minutos: datos.duracion_comida_minutos || 60,
-                        id_promotor_cobertura_comida: datos.id_promotor_cobertura_comida || null,
-                        notas_horario: datos.notas_horario || datos.motivo_asignacion || ''
-                    };
-
-                    const response = await crearAsignacionBD(datosGarantizados);
-
-                    let esExitoso = false;
-                    let nuevoId = null;
-
-                    if (response) {
-                        if (response.success === true) {
-                            esExitoso = true;
-                            nuevoId = response.id || response.data?.id_asignacion || response.data?.id;
-                        } else if (response.id || response.data?.id_asignacion) {
-                            esExitoso = true;
-                            nuevoId = response.id || response.data?.id_asignacion;
-                        } else if (response.data && typeof response.data === 'object') {
-                            esExitoso = true;
-                            nuevoId = response.data.id_asignacion || response.data.id || Date.now();
-                        }
-                    }
-
-                    if (esExitoso) {
-                        console.log('✅ Evento creado en BD exitosamente');
-
-                        const nuevoEvento = {
-                            id: `asig_nuevo_${nuevoId || Date.now()}`,
-                            title: `${promotor.nombre} ${promotor.apellido} - ${tienda.cadena} #${tienda.num_tienda}`,
-                            start: datos.fecha_inicio,
-                            className: determinarClaseEvento(tipo),
-                            extendedProps: {
-                                id_asignacion: nuevoId,
-                                id_promotor: datos.id_promotor,
-                                id_tienda: datos.id_tienda,
-                                nombre_promotor: `${promotor.nombre} ${promotor.apellido}`,
-                                nombre_tienda: tienda.nombre_tienda,
-                                numero_tienda: tienda.num_tienda,
-                                cadena: tienda.cadena,
-                                motivo_asignacion: datos.motivo_asignacion,
-                                tipo_trabajo: promotor.tipo_trabajo,
-                                hora_entrada: datosGarantizados.hora_entrada,
-                                hora_salida: datosGarantizados.hora_salida,
-                                hora_comida_inicio: datosGarantizados.hora_comida_inicio,
-                                duracion_comida_minutos: datosGarantizados.duracion_comida_minutos,
-                                id_promotor_cobertura_comida: datosGarantizados.id_promotor_cobertura_comida,
-                                notas_horario: datosGarantizados.notas_horario,
-                                fecha_fin: datos.fecha_fin || null,
-                                dias_semana: datos.dias_semana || null
-                            }
-                        };
-
-                        todosLosEventos.push(nuevoEvento);
-                        aplicarFiltroTienda();
-                        actualizarDashboard();
-
-                        console.log('🎉 Evento agregado exitosamente');
-
-                    } else {
-                        console.warn('⚠️ Respuesta ambigua pero el evento podría haberse creado');
-                    }
-
-                } catch (error) {
-                    console.error('❌ Error en crearNuevoEvento:', error);
-                    throw error;
-                }
-            }
-
-            // ===== FUNCIÓN PARA GUARDAR EVENTO =====
-            async function guardarEvento() {
-                try {
-                    console.log('💾 Iniciando guardado de evento...');
-
-                    const promotorId = document.getElementById('event-promotor-horas').value;
-                    const tiendaId = document.getElementById('event-tienda-horas').value;
-                    const tipo = document.getElementById('event-tipo-horas').value;
-                    const notas = document.getElementById('event-notas-horas').value;
-
-                    const horaEntrada = document.getElementById('event-hora-entrada')?.value || '09:00';
-                    const horaSalida = document.getElementById('event-hora-salida')?.value || '19:00';
-                    const horaComidaInicio = document.getElementById('event-hora-comida-inicio')?.value || '14:00';
-                    const duracionComida = parseInt(document.getElementById('event-duracion-comida')?.value) || 60;
-                    const promotorCoberturaComida = document.getElementById('event-promotor-cobertura-comida')?.value || null;
-
-                    const tipoAsignacion = document.getElementById('assignment-type-selector')?.value || 'single';
-
-                    if (tipoAsignacion === 'multiple') {
-                        await guardarAsignacionMultiple(promotorId, tiendaId, tipo, notas, horaEntrada, horaSalida, horaComidaInicio, duracionComida, promotorCoberturaComida);
-                    } else {
-                        const fecha = document.getElementById('event-fecha-horas').value;
-
-                        if (!promotorId || !tiendaId || !fecha) {
-                            alert('Por favor completa todos los campos obligatorios');
-                            return;
-                        }
-
-                        const promotor = promotoresData.find(p => p.id_promotor == promotorId);
-                        const tienda = tiendasData.find(t => t.id_tienda == tiendaId);
-
-                        if (!promotor || !tienda) {
-                            alert('Error: No se encontraron los datos del promotor o tienda');
-                            return;
-                        }
-
-                        const datosCompletos = {
-                            id_promotor: promotorId,
-                            id_tienda: tiendaId,
-                            fecha_inicio: fecha,
-                            motivo_asignacion: notas || 'Asignación desde calendario',
-                            tipo_asignacion: tipo.includes('fijo') ? 'Principal' : 'Individual',
-                            hora_entrada: horaEntrada,
-                            hora_salida: horaSalida,
-                            hora_comida_inicio: horaComidaInicio,
-                            duracion_comida_minutos: duracionComida,
-                            id_promotor_cobertura_comida: promotorCoberturaComida,
-                            notas_horario: notas || 'Asignación desde calendario de horas'
-                        };
-
-                        if (currentEvent && currentEvent.extendedProps.id_asignacion) {
-                            await actualizarEventoExistente(currentEvent, datosCompletos);
-                        } else {
-                            await crearNuevoEvento(datosCompletos, promotor, tienda, tipo);
-                        }
-                    }
-
-                    closeModal();
-
-                } catch (error) {
-                    console.error('❌ Error guardando evento:', error);
-                    alert('❌ Error guardando el evento: ' + error.message);
-                }
-            }
-
-            // ===== FUNCIÓN PARA GUARDAR ASIGNACIÓN MÚLTIPLE - CORREGIDA =====
-            async function guardarAsignacionMultiple(promotorId, tiendaId, tipo, notas, horaEntrada, horaSalida, horaComidaInicio, duracionComida, promotorCoberturaComida) {
-                try {
-                    const fechaInicio = document.getElementById('fecha-inicio-multiple').value;
-                    const fechaFin = document.getElementById('fecha-fin-multiple').value;
-
-                    if (!fechaInicio || !fechaFin || !promotorId || !tiendaId) {
-                        alert('Por favor completa todos los campos obligatorios');
-                        return;
-                    }
-
-                    const diasSeleccionados = Array.from(document.querySelectorAll('#days-selector input[type="checkbox"]:checked'))
-                        .map(cb => parseInt(cb.value));
-
-                    if (diasSeleccionados.length === 0) {
-                        alert('Por favor selecciona al menos un día de la semana');
-                        return;
-                    }
-
-                    const promotor = promotoresData.find(p => p.id_promotor == promotorId);
-                    const tienda = tiendasData.find(t => t.id_tienda == tiendaId);
-
-                    if (!promotor || !tienda) {
-                        alert('Error: No se encontraron los datos del promotor o tienda');
-                        return;
-                    }
-
-                    // Formatear días seleccionados como texto
-                    const diasNombres = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-                    const diasTexto = diasSeleccionados.map(d => diasNombres[d]).join(', ');
-
-                    if (!confirm(`Se creará UNA asignación del ${fechaInicio} al ${fechaFin} para los días: ${diasTexto}.\n¿Deseas continuar?`)) {
-                        return;
-                    }
-
-                    // Crear UNA SOLA asignación con fecha_inicio y fecha_fin
-                    const datosCompletos = {
-                        id_promotor: promotorId,
-                        id_tienda: tiendaId,
-                        fecha_inicio: fechaInicio,
-                        fecha_fin: fechaFin,  // Incluir fecha fin
-                        dias_semana: diasSeleccionados.join(','), // Guardar los días como "1,2,3,4,5"
-                        motivo_asignacion: notas || `Asignación múltiple - ${diasTexto}`,
-                        tipo_asignacion: 'Rango',
-                        hora_entrada: horaEntrada,
-                        hora_salida: horaSalida,
-                        hora_comida_inicio: horaComidaInicio,
-                        duracion_comida_minutos: duracionComida,
-                        id_promotor_cobertura_comida: promotorCoberturaComida,
-                        notas_horario: notas || `Asignación de rango: ${diasTexto}`
-                    };
-
-                    await crearNuevoEvento(datosCompletos, promotor, tienda, tipo);
-
-                    alert('✅ Asignación de rango creada exitosamente');
-
-                } catch (error) {
-                    console.error('Error en asignación múltiple:', error);
-                    alert('Error en asignación múltiple: ' + error.message);
-                }
-            }
-
-            // ===== ACTUALIZAR EVENTO EN BD =====
-            async function actualizarEventoEnBD(event) {
-                if (!event.extendedProps?.id_asignacion) {
-                    console.warn('⚠️ Evento sin ID de asignación');
-                    return;
-                }
-
-                try {
-                    const datos = {
-                        fecha_inicio: event.start.toISOString().split('T')[0],
-                        id_tienda_nueva: event.extendedProps?.id_tienda,
-                        manejar_cambio_tienda: true
-                    };
-
-                    const response = await fetch(`${window.location.origin}/promotoria/api/hoja_horario.php?resource=asignaciones&id=${event.extendedProps.id_asignacion}`, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(datos)
-                    });
-
-                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-                    const resultado = await response.json();
-                    if (!resultado.success) throw new Error(resultado.message);
-
-                    console.log('✅ Evento actualizado en BD');
-
-                } catch (error) {
-                    console.error('❌ Error actualizando evento:', error);
-                    aplicarFiltroTienda();
-                }
-            }
-
-            // ===== ACTUALIZAR EVENTO EXISTENTE =====
-            async function actualizarEventoExistente(event, nuevosDatos) {
-                try {
-                    console.log('✏️ Actualizando evento existente...', nuevosDatos);
-
-                    const cambioTienda = nuevosDatos.id_tienda != event.extendedProps.id_tienda;
-
-                    if (cambioTienda) {
-                        nuevosDatos.manejar_cambio_tienda = true;
-                        nuevosDatos.id_tienda_nueva = nuevosDatos.id_tienda;
-                    }
-
-                    const response = await fetch(`${window.location.origin}/promotoria/api/hoja_horario.php?resource=asignaciones&id=${event.extendedProps.id_asignacion}`, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(nuevosDatos)
-                    });
-
-                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-                    const resultado = await response.json();
-                    if (!resultado.success) throw new Error(resultado.message);
-
-                    const index = todosLosEventos.findIndex(e => e.id === event.id);
-                    if (index !== -1) {
-                        const promotor = promotoresData.find(p => p.id_promotor == nuevosDatos.id_promotor);
-                        const tienda = tiendasData.find(t => t.id_tienda == nuevosDatos.id_tienda);
-
-                        if (promotor && tienda) {
-                            todosLosEventos[index].title = `${promotor.nombre} ${promotor.apellido} - ${tienda.cadena} #${tienda.num_tienda}`;
-                            todosLosEventos[index].start = nuevosDatos.fecha_inicio;
-                            todosLosEventos[index].extendedProps.motivo_asignacion = nuevosDatos.motivo_asignacion;
-                            todosLosEventos[index].extendedProps.id_tienda = nuevosDatos.id_tienda;
-                            todosLosEventos[index].extendedProps.hora_entrada = nuevosDatos.hora_entrada;
-                            todosLosEventos[index].extendedProps.hora_salida = nuevosDatos.hora_salida;
-                            todosLosEventos[index].extendedProps.hora_comida_inicio = nuevosDatos.hora_comida_inicio;
-                            todosLosEventos[index].extendedProps.duracion_comida_minutos = nuevosDatos.duracion_comida_minutos;
-                            todosLosEventos[index].extendedProps.id_promotor_cobertura_comida = nuevosDatos.id_promotor_cobertura_comida;
-                        }
-                    }
-
-                    aplicarFiltroTienda();
-                    actualizarDashboard();
-                    console.log('✅ Evento actualizado correctamente');
-
-                } catch (error) {
-                    console.error('❌ Error actualizando evento:', error);
-                    throw error;
-                }
-            }
-
-            // ===== ELIMINAR EVENTO - ACTUALIZADO =====
-            // ===== ELIMINAR EVENTO - ACTUALIZADO =====
-            async function eliminarEvento() {
-                if (!currentEvent || !currentEvent.extendedProps.id_asignacion) {
-                    alert('No se puede eliminar este evento');
-                    return;
-                }
-
-                if (!confirm('¿Estás seguro de que deseas eliminar esta asignación?')) {
-                    return;
-                }
-
-                try {
-                    const idPromotorActual = currentEvent.extendedProps.id_promotor;
-
-                    const response = await fetch(`${window.location.origin}/promotoria/api/hoja_horario.php?resource=asignaciones&id=${currentEvent.extendedProps.id_asignacion}`, {
-                        method: 'DELETE',
-                        headers: { 'Content-Type': 'application/json' }
-                    });
-
-                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-                    const resultado = await response.json();
-                    if (!resultado.success) throw new Error(resultado.message);
-
-                    todosLosEventos = todosLosEventos.filter(e => e.id !== currentEvent.id);
-
-                    aplicarFiltroTienda();
-                    actualizarDashboard();
-                    closeModal();
-
-                    console.log('✅ Evento eliminado correctamente');
-
-                    // 🔧 NUEVO: Si el modal de historial del módulo de promotores está abierto, recargarlo
-                    if (typeof window.verHistorialPromotor === 'function') {
-                        const modalHistorial = document.getElementById('modal-historial');
-                        if (modalHistorial && modalHistorial.classList.contains('active')) {
-                            console.log('🔄 Detectado modal de historial abierto, recargando...');
-
-                            // Cerrar y reabrir para forzar recarga desde BD
-                            if (typeof window.cerrarModalHistorial === 'function') {
-                                window.cerrarModalHistorial();
-                                await new Promise(resolve => setTimeout(resolve, 300));
-                            }
-
-                            await window.verHistorialPromotor(idPromotorActual);
-                        }
-                    }
-
-                    // 🔧 NUEVO: Recargar tabla de promotores si existe
-                    if (typeof window.cargarPromotores === 'function') {
-                        console.log('🔄 Recargando tabla de promotores...');
-                        await window.cargarPromotores();
-                    }
-
-                } catch (error) {
-                    console.error('❌ Error eliminando evento:', error);
-                    alert('Error eliminando el evento: ' + error.message);
-                }
+                document.getElementById('contratosActivos').textContent = contratosActivos.size;
             }
 
             // ===== DASHBOARD - FUNCIÓN ACTUALIZADA =====
             function actualizarDashboard() {
-                const events = todosLosEventos || [];
-                const totalAssignments = events.length;
-                const totalHours = events.reduce((total, event) => {
-                    return total + 8;
-                }, 0);
+                // Usar requestAnimationFrame para no bloquear UI
+                requestAnimationFrame(() => {
+                    const events = calendar ? calendar.getEvents() : todosLosEventos.slice(0, 100);
+                    const totalAssignments = todosLosEventos.length;
 
-                const tiendasUnicas = new Set();
-                events.forEach((event) => {
-                    const props = event.extendedProps;
-                    if (props && props.numero_tienda && props.cadena) {
-                        tiendasUnicas.add(`${props.cadena}_#${props.numero_tienda}`);
-                    }
+                    let totalHorasSemanales = 0;
+                    const tiendasUnicas = new Set();
+
+                    // Procesar en lotes para no bloquear
+                    const batchSize = 50;
+                    let processed = 0;
+
+                    const processBatch = () => {
+                        const end = Math.min(processed + batchSize, events.length);
+
+                        for (let i = processed; i < end; i++) {
+                            const event = events[i];
+                            const diasSemana = event.extendedProps?.dias_semana || [1, 2, 3, 4, 5, 6];
+                            totalHorasSemanales += diasSemana.length * 10;
+
+                            const props = event.extendedProps;
+                            if (props && props.numero_tienda && props.cadena) {
+                                tiendasUnicas.add(`${props.cadena}_#${props.numero_tienda}`);
+                            }
+                        }
+
+                        processed = end;
+
+                        if (processed < events.length) {
+                            requestAnimationFrame(processBatch);
+                        } else {
+                            // Actualizar UI cuando termine
+                            const activeStores = tiendasUnicas.size;
+                            const coverage = Math.min(100, Math.round((totalAssignments / 10) * 100));
+
+                            const elementos = {
+                                'total-assignments': totalAssignments,
+                                'total-hours': Math.round(totalHorasSemanales / (totalAssignments || 1)) + 'h/sem',
+                                'active-stores': activeStores,
+                                'coverage-percentage': coverage + '%'
+                            };
+
+                            Object.entries(elementos).forEach(([id, value]) => {
+                                const el = document.getElementById(id);
+                                if (el) el.textContent = value;
+                            });
+
+                            actualizarGraficoDistribucion(events);
+                            actualizarResumenOperativo(events);
+                        }
+                    };
+
+                    processBatch();
                 });
-
-                const activeStores = Math.max(tiendasUnicas.size, 0);
-                const coverage = Math.min(100, Math.round((totalAssignments / 30) * 100));
-
-                const elementos = {
-                    'total-assignments': totalAssignments,
-                    'total-hours': Math.round(totalHours) + 'h',
-                    'active-stores': activeStores,
-                    'coverage-percentage': coverage + '%'
-                };
-
-                Object.entries(elementos).forEach(([id, value]) => {
-                    const el = document.getElementById(id);
-                    if (el) el.textContent = value;
-                });
-
-                actualizarGraficoDistribucion(events);
-                actualizarResumenOperativo(events);
             }
 
             // ===== FUNCIÓN ACTUALIZADA: GRÁFICO DE DISTRIBUCIÓN =====
@@ -4780,19 +4132,16 @@
                 Object.entries(distributionMap).forEach(([promotor, count]) => {
                     const percentage = Math.round((count / total) * 100);
 
-                    // Determinar clase de color basada en el tipo REAL de promotor
                     let barClass = 'chart-bar';
 
-                    // Buscar el promotor en los datos reales
                     const promotorData = promotoresData.find(p =>
                         `${p.nombre} ${p.apellido}`.trim() === promotor.trim()
                     );
 
-                    // Asignar color según el tipo_trabajo real del promotor
                     if (promotorData && promotorData.tipo_trabajo === 'cubredescansos') {
-                        barClass += ' maria-bar';  // Color naranja para cubredescansos
+                        barClass += ' maria-bar';
                     } else {
-                        barClass += ' juan-bar';   // Color azul para fijos
+                        barClass += ' juan-bar';
                     }
 
                     html += `
@@ -4821,16 +4170,16 @@
 
                 const html = `
                     <div class="summary-item">
-                        <strong>Promotores Activos:</strong> ${totalPromotores} con asignaciones
+                        <strong>Promotores Activos:</strong> ${totalPromotores} con contratos
                     </div>
                     <div class="summary-item">
                         <strong>Tiendas Cubiertas:</strong> ${totalTiendas} tiendas con cobertura
                     </div>
                     <div class="summary-item">
-                        <strong>Promedio de Asignaciones:</strong> ${promedioAsignaciones} por promotor
+                        <strong>Promedio de Contratos:</strong> ${promedioAsignaciones} por promotor
                     </div>
                     <div class="summary-item">
-                        <strong>Estado:</strong> ${datosAutomaticosExitosos ? '✅ Datos cargados desde BD' : '⚠️ Datos de ejemplo'}
+                        <strong>Estado:</strong> ${datosAutomaticosExitosos ? 'Contratos Recurrentes Activos' : 'Sin datos'}
                     </div>
                 `;
 
@@ -4876,7 +4225,7 @@
                 const modal = document.getElementById('modal-evento-horas');
                 if (!modal) return;
 
-                console.log('📝 Abriendo modal de evento');
+                console.log('Abriendo modal de contrato');
                 currentEvent = event;
 
                 limpiarModal();
@@ -4892,7 +4241,7 @@
                     document.getElementById('event-promotor-cobertura-comida').value = '';
 
                     if (startDate) {
-                        document.getElementById('event-fecha-horas').value = startDate.toISOString().split('T')[0];
+                        document.getElementById('event-fecha-inicio').value = startDate.toISOString().split('T')[0];
                     }
                     document.getElementById('btn-eliminar-horas').style.display = 'none';
 
@@ -4907,7 +4256,8 @@
                 document.getElementById('event-promotor-horas').value = '';
                 document.getElementById('event-tienda-horas').value = '';
                 document.getElementById('event-tipo-horas').value = 'fijo-principal';
-                document.getElementById('event-fecha-horas').value = '';
+                document.getElementById('event-fecha-inicio').value = '';
+                document.getElementById('event-fecha-fin').value = '';
                 document.getElementById('event-notas-horas').value = '';
 
                 document.getElementById('event-hora-entrada').value = '09:00';
@@ -4915,17 +4265,6 @@
                 document.getElementById('event-hora-comida-inicio').value = '14:00';
                 document.getElementById('event-duracion-comida').value = '60';
                 document.getElementById('event-promotor-cobertura-comida').value = '';
-
-                document.getElementById('assignment-type-selector').value = 'single';
-                document.getElementById('fecha-inicio-multiple').value = '';
-                document.getElementById('fecha-fin-multiple').value = '';
-
-                document.querySelectorAll('#days-selector input[type="checkbox"]').forEach(cb => {
-                    cb.checked = false;
-                });
-
-                document.getElementById('single-date-group').style.display = 'block';
-                document.getElementById('multiple-assignment-group').style.display = 'none';
 
                 llenarPromotoresCoberturaComida(null);
             }
@@ -4940,8 +4279,11 @@
                 if (props.id_tienda) {
                     document.getElementById('event-tienda-horas').value = props.id_tienda;
                 }
-                if (event.start) {
-                    document.getElementById('event-fecha-horas').value = event.start.toISOString().split('T')[0];
+                if (props.fecha_inicio) {
+                    document.getElementById('event-fecha-inicio').value = props.fecha_inicio.split('T')[0];
+                }
+                if (props.fecha_fin) {
+                    document.getElementById('event-fecha-fin').value = props.fecha_fin.split('T')[0];
                 }
                 if (props.motivo_asignacion) {
                     document.getElementById('event-notas-horas').value = props.motivo_asignacion;
@@ -4976,33 +4318,164 @@
                 limpiarModal();
             }
 
-            function determinarClaseEvento(tipo) {
-                switch (tipo) {
-                    case 'fijo-principal': return 'event-fijo-principal';
-                    case 'fijo-rotacion': return 'event-fijo-rotacion';
-                    case 'cubredescansos-apoyo': return 'event-cubredescansos-apoyo';
-                    case 'cubredescansos-otros': return 'event-cubredescansos-otros';
-                    case 'descanso': return 'event-descanso';
-                    default: return 'event-fijo-principal';
+            function limpiarCache() {
+                eventCache.clear();
+                console.log('🧹 Caché limpiada');
+            }
+
+            // ===== FUNCIÓN PARA GUARDAR EVENTO =====
+            async function guardarEvento() {
+                try {
+                    console.log('💾 Iniciando guardado de evento...');
+
+                    // Obtener valores o usar defaults
+                    const promotorId = document.getElementById('event-promotor-horas')?.value || null;
+                    const tiendaId = document.getElementById('event-tienda-horas')?.value || null;
+                    const tipo = document.getElementById('event-tipo-horas')?.value || 'fijo-principal';
+                    const notas = document.getElementById('event-notas-horas')?.value || '';
+                    const fecha = document.getElementById('event-fecha-horas')?.value || new Date().toISOString().split('T')[0];
+
+                    // Campos con valores por defecto
+                    const horaEntrada = document.getElementById('event-hora-entrada')?.value || '09:00';
+                    const horaSalida = document.getElementById('event-hora-salida')?.value || '19:00';
+                    const horaComidaInicio = document.getElementById('event-hora-comida-inicio')?.value || '14:00';
+                    const duracionComida = parseInt(document.getElementById('event-duracion-comida')?.value || '60');
+                    const promotorCoberturaComida = document.getElementById('event-promotor-cobertura-comida')?.value || null;
+
+                    const selectorTipoAsignacion = document.getElementById('assignment-type-selector');
+                    const tipoAsignacion = selectorTipoAsignacion ? selectorTipoAsignacion.value : 'single';
+
+                    // SIN VALIDACIONES - solo advertencia si faltan datos importantes
+                    if (!promotorId || !tiendaId) {
+                        console.warn('⚠️ Guardando sin promotor o tienda definidos');
+                    }
+
+                    if (tipoAsignacion === 'multiple') {
+                        await guardarAsignacionMultiple(promotorId, tiendaId, tipo, notas, horaEntrada, horaSalida, horaComidaInicio, duracionComida, promotorCoberturaComida);
+                    } else {
+                        const promotor = promotorId ? promotoresData.find(p => p.id_promotor == promotorId) : null;
+                        const tienda = tiendaId ? tiendasData.find(t => t.id_tienda == tiendaId) : null;
+
+                        // Calcular días laborales
+                        let diasSemana = [1, 2, 3, 4, 5, 6]; // Lunes a Sábado por defecto
+
+                        if (promotor && promotor.dia_descanso) {
+                            let diaDescansoNum = -1;
+
+                            if (typeof promotor.dia_descanso === 'number') {
+                                diaDescansoNum = promotor.dia_descanso === 7 ? 0 : promotor.dia_descanso;
+                            } else if (typeof promotor.dia_descanso === 'string') {
+                                const diaStr = promotor.dia_descanso.trim();
+
+                                if (/^[1-7]$/.test(diaStr)) {
+                                    const diaNum = parseInt(diaStr);
+                                    diaDescansoNum = diaNum === 7 ? 0 : diaNum;
+                                } else {
+                                    const diasSemanaTexto = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+                                    diaDescansoNum = diasSemanaTexto.indexOf(diaStr.toLowerCase());
+                                }
+                            }
+
+                            if (diaDescansoNum >= 0 && diaDescansoNum <= 6) {
+                                diasSemana = [0, 1, 2, 3, 4, 5, 6].filter(d => d !== diaDescansoNum);
+                            }
+                        }
+
+                        const datosCompletos = {
+                            id_promotor: promotorId,
+                            id_tienda: tiendaId,
+                            fecha_inicio: fecha,
+                            dias_semana: diasSemana.join(','),
+                            fecha_fin: null,
+                            motivo_asignacion: notas || 'Asignación desde calendario',
+                            tipo_asignacion: tipo && tipo.includes('fijo') ? 'Principal' : 'Individual',
+                            hora_entrada: horaEntrada,
+                            hora_salida: horaSalida,
+                            hora_comida_inicio: horaComidaInicio,
+                            duracion_comida_minutos: duracionComida,
+                            id_promotor_cobertura_comida: promotorCoberturaComida,
+                            notas_horario: notas || 'Asignación desde calendario de horas'
+                        };
+
+                        console.log('📡 Guardando con datos:', datosCompletos);
+
+                        if (currentEvent && currentEvent.extendedProps && currentEvent.extendedProps.id_asignacion) {
+                            await actualizarEventoExistente(currentEvent, datosCompletos);
+                        } else {
+                            await crearAsignacionBD(datosCompletos);
+
+                            const asignacionesActualizadas = await cargarAsignacionesReales();
+                            todosLosEventos = asignacionesActualizadas;
+                            // Después de la línea: todosLosEventos = asignacionesActualizadas;
+                            limpiarCache();
+                            aplicarFiltroTienda();
+                            actualizarDashboard();
+
+                            if (currentTab === 'asignaciones' && tiendaSeleccionadaDetalle) {
+                                setTimeout(() => {
+                                    cargarVistaDetalleTienda(tiendaSeleccionadaDetalle.id_tienda);
+                                }, 300);
+                            }
+
+                            alert('✅ Guardado exitosamente');
+                        }
+                    }
+
+                    closeModal();
+
+                } catch (error) {
+                    console.error('❌ Error guardando:', error);
+                    alert('❌ Error: ' + error.message);
                 }
             }
 
-            function manejarSelectorTipoAsignacion() {
-                const selector = document.getElementById('assignment-type-selector');
-                const singleGroup = document.getElementById('single-date-group');
-                const multipleGroup = document.getElementById('multiple-assignment-group');
+            // ===== ELIMINAR EVENTO =====
+            async function eliminarEvento() {
+                if (!currentEvent || !currentEvent.extendedProps.id_asignacion) {
+                    alert('No se puede eliminar este evento');
+                    return;
+                }
 
-                if (!selector || !singleGroup || !multipleGroup) return;
+                if (!confirm('¿Estás seguro de que deseas eliminar esta asignación?')) {
+                    return;
+                }
 
-                selector.addEventListener('change', function () {
-                    if (this.value === 'multiple') {
-                        singleGroup.style.display = 'none';
-                        multipleGroup.style.display = 'block';
-                    } else {
-                        singleGroup.style.display = 'block';
-                        multipleGroup.style.display = 'none';
+                try {
+                    const idPromotorActual = currentEvent.extendedProps.id_promotor;
+
+                    const response = await fetch(`${window.location.origin}/promotoria/api/hoja_horario.php?resource=asignaciones&id=${currentEvent.extendedProps.id_asignacion}`, {
+                        method: 'DELETE',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                    const resultado = await response.json();
+                    if (!resultado.success) throw new Error(resultado.message);
+
+                    // Eliminar de la lista local
+                    todosLosEventos = todosLosEventos.filter(e => e.id !== currentEvent.id);
+
+                    limpiarCache();
+                    // Actualizar vista
+                    aplicarFiltroTienda();
+                    actualizarDashboard();
+                    closeModal();
+
+                    alert('✅ Asignación eliminada exitosamente');
+                    console.log('✅ Evento eliminado correctamente');
+
+                    // Si estamos en la pestaña de filtros tienda, recargar la vista
+                    if (currentTab === 'asignaciones' && tiendaSeleccionadaDetalle) {
+                        setTimeout(() => {
+                            cargarVistaDetalleTienda(tiendaSeleccionadaDetalle.id_tienda);
+                        }, 300);
                     }
-                });
+
+                } catch (error) {
+                    console.error('❌ Error eliminando evento:', error);
+                    alert('Error eliminando el evento: ' + error.message);
+                }
             }
 
             function configurarEventListenersModal() {
@@ -5034,9 +4507,6 @@
                     newBtnCerrar.addEventListener('click', closeModal);
                 }
 
-                manejarSelectorTipoAsignacion();
-                configurarSelectoresDias();
-
                 const horaEntrada = document.getElementById('event-hora-entrada');
                 const horaSalida = document.getElementById('event-hora-salida');
                 const duracionComida = document.getElementById('event-duracion-comida');
@@ -5049,46 +4519,6 @@
                 if (promotorSelect) {
                     promotorSelect.addEventListener('change', function () {
                         llenarPromotoresCoberturaComida(this.value);
-                    });
-                }
-            }
-
-            function configurarSelectoresDias() {
-                const btnTodos = document.getElementById('select-all-days');
-                if (btnTodos) {
-                    btnTodos.addEventListener('click', function () {
-                        document.querySelectorAll('#days-selector input[type="checkbox"]').forEach(cb => {
-                            cb.checked = true;
-                        });
-                    });
-                }
-
-                const btnSemana = document.getElementById('select-weekdays');
-                if (btnSemana) {
-                    btnSemana.addEventListener('click', function () {
-                        document.querySelectorAll('#days-selector input[type="checkbox"]').forEach(cb => {
-                            const day = parseInt(cb.value);
-                            cb.checked = day >= 1 && day <= 5;
-                        });
-                    });
-                }
-
-                const btnFinSemana = document.getElementById('select-weekend');
-                if (btnFinSemana) {
-                    btnFinSemana.addEventListener('click', function () {
-                        document.querySelectorAll('#days-selector input[type="checkbox"]').forEach(cb => {
-                            const day = parseInt(cb.value);
-                            cb.checked = day === 0 || day === 6;
-                        });
-                    });
-                }
-
-                const btnLimpiar = document.getElementById('clear-days');
-                if (btnLimpiar) {
-                    btnLimpiar.addEventListener('click', function () {
-                        document.querySelectorAll('#days-selector input[type="checkbox"]').forEach(cb => {
-                            cb.checked = false;
-                        });
                     });
                 }
             }
@@ -5107,8 +4537,9 @@
                 const btnGenerar = document.getElementById('btn-generar-horarios');
                 if (btnGenerar) {
                     addListener(btnGenerar, 'click', () => {
-                        const totalEvents = todosLosEventos.length;
-                        alert(`SISTEMA COMPLETO:\n\n✅ Datos cargados automáticamente\n📊 Total asignaciones: ${totalEvents}\n🕐 Con horarios laborales configurables\n\nESTADO: ${datosAutomaticosExitosos ? 'DATOS REALES' : 'SIN DATOS'}`);
+                        aplicarFiltroTienda();
+                        actualizarDashboard();
+                        alert(`✅ Vista actualizada\n\n📅 Mostrando contratos hasta: ${new Date().toLocaleDateString('es-ES')}\n📊 Total visible: ${calendar.getEvents().length} eventos`);
                     });
                 }
 
@@ -5126,9 +4557,6 @@
                 addListener(window, 'click', function (event) {
                     const modal = document.getElementById('modal-evento-horas');
                     if (event.target === modal) closeModal();
-
-                    const modalIncidencia = document.getElementById('modal-incidencia');
-                    if (event.target === modalIncidencia) cerrarModalIncidencia();
                 });
 
                 // Cerrar tooltip en scroll o resize
@@ -5148,46 +4576,47 @@
 
                 const reportContent = `
                     <div style="text-align: center; margin-bottom: 30px;">
-                        <h2 style="color: var(--primary-color);">📊 Reporte del Sistema Completo</h2>
+                        <h2 style="color: var(--primary-color);">Reporte del Sistema de Contratos Recurrentes</h2>
                         <p style="color: ${datosAutomaticosExitosos ? 'var(--success-color)' : 'var(--warning-color)'};">
-                            ${datosAutomaticosExitosos ? '✅ Datos desde BD' : '⚠️ Sin datos'}
+                            ${datosAutomaticosExitosos ? 'Datos desde BD' : 'Sin datos'}
                         </p>
                         <hr style="margin: 20px 0; border: none; border-top: 2px solid var(--border-color);">
                     </div>
                     
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px;">
                         <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; text-align: center;">
-                            <h4 style="color: #1976d2;">Total Asignaciones</h4>
+                            <h4 style="color: #1976d2;">Contratos Activos</h4>
                             <div style="font-size: 2rem; font-weight: bold;">${events.length}</div>
-                            <small>Con horarios configurados</small>
+                            <small>Con recurrencia semanal</small>
                         </div>
                         <div style="background: #e8f5e8; padding: 15px; border-radius: 8px; text-align: center;">
                             <h4 style="color: var(--success-color);">Horas Programadas</h4>
                             <div style="font-size: 2rem; font-weight: bold;">${totalHoras}h</div>
-                            <small>Incluye horarios de comida</small>
+                            <small>Incluye horarios configurados</small>
                         </div>
                         <div style="background: #fff3e0; padding: 15px; border-radius: 8px; text-align: center;">
                             <h4 style="color: var(--warning-color);">Sistema</h4>
-                            <div style="font-size: 1.2rem; font-weight: bold;">${datosAutomaticosExitosos ? '✅ ACTIVO' : '⚠️ SIN DATOS'}</div>
+                            <div style="font-size: 1.2rem; font-weight: bold;">${datosAutomaticosExitosos ? 'ACTIVO' : 'SIN DATOS'}</div>
                         </div>
                     </div>
                     
                     <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid var(--border-color);">
-                        <h3 style="color: var(--success-color);">✅ Sistema Completo con Vista Detallada</h3>
+                        <h3 style="color: var(--success-color);">Sistema de Contratos Recurrentes Completo</h3>
                         <ul style="line-height: 1.8;">
-                            <li>📅 Calendario interactivo</li>
-                            <li>🏪 Vista detallada por tienda</li>
-                            <li>🕐 Horarios configurables</li>
-                            <li>👥 Cobertura de comidas</li>
-                            <li>⚠️ Sistema de incidencias</li>
-                            <li>📊 Dashboard y reportes</li>
+                            <li>Calendario con eventos recurrentes semanales</li>
+                            <li>Vista detallada por tienda con semana actual</li>
+                            <li>Horarios laborales configurables</li>
+                            <li>Tooltips informativos mejorados</li>
+                            <li>Dashboard con métricas en tiempo real</li>
+                            <li>Respeto automático de días de descanso</li>
+                            <li>Contratos indefinidos o con fecha de fin</li>
                         </ul>
                     </div>
                     
                     <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; text-align: center;">
                         <small>
-                            📅 ${new Date().toLocaleString('es-ES')}<br>
-                            🔧 SISTEMA COMPLETO INTEGRADO
+                            ${new Date().toLocaleString('es-ES')}<br>
+                            SISTEMA RECURRENTE COMPLETO INTEGRADO
                         </small>
                     </div>
                 `;
@@ -5198,7 +4627,7 @@
             // ===== INICIALIZACIÓN DEL MÓDULO PRINCIPAL =====
             async function initModule() {
                 try {
-                    console.log('🚀 INICIANDO SISTEMA COMPLETO CORREGIDO');
+                    console.log('INICIANDO SISTEMA RECURRENTE COMPLETO');
 
                     elements.dependenciesLoading.style.display = 'flex';
                     elements.mainContentHoras.style.display = 'none';
@@ -5206,9 +4635,9 @@
 
                     await loadFullCalendarDependencies();
 
-                    updateLoadingProgress('🔄 Cargando todos los datos automáticamente...');
+                    updateLoadingProgress('Cargando todos los datos automáticamente...');
 
-                    let eventosAutomaticos = [];
+                    let eventosRecurrentes = [];
 
                     const promesasCarga = [
                         cargarPromotoresReales().catch(err => []),
@@ -5220,26 +4649,33 @@
 
                     if (promotoresResult.length > 0) promotoresData = promotoresResult;
                     if (tiendasResult.length > 0) tiendasData = tiendasResult;
-                    if (asignacionesResult.length > 0) eventosAutomaticos = asignacionesResult;
+                    if (asignacionesResult.length > 0) eventosRecurrentes = asignacionesResult;
 
-                    datosAutomaticosExitosos = eventosAutomaticos.length > 0;
+                    datosAutomaticosExitosos = eventosRecurrentes.length > 0;
 
                     llenarSelectsModal();
-                    await initializeCalendar(eventosAutomaticos);
+                    await initializeCalendar(eventosRecurrentes);
 
                     elements.dependenciesLoading.style.display = 'none';
                     elements.mainContentHoras.style.display = 'block';
+
+                    // AGREGAR ESTA LÍNEA INMEDIATAMENTE DESPUÉS:
+                    iniciarActualizacionDiaria();
 
                     initializeEventListeners();
 
                     setTimeout(() => {
                         actualizarDashboard();
                         switchTab('calendario');
-                        console.log('🏁 INICIALIZACIÓN COMPLETADA');
-                    }, 200);
+
+                        // APLICAR FILTRO DE FECHA AL CARGAR POR PRIMERA VEZ
+                        aplicarFiltroTienda();
+
+                        console.log('INICIALIZACIÓN COMPLETADA');
+                    }, 200);;
 
                 } catch (error) {
-                    console.error('❌ ERROR CRÍTICO EN INICIALIZACIÓN:', error);
+                    console.error('ERROR CRÍTICO EN INICIALIZACIÓN:', error);
                     showError(`Error crítico cargando el módulo: ${error.message}`);
                 }
             }

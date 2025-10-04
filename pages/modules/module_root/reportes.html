@@ -1086,7 +1086,11 @@ body {
 </style>
 
 <!-- ===== SCRIPTS ===== -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<!-- ExcelJS para generar Excel con colores -->
+<script src="https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js"></script>
+<!-- FileSaver para descargar archivos -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+<!-- jsPDF para generar PDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 
@@ -1121,13 +1125,11 @@ const modalDetalle = document.getElementById('modal-detalle');
 // ===== FUNCIÓN PARA OBTENER FECHAS DINÁMICAS =====
 function obtenerFechasSemanaActual() {
     const hoy = new Date();
-    const diaSemana = hoy.getDay(); // 0 = domingo, 1 = lunes, etc.
+    const diaSemana = hoy.getDay();
     
-    // Calcular el lunes de esta semana
     const lunes = new Date(hoy);
     lunes.setDate(hoy.getDate() - (diaSemana === 0 ? 6 : diaSemana - 1));
     
-    // Calcular el domingo de esta semana
     const domingo = new Date(lunes);
     domingo.setDate(lunes.getDate() + 6);
     
@@ -1147,12 +1149,12 @@ function establecerFechasPorDefecto() {
     filtrosAplicados.fecha_inicio = fechasSemana.inicio;
     filtrosAplicados.fecha_fin = fechasSemana.fin;
     
-    console.log(`📅 Fechas por defecto establecidas: ${fechasSemana.inicio} al ${fechasSemana.fin}`);
+    console.log(`Fechas por defecto establecidas: ${fechasSemana.inicio} al ${fechasSemana.fin}`);
 }
 
 // ===== INICIALIZACIÓN CORREGIDA =====
 function init() {
-    console.log('✅ Inicializando módulo CORREGIDO Reportes Tiendas → Promotores...');
+    console.log('Inicializando módulo CORREGIDO Reportes Tiendas → Promotores...');
     
     establecerFechasPorDefecto();
     configurarEventListeners();
@@ -1161,7 +1163,7 @@ function init() {
     cargarPromotores();
     cargarTiendas();
     
-    console.log('✅ Sistema iniciado. Haga clic en "Consultar Reporte" para cargar datos.');
+    console.log('Sistema iniciado. Haga clic en "Consultar Reporte" para cargar datos.');
 }
 
 // ===== CARGA DINÁMICA DE DATOS =====
@@ -1199,14 +1201,14 @@ async function cargarPromotores() {
                 filtroPromotor.appendChild(option);
             });
             
-            console.log(`✅ ${promotores.length} promotores cargados dinámicamente`);
+            console.log(`${promotores.length} promotores cargados dinámicamente`);
         } else {
-            console.warn('⚠️ No se pudieron cargar los promotores:', resultado.message);
+            console.warn('No se pudieron cargar los promotores:', resultado.message);
             mostrarNotificacion('No se pudieron cargar los promotores', 'warning');
         }
         
     } catch (error) {
-        console.error('❌ Error cargando promotores:', error);
+        console.error('Error cargando promotores:', error);
         mostrarNotificacion('Error al cargar promotores', 'error');
     } finally {
         promotorLoading.style.display = 'none';
@@ -1247,14 +1249,14 @@ async function cargarTiendas() {
                 filtroTienda.appendChild(option);
             });
             
-            console.log(`✅ ${tiendas.length} tiendas cargadas dinámicamente`);
+            console.log(`${tiendas.length} tiendas cargadas dinámicamente`);
         } else {
-            console.warn('⚠️ No se pudieron cargar las tiendas:', resultado.message);
+            console.warn('No se pudieron cargar las tiendas:', resultado.message);
             mostrarNotificacion('No se pudieron cargar las tiendas', 'warning');
         }
         
     } catch (error) {
-        console.error('❌ Error cargando tiendas:', error);
+        console.error('Error cargando tiendas:', error);
         mostrarNotificacion('Error al cargar tiendas', 'error');
     } finally {
         tiendaLoading.style.display = 'none';
@@ -1262,23 +1264,19 @@ async function cargarTiendas() {
 }
 
 function configurarEventListeners() {
-    // Cambio en fechas
     fechaInicio.addEventListener('change', actualizarRangoFechas);
     fechaFin.addEventListener('change', actualizarRangoFechas);
     
-    // Botones principales
     btnConsultar.addEventListener('click', consultarReporte);
     btnLimpiarFiltros.addEventListener('click', limpiarFiltros);
     btnDescargarExcel.addEventListener('click', descargarExcel);
     btnDescargarPdf.addEventListener('click', descargarPDF);
     
-    // Modal
     document.getElementById('modal-close-detalle').addEventListener('click', cerrarModalDetalle);
     modalDetalle.addEventListener('click', (e) => {
         if (e.target === modalDetalle) cerrarModalDetalle();
     });
     
-    // ESC para cerrar modales
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             cerrarModalDetalle();
@@ -1300,7 +1298,6 @@ function actualizarRangoFechas() {
     const fechaInicioSeleccionada = new Date(fechaInicio.value + 'T00:00:00');
     const fechaFinSeleccionada = new Date(fechaFin.value + 'T00:00:00');
     
-    // Validar que la fecha fin no sea menor que la fecha inicio
     if (fechaFinSeleccionada < fechaInicioSeleccionada) {
         fechaFin.value = fechaInicio.value;
         mostrarNotificacion('La fecha fin no puede ser anterior a la fecha inicio', 'warning');
@@ -1316,7 +1313,6 @@ function actualizarRangoFechas() {
     filtrosAplicados.fecha_inicio = fechaInicio.value;
     filtrosAplicados.fecha_fin = fechaFin.value;
     
-    // Actualizar texto del período en estadísticas
     const periodoSeleccionado = document.getElementById('periodo-seleccionado');
     if (periodoSeleccionado) {
         const diferenciaMs = fechaFinSeleccionada - fechaInicioSeleccionada;
@@ -1327,7 +1323,7 @@ function actualizarRangoFechas() {
 
 // ===== CONSULTA DE REPORTE CORREGIDA =====
 async function consultarReporte() {
-    console.log('🔍 Iniciando consulta de reporte CORREGIDA...');
+    console.log('Iniciando consulta de reporte CORREGIDA...');
     
     if (!fechaInicio.value || !fechaFin.value) {
         mostrarNotificacion('Por favor seleccione un rango de fechas válido', 'warning');
@@ -1354,15 +1350,15 @@ async function consultarReporte() {
         
         if (filtroPromotor.value && filtroPromotor.value.trim() !== '') {
             datosConsulta.filtro_promotor = parseInt(filtroPromotor.value);
-            console.log(`🔍 Filtro por promotor: ${filtroPromotor.value}`);
+            console.log(`Filtro por promotor: ${filtroPromotor.value}`);
         }
         
         if (filtroTienda.value && filtroTienda.value.trim() !== '') {
             datosConsulta.filtro_tienda = parseInt(filtroTienda.value);
-            console.log(`🔍 Filtro por tienda: ${filtroTienda.value}`);
+            console.log(`Filtro por tienda: ${filtroTienda.value}`);
         }
         
-        console.log('📤 Enviando consulta CORREGIDA con datos:', datosConsulta);
+        console.log('Enviando consulta CORREGIDA con datos:', datosConsulta);
         
         const response = await fetch('../../api/reportes.php', {
             method: 'POST',
@@ -1377,7 +1373,7 @@ async function consultarReporte() {
         }
         
         const resultado = await response.json();
-        console.log('📥 Respuesta del servidor CORREGIDA:', resultado);
+        console.log('Respuesta del servidor CORREGIDA:', resultado);
         
         if (!resultado.success) {
             throw new Error(resultado.message || 'Error desconocido en la respuesta del servidor');
@@ -1386,13 +1382,12 @@ async function consultarReporte() {
         const asignacionesAPI = resultado.data.asignaciones || [];
         const estadisticasAPI = resultado.data.estadisticas || {};
         
-        console.log(`📊 Asignaciones encontradas: ${asignacionesAPI.length}`);
-        console.log('📈 Estadísticas:', estadisticasAPI);
+        console.log(`Asignaciones encontradas: ${asignacionesAPI.length}`);
+        console.log('Estadísticas:', estadisticasAPI);
         
-        // Mostrar información de debug si está disponible
         if (resultado.data.debug_info) {
-            console.log('🔧 Debug info:', resultado.data.debug_info);
-            console.log('🎯 Estrategia usada:', resultado.data.estrategia_usada);
+            console.log('Debug info:', resultado.data.debug_info);
+            console.log('Estrategia usada:', resultado.data.estrategia_usada);
         }
         
         if (asignacionesAPI.length === 0) {
@@ -1402,9 +1397,8 @@ async function consultarReporte() {
                 'info'
             );
             
-            // Mostrar información adicional si hay datos de debug
             if (resultado.data.debug_info && resultado.data.debug_info.tiendas_muestra) {
-                console.log('🏪 Tiendas disponibles en BD:', resultado.data.debug_info.tiendas_muestra);
+                console.log('Tiendas disponibles en BD:', resultado.data.debug_info.tiendas_muestra);
             }
         } else {
             reporteActual = asignacionesAPI;
@@ -1414,13 +1408,13 @@ async function consultarReporte() {
             actualizarSubtituloReporte();
             
             mostrarNotificacion(
-                `✅ Reporte generado exitosamente: ${asignacionesAPI.length} asignaciones encontradas en ${estadisticasAPI.total_tiendas} tiendas`, 
+                `Reporte generado exitosamente: ${asignacionesAPI.length} asignaciones encontradas en ${estadisticasAPI.total_tiendas} tiendas`, 
                 'success'
             );
         }
         
     } catch (error) {
-        console.error('❌ Error consultando reporte:', error);
+        console.error('Error consultando reporte:', error);
         mostrarNotificacion(`Error al consultar el reporte: ${error.message}`, 'error');
         mostrarEstadoVacio();
     }
@@ -1431,9 +1425,8 @@ function renderizarTablaTiendasCorregida(asignaciones) {
     const tbody = document.getElementById('tbody-tiendas');
     tbody.innerHTML = '';
     
-    console.log('🎨 Renderizando tabla con', asignaciones.length, 'asignaciones');
+    console.log('Renderizando tabla con', asignaciones.length, 'asignaciones');
     
-    // Agrupar datos por tienda de forma más robusta
     const tiendasGroup = new Map();
     
     asignaciones.forEach((asignacion, index) => {
@@ -1458,16 +1451,14 @@ function renderizarTablaTiendasCorregida(asignaciones) {
         tiendasGroup.get(tiendaId).asignaciones.push(asignacion);
     });
     
-    console.log(`🏪 Se encontraron ${tiendasGroup.size} tiendas únicas`);
+    console.log(`Se encontraron ${tiendasGroup.size} tiendas únicas`);
     
-    // Generar filas para cada tienda
     for (const [tiendaId, data] of tiendasGroup) {
         const tienda = data.tienda;
         const asignacionesTienda = data.asignaciones;
         
         console.log(`Procesando tienda ${tienda.nombre} con ${asignacionesTienda.length} asignaciones`);
         
-        // Agrupar por promotor dentro de la tienda
         const promotoresGroup = new Map();
         asignacionesTienda.forEach(asignacion => {
             const promotorId = asignacion.promotor_id;
@@ -1493,7 +1484,6 @@ function renderizarTablaTiendasCorregida(asignaciones) {
         
         const totalDias = asignacionesTienda.length;
         
-        // Generar HTML para promotores asignados
         let promotoresHTML = '';
         for (const [promotorId, promotorData] of promotoresGroup) {
             promotoresHTML += `
@@ -1504,7 +1494,6 @@ function renderizarTablaTiendasCorregida(asignaciones) {
             `;
         }
         
-        // Generar HTML para días con cobertura específicos por promotor
         let diasCoberturaHTML = '';
         for (const [promotorId, promotorData] of promotoresGroup) {
             const diasFormateados = promotorData.dias
@@ -1567,7 +1556,7 @@ function renderizarTablaTiendasCorregida(asignaciones) {
         tbody.innerHTML += row;
     }
     
-    console.log(`✅ Tabla renderizada con ${tiendasGroup.size} tiendas`);
+    console.log(`Tabla renderizada con ${tiendasGroup.size} tiendas`);
 }
 
 // ===== FUNCIONES AUXILIARES =====
@@ -1598,7 +1587,7 @@ function mostrarEstadisticas(estadisticasAPI) {
     document.getElementById('stat-dias').textContent = diasPeriodo;
     document.getElementById('stat-dias-trabajados').textContent = totalAsignaciones;
     
-    console.log(`📊 Estadísticas mostradas: ${totalTiendas} tiendas, ${totalPromotores} promotores, ${totalAsignaciones} asignaciones`);
+    console.log(`Estadísticas mostradas: ${totalTiendas} tiendas, ${totalPromotores} promotores, ${totalAsignaciones} asignaciones`);
 }
 
 function calcularDiasPeriodo(fechaInicio, fechaFin) {
@@ -1629,7 +1618,6 @@ function mostrarEstadoVacio() {
     reporteContent.style.display = 'none';
     reporteEmpty.style.display = 'block';
     
-    // Mostrar estadísticas vacías
     document.getElementById('stat-tiendas').textContent = '0';
     document.getElementById('stat-promotores').textContent = '0';
     document.getElementById('stat-dias').textContent = filtrosAplicados.fecha_inicio && filtrosAplicados.fecha_fin ? 
@@ -1736,7 +1724,7 @@ function cerrarModalDetalle() {
 
 // ===== LIMPIAR FILTROS =====
 function limpiarFiltros() {
-    console.log('🧹 Limpiando filtros...');
+    console.log('Limpiando filtros...');
     
     filtroPromotor.value = '';
     filtroTienda.value = '';
@@ -1754,97 +1742,223 @@ function limpiarFiltros() {
     mostrarNotificacion('Filtros limpiados. Haga clic en "Consultar Reporte" para cargar nuevos datos.', 'info');
 }
 
-// ===== GENERACIÓN DE EXCEL =====
-function descargarExcel() {
+// ===== GENERACIÓN DE EXCEL CON EXCELJS - CON COLORES REALES =====
+async function descargarExcel() {
     if (!reporteActual || reporteActual.length === 0) {
         mostrarNotificacion('No hay datos para exportar', 'warning');
         return;
     }
     
     try {
-        // Crear libro de trabajo
-        const wb = XLSX.utils.book_new();
+        const workbook = new ExcelJS.Workbook();
+        workbook.creator = 'Sistema de Reportes';
+        workbook.created = new Date();
         
-        // Preparar datos para Excel
-        const datosExcel = [];
+        // HOJA PRINCIPAL DE DATOS
+        const worksheet = workbook.addWorksheet('Reporte Tiendas-Promotores');
         
-        // Encabezados
-        datosExcel.push([
-            'Tienda',
-            'Número',
-            'Región',
-            'Cadena',
-            'Ciudad',
-            'Estado',
-            'Promotor',
-            'RFC Promotor',
-            'Fecha',
-            'Día Semana',
-            'Claves'
-        ]);
-        
-        // Agrupar por tienda
+        // Preparar datos agrupados por tienda
         const tiendasGroup = {};
         reporteActual.forEach(asignacion => {
             if (!tiendasGroup[asignacion.tienda_id]) {
-                tiendasGroup[asignacion.tienda_id] = [];
+                tiendasGroup[asignacion.tienda_id] = {
+                    tienda: {
+                        id: asignacion.tienda_id,
+                        nombre: asignacion.tienda_nombre,
+                        numero: asignacion.tienda_numero,
+                        region: asignacion.tienda_region,
+                        cadena: asignacion.tienda_cadena
+                    },
+                    promotores: {}
+                };
             }
-            tiendasGroup[asignacion.tienda_id].push(asignacion);
-        });
-        
-        // Agregar datos
-        Object.entries(tiendasGroup).forEach(([tiendaId, asignaciones]) => {
-            asignaciones.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
             
-            asignaciones.forEach(asignacion => {
-                const fechaObj = new Date(asignacion.fecha + 'T00:00:00');
-                const fechaFormateada = fechaObj.toLocaleDateString('es-MX');
-                const clavesTexto = (asignacion.claves && asignacion.claves.length > 0) 
-                    ? asignacion.claves.join(', ') 
-                    : '';
-                
-                datosExcel.push([
-                    asignacion.tienda_nombre || '',
-                    asignacion.tienda_numero || '',
-                    asignacion.tienda_region || '',
-                    asignacion.tienda_cadena || '',
-                    asignacion.tienda_ciudad || '',
-                    asignacion.tienda_estado || '',
-                    asignacion.promotor_nombre || '',
-                    asignacion.promotor_rfc || '',
-                    fechaFormateada,
-                    asignacion.dia_semana || '',
-                    clavesTexto
-                ]);
+            if (!tiendasGroup[asignacion.tienda_id].promotores[asignacion.promotor_id]) {
+                tiendasGroup[asignacion.tienda_id].promotores[asignacion.promotor_id] = {
+                    nombre: asignacion.promotor_nombre,
+                    fechas: []
+                };
+            }
+            
+            tiendasGroup[asignacion.tienda_id].promotores[asignacion.promotor_id].fechas.push({
+                fecha: asignacion.fecha,
+                dia_semana: asignacion.dia_semana,
+                claves: asignacion.claves || []
             });
         });
         
-        // Crear hoja de trabajo
-        const ws = XLSX.utils.aoa_to_sheet(datosExcel);
+        // ENCABEZADOS PRINCIPALES
+        const headerRow = worksheet.addRow(['Promotor / Tienda', 'Días Trabajados', 'Total Días', 'Período', 'Claves']);
+        
+        // Estilo para encabezados principales (VERDE)
+        headerRow.eachCell((cell) => {
+            cell.fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: 'FF27AE60' }  // Verde
+            };
+            cell.font = {
+                bold: true,
+                color: { argb: 'FFFFFFFF' },  // Blanco
+                size: 12
+            };
+            cell.alignment = { vertical: 'middle', horizontal: 'center' };
+            cell.border = {
+                top: { style: 'thin' },
+                left: { style: 'thin' },
+                bottom: { style: 'thin' },
+                right: { style: 'thin' }
+            };
+        });
+        headerRow.height = 25;
+        
+        // Agregar datos agrupados por tienda
+        Object.entries(tiendasGroup).forEach(([tiendaId, tiendaData]) => {
+            const tienda = tiendaData.tienda;
+            
+            // FILA DE ENCABEZADO DE TIENDA (VERDE)
+            const tiendaRow = worksheet.addRow([
+                `TIENDA: ${tienda.nombre} (${tienda.numero || 'N/A'}) - Región ${tienda.region}`,
+                '', '', '', ''
+            ]);
+            
+            worksheet.mergeCells(`A${tiendaRow.number}:E${tiendaRow.number}`);
+            
+            tiendaRow.eachCell((cell) => {
+                cell.fill = {
+                    type: 'pattern',
+                    pattern: 'solid',
+                    fgColor: { argb: 'FF27AE60' }  // Verde
+                };
+                cell.font = {
+                    bold: true,
+                    color: { argb: 'FFFFFFFF' },  // Blanco
+                    size: 11
+                };
+                cell.alignment = { vertical: 'middle', horizontal: 'left' };
+                cell.border = {
+                    top: { style: 'medium' },
+                    left: { style: 'medium' },
+                    bottom: { style: 'medium' },
+                    right: { style: 'medium' }
+                };
+            });
+            tiendaRow.height = 20;
+            
+            // Agregar cada promotor bajo la tienda
+            Object.entries(tiendaData.promotores).forEach(([promotorId, promotorData]) => {
+                const fechasOrdenadas = promotorData.fechas
+                    .sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+                
+                const diasFormateados = fechasOrdenadas.map(fecha => {
+                    const fechaObj = new Date(fecha.fecha + 'T00:00:00');
+                    const diaCorto = fechaObj.toLocaleDateString('es-ES', { weekday: 'short' });
+                    return `${diaCorto} ${fechaObj.getDate()}`;
+                }).join(', ');
+                
+                const clavesPromotor = [...new Set(
+                    fechasOrdenadas.flatMap(fecha => fecha.claves || [])
+                )];
+                
+                const fechaInicioPeriodo = fechasOrdenadas[0].fecha;
+                const fechaFinPeriodo = fechasOrdenadas[fechasOrdenadas.length - 1].fecha;
+                
+                const promotorRow = worksheet.addRow([
+                    `  • ${promotorData.nombre}`,
+                    diasFormateados,
+                    `${fechasOrdenadas.length} días`,
+                    `${fechaInicioPeriodo} al ${fechaFinPeriodo}`,
+                    clavesPromotor.join(', ') || 'Sin claves'
+                ]);
+                
+                // Estilo para filas de promotores (BLANCO)
+                promotorRow.eachCell((cell) => {
+                    cell.fill = {
+                        type: 'pattern',
+                        pattern: 'solid',
+                        fgColor: { argb: 'FFFFFFFF' }  // Blanco
+                    };
+                    cell.font = {
+                        size: 10
+                    };
+                    cell.alignment = { vertical: 'middle', horizontal: 'left', wrapText: true };
+                    cell.border = {
+                        top: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+                        left: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+                        bottom: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+                        right: { style: 'thin', color: { argb: 'FFE2E8F0' } }
+                    };
+                });
+                promotorRow.height = 18;
+            });
+            
+            // FILA DE TOTAL POR TIENDA (VERDE CLARO)
+            const totalDiasTienda = Object.values(tiendaData.promotores)
+                .reduce((total, promotor) => total + promotor.fechas.length, 0);
+            const totalPromotores = Object.keys(tiendaData.promotores).length;
+            
+            const totalRow = worksheet.addRow([
+                `TOTAL TIENDA: ${totalPromotores} promotores, ${totalDiasTienda} días trabajados`,
+                '', '', '', ''
+            ]);
+            
+            worksheet.mergeCells(`A${totalRow.number}:E${totalRow.number}`);
+            
+            totalRow.eachCell((cell) => {
+                cell.fill = {
+                    type: 'pattern',
+                    pattern: 'solid',
+                    fgColor: { argb: 'FFD5F4E6' }  // Verde claro
+                };
+                cell.font = {
+                    bold: true,
+                    color: { argb: 'FF27AE60' },  // Verde
+                    size: 10
+                };
+                cell.alignment = { vertical: 'middle', horizontal: 'left' };
+                cell.border = {
+                    top: { style: 'thin', color: { argb: 'FF27AE60' } },
+                    left: { style: 'thin', color: { argb: 'FF27AE60' } },
+                    bottom: { style: 'thin', color: { argb: 'FF27AE60' } },
+                    right: { style: 'thin', color: { argb: 'FF27AE60' } }
+                };
+            });
+            totalRow.height = 18;
+            
+            // Fila en blanco para separación
+            worksheet.addRow(['', '', '', '', '']);
+        });
         
         // Ajustar ancho de columnas
-        const columnWidths = [
-            { wch: 30 },  // Tienda
-            { wch: 10 },  // Número
-            { wch: 10 },  // Región
-            { wch: 15 },  // Cadena
-            { wch: 20 },  // Ciudad
-            { wch: 15 },  // Estado
-            { wch: 25 },  // Promotor
-            { wch: 15 },  // RFC
-            { wch: 12 },  // Fecha
-            { wch: 12 },  // Día
-            { wch: 30 }   // Claves
+        worksheet.columns = [
+            { width: 50 },  // Promotor/Tienda
+            { width: 65 },  // Días Trabajados
+            { width: 15 },  // Total Días
+            { width: 30 },  // Período
+            { width: 35 }   // Claves
         ];
-        ws['!cols'] = columnWidths;
         
-        // Agregar hoja al libro
-        XLSX.utils.book_append_sheet(wb, ws, 'Reporte Tiendas-Promotores');
+        // HOJA DE RESUMEN CON COLORES
+        const resumenSheet = workbook.addWorksheet('Resumen');
         
-        // Crear hoja de resumen
-        const resumenData = [
-            ['RESUMEN ESTADÍSTICO'],
-            [''],
+        const tituloRow = resumenSheet.addRow(['RESUMEN ESTADÍSTICO']);
+        resumenSheet.mergeCells('A1:B1');
+        tituloRow.getCell(1).fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FF27AE60' }
+        };
+        tituloRow.getCell(1).font = {
+            bold: true,
+            color: { argb: 'FFFFFFFF' },
+            size: 14
+        };
+        tituloRow.getCell(1).alignment = { vertical: 'middle', horizontal: 'center' };
+        tituloRow.height = 30;
+        
+        resumenSheet.addRow([]);
+        
+        const datosResumen = [
             ['Tiendas con Cobertura', document.getElementById('stat-tiendas').textContent],
             ['Promotores Activos', document.getElementById('stat-promotores').textContent],
             ['Días del Período', document.getElementById('stat-dias').textContent],
@@ -1854,23 +1968,47 @@ function descargarExcel() {
             ['Fecha de Generación', new Date().toLocaleString('es-MX')]
         ];
         
-        const wsResumen = XLSX.utils.aoa_to_sheet(resumenData);
-        wsResumen['!cols'] = [{ wch: 25 }, { wch: 40 }];
-        XLSX.utils.book_append_sheet(wb, wsResumen, 'Resumen');
+        datosResumen.forEach((fila, index) => {
+            const row = resumenSheet.addRow(fila);
+            
+            if (fila[0] !== '') {
+                // Etiquetas (columna A)
+                row.getCell(1).font = { bold: true, size: 11 };
+                row.getCell(1).fill = {
+                    type: 'pattern',
+                    pattern: 'solid',
+                    fgColor: { argb: 'FFF8FAFC' }
+                };
+                row.getCell(1).alignment = { vertical: 'middle', horizontal: 'left' };
+                
+                // Valores (columna B)
+                row.getCell(2).font = { size: 11 };
+                row.getCell(2).alignment = { vertical: 'middle', horizontal: 'left' };
+            }
+            
+            row.height = 20;
+        });
         
-        // Generar nombre de archivo
+        resumenSheet.columns = [
+            { width: 25 },
+            { width: 50 }
+        ];
+        
+        // Generar archivo y descargar
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        
         const fechaInicioValor = fechaInicio.value;
         const fechaFinValor = fechaFin.value;
         const nombreArchivo = `reporte-tiendas-promotores-${fechaInicioValor}-${fechaFinValor}.xlsx`;
         
-        // Descargar archivo
-        XLSX.writeFile(wb, nombreArchivo);
+        saveAs(blob, nombreArchivo);
         
-        mostrarNotificacion('Excel descargado exitosamente', 'success');
+        mostrarNotificacion('Excel descargado exitosamente CON COLORES', 'success');
         
     } catch (error) {
         console.error('Error generando Excel:', error);
-        mostrarNotificacion('Error al generar Excel', 'error');
+        mostrarNotificacion('Error al generar Excel: ' + error.message, 'error');
     }
 }
 
@@ -1901,7 +2039,6 @@ function descargarPDF() {
         ];
         doc.text(stats.join(' | '), 20, 40);
         
-        // Agrupar datos por tienda para el PDF
         const tiendasGroup = {};
         reporteActual.forEach(asignacion => {
             if (!tiendasGroup[asignacion.tienda_id]) {
@@ -2080,15 +2217,8 @@ window.verDetalleTienda = verDetalleTienda;
 window.limpiarFiltros = limpiarFiltros;
 
 // ===== INICIALIZACIÓN FINAL =====
-console.log('✅ Módulo CORREGIDO Tiendas → Promotores iniciado');
-console.log('🔧 Correcciones aplicadas para múltiples tiendas:');
-console.log('  • Consultas SQL más flexibles y menos restrictivas');
-console.log('  • Mejor agrupamiento de datos por tienda');
-console.log('  • Múltiples estrategias de consulta como fallback');
-console.log('  • Logging mejorado para debugging');
-console.log('  • Eliminación de duplicados');
-console.log('  • Validaciones de datos más robustas');
-console.log('  • Exportación a Excel agregada');
+console.log('Módulo CORREGIDO Tiendas → Promotores iniciado');
+console.log('Usando ExcelJS para generar Excel CON COLORES REALES');
 
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
