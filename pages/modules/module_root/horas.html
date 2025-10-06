@@ -3690,15 +3690,227 @@
                     mostrarPromotoresAsignados(promotoresCompletos);
                 }
 
-                // GENERAR SEMANA ACTUAL
-                generarSemanaActual(idTienda);
+                // GENERAR CALENDARIO PARA CADA PROMOTOR
+                renderizarCalendarioPorPromotores(idTienda, promotoresCompletos);
 
                 // MOSTRAR SECCIONES
                 document.getElementById('promotor-asignado-section').style.display = 'block';
                 document.getElementById('leyenda-section').style.display = 'block';
                 document.getElementById('calendario-section').style.display = 'block';
+            }
 
-                renderizarCalendario();
+            function renderizarCalendarioPorPromotores(idTienda, promotores) {
+                const calendarioSection = document.getElementById('calendario-section');
+                if (!calendarioSection) return;
+
+                // Limpiar contenido actual
+                calendarioSection.innerHTML = '';
+
+                // Crear un bloque de semana para cada promotor
+                promotores.forEach((promotor, index) => {
+                    // Contenedor para este promotor
+                    const promotorBlock = document.createElement('div');
+                    promotorBlock.style.cssText = 'margin-bottom: 40px;';
+
+                    // Header del promotor
+                    const promotorHeader = document.createElement('div');
+                    promotorHeader.style.cssText = 'background: rgb(101, 217, 226); padding: 15px 20px; border-radius: 8px 8px 0 0; margin-bottom: 0;';
+
+                    const iniciales = `${promotor.nombre.charAt(0)}${promotor.apellido.charAt(0)}`;
+                    const diasSemana = promotor.diasSemana || [1, 2, 3, 4, 5, 6];
+                    const diasNombres = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+                    const diasTexto = diasSemana.map(d => diasNombres[d]).join(', ');
+
+                    promotorHeader.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.3rem; font-weight: 700;">
+                    ${iniciales}
+                </div>
+                <div>
+                    <h3 style="font-size: 1.1rem; margin-bottom: 5px; color: #333;">${promotor.nombre} ${promotor.apellido}</h3>
+                    <div style="display: flex; gap: 15px; color: #666; font-size: 0.85rem;">
+                        <span><strong>Tipo:</strong> ${promotor.tipo_trabajo}</span>
+                        <span><strong>Días:</strong> ${diasTexto}</span>
+                        <span style="background: #e3f2fd; padding: 3px 10px; border-radius: 4px; color: #1976d2; font-weight: 600;">
+                            ${promotor.numContratos} contrato${promotor.numContratos !== 1 ? 's' : ''}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        `;
+
+                    // Título de la semana
+                    const hoy = new Date();
+                    hoy.setHours(12, 0, 0, 0);
+                    const diaSemana = hoy.getDay();
+                    const domingo = new Date(hoy);
+                    domingo.setDate(hoy.getDate() - diaSemana);
+
+                    const semanaInicio = new Date(domingo);
+                    const semanaFin = new Date(domingo);
+                    semanaFin.setDate(domingo.getDate() + 6);
+
+                    const primerDia = semanaInicio.getDate();
+                    const ultimoDia = semanaFin.getDate();
+                    const mesInicio = semanaInicio.getMonth();
+                    const mesFin = semanaFin.getMonth();
+
+                    let tituloSemana;
+                    if (mesInicio !== mesFin) {
+                        const mesNombreInicio = semanaInicio.toLocaleDateString('es-ES', { month: 'long' });
+                        const mesNombreFin = semanaFin.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+                        tituloSemana = `Semana del ${primerDia} de ${mesNombreInicio} al ${ultimoDia} de ${mesNombreFin}`;
+                    } else {
+                        const mesNombre = semanaInicio.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+                        tituloSemana = `Semana del ${primerDia} al ${ultimoDia} de ${mesNombre}`;
+                    }
+
+                    const semanaHeader = document.createElement('div');
+                    semanaHeader.style.cssText = 'background: #f8f9fa; padding: 12px 20px; border-bottom: 2px solid #e0e0e0;';
+                    semanaHeader.innerHTML = `<div style="font-size: 1.1rem; font-weight: 600; color: #333;">${tituloSemana}</div>`;
+
+                    // Grid de días
+                    const gridDias = document.createElement('div');
+                    gridDias.className = 'calendario-grid';
+                    gridDias.style.cssText = 'display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; padding: 20px; background: white;';
+
+                    // Generar semana para este promotor específico
+                    const semanaPromotor = generarSemanaParaPromotor(idTienda, promotor.id_promotor);
+
+                    semanaPromotor.forEach(dia => {
+                        const diaCard = crearTarjetaDia(dia);
+                        gridDias.appendChild(diaCard);
+                    });
+
+                    // Resumen
+                    const resumen = crearResumenPromotor(semanaPromotor, promotor);
+
+                    // Ensamblar todo
+                    promotorBlock.appendChild(promotorHeader);
+                    promotorBlock.appendChild(semanaHeader);
+                    promotorBlock.appendChild(gridDias);
+                    promotorBlock.appendChild(resumen);
+
+                    calendarioSection.appendChild(promotorBlock);
+                });
+
+                calendarioSection.style.display = 'block';
+            }
+
+            function generarSemanaParaPromotor(idTienda, idPromotor) {
+                const hoy = new Date();
+                hoy.setHours(12, 0, 0, 0);
+
+                const diaSemana = hoy.getDay();
+                const domingo = new Date(hoy);
+                domingo.setDate(hoy.getDate() - diaSemana);
+                domingo.setHours(12, 0, 0, 0);
+
+                const semana = [];
+                const diasSemana = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+
+                // Obtener contratos de ESTE promotor en ESTA tienda
+                const contratosPromotor = todosLosEventos.filter(e =>
+                    e.extendedProps.id_tienda == idTienda &&
+                    e.extendedProps.id_promotor == idPromotor &&
+                    (e.extendedProps.activo === 1 || e.extendedProps.activo === '1' || e.extendedProps.activo === true)
+                );
+
+                for (let i = 0; i < 7; i++) {
+                    const fecha = new Date(domingo);
+                    fecha.setDate(domingo.getDate() + i);
+                    fecha.setHours(12, 0, 0, 0);
+                    const fechaStr = fecha.toISOString().split('T')[0];
+
+                    let tipoDia = 'sin_contrato';
+                    let promotor = null;
+                    let promotorComida = null;
+
+                    // Verificar si algún contrato de ESTE promotor cubre este día
+                    for (const contrato of contratosPromotor) {
+                        const diasSemanaContrato = contrato.extendedProps.dias_semana || [];
+
+                        const esDiaLaboral = Array.isArray(diasSemanaContrato)
+                            ? diasSemanaContrato.includes(i)
+                            : false;
+
+                        const fechaInicio = new Date(contrato.extendedProps.fecha_inicio);
+                        fechaInicio.setHours(0, 0, 0, 0);
+
+                        const fechaFin = contrato.extendedProps.fecha_fin ? new Date(contrato.extendedProps.fecha_fin) : null;
+                        if (fechaFin) fechaFin.setHours(23, 59, 59, 999);
+
+                        const fechaActual = new Date(fechaStr);
+                        fechaActual.setHours(12, 0, 0, 0);
+
+                        const dentroDelRango = fechaActual >= fechaInicio && (!fechaFin || fechaActual <= fechaFin);
+
+                        if (dentroDelRango) {
+                            if (esDiaLaboral) {
+                                tipoDia = 'trabajo';
+                                promotor = contrato.extendedProps.id_promotor;
+                                promotorComida = contrato.extendedProps.id_promotor_cobertura_comida;
+                                break;
+                            } else {
+                                tipoDia = 'descanso';
+                                promotor = contrato.extendedProps.id_promotor;
+                            }
+                        }
+                    }
+
+                    semana.push({
+                        fecha: fechaStr,
+                        dia: diasSemana[i],
+                        numero: fecha.getDate(),
+                        tipo: tipoDia,
+                        promotor: promotor,
+                        promotorComida: promotorComida
+                    });
+                }
+
+                return semana;
+            }
+
+            function crearResumenPromotor(semana, promotor) {
+                const resumen = document.createElement('div');
+                resumen.style.cssText = 'margin-top: 20px; padding: 20px; background: #f8f9fa; border-radius: 0 0 8px 8px; border-left: 4px solid #667eea;';
+
+                let diasTrabajados = 0;
+                let diasDescanso = 0;
+                let horasTotales = 0;
+
+                semana.forEach(dia => {
+                    if (dia.tipo === 'trabajo') {
+                        diasTrabajados++;
+                        horasTotales += 10;
+                    } else if (dia.tipo === 'descanso') {
+                        diasDescanso++;
+                    }
+                });
+
+                resumen.innerHTML = `
+        <h3 style="margin-bottom: 15px; color: #333; font-size: 1.1rem;">Resumen de ${promotor.nombre} ${promotor.apellido}</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px;">
+            <div style="background: white; padding: 15px; border-radius: 6px; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.05);">
+                <div style="font-size: 2rem; font-weight: 700; color: #667eea;">${diasTrabajados}</div>
+                <div style="font-size: 0.85rem; color: #666; margin-top: 5px;">Días Trabajados</div>
+            </div>
+            <div style="background: white; padding: 15px; border-radius: 6px; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.05);">
+                <div style="font-size: 2rem; font-weight: 700; color: #9E9E9E;">${diasDescanso}</div>
+                <div style="font-size: 0.85rem; color: #666; margin-top: 5px;">Días Descanso</div>
+            </div>
+            <div style="background: white; padding: 15px; border-radius: 6px; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.05);">
+                <div style="font-size: 2rem; font-weight: 700; color: #4CAF50;">${horasTotales}h</div>
+                <div style="font-size: 0.85rem; color: #666; margin-top: 5px;">Horas Totales</div>
+            </div>
+            <div style="background: white; padding: 15px; border-radius: 6px; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.05);">
+                <div style="font-size: 2rem; font-weight: 700; color: #FF9800;">${promotor.numContratos}</div>
+                <div style="font-size: 0.85rem; color: #666; margin-top: 5px;">Contratos</div>
+            </div>
+        </div>
+    `;
+
+                return resumen;
             }
 
             function mostrarPromotoresAsignados(promotores) {

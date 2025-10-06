@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vista Previa - Sistema de Incidencias</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f8fafc;
+            padding: 2rem;
+        }
+
+        :root {
+            --primary-color: #27ae60;
+            --primary-hover: #229954;
+            --primary-light: #d5f4e6;
+            --secondary-color: #6c757d;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --info-color: #3b82f6;
+            --background: #f8fafc;
+            --surface: rgba(255, 255, 255, 0.95);
+            --text-primary: #2d3748;
+            --text-secondary: #718096;
+            --border-color: #e2e8f0;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            --shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.15);
+            --radius: 12px;
+        }
+
+        .preview-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .preview-header {
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .preview-header h1 {
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .preview-header p {
+            color: var(--text-secondary);
+        }
+
+        .demo-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 1.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(39, 174, 96, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 20px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .btn-action {
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: white;
+        }
+
+        .btn-action.warning {
+            background: var(--warning-color);
+        }
+
+        .btn-action.view {
+            background: var(--info-color);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-container {
+            background: white;
+            border-radius: var(--radius);
+            width: 100%;
+            max-width: 900px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        .modal-container.modal-small {
+            max-width: 500px;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 1.5rem 2rem;
+            border-radius: var(--radius) var(--radius) 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: white;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-content {
+            padding: 2rem;
+        }
+
+        .modal-form {
+            padding: 2rem;
+        }
+
+        .incidencias-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .incidencia-stat-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            border: 2px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .incidencia-stat-card:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .incidencia-stat-card h5 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0 0 0.5rem 0;
+        }
+
+        .incidencia-stat-card.total h5 { color: var(--info-color); }
+        .incidencia-stat-card.activas h5 { color: var(--danger-color); }
+        .incidencia-stat-card.resueltas h5 { color: var(--success-color); }
+        .incidencia-stat-card.canceladas h5 { color: var(--secondary-color); }
+        .incidencia-stat-card.faltas h5 { color: var(--warning-color); }
+        .incidencia-stat-card.retardos h5 { color: var(--info-color); }
+
+        .incidencia-stat-card p {
+            margin: 0;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .incidencias-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .incidencia-card {
+            background: white;
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            border: 2px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .incidencia-card:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .incidencia-card.activa {
+            border-left: 4px solid var(--danger-color);
+        }
+
+        .incidencia-card.resuelta {
+            border-left: 4px solid var(--success-color);
+            opacity: 0.8;
+        }
+
+        .incidencia-card.cancelada {
+            border-left: 4px solid var(--secondary-color);
+            opacity: 0.6;
+        }
+
+        .incidencia-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .incidencia-tipo-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .incidencia-tipo-badge.falta { background: #ffe5e5; color: #c41e3a; }
+        .incidencia-tipo-badge.retardo { background: #fff3cd; color: #856404; }
+        .incidencia-tipo-badge.abandono { background: #f8d7da; color: #721c24; }
+        .incidencia-tipo-badge.actitud { background: #d1ecf1; color: #0c5460; }
+        .incidencia-tipo-badge.uniforme { background: #e7e8ea; color: #383d41; }
+        .incidencia-tipo-badge.sancion { background: #f5c6cb; color: #721c24; }
+        .incidencia-tipo-badge.otro { background: #d4edda; color: #155724; }
+
+        .incidencia-estatus-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .incidencia-estatus-badge.activa { background: var(--danger-color); color: white; }
+        .incidencia-estatus-badge.resuelta { background: var(--success-color); color: white; }
+        .incidencia-estatus-badge.cancelada { background: var(--secondary-color); color: white; }
+
+        .incidencia-body {
+            margin-bottom: 1rem;
+        }
+
+        .incidencia-body p {
+            margin: 0.5rem 0;
+            color: var(--text-primary);
+        }
+
+        .incidencia-body strong {
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .incidencia-descripcion {
+            background: #f8f9fa;
+            padding: 0.75rem;
+            border-radius: 6px;
+            margin: 0.5rem 0;
+            font-style: italic;
+            color: var(--text-primary);
+        }
+
+        .incidencia-actions {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+        }
+
+        .incidencia-resolucion {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            padding: 1rem;
+            border-radius: 6px;
+            margin-top: 1rem;
+        }
+
+        .incidencia-resolucion h5 {
+            margin: 0 0 0.5rem 0;
+            color: #155724;
+            font-size: 0.9rem;
+        }
+
+        .empty-incidencias {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-incidencias i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--border-color);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.1);
+        }
+
+        .modal-actions {
+            padding: 1.5rem 2rem;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="preview-container">
+        <div class="preview-header">
+            <h1><i class="fas fa-eye"></i> Vista Previa - Sistema de Incidencias</h1>
+            <p>Visualiza cómo funcionará el módulo de gestión de incidencias para promotores</p>
+            
+            <div class="demo-buttons">
+                <button class="btn-primary" onclick="abrirModalIncidencias()">
+                    <i class="fas fa-exclamation-triangle"></i> Ver Gestión de Incidencias
+                </button>
+                <button class="btn-primary" onclick="abrirModalFormulario()">
+                    <i class="fas fa-plus"></i> Registrar Nueva Incidencia
+                </button>
+                <button class="btn-primary" onclick="abrirModalResolver()">
+                    <i class="fas fa-check-circle"></i> Resolver Incidencia
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Gestión de Incidencias -->
+    <div class="modal-overlay" id="modal-incidencias">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2>
+                    <i class="fas fa-exclamation-triangle"></i> 
+                    Gestión de Incidencias - Juan Pérez González
+                </h2>
+                <button class="modal-close" onclick="cerrarModal('modal-incidencias')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="modal-content">
+                <!-- Estadísticas -->
+                <div class="incidencias-stats">
+                    <div class="incidencia-stat-card total">
+                        <h5>8</h5>
+                        <p>Total Incidencias</p>
+                    </div>
+                    <div class="incidencia-stat-card activas">
+                        <h5>2</h5>
+                        <p>Activas</p>
+                    </div>
+                    <div class="incidencia-stat-card resueltas">
+                        <h5>5</h5>
+                        <p>Resueltas</p>
+                    </div>
+                    <div class="incidencia-stat-card canceladas">
+                        <h5>1</h5>
+                        <p>Canceladas</p>
+                    </div>
+                    <div class="incidencia-stat-card faltas">
+                        <h5>3</h5>
+                        <p>Faltas</p>
+                    </div>
+                    <div class="incidencia-stat-card retardos">
+                        <h5>4</h5>
+                        <p>Retardos</p>
+                    </div>
+                </div>
+
+                <!-- Botón nueva incidencia -->
+                <div style="margin-bottom: 1.5rem;">
+                    <button class="btn-primary" onclick="abrirModalFormulario()">
+                        <i class="fas fa-plus"></i> Registrar Nueva Incidencia
+                    </button>
+                </div>
+
+                <!-- Lista de incidencias -->
+                <div class="incidencias-list">
+                    <!-- Incidencia Activa 1 -->
+                    <div class="incidencia-card activa">
+                        <div class="incidencia-header">
+                            <div>
+                                <span class="incidencia-tipo-badge falta">FALTA</span>
+                            </div>
+                            <div>
+                                <span class="incidencia-estatus-badge activa">ACTIVA</span>
+                            </div>
+                        </div>
+                        
+                        <div class="incidencia-body">
+                            <p><strong>Fecha:</strong> 05/10/2025</p>
+                            <p><strong>Días transcurridos:</strong> 1</p>
+                            
+                            <div class="incidencia-descripcion">
+                                No se presentó a trabajar sin previo aviso. Se intentó contactar vía telefónica sin respuesta.
+                            </div>
+                            
+                            <p><strong>Sanción:</strong> Descuento de 1 día</p>
+                            <p><strong>Registrado por:</strong> María López</p>
+                            <p><strong>Fecha registro:</strong> 05/10/2025 14:30</p>
+                        </div>
+                        
+                        <div class="incidencia-actions">
+                            <button class="btn-action view" onclick="abrirModalResolver()">
+                                <i class="fas fa-check"></i> Resolver
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Incidencia Activa 2 -->
+                    <div class="incidencia-card activa">
+                        <div class="incidencia-header">
+                            <div>
+                                <span class="incidencia-tipo-badge retardo">RETARDO</span>
+                            </div>
+                            <div>
+                                <span class="incidencia-estatus-badge activa">ACTIVA</span>
+                            </div>
+                        </div>
+                        
+                        <div class="incidencia-body">
+                            <p><strong>Fecha:</strong> 03/10/2025</p>
+                            <p><strong>Días transcurridos:</strong> 3</p>
+                            
+                            <div class="incidencia-descripcion">
+                                Llegó 45 minutos tarde a su turno. Mencionó problemas con el transporte público.
+                            </div>
+                            
+                            <p><strong>Sanción:</strong> Amonestación verbal</p>
+                            <p><strong>Registrado por:</strong> Carlos Ramírez</p>
+                            <p><strong>Fecha registro:</strong> 03/10/2025 09:45</p>
+                        </div>
+                        
+                        <div class="incidencia-actions">
+                            <button class="btn-action view" onclick="abrirModalResolver()">
+                                <i class="fas fa-check"></i> Resolver
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Incidencia Resuelta -->
+                    <div class="incidencia-card resuelta">
+                        <div class="incidencia-header">
+                            <div>
+                                <span class="incidencia-tipo-badge uniforme">UNIFORME</span>
+                            </div>
+                            <div>
+                                <span class="incidencia-estatus-badge resuelta">RESUELTA</span>
+                            </div>
+                        </div>
+                        
+                        <div class="incidencia-body">
+                            <p><strong>Fecha:</strong> 28/09/2025</p>
+                            <p><strong>Días transcurridos:</strong> 8</p>
+                            
+                            <div class="incidencia-descripcion">
+                                Se presentó a trabajar sin la playera oficial del uniforme.
+                            </div>
+                            
+                            <p><strong>Sanción:</strong> Amonestación escrita</p>
+                            <p><strong>Registrado por:</strong> Ana García</p>
+                            <p><strong>Fecha registro:</strong> 28/09/2025 08:15</p>
+                            
+                            <div class="incidencia-resolucion">
+                                <h5><i class="fas fa-check-circle"></i> Resolución</h5>
+                                <p><strong>Fecha:</strong> 30/09/2025</p>
+                                <p><strong>Usuario:</strong> María López</p>
+                                <p><strong>Comentarios:</strong> El promotor presentó justificante médico. Se le proporcionó nuevo uniforme. Incidencia resuelta satisfactoriamente.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Incidencia Resuelta 2 -->
+                    <div class="incidencia-card resuelta">
+                        <div class="incidencia-header">
+                            <div>
+                                <span class="incidencia-tipo-badge actitud">ACTITUD/CONDUCTA</span>
+                            </div>
+                            <div>
+                                <span class="incidencia-estatus-badge resuelta">RESUELTA</span>
+                            </div>
+                        </div>
+                        
+                        <div class="incidencia-body">
+                            <p><strong>Fecha:</strong> 20/09/2025</p>
+                            <p><strong>Días transcurridos:</strong> 16</p>
+                            
+                            <div class="incidencia-descripcion">
+                                Actitud poco profesional con clientes. Se recibieron quejas del personal de la tienda.
+                            </div>
+                            
+                            <p><strong>Sanción:</strong> Suspensión de 2 días sin goce de sueldo</p>
+                            <p><strong>Registrado por:</strong> Roberto Sánchez</p>
+                            <p><strong>Fecha registro:</strong> 20/09/2025 16:30</p>
+                            
+                            <div class="incidencia-resolucion">
+                                <h5><i class="fas fa-check-circle"></i> Resolución</h5>
+                                <p><strong>Fecha:</strong> 25/09/2025</p>
+                                <p><strong>Usuario:</strong> Carlos Ramírez</p>
+                                <p><strong>Comentarios:</strong> Se realizó sesión de coaching y capacitación en servicio al cliente. El promotor mostró mejor actitud tras la sanción.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Incidencia Cancelada -->
+                    <div class="incidencia-card cancelada">
+                        <div class="incidencia-header">
+                            <div>
+                                <span class="incidencia-tipo-badge retardo">RETARDO</span>
+                            </div>
+                            <div>
+                                <span class="incidencia-estatus-badge cancelada">CANCELADA</span>
+                            </div>
+                        </div>
+                        
+                        <div class="incidencia-body">
+                            <p><strong>Fecha:</strong> 15/09/2025</p>
+                            <p><strong>Días transcurridos:</strong> 21</p>
+                            
+                            <div class="incidencia-descripcion">
+                                Retardo de 30 minutos reportado por coordinador de tienda.
+                            </div>
+                            
+                            <p><strong>Registrado por:</strong> Juan Martínez</p>
+                            <p><strong>Fecha registro:</strong> 15/09/2025 10:00</p>
+                            
+                            <div class="incidencia-resolucion">
+                                <h5><i class="fas fa-check-circle"></i> Resolución</h5>
+                                <p><strong>Fecha:</strong> 16/09/2025</p>
+                                <p><strong>Usuario:</strong> María López</p>
+                                <p><strong>Comentarios:</strong> Incidencia registrada por error. El promotor había solicitado permiso con anticipación que fue autorizado pero no registrado en el sistema.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Formulario Nueva Incidencia -->
+    <div class="modal-overlay" id="modal-form-incidencia">
+        <div class="modal-container modal-small">
+            <div class="modal-header">
+                <h2><i class="fas fa-file-medical"></i> Registrar Nueva Incidencia</h2>
+                <button class="modal-close" onclick="cerrarModal('modal-form-incidencia')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <form class="modal-form" onsubmit="return false;">
+                <div class="form-group">
+                    <label for="incidencia-tipo">Tipo de Incidencia *</label>
+                    <select id="incidencia-tipo" required>
+                        <option value="">Seleccionar...</option>
+                        <option value="FALTA">Falta</option>
+                        <option value="RETARDO">Retardo</option>
+                        <option value="ABANDONO">Abandono de Puesto</option>
+                        <option value="ACTITUD">Actitud/Conducta</option>
+                        <option value="UNIFORME">Uniforme Incompleto</option>
+                        <option value="SANCION">Sanción Aplicada</option>
+                        <option value="OTRO">Otro</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="incidencia-fecha">Fecha de la Incidencia *</label>
+                    <input type="date" id="incidencia-fecha" value="2025-10-06" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="incidencia-descripcion">Descripción *</label>
+                    <textarea id="incidencia-descripcion" rows="4" required 
+                        placeholder="Describe detalladamente la incidencia...">El promotor no se presentó a trabajar sin previo aviso ni justificación.</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="incidencia-sancion">Sanción Aplicada (opcional)</label>
+                    <input type="text" id="incidencia-sancion" 
+                        placeholder="Ej: Descuento de 1 día, amonestación verbal..."
+                        value="Descuento de 1 día">
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" onclick="cerrarModal('modal-form-incidencia')">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                    <button type="submit" class="btn-primary" onclick="alert('En producción, esto guardará la incidencia en la base de datos')">
+                        <i class="fas fa-save"></i> Guardar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Resolver Incidencia -->
+    <div class="modal-overlay" id="modal-resolver-incidencia">
+        <div class="modal-container modal-small">
+            <div class="modal-header">
+                <h2><i class="fas fa-check-circle"></i> Resolver Incidencia</h2>
+                <button class="modal-close" onclick="cerrarModal('modal-resolver-incidencia')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <form class="modal-form" onsubmit="return false;">
+                <div class="form-group">
+                    <label for="resolver-estatus">Nuevo Estatus *</label>
+                    <select id="resolver-estatus" required>
+                        <option value="RESUELTA">Resuelta</option>
+                        <option value="CANCELADA">Cancelada</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="resolver-fecha">Fecha de Resolución *</label>
+                    <input type="date" id="resolver-fecha" value="2025-10-06" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="resolver-comentarios">Comentarios *</label>
+                    <textarea id="resolver-comentarios" rows="4" required 
+                        placeholder="Explica cómo se resolvió la incidencia...">El promotor presentó justificación médica válida. Se acepta la falta como justificada.</textarea>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" onclick="cerrarModal('modal-resolver-incidencia')">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                    <button type="submit" class="btn-primary" onclick="alert('En producción, esto actualizará la incidencia en la base de datos')">
+                        <i class="fas fa-save"></i> Resolver
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function abrirModalIncidencias() {
+            document.getElementById('modal-incidencias').classList.add('active');
+        }
+
+        function abrirModalFormulario() {
+            document.getElementById('modal-form-incidencia').classList.add('active');
+        }
+
+        function abrirModalResolver() {
+            document.getElementById('modal-resolver-incidencia').classList.add('active');
+        }
+
+        function cerrarModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        // Cerrar con ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal-overlay').forEach(modal => {
+                    modal.classList.remove('active');
+                });
+            }
+        });
+
+        // Cerrar clickeando fuera
+        document.querySelectorAll('.modal-overlay').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.remove('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

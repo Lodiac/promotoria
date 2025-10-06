@@ -4,14 +4,7 @@ define('APP_ACCESS', true);
 require_once __DIR__ . '/../config/db_connect.php';
 
 /**
- * REPORTE CORREGIDO PARA MÚLTIPLES TIENDAS - Versión que soluciona el problema
- * 
- * CAMBIOS PRINCIPALES:
- * 1. Consultas más flexibles que obtienen TODAS las tiendas
- * 2. Mejor lógica de agrupamiento
- * 3. Múltiples estrategias de fallback
- * 4. Validación mejorada de datos
- * 5. Logging completo para debugging
+ * REPORTE CORREGIDO PARA MÚLTIPLES TIENDAS CON DÍA DE DESCANSO
  */
 class ReporteMultiplesTiendasCorregido {
     
@@ -61,6 +54,25 @@ class ReporteMultiplesTiendasCorregido {
     }
     
     /**
+     * CONVERTIR NÚMERO DE DÍA A NOMBRE EN ESPAÑOL
+     */
+    private static function convertirDiaDescansoANombre($dia_numero) {
+        if ($dia_numero === null) return null;
+        
+        $dias = [
+            '1' => 'lunes',
+            '2' => 'martes',
+            '3' => 'miércoles',
+            '4' => 'jueves',
+            '5' => 'viernes',
+            '6' => 'sábado',
+            '7' => 'domingo'
+        ];
+        
+        return $dias[$dia_numero] ?? null;
+    }
+    
+    /**
      * MÉTODO PRINCIPAL - Generar reporte de asignaciones CORREGIDO
      */
     public static function generarReporteAsignaciones($fecha_inicio, $fecha_fin, $filtros = []) {
@@ -77,7 +89,7 @@ class ReporteMultiplesTiendasCorregido {
             throw new Exception('La fecha fin no puede ser anterior a la fecha inicio');
         }
         
-        error_log("=== REPORTE MÚLTIPLES TIENDAS CORREGIDO ===");
+        error_log("=== REPORTE MÚLTIPLES TIENDAS CON DÍA DESCANSO ===");
         error_log("Fechas solicitadas: $fecha_inicio al $fecha_fin");
         error_log("Filtros: " . json_encode($filtros));
         
@@ -150,7 +162,7 @@ class ReporteMultiplesTiendasCorregido {
     }
     
     /**
-     * CONSULTA OPTIMIZADA PARA MÚLTIPLES TIENDAS
+     * CONSULTA OPTIMIZADA PARA MÚLTIPLES TIENDAS CON DÍA DESCANSO
      */
     private static function consultaMultiplesTiendas($fecha_inicio, $fecha_fin, $filtros) {
         $sql = "
@@ -169,6 +181,7 @@ class ReporteMultiplesTiendasCorregido {
                 COALESCE(p.correo, 'Sin correo') as correo,
                 COALESCE(p.region, 0) as promotor_region,
                 COALESCE(p.estatus, 'Activo') as estatus,
+                p.dia_descanso,
                 p.clave_asistencia,
                 pta.fecha_inicio,
                 pta.fecha_fin,
@@ -235,6 +248,7 @@ class ReporteMultiplesTiendasCorregido {
                 COALESCE(p.correo, 'Sin correo') as correo,
                 COALESCE(p.region, 0) as promotor_region,
                 COALESCE(p.estatus, 'Activo') as estatus,
+                p.dia_descanso,
                 p.clave_asistencia,
                 pta.fecha_inicio,
                 pta.fecha_fin,
@@ -288,6 +302,7 @@ class ReporteMultiplesTiendasCorregido {
                 COALESCE(p.correo, 'Sin correo') as correo,
                 COALESCE(p.region, 0) as promotor_region,
                 COALESCE(p.estatus, 'Activo') as estatus,
+                p.dia_descanso,
                 p.clave_asistencia,
                 pta.fecha_inicio,
                 pta.fecha_fin,
@@ -419,7 +434,7 @@ class ReporteMultiplesTiendasCorregido {
     }
     
     /**
-     * EXPANDIR ASIGNACIONES A DÍAS INDIVIDUALES - MEJORADO
+     * EXPANDIR ASIGNACIONES A DÍAS INDIVIDUALES - CON DÍA DESCANSO
      */
     private static function expandirAsignacionesADias($asignaciones, $fecha_inicio_consulta, $fecha_fin_consulta) {
         $resultado = [];
@@ -451,6 +466,9 @@ class ReporteMultiplesTiendasCorregido {
                     }
                 }
                 
+                // Convertir día de descanso numérico a nombre
+                $dia_descanso_nombre = self::convertirDiaDescansoANombre($asignacion['dia_descanso']);
+                
                 $resultado[] = [
                     'fecha' => $fecha_actual->format('Y-m-d'),
                     'dia_semana' => self::getDiaSemanaEspanol($fecha_actual->format('w')),
@@ -468,6 +486,7 @@ class ReporteMultiplesTiendasCorregido {
                     'promotor_correo' => $asignacion['correo'],
                     'promotor_region' => (int) $asignacion['promotor_region'],
                     'promotor_estatus' => $asignacion['estatus'],
+                    'promotor_dia_descanso' => $dia_descanso_nombre,
                     'claves' => $claves_array
                 ];
                 
@@ -555,7 +574,7 @@ class ReporteMultiplesTiendasCorregido {
     }
     
     /**
-     * GENERAR LISTA DE PROMOTORES
+     * GENERAR LISTA DE PROMOTORES CON DÍA DESCANSO
      */
     public static function generarReportePromotores() {
         try {
@@ -568,13 +587,19 @@ class ReporteMultiplesTiendasCorregido {
                     rfc,
                     telefono,
                     correo,
-                    estatus
+                    estatus,
+                    dia_descanso
                 FROM promotores 
                 WHERE estado = 1
                 ORDER BY nombre ASC, apellido ASC
             ";
             
             $promotores = self::selectAll($sql);
+            
+            // Convertir día descanso numérico a nombre
+            foreach ($promotores as &$promotor) {
+                $promotor['dia_descanso_nombre'] = self::convertirDiaDescansoANombre($promotor['dia_descanso']);
+            }
             
             return [
                 'promotores' => $promotores,
