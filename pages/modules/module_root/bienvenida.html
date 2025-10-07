@@ -10,1415 +10,502 @@
 
 <body>
 
-    <!-- ===== MÓDULO BIENVENIDA - ESTRUCTURA INTEGRADA ===== -->
+    <!-- ===== MÓDULO BIENVENIDA MINIMALISTA ===== -->
     <div class="bienvenida-module">
-        <!-- CANVAS DE FONDO MEJORADO -->
-        <canvas id="backgroundCanvas" class="background-canvas"></canvas>
-        <canvas id="particlesCanvas" class="particles-canvas"></canvas>
-        <canvas id="wavesCanvas" class="waves-canvas"></canvas>
+        
+        <!-- Formas orgánicas de fondo -->
+        <div class="organic-shape shape-1"></div>
+        <div class="organic-shape shape-2"></div>
 
-        <!-- HEADER DEL MÓDULO -->
-        <div class="module-header">
-            <div class="header-content">
-                <div class="header-title">
-                    <div class="header-icon animated-logo">
-                        <span class="logo-text">SG</span>
-                        <div class="logo-orbit"></div>
-                        <div class="logo-orbit orbit-2"></div>
-                    </div>
-                    <div class="welcome-text">
-                        <h1>¡Bienvenido al Sistema!</h1>
-                        <p class="subtitle">Sistema de Gestión de Promotores</p>
-                    </div>
-                </div>
+        <!-- HEADER DEL SISTEMA (NO MODIFICAR) -->
+        <header class="system-header">
+            <div class="header-left">
+                <img src="/promotoria/img/logo.png" alt="" style="padding-right: 0; height: 90px; ">
+                <h3 style="font-size: 55px;"><strong>EVONET</strong></h3>
             </div>
-            <div class="header-glow"></div>
-        </div>
+        </header>
 
-        <!-- CONTENEDOR PRINCIPAL DE BIENVENIDA -->
-        <div class="welcome-content-container">
-
-            <!-- MENSAJE PRINCIPAL -->
-            <div class="welcome-main-message">
-                <!-- LOGO EVONET -->
-                <div class="logo-container">
-                    <img src="/promotoria/img/Evonet_Recortado.png" alt="EVONET" class="evonet-main-logo">
-                    <div class="logo-shine"></div>
-                </div>
-                <br><br>
-                <h2 class="main-title">
-                    <span class="title-word" style="--delay: 0.1s">Administra</span>
-                    <span class="title-word" style="--delay: 0.2s">tu</span>
-                    <span class="title-word" style="--delay: 0.3s">equipo</span>
-                    <span class="title-word" style="--delay: 0.4s">de</span>
-                    <span class="title-word" style="--delay: 0.5s">manera</span>
-                    <span class="title-word" style="--delay: 0.6s">eficiente</span>
-                </h2>
-                <p class="main-description">
-                    Sistema integral para la gestión de promotores, asignación de tiendas
-                    y seguimiento de rendimiento en tiempo real.
+        <!-- CONTENEDOR PRINCIPAL -->
+        <main class="welcome-content">
+            
+            <!-- Sección izquierda con texto -->
+            <section class="content-left">
+                <h1 class="main-title">
+                    Creativo<br>
+                    <span class="highlight">Sistema</span>
+                </h1>
+                <p class="subtitle">Sistema de Gestión</p>
+                <p class="description">
+                    Administra tu equipo de promotores de manera eficiente y sencilla.
                 </p>
-                <div class="floating-elements">
-                    <!-- Partículas originales -->
-                    <div class="floating-dot" style="--x: 10%; --y: 20%; --delay: 0s;"></div>
-                    <div class="floating-dot" style="--x: 85%; --y: 15%; --delay: 1s;"></div>
-                    <div class="floating-dot" style="--x: 15%; --y: 80%; --delay: 2s;"></div>
-                    <div class="floating-dot" style="--x: 90%; --y: 75%; --delay: 3s;"></div>
+            </section>
 
-                    <!-- ✨ Más partículas añadidas -->
-                    <div class="floating-dot" style="--x: 50%; --y: 10%; --delay: 1.5s;"></div>
-                    <div class="floating-dot" style="--x: 70%; --y: 50%; --delay: 2.5s;"></div>
-                    <div class="floating-dot" style="--x: 30%; --y: 60%; --delay: 0.8s;"></div>
-                    <div class="floating-dot" style="--x: 5%; --y: 40%; --delay: 3.2s;"></div>
-                    <div class="floating-dot" style="--x: 95%; --y: 50%; --delay: 2.8s;"></div>
-                    <div class="floating-dot" style="--x: 40%; --y: 90%; --delay: 4s;"></div>
-                    <div class="floating-dot" style="--x: 60%; --y: 30%; --delay: 1.2s;"></div>
-                    <div class="floating-dot" style="--x: 20%; --y: 10%; --delay: 2.2s;"></div>
-                    <div class="floating-dot" style="--x: 80%; --y: 85%; --delay: 3.8s;"></div>
-                    <div class="floating-dot" style="--x: 45%; --y: 45%; --delay: 4.5s;"></div>
-
-                    <!-- 💫 Extra partículas -->
-                    <div class="floating-dot" style="--x: 12%; --y: 65%; --delay: 2.7s;"></div>
-                    <div class="floating-dot" style="--x: 28%; --y: 25%; --delay: 3.4s;"></div>
-                    <div class="floating-dot" style="--x: 66%; --y: 12%; --delay: 1.1s;"></div>
-                    <div class="floating-dot" style="--x: 78%; --y: 33%; --delay: 2.9s;"></div>
-                    <div class="floating-dot" style="--x: 88%; --y: 60%; --delay: 1.8s;"></div>
-                    <div class="floating-dot" style="--x: 33%; --y: 15%; --delay: 0.6s;"></div>
-                    <div class="floating-dot" style="--x: 55%; --y: 70%; --delay: 3.6s;"></div>
-                    <div class="floating-dot" style="--x: 22%; --y: 90%; --delay: 4.8s;"></div>
-                    <div class="floating-dot" style="--x: 76%; --y: 5%; --delay: 1.7s;"></div>
-                    <div class="floating-dot" style="--x: 10%; --y: 55%; --delay: 0.9s;"></div>
-                    <div class="floating-dot" style="--x: 65%; --y: 88%; --delay: 2.3s;"></div>
-                    <div class="floating-dot" style="--x: 90%; --y: 30%; --delay: 4.2s;"></div>
-                    <div class="floating-dot" style="--x: 38%; --y: 78%; --delay: 3.1s;"></div>
-                    <div class="floating-dot" style="--x: 15%; --y: 35%; --delay: 2.5s;"></div>
-                    <div class="floating-dot" style="--x: 48%; --y: 20%; --delay: 1.4s;"></div>
-                    <div class="floating-dot" style="--x: 80%; --y: 55%; --delay: 3.7s;"></div>
-                    <div class="floating-dot" style="--x: 58%; --y: 95%; --delay: 4.9s;"></div>
-                    <div class="floating-dot" style="--x: 25%; --y: 5%; --delay: 1.9s;"></div>
-                    <div class="floating-dot" style="--x: 5%; --y: 95%; --delay: 2.6s;"></div>
-
+            <!-- Sección derecha con logo -->
+            <section class="content-right">
+                <div class="logo-container">
+                    <img src="/promotoria/img/Evonet_Recortado.png" alt="EVONET" class="evonet-logo">
                 </div>
+            </section>
+
+        </main>
+
+        <!-- TARJETAS DE CARACTERÍSTICAS -->
+        <section class="features-section">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h3>Gestión de Promotores</h3>
+                <p>Control completo de tu equipo de trabajo</p>
             </div>
 
-            <!-- TARJETAS DE CARACTERÍSTICAS -->
-            <div class="features-grid">
-                <div class="feature-card" style="--delay: 0.2s;" data-tilt>
-                    <div class="card-background"></div>
-                    <div class="feature-icon">
-                        <i class="fas fa-users"></i>
-                        <div class="icon-pulse"></div>
-                    </div>
-                    <div class="feature-content">
-                        <h3>Gestión de Promotores</h3>
-                        <p>Control completo de tu equipo de trabajo, información personal, historial y rendimiento.</p>
-                        <ul>
-                            <li>Registro y edición de promotores</li>
-                            <li>Seguimiento de vacaciones e incidencias</li>
-                            <li>Historial laboral completo</li>
-                        </ul>
-                    </div>
-                    <div class="card-glow"></div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-store"></i>
                 </div>
-
-                <div class="feature-card" style="--delay: 0.4s;" data-tilt>
-                    <div class="card-background"></div>
-                    <div class="feature-icon">
-                        <i class="fas fa-store"></i>
-                        <div class="icon-pulse"></div>
-                    </div>
-                    <div class="feature-content">
-                        <h3>Asignación de Tiendas</h3>
-                        <p>Organiza y controla las ubicaciones de trabajo de cada promotor de manera inteligente.</p>
-                        <ul>
-                            <li>Asignaciones por región</li>
-                            <li>Control de fechas y horarios</li>
-                            <li>Historial de asignaciones</li>
-                        </ul>
-                    </div>
-                    <div class="card-glow"></div>
-                </div>
-
-                <div class="feature-card" style="--delay: 0.6s;" data-tilt>
-                    <div class="card-background"></div>
-                    <div class="feature-icon">
-                        <i class="fas fa-chart-line"></i>
-                        <div class="icon-pulse"></div>
-                    </div>
-                    <div class="feature-content">
-                        <h3>Reportes en Tiempo Real</h3>
-                        <p>Datos actualizados al instante con métricas clave para tomar mejores decisiones.</p>
-                        <ul>
-                            <li>Dashboard en tiempo real</li>
-                            <li>Estadísticas de rendimiento</li>
-                            <li>Exportación de reportes</li>
-                        </ul>
-                    </div>
-                    <div class="card-glow"></div>
-                </div>
+                <h3>Asignación de Tiendas</h3>
+                <p>Organiza ubicaciones de manera inteligente</p>
             </div>
-        </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3>Reportes en Tiempo Real</h3>
+                <p>Métricas actualizadas al instante</p>
+            </div>
+        </section>
+
+        <!-- FOOTER CON DERECHOS RESERVADOS -->
+        <footer class="footer">
+            <p>&copy; 2025 Sistema de Gestión - EVONET. Todos los derechos reservados.</p>
+        </footer>
+
     </div>
 
     <style>
-        /* ===== VARIABLES CSS ===== */
+        /* ===== RESET Y VARIABLES ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         :root {
-            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            --glow-color: rgba(102, 126, 234, 0.4);
+            --primary-color: #764ba2;
+            --secondary-color: #667eea;
+            --accent-color: #f093fb;
             --text-dark: #2c3e50;
             --text-light: #718096;
-            --white-glass: rgba(255, 255, 255, 0.95);
-            --border-glass: rgba(255, 255, 255, 0.2);
+            --background: #f5f5f5;
         }
 
-        /* ===== ESTILOS BIENVENIDA MODULE MEJORADOS ===== */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--background);
+            overflow-x: hidden;
+        }
+
+        /* ===== CONTENEDOR PRINCIPAL ===== */
         .bienvenida-module {
-            padding: 0;
-            max-width: 100%;
-            position: relative;
             min-height: 100vh;
-            overflow: hidden;
-            /* background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #667eea 100%); */
+            position: relative;
+            background: linear-gradient(135deg, #f5e6f0 0%, #e8ddf5 50%, #ddd6f3 100%);
+            display: flex;
+            flex-direction: column;
         }
 
-        /* ===== CANVAS MÚLTIPLES ===== */
-        .background-canvas,
-        .particles-canvas,
-        .waves-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-        }
-
-        .background-canvas {
+        /* ===== FORMAS ORGÁNICAS ===== */
+        .organic-shape {
+            position: absolute;
+            border-radius: 50% 40% 60% 50%;
+            opacity: 0.15;
             z-index: 1;
         }
 
-        .particles-canvas {
-            z-index: 2;
+        .shape-1 {
+            width: 600px;
+            height: 600px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            top: -200px;
+            right: -100px;
+            transform: rotate(45deg);
         }
 
-        .waves-canvas {
-            z-index: 3;
+        .shape-2 {
+            width: 400px;
+            height: 400px;
+            background: linear-gradient(135deg, var(--accent-color), var(--primary-color));
+            bottom: -150px;
+            left: -100px;
+            transform: rotate(-30deg);
         }
 
-        /* ===== HEADER MEJORADO ===== */
-        .bienvenida-module .module-header {
-            background: var(--white-glass);
-            backdrop-filter: blur(25px) saturate(180%);
-            border-radius: 24px;
-            padding: 2.5rem;
-            margin: 2rem auto;
-            margin-bottom: 2rem;
-            border: 1px solid var(--border-glass);
-            box-shadow:
-                0 20px 40px rgba(0, 0, 0, 0.1),
-                0 0 60px var(--glow-color),
-                inset 0 1px 0 rgba(255, 255, 255, 0.3);
-            position: relative;
-            z-index: 10;
-            animation: heroEntrance 1.5s cubic-bezier(0.23, 1, 0.32, 1);
-            max-width: 1200px;
-            overflow: hidden;
-        }
-
-        .header-glow {
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: conic-gradient(from 0deg, transparent, var(--glow-color), transparent);
-            animation: rotate 20s linear infinite;
-            opacity: 0.1;
-            z-index: -1;
-        }
-
-        .bienvenida-module .header-content {
+        /* ===== HEADER DEL SISTEMA (ORIGINAL) ===== */
+        .system-header {
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
-            gap: 2rem;
+            padding: 1rem 2rem;
+            /* background: white; */
+            border-bottom: 2px solid #e0e0e0;
             position: relative;
-            z-index: 2;
+            z-index: 100;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
         }
 
-        .bienvenida-module .header-title {
+        .header-left {
             display: flex;
             align-items: center;
-            gap: 30px;
+            gap: 1rem;
+            display: transparent;
         }
 
-        /* ===== LOGO ANIMADO MEJORADO ===== */
-        .animated-logo {
-            width: 80px;
-            height: 80px;
-            background: var(--primary-gradient);
-            background-size: 400% 400%;
-            border-radius: 20px;
+        .system-logo {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 2rem;
-            font-weight: bold;
-            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.4);
-            animation: logoFloat 3s ease-in-out infinite, gradientShift 4s ease-in-out infinite;
-            box-shadow:
-                0 12px 30px rgba(52, 152, 219, 0.4),
-                0 0 30px rgba(102, 126, 234, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.3);
-            position: relative;
-            overflow: hidden;
+            font-size: 1.3rem;
         }
 
-        .logo-orbit {
-            position: absolute;
-            width: 120px;
-            height: 120px;
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            animation: orbit 10s linear infinite;
-        }
-
-        .orbit-2 {
-            width: 140px;
-            height: 140px;
-            border-color: rgba(102, 126, 234, 0.3);
-            animation-direction: reverse;
-            animation-duration: 15s;
-        }
-
-        .logo-orbit::before {
-            content: '';
-            position: absolute;
-            width: 6px;
-            height: 6px;
-            background: rgba(255, 255, 255, 0.8);
-            border-radius: 50%;
-            top: -3px;
-            left: 50%;
-            transform: translateX(-50%);
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-        }
-
-        /* ===== TEXTO DE BIENVENIDA MEJORADO ===== */
-        .welcome-text h1 {
-            margin: 0 0 10px 0;
-            font-size: 2.5rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, #2c3e50 0%, #4a90e2 50%, #667eea 100%);
-            background-size: 400% 400%;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            animation: textShimmer 3s ease-in-out infinite, slideInFromLeft 1s ease-out 0.5s both;
-            text-shadow: 0 0 30px rgba(102, 126, 234, 0.3);
-        }
-
-        .welcome-text .subtitle {
+        .system-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #2c3e50;
             margin: 0;
-            font-size: 1.2rem;
-            color: var(--text-light);
-            animation: slideInFromRight 1s ease-out 0.8s both, subtitleGlow 2s ease-in-out infinite alternate;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-name {
+            font-size: 1rem;
+            color: #2c3e50;
             font-weight: 500;
         }
 
-        /* ===== CONTENEDOR PRINCIPAL ===== */
-        .welcome-content-container {
+        .btn-root {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 0.5rem 1.2rem;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .btn-root:hover {
+            background: #c82333;
+        }
+
+        .btn-logout {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 0.5rem 1.2rem;
+            border-radius: 6px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: background 0.3s;
+        }
+
+        .btn-logout:hover {
+            background: #c82333;
+        }
+
+        /* ===== CONTENIDO PRINCIPAL ===== */
+        .welcome-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            padding: 2rem 4rem 2.5rem 4rem;
+            position: relative;
+            z-index: 10;
+            align-items: center;
+        }
+
+        .content-left {
+            padding-right: 2rem;
+        }
+
+        .main-title {
+            font-size: 5rem;
+            font-weight: 300;
+            color: var(--text-dark);
+            line-height: 1.1;
+            margin-bottom: 0.5rem;
+        }
+
+        .highlight {
+            font-weight: 800;
+            color: var(--text-dark);
+            display: block;
+        }
+
+        .subtitle {
+            font-size: 1.6rem;
+            color: var(--text-light);
+            margin-bottom: 1.5rem;
+            font-weight: 400;
+        }
+
+        .description {
+            font-size: 1.2rem;
+            color: var(--text-light);
+            line-height: 1.6;
+            max-width: 500px;
+        }
+
+        /* ===== CONTENIDO DERECHO ===== */
+        .content-right {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        .evonet-logo {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* ===== TARJETAS DE CARACTERÍSTICAS ===== */
+        .features-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            padding: 2.5rem 4rem;
             position: relative;
             z-index: 10;
             max-width: 1200px;
             margin: 0 auto;
-            padding: 0 1rem;
-        }
-
-        /* ===== MENSAJE PRINCIPAL MEJORADO ===== */
-        .welcome-main-message {
-            background: var(--white-glass);
-            backdrop-filter: blur(25px) saturate(180%);
-            border-radius: 24px;
-            padding: 4rem 3rem;
-            margin-bottom: 3rem;
-            border: 1px solid var(--border-glass);
-            box-shadow:
-                0 20px 40px rgba(0, 0, 0, 0.1),
-                0 0 60px var(--glow-color),
-                inset 0 1px 0 rgba(255, 255, 255, 0.3);
-            text-align: center;
-            animation: fadeInUp 1s ease-out 0.3s both;
-            position: relative;
-            overflow: hidden;
-        }
-
-        /* ===== LOGO EVONET MEJORADO ===== */
-        .logo-container {
-            position: relative;
-            display: inline-block;
-            margin: 1rem 0;
-        }
-
-        .evonet-main-logo {
-            height: 40%;
-            width: 100%;
-            border-radius: 16px;
-            box-shadow:
-                0 10px 30px rgba(0, 0, 0, 0.2),
-                0 0 40px rgba(102, 126, 234, 0.3);
-            border: 3px solid transparent;
-            background: transparent;
-            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-            animation: logoFloat 4s ease-in-out infinite;
-        }
-
-        .logo-shine {
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-            animation: shine 3s ease-in-out infinite;
-            border-radius: inherit;
-        }
-
-        .evonet-main-logo:hover {
-            transform: scale(1.05) rotateY(5deg);
-            box-shadow:
-                0 15px 40px rgba(0, 0, 0, 0.3),
-                0 0 60px rgba(102, 126, 234, 0.5);
-        }
-
-        /* ===== TÍTULO PRINCIPAL MEJORADO ===== */
-        .main-title {
-            font-size: 2.8rem;
-            font-weight: 800;
-            color: var(--text-dark);
-            margin: 2rem 0 1.5rem 0;
-            line-height: 1.2;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 0.5rem;
-        }
-
-        .title-word {
-            display: inline-block;
-            background: var(--primary-gradient);
-            background-size: 400% 400%;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            animation:
-                wordFloat 2s ease-in-out infinite var(--delay),
-                gradientShift 3s ease-in-out infinite;
-            text-shadow: 0 0 30px var(--glow-color);
-        }
-
-        .main-description {
-            font-size: 1.4rem;
-            color: var(--text-light);
-            line-height: 1.8;
-            max-width: 800px;
-            margin: 0 auto 2rem auto;
-            animation: fadeInUp 1s ease-out 1s both;
-        }
-
-        /* ===== ELEMENTOS FLOTANTES ===== */
-        .floating-elements {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        .floating-dot {
-            position: absolute;
-            width: 8px;
-            height: 8px;
-            background: var(--accent-gradient);
-            border-radius: 50%;
-            left: var(--x);
-            top: var(--y);
-            animation: floatingDot 4s ease-in-out infinite var(--delay);
-            box-shadow: 0 0 20px rgba(79, 172, 254, 0.6);
-        }
-
-        /* ===== GRID DE CARACTERÍSTICAS MEJORADO ===== */
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
-            gap: 2.5rem;
-            margin-bottom: 3rem;
-            perspective: 1000px;
-        }
-
-        /* Centrar la tercera tarjeta cuando esté sola en su fila */
-        .feature-card:nth-child(3) {
-            grid-column: 1 / -1;
-            justify-self: center;
-            max-width: 420px;
         }
 
         .feature-card {
-            background: var(--white-glass);
-            backdrop-filter: blur(25px) saturate(180%);
-            border-radius: 24px;
-            padding: 2.5rem;
-            border: 1px solid var(--border-glass);
-            box-shadow:
-                0 20px 40px rgba(0, 0, 0, 0.1),
-                0 0 40px rgba(102, 126, 234, 0.2);
-            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-            animation: cardEntrance 1s ease-out var(--delay, 0.5s) both;
-            position: relative;
-            overflow: hidden;
-            transform-style: preserve-3d;
-        }
-
-        .card-background {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--primary-gradient);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            z-index: -1;
-        }
-
-        .card-glow {
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: conic-gradient(from 0deg, transparent, var(--glow-color), transparent);
-            animation: rotate 15s linear infinite;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            z-index: -2;
-        }
-
-        .feature-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: var(--primary-gradient);
-            background-size: 400% 400%;
-            animation: gradientShift 3s ease-in-out infinite;
-            border-radius: 24px 24px 0 0;
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
         }
 
         .feature-card:hover {
-            transform: translateY(-15px) rotateX(5deg) rotateY(5deg);
-            box-shadow:
-                0 30px 60px rgba(0, 0, 0, 0.2),
-                0 0 80px rgba(102, 126, 234, 0.4);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
         }
 
-        .feature-card:hover .card-background {
-            opacity: 0.05;
-        }
-
-        .feature-card:hover .card-glow {
-            opacity: 0.1;
-        }
-
-        .feature-card:hover .feature-icon {
-            transform: scale(1.1) rotateY(180deg);
-        }
-
-        /* ===== ÍCONOS MEJORADOS ===== */
         .feature-icon {
             width: 70px;
             height: 70px;
-            background: var(--primary-gradient);
-            border-radius: 16px;
+            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+            border-radius: 15px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 2rem;
-            margin-bottom: 2rem;
-            box-shadow:
-                0 12px 30px rgba(52, 152, 219, 0.4),
-                0 0 30px rgba(102, 126, 234, 0.3);
-            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .icon-pulse {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 100%;
-            height: 100%;
-            border: 2px solid rgba(255, 255, 255, 0.5);
-            border-radius: inherit;
-            transform: translate(-50%, -50%) scale(0);
-            animation: iconPulse 2s ease-out infinite;
-        }
-
-        .feature-content h3 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text-dark);
-            margin: 0 0 1rem 0;
-            background: var(--primary-gradient);
-            background-size: 400% 400%;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            animation: gradientShift 3s ease-in-out infinite;
-        }
-
-        .feature-content p {
-            color: var(--text-light);
-            line-height: 1.7;
+            font-size: 1.8rem;
             margin-bottom: 1.5rem;
-            font-weight: 500;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
         }
 
-        .feature-content ul {
-            list-style: none;
-            padding: 0;
+        .feature-card h3 {
+            font-size: 1.5rem;
+            color: var(--text-dark);
+            margin-bottom: 0.8rem;
+            font-weight: 600;
+        }
+
+        .feature-card p {
+            color: var(--text-light);
+            line-height: 1.6;
+            font-size: 1.05rem;
+        }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            padding: 1.5rem 4rem;
+            text-align: center;
+            position: relative;
+            z-index: 10;
+            border-top: 1px solid rgba(102, 126, 234, 0.1);
+        }
+
+        .footer p {
+            color: var(--text-light);
+            font-size: 1rem;
             margin: 0;
         }
 
-        .feature-content ul li {
-            color: #555;
-            padding: 0.7rem 0;
-            position: relative;
-            padding-left: 2rem;
-            font-weight: 500;
-            transition: color 0.3s ease;
-        }
-
-        .feature-content ul li::before {
-            content: '✓';
-            position: absolute;
-            left: 0;
-            color: #27ae60;
-            font-weight: bold;
-            font-size: 1.1rem;
-            animation: checkPulse 2s ease-in-out infinite;
-        }
-
-        .feature-card:hover .feature-content ul li {
-            color: #333;
-        }
-
-        /* ===== ANIMACIONES MEJORADAS ===== */
-        @keyframes heroEntrance {
-            0% {
-                opacity: 0;
-                transform: translateY(60px) scale(0.8);
-                filter: blur(10px);
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 1024px) {
+            .welcome-content {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+                padding: 2rem 2rem;
             }
 
-            100% {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-                filter: blur(0);
+            .content-left {
+                padding-right: 0;
+                text-align: center;
+            }
+
+            .description {
+                margin-left: auto;
+                margin-right: auto;
+            }
+
+            .main-title {
+                font-size: 3.5rem;
             }
         }
 
-        @keyframes cardEntrance {
-            0% {
-                opacity: 0;
-                transform: translateY(50px) rotateX(25deg);
-                filter: blur(5px);
+        @media (max-width: 768px) {
+            .system-header {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
             }
 
-            100% {
-                opacity: 1;
-                transform: translateY(0) rotateX(0deg);
-                filter: blur(0);
-            }
-        }
-
-        @keyframes logoFloat {
-
-            0%,
-            100% {
-                transform: translateY(0px) rotate(0deg);
+            .header-left {
+                width: 100%;
+                justify-content: center;
             }
 
-            50% {
-                transform: translateY(-10px) rotate(2deg);
-            }
-        }
-
-        @keyframes wordFloat {
-
-            0%,
-            100% {
-                transform: translateY(0px);
+            .header-right {
+                width: 100%;
+                justify-content: center;
+                flex-wrap: wrap;
             }
 
-            50% {
-                transform: translateY(-5px);
-            }
-        }
-
-        @keyframes floatingDot {
-
-            0%,
-            100% {
-                transform: translateY(0px) scale(1);
-                opacity: 0.5;
+            .main-title {
+                font-size: 3rem;
             }
 
-            50% {
-                transform: translateY(-20px) scale(1.2);
-                opacity: 1;
+            .features-section {
+                grid-template-columns: 1fr;
+                padding: 2rem;
+            }
+
+            .footer {
+                padding: 1.5rem 2rem;
+            }
+
+            .shape-1,
+            .shape-2 {
+                opacity: 0.08;
             }
         }
 
-        @keyframes orbit {
-            0% {
-                transform: translate(-50%, -50%) rotate(0deg);
+        @media (max-width: 480px) {
+            .system-header {
+                padding: 1rem;
             }
 
-            100% {
-                transform: translate(-50%, -50%) rotate(360deg);
-            }
-        }
-
-        @keyframes rotate {
-            0% {
-                transform: rotate(0deg);
+            .system-logo {
+                width: 40px;
+                height: 40px;
+                font-size: 1.1rem;
             }
 
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        @keyframes shine {
-            0% {
-                left: -100%;
+            .system-title {
+                font-size: 1.1rem;
             }
 
-            50% {
-                left: 100%;
+            .user-name {
+                font-size: 0.9rem;
             }
 
-            100% {
-                left: 100%;
-            }
-        }
-
-        @keyframes iconPulse {
-            0% {
-                transform: translate(-50%, -50%) scale(0);
-                opacity: 1;
+            .btn-root,
+            .btn-logout {
+                padding: 0.4rem 1rem;
+                font-size: 0.85rem;
             }
 
-            100% {
-                transform: translate(-50%, -50%) scale(2);
-                opacity: 0;
-            }
-        }
-
-        @keyframes checkPulse {
-
-            0%,
-            100% {
-                transform: scale(1);
+            .main-title {
+                font-size: 2.5rem;
             }
 
-            50% {
-                transform: scale(1.1);
+            .welcome-content {
+                padding: 1.5rem 1.5rem;
+            }
+
+            .features-section {
+                padding: 2rem 1.5rem;
+            }
+
+            .footer {
+                padding: 1.5rem;
+            }
+
+            .footer p {
+                font-size: 0.9rem;
             }
         }
 
-        @keyframes textShimmer {
-
-            0%,
-            100% {
-                background-position: 0% 50%;
-            }
-
-            50% {
-                background-position: 100% 50%;
-            }
-        }
-
-        @keyframes subtitleGlow {
-            0% {
-                text-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
-            }
-
-            100% {
-                text-shadow: 0 0 20px rgba(102, 126, 234, 0.6);
-            }
-        }
-
-        @keyframes fadeInUp {
+        /* ===== ANIMACIONES MÍNIMAS ===== */
+        @keyframes fadeIn {
             from {
                 opacity: 0;
-                transform: translateY(30px);
+                transform: translateY(20px);
             }
-
             to {
                 opacity: 1;
                 transform: translateY(0);
             }
         }
 
-        @keyframes slideInFromLeft {
-            from {
-                opacity: 0;
-                transform: translateX(-50px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
+        .content-left,
+        .content-right,
+        .feature-card {
+            animation: fadeIn 0.8s ease-out forwards;
         }
 
-        @keyframes slideInFromRight {
-            from {
-                opacity: 0;
-                transform: translateX(50px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
+        .content-left {
+            animation-delay: 0.1s;
         }
 
-        @keyframes gradientShift {
-
-            0%,
-            100% {
-                background-position: 0% 50%;
-            }
-
-            50% {
-                background-position: 100% 50%;
-            }
+        .content-right {
+            animation-delay: 0.2s;
         }
 
-        /* ===== EFECTOS 3D ===== */
-        .feature-card[data-tilt] {
-            transform-style: preserve-3d;
+        .feature-card:nth-child(1) {
+            animation-delay: 0.3s;
         }
 
-        .feature-card[data-tilt]:hover {
-            animation: none;
+        .feature-card:nth-child(2) {
+            animation-delay: 0.4s;
         }
 
-        /* ===== RESPONSIVE MEJORADO ===== */
-        @media (max-width: 768px) {
-            .bienvenida-module .header-content {
-                flex-direction: column;
-                text-align: center;
-                gap: 1.5rem;
-            }
-
-            .bienvenida-module .header-title {
-                flex-direction: column;
-                gap: 1.5rem;
-            }
-
-            .welcome-text h1 {
-                font-size: 2rem;
-            }
-
-            .main-title {
-                font-size: 2.2rem;
-            }
-
-            .title-word {
-                margin: 0.2rem;
-            }
-
-            .main-description {
-                font-size: 1.2rem;
-            }
-
-            .features-grid {
-                grid-template-columns: 1fr;
-                gap: 2rem;
-            }
-
-            .welcome-main-message {
-                padding: 3rem 2rem;
-                margin-bottom: 2rem;
-            }
-
-            .feature-card {
-                padding: 2rem;
-            }
-
-            .animated-logo {
-                width: 70px;
-                height: 70px;
-                font-size: 1.8rem;
-            }
-
-            .logo-orbit {
-                width: 100px;
-                height: 100px;
-            }
-
-            .orbit-2 {
-                width: 120px;
-                height: 120px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .bienvenida-module .module-header {
-                padding: 2rem 1.5rem;
-                margin: 1rem;
-                border-radius: 20px;
-            }
-
-            .animated-logo {
-                width: 60px;
-                height: 60px;
-                font-size: 1.5rem;
-            }
-
-            .welcome-text h1 {
-                font-size: 1.7rem;
-            }
-
-            .main-title {
-                font-size: 1.9rem;
-                flex-direction: column;
-                gap: 0.3rem;
-            }
-
-            .welcome-main-message {
-                padding: 2rem 1.5rem;
-                border-radius: 20px;
-            }
-
-            .feature-card {
-                padding: 1.5rem;
-                border-radius: 20px;
-            }
-
-            .features-grid {
-                gap: 1.5rem;
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* ===== EFECTOS DE GLASSMORPHISM AVANZADOS ===== */
-        .bienvenida-module .module-header::before,
-        .welcome-main-message::before,
-        .feature-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
-            border-radius: inherit;
-            z-index: -1;
-        }
-
-        /* ===== EFECTOS DE PARTÍCULAS EN HOVER ===== */
-        .feature-card:hover::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            background: radial-gradient(circle, rgba(102, 126, 234, 0.1) 0%, transparent 70%);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            animation: ripple 0.6s ease-out;
-            z-index: -1;
-        }
-
-        @keyframes ripple {
-            to {
-                width: 400px;
-                height: 400px;
-                opacity: 0;
-            }
+        .feature-card:nth-child(3) {
+            animation-delay: 0.5s;
         }
     </style>
-
-    <script>
-        // ===== CONFIGURACIÓN AVANZADA DEL CANVAS =====
-        class AdvancedCanvasManager {
-            constructor() {
-                this.bgCanvas = document.getElementById('backgroundCanvas');
-                this.particlesCanvas = document.getElementById('particlesCanvas');
-                this.wavesCanvas = document.getElementById('wavesCanvas');
-
-                this.bgCtx = this.bgCanvas.getContext('2d');
-                this.particlesCtx = this.particlesCanvas.getContext('2d');
-                this.wavesCtx = this.wavesCanvas.getContext('2d');
-
-                this.particles = [];
-                this.waves = [];
-                this.stars = [];
-                this.animationId = null;
-                this.mouseX = 0;
-                this.mouseY = 0;
-                this.time = 0;
-
-                this.init();
-            }
-
-            init() {
-                this.resizeCanvases();
-                this.createParticles();
-                this.createWaves();
-                this.createStars();
-                this.setupEventListeners();
-                this.animate();
-            }
-
-            resizeCanvases() {
-                const width = window.innerWidth;
-                const height = window.innerHeight;
-
-                [this.bgCanvas, this.particlesCanvas, this.wavesCanvas].forEach(canvas => {
-                    canvas.width = width;
-                    canvas.height = height;
-                });
-            }
-
-            createParticles() {
-                this.particles = [];
-                const particleCount = Math.min(100, Math.floor((this.bgCanvas.width * this.bgCanvas.height) / 15000));
-
-                for (let i = 0; i < particleCount; i++) {
-                    this.particles.push(new EnhancedParticle(this.bgCanvas));
-                }
-            }
-
-            createWaves() {
-                this.waves = [];
-                for (let i = 0; i < 3; i++) {
-                    this.waves.push(new AnimatedWave(this.wavesCanvas, i));
-                }
-            }
-
-            createStars() {
-                this.stars = [];
-                const starCount = 50;
-
-                for (let i = 0; i < starCount; i++) {
-                    this.stars.push(new TwinklingS, tar(this.bgCanvas));
-                }
-            }
-
-            setupEventListeners() {
-                window.addEventListener('resize', () => {
-                    this.resizeCanvases();
-                    this.createParticles();
-                    this.createWaves();
-                    this.createStars();
-                });
-
-                document.addEventListener('mousemove', (e) => {
-                    this.mouseX = e.clientX;
-                    this.mouseY = e.clientY;
-                });
-
-                document.addEventListener('visibilitychange', () => {
-                    if (document.hidden) {
-                        cancelAnimationFrame(this.animationId);
-                    } else {
-                        this.animate();
-                    }
-                });
-            }
-
-            animate() {
-                this.time += 0.01;
-
-                // Clear canvases
-                this.bgCtx.clearRect(0, 0, this.bgCanvas.width, this.bgCanvas.height);
-                this.particlesCtx.clearRect(0, 0, this.particlesCanvas.width, this.particlesCanvas.height);
-                this.wavesCtx.clearRect(0, 0, this.wavesCanvas.width, this.wavesCanvas.height);
-
-                // Draw background effects
-                this.drawGradientBackground();
-                this.drawStars();
-
-                // Draw waves
-                this.waves.forEach(wave => {
-                    wave.update(this.time);
-                    wave.draw(this.wavesCtx);
-                });
-
-                // Draw particles
-                this.particles.forEach(particle => {
-                    particle.update(this.mouseX, this.mouseY, this.time);
-                    particle.draw(this.particlesCtx);
-                });
-
-                this.drawConnections();
-                this.drawMouseEffects();
-
-                this.animationId = requestAnimationFrame(() => this.animate());
-            }
-
-            drawGradientBackground() {
-                const gradient = this.bgCtx.createRadialGradient(
-                    this.bgCanvas.width / 2,
-                    this.bgCanvas.height / 2,
-                    0,
-                    this.bgCanvas.width / 2,
-                    this.bgCanvas.height / 2,
-                    this.bgCanvas.width
-                );
-
-                gradient.addColorStop(0, 'rgba(102, 126, 234, 0.1)');
-                gradient.addColorStop(0.5, 'rgba(142, 68, 173, 0.05)');
-                gradient.addColorStop(1, 'rgba(30, 60, 114, 0.15)');
-
-                this.bgCtx.fillStyle = gradient;
-                this.bgCtx.fillRect(0, 0, this.bgCanvas.width, this.bgCanvas.height);
-            }
-
-            drawStars() {
-                this.stars.forEach(star => {
-                    star.update(this.time);
-                    star.draw(this.bgCtx);
-                });
-            }
-
-            drawConnections() {
-                for (let i = 0; i < this.particles.length; i++) {
-                    for (let j = i + 1; j < this.particles.length; j++) {
-                        const dx = this.particles[i].x - this.particles[j].x;
-                        const dy = this.particles[i].y - this.particles[j].y;
-                        const distance = Math.sqrt(dx * dx + dy * dy);
-
-                        if (distance < 120) {
-                            const opacity = (120 - distance) / 120 * 0.2;
-                            const gradient = this.particlesCtx.createLinearGradient(
-                                this.particles[i].x, this.particles[i].y,
-                                this.particles[j].x, this.particles[j].y
-                            );
-                            gradient.addColorStop(0, `rgba(102, 126, 234, ${opacity})`);
-                            gradient.addColorStop(1, `rgba(79, 172, 254, ${opacity})`);
-
-                            this.particlesCtx.beginPath();
-                            this.particlesCtx.moveTo(this.particles[i].x, this.particles[i].y);
-                            this.particlesCtx.lineTo(this.particles[j].x, this.particles[j].y);
-                            this.particlesCtx.strokeStyle = gradient;
-                            this.particlesCtx.lineWidth = 2;
-                            this.particlesCtx.stroke();
-                        }
-                    }
-                }
-            }
-
-            drawMouseEffects() {
-                if (this.mouseX > 0 && this.mouseY > 0) {
-                    const gradient = this.particlesCtx.createRadialGradient(
-                        this.mouseX, this.mouseY, 0,
-                        this.mouseX, this.mouseY, 150
-                    );
-                    gradient.addColorStop(0, 'rgba(255, 255, 255, 0.1)');
-                    gradient.addColorStop(1, 'rgba(102, 126, 234, 0)');
-
-                    this.particlesCtx.fillStyle = gradient;
-                    this.particlesCtx.fillRect(0, 0, this.particlesCanvas.width, this.particlesCanvas.height);
-                }
-            }
-        }
-
-        class EnhancedParticle {
-            constructor(canvas) {
-                this.canvas = canvas;
-                this.reset();
-                this.originalRadius = this.radius;
-                this.pulsePhase = Math.random() * Math.PI * 2;
-            }
-
-            reset() {
-                this.x = Math.random() * this.canvas.width;
-                this.y = Math.random() * this.canvas.height;
-                this.vx = (Math.random() - 0.5) * 1.5;
-                this.vy = (Math.random() - 0.5) * 1.5;
-                this.radius = Math.random() * 3 + 1;
-                this.opacity = Math.random() * 0.5 + 0.2;
-                this.originalOpacity = this.opacity;
-                this.life = Math.random() * 300 + 200;
-                this.maxLife = this.life;
-                this.hue = Math.random() * 60 + 200; // Blue to purple range
-            }
-
-            update(mouseX, mouseY, time) {
-                // Mouse interaction
-                const dx = mouseX - this.x;
-                const dy = mouseY - this.y;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-
-                if (distance < 150) {
-                    const force = (150 - distance) / 150 * 0.01;
-                    this.vx += (dx / distance) * force;
-                    this.vy += (dy / distance) * force;
-                    this.opacity = Math.min(0.8, this.originalOpacity + force * 3);
-                    this.radius = this.originalRadius * (1 + force * 2);
-                } else {
-                    this.opacity += (this.originalOpacity - this.opacity) * 0.02;
-                    this.radius += (this.originalRadius - this.radius) * 0.02;
-                }
-
-                // Add pulsing effect
-                this.pulsePhase += 0.02;
-                const pulseScale = 1 + Math.sin(this.pulsePhase) * 0.1;
-                this.radius *= pulseScale;
-
-                // Drift effect
-                this.x += this.vx + Math.sin(time + this.x * 0.01) * 0.5;
-                this.y += this.vy + Math.cos(time + this.y * 0.01) * 0.5;
-
-                this.vx *= 0.99;
-                this.vy *= 0.99;
-
-                // Boundary handling with wrap-around
-                if (this.x < -this.radius) this.x = this.canvas.width + this.radius;
-                if (this.x > this.canvas.width + this.radius) this.x = -this.radius;
-                if (this.y < -this.radius) this.y = this.canvas.height + this.radius;
-                if (this.y > this.canvas.height + this.radius) this.y = -this.radius;
-
-                this.life--;
-                if (this.life <= 0) {
-                    this.reset();
-                }
-            }
-
-            draw(ctx) {
-                ctx.save();
-                ctx.globalAlpha = this.opacity;
-
-                // Main particle with gradient
-                const gradient = ctx.createRadialGradient(
-                    this.x, this.y, 0,
-                    this.x, this.y, this.radius * 3
-                );
-                gradient.addColorStop(0, `hsla(${this.hue}, 70%, 60%, 0.8)`);
-                gradient.addColorStop(0.5, `hsla(${this.hue}, 70%, 50%, 0.4)`);
-                gradient.addColorStop(1, 'transparent');
-
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.radius * 3, 0, Math.PI * 2);
-                ctx.fillStyle = gradient;
-                ctx.fill();
-
-                // Inner bright core
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                ctx.fillStyle = `hsla(${this.hue}, 80%, 80%, 0.9)`;
-                ctx.fill();
-
-                ctx.restore();
-            }
-        }
-
-        class AnimatedWave {
-            constructor(canvas, index) {
-                this.canvas = canvas;
-                this.index = index;
-                this.amplitude = 30 + index * 10;
-                this.frequency = 0.02 + index * 0.005;
-                this.speed = 0.02 + index * 0.01;
-                this.offset = index * Math.PI / 3;
-                this.opacity = 0.1 - index * 0.02;
-            }
-
-            update(time) {
-                this.time = time;
-            }
-
-            draw(ctx) {
-                ctx.save();
-                ctx.globalAlpha = this.opacity;
-
-                const gradient = ctx.createLinearGradient(0, 0, 0, this.canvas.height);
-                gradient.addColorStop(0, 'rgba(102, 126, 234, 0.3)');
-                gradient.addColorStop(0.5, 'rgba(79, 172, 254, 0.2)');
-                gradient.addColorStop(1, 'rgba(142, 68, 173, 0.1)');
-
-                ctx.beginPath();
-                ctx.moveTo(0, this.canvas.height);
-
-                for (let x = 0; x <= this.canvas.width; x += 5) {
-                    const y = this.canvas.height - 100 +
-                        Math.sin(x * this.frequency + this.time * this.speed + this.offset) * this.amplitude;
-                    ctx.lineTo(x, y);
-                }
-
-                ctx.lineTo(this.canvas.width, this.canvas.height);
-                ctx.closePath();
-                ctx.fillStyle = gradient;
-                ctx.fill();
-
-                ctx.restore();
-            }
-        }
-
-        class TwinklingStar {
-            constructor(canvas) {
-                this.canvas = canvas;
-                this.reset();
-            }
-
-            reset() {
-                this.x = Math.random() * this.canvas.width;
-                this.y = Math.random() * this.canvas.height;
-                this.radius = Math.random() * 2 + 0.5;
-                this.opacity = Math.random() * 0.5 + 0.3;
-                this.twinkleSpeed = Math.random() * 0.02 + 0.01;
-                this.twinklePhase = Math.random() * Math.PI * 2;
-            }
-
-            update(time) {
-                this.twinklePhase += this.twinkleSpeed;
-                this.currentOpacity = this.opacity * (0.5 + Math.sin(this.twinklePhase) * 0.5);
-            }
-
-            draw(ctx) {
-                ctx.save();
-                ctx.globalAlpha = this.currentOpacity;
-
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                ctx.fillStyle = 'white';
-                ctx.fill();
-
-                // Star sparkle effect
-                ctx.beginPath();
-                ctx.moveTo(this.x - this.radius * 2, this.y);
-                ctx.lineTo(this.x + this.radius * 2, this.y);
-                ctx.moveTo(this.x, this.y - this.radius * 2);
-                ctx.lineTo(this.x, this.y + this.radius * 2);
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
-                ctx.lineWidth = 1;
-                ctx.stroke();
-
-                ctx.restore();
-            }
-        }
-
-        // ===== EFECTOS 3D PARA TARJETAS =====
-        class Card3DEffect {
-            constructor() {
-                this.initTiltEffect();
-            }
-
-            initTiltEffect() {
-                const cards = document.querySelectorAll('[data-tilt]');
-
-                cards.forEach(card => {
-                    card.addEventListener('mousemove', this.handleMouseMove.bind(this));
-                    card.addEventListener('mouseleave', this.handleMouseLeave.bind(this));
-                });
-            }
-
-            handleMouseMove(e) {
-                const card = e.currentTarget;
-                const rect = card.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-
-                const centerX = rect.width / 2;
-                const centerY = rect.height / 2;
-
-                const rotateX = (y - centerY) / 10;
-                const rotateY = (centerX - x) / 10;
-
-                card.style.transform = `
-            perspective(1000px)
-            rotateX(${rotateX}deg)
-            rotateY(${rotateY}deg)
-            translateZ(20px)
-            translateY(-15px)
-        `;
-            }
-
-            handleMouseLeave(e) {
-                const card = e.currentTarget;
-                card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) translateZ(0) translateY(0)';
-            }
-        }
-
-        // ===== INICIALIZACIÓN MEJORADA =====
-        class EnhancedWelcomeModule {
-            constructor() {
-                this.canvasManager = null;
-                this.card3DEffect = null;
-                this.init();
-            }
-
-            init() {
-                console.log('🎉 Inicializando módulo de bienvenida mejorado...');
-                console.log('🎨 Cargando efectos visuales avanzados...');
-                console.log('✨ Canvas múltiples: Fondo, Partículas y Ondas');
-                console.log('🌟 Efectos 3D habilitados para tarjetas');
-
-                setTimeout(() => {
-                    this.canvasManager = new AdvancedCanvasManager();
-                    this.card3DEffect = new Card3DEffect();
-                    this.initScrollEffects();
-                }, 100);
-            }
-
-            initScrollEffects() {
-                const observerOptions = {
-                    threshold: 0.1,
-                    rootMargin: '0px 0px -50px 0px'
-                };
-
-                const observer = new IntersectionObserver((entries) => {
-                    entries.forEach(entry => {
-                        if (entry.isIntersecting) {
-                            entry.target.style.animationPlayState = 'running';
-                        }
-                    });
-                }, observerOptions);
-
-                document.querySelectorAll('.feature-card, .welcome-main-message').forEach(el => {
-                    observer.observe(el);
-                });
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            new EnhancedWelcomeModule();
-        });
-
-        console.log('🚀 Módulo de bienvenida mejorado cargado exitosamente');
-        console.log('🎯 Efectos incluidos: Partículas, Ondas, Estrellas, 3D, Glassmorphism');
-    </script>
 
 </body>
 
