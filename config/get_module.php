@@ -49,7 +49,7 @@ $allowedModules = [
         'reportes',
         'horas',
         'usuarios',
-        // 'asignacion'
+        'incidencias'
     ],
     'supervisor' => [
         'bienvenida',

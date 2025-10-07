@@ -1,0 +1,1754 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📋 Módulo de Incidencias - Promotores</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body>
+
+    <!-- ===== MÓDULO INCIDENCIAS PROMOTORES (DATOS REALES) ===== -->
+    <div class="incidencias-module">
+        <!-- HEADER DEL MÓDULO -->
+        <div class="module-header">
+            <div class="header-content">
+                <div class="header-title">
+                    <i class="fas fa-exclamation-triangle header-icon"></i>
+                    <div>
+                        <h1>Gestión de Incidencias</h1>
+                        <p class="header-subtitle">Sistema de registro y seguimiento de incidencias de promotores</p>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button class="btn-primary" id="btn-nueva-incidencia">
+                        <i class="fas fa-plus"></i> Nueva Incidencia
+                    </button>
+                    <button class="btn-secondary" id="btn-descargar-reporte">
+                        <i class="fas fa-file-excel"></i> Exportar Excel
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ESTADÍSTICAS GENERALES -->
+        <div class="stats-container">
+            <div class="stats-content">
+                <h3><i class="fas fa-chart-bar"></i> Resumen de Incidencias</h3>
+                <div class="stats-grid">
+                    <div class="stat-card stat-total">
+                        <div class="stat-icon">
+                            <i class="fas fa-clipboard-list"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h4 id="stat-total">0</h4>
+                            <p>Total Incidencias</p>
+                        </div>
+                    </div>
+                    <div class="stat-card stat-pendiente">
+                        <div class="stat-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h4 id="stat-pendientes">0</h4>
+                            <p>Pendientes</p>
+                        </div>
+                    </div>
+                    <div class="stat-card stat-revision">
+                        <div class="stat-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h4 id="stat-revision">0</h4>
+                            <p>En Revisión</p>
+                        </div>
+                    </div>
+                    <div class="stat-card stat-resuelta">
+                        <div class="stat-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h4 id="stat-resueltas">0</h4>
+                            <p>Resueltas</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FILTROS -->
+        <div class="filters-container">
+            <div class="filters-content">
+                <h3><i class="fas fa-filter"></i> Filtros de Búsqueda</h3>
+
+                <div class="filter-section">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Fecha de Inicio</label>
+                            <input type="date" id="filtro-fecha-inicio">
+                        </div>
+                        <div class="form-group">
+                            <label>Fecha de Fin</label>
+                            <input type="date" id="filtro-fecha-fin">
+                        </div>
+                        <div class="form-group">
+                            <label>Promotor</label>
+                            <select id="filtro-promotor">
+                                <option value="">Todos los promotores</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Tipo de Incidencia</label>
+                            <select id="filtro-tipo">
+                                <option value="">Todos los tipos</option>
+                                <option value="falta">🚫 Falta</option>
+                                <option value="retardo">⏰ Retardo</option>
+                                <option value="abandono">🏃 Abandono de Puesto</option>
+                                <option value="salud">🏥 Incapacidad/Salud</option>
+                                <option value="imprevisto">⚠️ Imprevisto</option>
+                                <option value="otro">📝 Otro</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Estatus</label>
+                            <select id="filtro-estatus">
+                                <option value="">Todos los estatus</option>
+                                <option value="pendiente">⏳ Pendiente</option>
+                                <option value="revision">🔍 En Revisión</option>
+                                <option value="resuelta">✅ Resuelta</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="filter-actions">
+                    <button type="button" class="btn-secondary" id="btn-limpiar-filtros">
+                        <i class="fas fa-broom"></i> Limpiar Filtros
+                    </button>
+                    <button type="button" class="btn-primary" id="btn-aplicar-filtros">
+                        <i class="fas fa-search"></i> Aplicar Filtros
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- LOADING STATE -->
+        <div class="loading-container" id="loading-container" style="display: none;">
+            <div class="loading-spinner"></div>
+            <p>Cargando incidencias...</p>
+        </div>
+
+        <!-- TABLA DE INCIDENCIAS -->
+        <div class="reporte-container" id="reporte-container">
+            <div class="reporte-content">
+                <div class="reporte-header">
+                    <div class="reporte-title">
+                        <h3>Registro de Incidencias</h3>
+                        <p class="text-secondary">Listado completo de incidencias registradas</p>
+                    </div>
+                </div>
+
+                <div class="table-wrapper">
+                    <table class="reporte-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Fecha</th>
+                                <th>Promotor</th>
+                                <th>Tienda</th>
+                                <th>Tipo</th>
+                                <th>Descripción</th>
+                                <th>Estatus</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-incidencias">
+                            <!-- Se llenará dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- EMPTY STATE -->
+                <div class="empty-state" id="empty-state" style="display: none;">
+                    <i class="fas fa-clipboard-list"></i>
+                    <h3>No hay incidencias registradas</h3>
+                    <p>Comience registrando una nueva incidencia usando el botón "Nueva Incidencia"</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ===== MODAL NUEVA/EDITAR INCIDENCIA ===== -->
+    <div class="modal-overlay" id="modal-incidencia">
+        <div class="modal-container modal-large">
+            <div class="modal-header">
+                <h2 id="modal-title">
+                    <i class="fas fa-plus-circle"></i> Nueva Incidencia
+                </h2>
+                <button class="modal-close" id="modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="modal-content">
+                <form id="form-incidencia">
+                    <input type="hidden" id="incidencia-id">
+
+                    <div class="form-section">
+                        <h4><i class="fas fa-user"></i> Información del Promotor</h4>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Promotor *</label>
+                                <select id="incidencia-promotor" required>
+                                    <option value="">Seleccione un promotor</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Tienda</label>
+                                <input type="text" id="incidencia-tienda" placeholder="Nombre de la tienda (opcional)">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h4><i class="fas fa-calendar"></i> Detalles de la Incidencia</h4>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Fecha de Incidencia *</label>
+                                <input type="date" id="incidencia-fecha" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Tipo de Incidencia *</label>
+                                <select id="incidencia-tipo" required>
+                                    <option value="">Seleccione el tipo</option>
+                                    <option value="falta">🚫 Falta (No asistió)</option>
+                                    <option value="retardo">⏰ Retardo (Llegó tarde)</option>
+                                    <option value="abandono">🏃 Abandono de Puesto</option>
+                                    <option value="salud">🏥 Incapacidad/Salud</option>
+                                    <option value="imprevisto">⚠️ Imprevisto</option>
+                                    <option value="otro">📝 Otro</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h4><i class="fas fa-file-alt"></i> Descripción</h4>
+                        <div class="form-group">
+                            <label>Motivo/Descripción de la Incidencia *</label>
+                            <textarea id="incidencia-descripcion" rows="4" 
+                                placeholder="Describa detalladamente lo sucedido..." required></textarea>
+                            <small class="text-muted">Proporcione toda la información relevante sobre la incidencia</small>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h4><i class="fas fa-cog"></i> Gestión</h4>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Estatus *</label>
+                                <select id="incidencia-estatus" required>
+                                    <option value="pendiente">⏳ Pendiente</option>
+                                    <option value="revision">🔍 En Revisión</option>
+                                    <option value="resuelta">✅ Resuelta</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Prioridad</label>
+                                <select id="incidencia-prioridad">
+                                    <option value="baja">🟢 Baja</option>
+                                    <option value="media" selected>🟡 Media</option>
+                                    <option value="alta">🔴 Alta</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <div class="form-group">
+                            <label>Notas Adicionales</label>
+                            <textarea id="incidencia-notas" rows="3" 
+                                placeholder="Información adicional, seguimiento, resolución..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="btn-secondary" id="btn-cancelar">
+                            <i class="fas fa-times"></i> Cancelar
+                        </button>
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-save"></i> Guardar Incidencia
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL DETALLE INCIDENCIA ===== -->
+    <div class="modal-overlay" id="modal-detalle">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2>
+                    <i class="fas fa-info-circle"></i> Detalle de Incidencia
+                </h2>
+                <button class="modal-close" id="modal-close-detalle">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="modal-content" id="detalle-content">
+                <!-- Se llenará dinámicamente -->
+            </div>
+        </div>
+    </div>
+
+    <!-- SISTEMA DE NOTIFICACIONES -->
+    <div class="notifications-container" id="notifications-container"></div>
+
+    <style>
+        /* ===== ESTILOS (IDÉNTICOS AL ANTERIOR) ===== */
+        :root {
+            --primary-color: #27ae60;
+            --primary-hover: #229954;
+            --primary-light: #d5f4e6;
+            --secondary-color: #6c757d;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --info-color: #3b82f6;
+            --background: #f8fafc;
+            --surface: rgba(255, 255, 255, 0.95);
+            --text-primary: #2d3748;
+            --text-secondary: #718096;
+            --border-color: #e2e8f0;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            --shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.15);
+            --radius: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--background);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .module-header {
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: var(--shadow);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--primary-color);
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.8rem;
+            box-shadow: 0 8px 20px rgba(39, 174, 96, 0.3);
+        }
+
+        .header-title h1 {
+            margin: 0 0 0.3rem 0;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .header-subtitle {
+            margin: 0;
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .stats-container {
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius);
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: var(--shadow);
+        }
+
+        .stats-content {
+            padding: 2rem;
+        }
+
+        .stats-content h3 {
+            margin: 0 0 1.5rem 0;
+            color: var(--text-primary);
+            font-size: 1.3rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            border: 2px solid var(--border-color);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card.stat-total:hover {
+            border-color: var(--primary-color);
+        }
+
+        .stat-card.stat-pendiente:hover {
+            border-color: var(--warning-color);
+        }
+
+        .stat-card.stat-revision:hover {
+            border-color: var(--info-color);
+        }
+
+        .stat-card.stat-resuelta:hover {
+            border-color: var(--success-color);
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .stat-total .stat-icon {
+            background: var(--primary-light);
+            color: var(--primary-color);
+        }
+
+        .stat-pendiente .stat-icon {
+            background: #fef3c7;
+            color: var(--warning-color);
+        }
+
+        .stat-revision .stat-icon {
+            background: #dbeafe;
+            color: var(--info-color);
+        }
+
+        .stat-resuelta .stat-icon {
+            background: #d1fae5;
+            color: var(--success-color);
+        }
+
+        .stat-info h4 {
+            margin: 0 0 0.5rem 0;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .stat-info p {
+            margin: 0;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .filters-container {
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius);
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: var(--shadow);
+        }
+
+        .filters-content {
+            padding: 2rem;
+        }
+
+        .filters-content h3 {
+            margin: 0 0 1.5rem 0;
+            color: var(--text-primary);
+            font-size: 1.3rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .filter-section {
+            margin-bottom: 1.2rem;
+            padding: 1.2rem;
+            background: #f8fafc;
+            border-radius: var(--radius);
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.4rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.85rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.1);
+        }
+
+        .form-group small {
+            display: block;
+            margin-top: 0.3rem;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .btn-primary,
+        .btn-secondary,
+        .btn-danger,
+        .btn-info {
+            border: none;
+            border-radius: 8px;
+            padding: 12px 20px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(39, 174, 96, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .btn-danger:hover:not(:disabled) {
+            background: #dc2626;
+            transform: translateY(-2px);
+        }
+
+        .btn-info {
+            background: var(--info-color);
+            color: white;
+            padding: 8px 12px;
+            font-size: 0.8rem;
+        }
+
+        .btn-info:hover:not(:disabled) {
+            background: #2563eb;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+        }
+
+        .loading-container {
+            text-align: center;
+            padding: 60px 20px;
+            background: var(--surface);
+            border-radius: var(--radius);
+            margin-bottom: 2rem;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(39, 174, 96, 0.1);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .reporte-container {
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius);
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: var(--shadow);
+        }
+
+        .reporte-content {
+            padding: 2rem;
+        }
+
+        .reporte-header {
+            margin-bottom: 2rem;
+        }
+
+        .reporte-title h3 {
+            margin: 0 0 0.5rem 0;
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+        }
+
+        .reporte-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .reporte-table th {
+            background: var(--primary-color);
+            color: white;
+            padding: 15px 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+
+        .reporte-table td {
+            padding: 15px 12px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+        }
+
+        .reporte-table tbody tr {
+            transition: all 0.3s ease;
+        }
+
+        .reporte-table tbody tr:hover {
+            background: rgba(39, 174, 96, 0.05);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .badge-pendiente {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fbbf24;
+        }
+
+        .badge-revision {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #60a5fa;
+        }
+
+        .badge-resuelta {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #34d399;
+        }
+
+        .badge-falta {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .badge-retardo {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-abandono {
+            background: #fecaca;
+            color: #7f1d1d;
+        }
+
+        .badge-salud {
+            background: #dbeafe;
+            color: #1e3a8a;
+        }
+
+        .badge-imprevisto {
+            background: #fef3c7;
+            color: #78350f;
+        }
+
+        .badge-otro {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .badge-prioridad-alta {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 2px solid #f87171;
+        }
+
+        .badge-prioridad-media {
+            background: #fef3c7;
+            color: #92400e;
+            border: 2px solid #fbbf24;
+        }
+
+        .badge-prioridad-baja {
+            background: #d1fae5;
+            color: #065f46;
+            border: 2px solid #34d399;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-container {
+            background: white;
+            border-radius: var(--radius);
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        .modal-container.modal-large {
+            max-width: 900px;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 1.5rem 2rem;
+            border-radius: var(--radius) var(--radius) 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: white;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-content {
+            padding: 2rem;
+        }
+
+        .form-section {
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .form-section:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .form-section h4 {
+            margin: 0 0 1rem 0;
+            color: var(--primary-color);
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--border-color);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            color: var(--border-color);
+            margin-bottom: 1rem;
+        }
+
+        .empty-state h3 {
+            margin: 0 0 0.5rem 0;
+            color: var(--text-primary);
+        }
+
+        .notifications-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 3000;
+            max-width: 400px;
+        }
+
+        .notification {
+            background: white;
+            border-radius: var(--radius);
+            padding: 1rem 1.5rem;
+            margin-bottom: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            border-left: 4px solid;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: notificationSlideIn 0.3s ease;
+        }
+
+        .notification.success {
+            border-left-color: var(--success-color);
+        }
+
+        .notification.error {
+            border-left-color: var(--danger-color);
+        }
+
+        .notification.warning {
+            border-left-color: var(--warning-color);
+        }
+
+        .notification.info {
+            border-left-color: var(--info-color);
+        }
+
+        @keyframes notificationSlideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .notification-icon {
+            font-size: 1.2rem;
+        }
+
+        .notification.success .notification-icon {
+            color: var(--success-color);
+        }
+
+        .notification.error .notification-icon {
+            color: var(--danger-color);
+        }
+
+        .notification.warning .notification-icon {
+            color: var(--warning-color);
+        }
+
+        .notification.info .notification-icon {
+            color: var(--info-color);
+        }
+
+        .notification-content h4 {
+            margin: 0 0 5px 0;
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        .notification-content p {
+            margin: 0;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .detalle-item {
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: #f8fafc;
+            border-radius: 8px;
+            border-left: 3px solid var(--primary-color);
+        }
+
+        .detalle-item strong {
+            display: block;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .detalle-item p {
+            margin: 0;
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+
+        .text-secondary {
+            color: var(--text-secondary);
+        }
+
+        .text-muted {
+            color: var(--text-secondary);
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-actions,
+            .modal-actions {
+                flex-direction: column;
+            }
+
+            .modal-container {
+                margin: 10px;
+                max-width: calc(100% - 20px);
+            }
+
+            .table-wrapper {
+                font-size: 0.8rem;
+            }
+
+            .reporte-table th,
+            .reporte-table td {
+                padding: 10px 8px;
+            }
+        }
+    </style>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+    <script>
+        // ===== CONFIGURACIÓN API =====
+        const API_URL = '../../api/incidencias.php'; // Ajusta la ruta según tu estructura
+
+        // ===== VARIABLES GLOBALES =====
+        let incidencias = [];
+        let incidenciaEditando = null;
+        let promotores = [];
+
+        // ===== ELEMENTOS DOM =====
+        const btnNuevaIncidencia = document.getElementById('btn-nueva-incidencia');
+        const btnDescargarReporte = document.getElementById('btn-descargar-reporte');
+        const btnAplicarFiltros = document.getElementById('btn-aplicar-filtros');
+        const btnLimpiarFiltros = document.getElementById('btn-limpiar-filtros');
+
+        const modalIncidencia = document.getElementById('modal-incidencia');
+        const modalDetalle = document.getElementById('modal-detalle');
+        const formIncidencia = document.getElementById('form-incidencia');
+        const loadingContainer = document.getElementById('loading-container');
+
+        // ===== INICIALIZACIÓN =====
+        async function init() {
+            console.log('Inicializando módulo de incidencias con datos reales...');
+
+            configurarEventListeners();
+            
+            // Cargar promotores primero
+            await cargarPromotores();
+            
+            // Luego cargar incidencias
+            await cargarIncidencias();
+
+            // Establecer fecha de hoy por defecto
+            const hoy = new Date().toISOString().split('T')[0];
+            document.getElementById('incidencia-fecha').value = hoy;
+
+            console.log('Módulo iniciado correctamente');
+        }
+
+        function configurarEventListeners() {
+            btnNuevaIncidencia.addEventListener('click', abrirModalNuevaIncidencia);
+            btnDescargarReporte.addEventListener('click', descargarExcel);
+            btnAplicarFiltros.addEventListener('click', aplicarFiltros);
+            btnLimpiarFiltros.addEventListener('click', limpiarFiltros);
+
+            document.getElementById('modal-close').addEventListener('click', cerrarModalIncidencia);
+            document.getElementById('btn-cancelar').addEventListener('click', cerrarModalIncidencia);
+            document.getElementById('modal-close-detalle').addEventListener('click', cerrarModalDetalle);
+
+            formIncidencia.addEventListener('submit', guardarIncidencia);
+
+            modalIncidencia.addEventListener('click', (e) => {
+                if (e.target === modalIncidencia) cerrarModalIncidencia();
+            });
+
+            modalDetalle.addEventListener('click', (e) => {
+                if (e.target === modalDetalle) cerrarModalDetalle();
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    cerrarModalIncidencia();
+                    cerrarModalDetalle();
+                }
+            });
+        }
+
+        // ===== CARGAR DATOS DESDE API =====
+        async function cargarPromotores() {
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        accion: 'promotores'
+                    })
+                });
+
+                const resultado = await response.json();
+
+                if (resultado.success && resultado.data.promotores) {
+                    promotores = resultado.data.promotores;
+                    
+                    const selectPromotor = document.getElementById('incidencia-promotor');
+                    const filtroPromotor = document.getElementById('filtro-promotor');
+
+                    promotores.forEach(promotor => {
+                        const option = document.createElement('option');
+                        option.value = promotor.id_promotor;
+                        option.textContent = `${promotor.nombre_completo} (${promotor.rfc})`;
+
+                        selectPromotor.appendChild(option.cloneNode(true));
+                        filtroPromotor.appendChild(option);
+                    });
+
+                    console.log(`${promotores.length} promotores cargados`);
+                } else {
+                    throw new Error(resultado.message || 'Error al cargar promotores');
+                }
+            } catch (error) {
+                console.error('Error cargando promotores:', error);
+                mostrarNotificacion('Error al cargar promotores: ' + error.message, 'error');
+            }
+        }
+
+        async function cargarIncidencias(filtros = {}) {
+            try {
+                mostrarLoading();
+
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        accion: 'listar',
+                        ...filtros
+                    })
+                });
+
+                const resultado = await response.json();
+
+                ocultarLoading();
+
+                if (resultado.success && resultado.data) {
+                    incidencias = resultado.data.incidencias || [];
+                    const estadisticas = resultado.data.estadisticas || {};
+
+                    renderizarTabla();
+                    actualizarEstadisticas(estadisticas);
+
+                    console.log(`${incidencias.length} incidencias cargadas`);
+                } else {
+                    throw new Error(resultado.message || 'Error al cargar incidencias');
+                }
+            } catch (error) {
+                ocultarLoading();
+                console.error('Error cargando incidencias:', error);
+                mostrarNotificacion('Error al cargar incidencias: ' + error.message, 'error');
+            }
+        }
+
+        // ===== GUARDAR INCIDENCIA =====
+        async function guardarIncidencia(e) {
+            e.preventDefault();
+
+            try {
+                const datos = {
+                    accion: incidenciaEditando ? 'actualizar' : 'crear',
+                    fecha_incidencia: document.getElementById('incidencia-fecha').value,
+                    id_promotor: parseInt(document.getElementById('incidencia-promotor').value),
+                    tienda_nombre: document.getElementById('incidencia-tienda').value,
+                    tipo_incidencia: document.getElementById('incidencia-tipo').value,
+                    descripcion: document.getElementById('incidencia-descripcion').value,
+                    estatus: document.getElementById('incidencia-estatus').value,
+                    prioridad: document.getElementById('incidencia-prioridad').value,
+                    notas: document.getElementById('incidencia-notas').value
+                };
+
+                if (incidenciaEditando) {
+                    datos.id_incidencia = incidenciaEditando.id_incidencia;
+                }
+
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(datos)
+                });
+
+                const resultado = await response.json();
+
+                if (resultado.success) {
+                    mostrarNotificacion(
+                        incidenciaEditando ? 'Incidencia actualizada exitosamente' : 'Incidencia registrada exitosamente',
+                        'success'
+                    );
+                    cerrarModalIncidencia();
+                    await cargarIncidencias();
+                } else {
+                    throw new Error(resultado.message || 'Error al guardar incidencia');
+                }
+            } catch (error) {
+                console.error('Error guardando incidencia:', error);
+                mostrarNotificacion('Error al guardar incidencia: ' + error.message, 'error');
+            }
+        }
+
+        // ===== RENDERIZAR TABLA =====
+        function renderizarTabla() {
+            const tbody = document.getElementById('tbody-incidencias');
+            const emptyState = document.getElementById('empty-state');
+
+            tbody.innerHTML = '';
+
+            if (incidencias.length === 0) {
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+
+            incidencias.forEach(incidencia => {
+                const row = document.createElement('tr');
+
+                const tipoEmoji = {
+                    'falta': '🚫',
+                    'retardo': '⏰',
+                    'abandono': '🏃',
+                    'salud': '🏥',
+                    'imprevisto': '⚠️',
+                    'otro': '📝'
+                };
+
+                const tipoTexto = {
+                    'falta': 'Falta',
+                    'retardo': 'Retardo',
+                    'abandono': 'Abandono',
+                    'salud': 'Salud',
+                    'imprevisto': 'Imprevisto',
+                    'otro': 'Otro'
+                };
+
+                const estatusTexto = {
+                    'pendiente': '⏳ Pendiente',
+                    'revision': '🔍 En Revisión',
+                    'resuelta': '✅ Resuelta'
+                };
+
+                row.innerHTML = `
+                    <td><strong>#${incidencia.id_incidencia}</strong></td>
+                    <td>${formatearFecha(incidencia.fecha_incidencia)}</td>
+                    <td>
+                        <strong>${incidencia.promotor_nombre}</strong>
+                        ${incidencia.prioridad === 'alta' ? '<span class="badge badge-prioridad-alta">🔴 Alta</span>' : ''}
+                    </td>
+                    <td>${incidencia.tienda_nombre || 'N/A'}</td>
+                    <td><span class="badge badge-${incidencia.tipo_incidencia}">${tipoEmoji[incidencia.tipo_incidencia]} ${tipoTexto[incidencia.tipo_incidencia]}</span></td>
+                    <td style="max-width: 300px;">${truncarTexto(incidencia.descripcion, 80)}</td>
+                    <td><span class="badge badge-${incidencia.estatus}">${estatusTexto[incidencia.estatus]}</span></td>
+                    <td>
+                        <button class="btn-info btn-sm" onclick="verDetalle(${incidencia.id_incidencia})">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn-secondary btn-sm" onclick="editarIncidencia(${incidencia.id_incidencia})">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn-danger btn-sm" onclick="eliminarIncidencia(${incidencia.id_incidencia})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+
+                tbody.appendChild(row);
+            });
+        }
+
+        // ===== ESTADÍSTICAS =====
+        function actualizarEstadisticas(stats) {
+            document.getElementById('stat-total').textContent = stats.total || 0;
+            document.getElementById('stat-pendientes').textContent = stats.pendientes || 0;
+            document.getElementById('stat-revision').textContent = stats.revision || 0;
+            document.getElementById('stat-resueltas').textContent = stats.resueltas || 0;
+        }
+
+        // ===== FILTROS =====
+        async function aplicarFiltros() {
+            const filtros = {
+                fecha_inicio: document.getElementById('filtro-fecha-inicio').value,
+                fecha_fin: document.getElementById('filtro-fecha-fin').value,
+                id_promotor: document.getElementById('filtro-promotor').value ? parseInt(document.getElementById('filtro-promotor').value) : null,
+                tipo_incidencia: document.getElementById('filtro-tipo').value,
+                estatus: document.getElementById('filtro-estatus').value
+            };
+
+            await cargarIncidencias(filtros);
+            mostrarNotificacion(`Se encontraron ${incidencias.length} incidencias`, 'info');
+        }
+
+        async function limpiarFiltros() {
+            document.getElementById('filtro-fecha-inicio').value = '';
+            document.getElementById('filtro-fecha-fin').value = '';
+            document.getElementById('filtro-promotor').value = '';
+            document.getElementById('filtro-tipo').value = '';
+            document.getElementById('filtro-estatus').value = '';
+
+            await cargarIncidencias();
+            mostrarNotificacion('Filtros limpiados', 'info');
+        }
+
+        // ===== DETALLE INCIDENCIA =====
+        function verDetalle(id) {
+            const incidencia = incidencias.find(i => i.id_incidencia === id);
+            if (!incidencia) return;
+
+            const tipoEmoji = {
+                'falta': '🚫',
+                'retardo': '⏰',
+                'abandono': '🏃',
+                'salud': '🏥',
+                'imprevisto': '⚠️',
+                'otro': '📝'
+            };
+
+            const tipoTexto = {
+                'falta': 'Falta',
+                'retardo': 'Retardo',
+                'abandono': 'Abandono de Puesto',
+                'salud': 'Incapacidad/Salud',
+                'imprevisto': 'Imprevisto',
+                'otro': 'Otro'
+            };
+
+            const estatusTexto = {
+                'pendiente': '⏳ Pendiente',
+                'revision': '🔍 En Revisión',
+                'resuelta': '✅ Resuelta'
+            };
+
+            const prioridadTexto = {
+                'baja': '🟢 Baja',
+                'media': '🟡 Media',
+                'alta': '🔴 Alta'
+            };
+
+            const contenido = `
+                <div class="detalle-item">
+                    <strong>ID de Incidencia</strong>
+                    <p>#${incidencia.id_incidencia}</p>
+                </div>
+
+                <div class="detalle-item">
+                    <strong>Promotor Afectado</strong>
+                    <p>${incidencia.promotor_nombre}</p>
+                </div>
+
+                <div class="detalle-item">
+                    <strong>RFC Promotor</strong>
+                    <p>${incidencia.promotor_rfc}</p>
+                </div>
+
+                <div class="detalle-item">
+                    <strong>Tienda</strong>
+                    <p>${incidencia.tienda_nombre || 'N/A'}</p>
+                </div>
+
+                <div class="detalle-item">
+                    <strong>Fecha de Incidencia</strong>
+                    <p>${formatearFecha(incidencia.fecha_incidencia)}</p>
+                </div>
+
+                <div class="detalle-item">
+                    <strong>Tipo de Incidencia</strong>
+                    <p><span class="badge badge-${incidencia.tipo_incidencia}">${tipoEmoji[incidencia.tipo_incidencia]} ${tipoTexto[incidencia.tipo_incidencia]}</span></p>
+                </div>
+
+                <div class="detalle-item">
+                    <strong>Descripción</strong>
+                    <p>${incidencia.descripcion}</p>
+                </div>
+
+                <div class="detalle-item">
+                    <strong>Estatus Actual</strong>
+                    <p><span class="badge badge-${incidencia.estatus}">${estatusTexto[incidencia.estatus]}</span></p>
+                </div>
+
+                <div class="detalle-item">
+                    <strong>Prioridad</strong>
+                    <p><span class="badge badge-prioridad-${incidencia.prioridad}">${prioridadTexto[incidencia.prioridad]}</span></p>
+                </div>
+
+                ${incidencia.notas ? `
+                <div class="detalle-item">
+                    <strong>Notas Adicionales</strong>
+                    <p>${incidencia.notas}</p>
+                </div>
+                ` : ''}
+
+                <div class="detalle-item">
+                    <strong>Fecha de Registro</strong>
+                    <p>${new Date(incidencia.fecha_registro).toLocaleString('es-MX')}</p>
+                </div>
+
+                ${incidencia.fecha_modificacion ? `
+                <div class="detalle-item">
+                    <strong>Última Modificación</strong>
+                    <p>${new Date(incidencia.fecha_modificacion).toLocaleString('es-MX')}</p>
+                </div>
+                ` : ''}
+            `;
+
+            document.getElementById('detalle-content').innerHTML = contenido;
+            modalDetalle.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // ===== ACCIONES =====
+        function abrirModalNuevaIncidencia() {
+            incidenciaEditando = null;
+            document.getElementById('modal-title').innerHTML = '<i class="fas fa-plus-circle"></i> Nueva Incidencia';
+            formIncidencia.reset();
+
+            const hoy = new Date().toISOString().split('T')[0];
+            document.getElementById('incidencia-fecha').value = hoy;
+
+            modalIncidencia.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function editarIncidencia(id) {
+            const incidencia = incidencias.find(i => i.id_incidencia === id);
+            if (!incidencia) return;
+
+            incidenciaEditando = incidencia;
+            document.getElementById('modal-title').innerHTML = '<i class="fas fa-edit"></i> Editar Incidencia';
+
+            document.getElementById('incidencia-id').value = incidencia.id_incidencia;
+            document.getElementById('incidencia-promotor').value = incidencia.id_promotor;
+            document.getElementById('incidencia-tienda').value = incidencia.tienda_nombre || '';
+            document.getElementById('incidencia-fecha').value = incidencia.fecha_incidencia;
+            document.getElementById('incidencia-tipo').value = incidencia.tipo_incidencia;
+            document.getElementById('incidencia-descripcion').value = incidencia.descripcion;
+            document.getElementById('incidencia-estatus').value = incidencia.estatus;
+            document.getElementById('incidencia-prioridad').value = incidencia.prioridad;
+            document.getElementById('incidencia-notas').value = incidencia.notas || '';
+
+            modalIncidencia.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        async function eliminarIncidencia(id) {
+            if (!confirm('¿Está seguro de eliminar esta incidencia? Esta acción no se puede deshacer.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        accion: 'eliminar',
+                        id_incidencia: id
+                    })
+                });
+
+                const resultado = await response.json();
+
+                if (resultado.success) {
+                    mostrarNotificacion('Incidencia eliminada exitosamente', 'success');
+                    await cargarIncidencias();
+                } else {
+                    throw new Error(resultado.message || 'Error al eliminar incidencia');
+                }
+            } catch (error) {
+                console.error('Error eliminando incidencia:', error);
+                mostrarNotificacion('Error al eliminar incidencia: ' + error.message, 'error');
+            }
+        }
+
+        function cerrarModalIncidencia() {
+            modalIncidencia.classList.remove('active');
+            document.body.style.overflow = 'auto';
+            formIncidencia.reset();
+            incidenciaEditando = null;
+        }
+
+        function cerrarModalDetalle() {
+            modalDetalle.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        // ===== EXPORTAR EXCEL =====
+        async function descargarExcel() {
+            if (incidencias.length === 0) {
+                mostrarNotificacion('No hay incidencias para exportar', 'warning');
+                return;
+            }
+
+            try {
+                const workbook = new ExcelJS.Workbook();
+                workbook.creator = 'Sistema de Incidencias';
+                workbook.created = new Date();
+
+                const worksheet = workbook.addWorksheet('Incidencias');
+
+                const headerRow = worksheet.addRow([
+                    'ID',
+                    'Fecha',
+                    'Promotor',
+                    'RFC',
+                    'Tienda',
+                    'Tipo',
+                    'Descripción',
+                    'Estatus',
+                    'Prioridad',
+                    'Notas',
+                    'Fecha Registro'
+                ]);
+
+                headerRow.eachCell((cell) => {
+                    cell.fill = {
+                        type: 'pattern',
+                        pattern: 'solid',
+                        fgColor: { argb: 'FF27AE60' }
+                    };
+                    cell.font = {
+                        bold: true,
+                        color: { argb: 'FFFFFFFF' },
+                        size: 12
+                    };
+                    cell.alignment = { vertical: 'middle', horizontal: 'center' };
+                    cell.border = {
+                        top: { style: 'medium' },
+                        left: { style: 'medium' },
+                        bottom: { style: 'medium' },
+                        right: { style: 'medium' }
+                    };
+                });
+                headerRow.height = 25;
+
+                incidencias.forEach((incidencia) => {
+                    const row = worksheet.addRow([
+                        incidencia.id_incidencia,
+                        incidencia.fecha_incidencia,
+                        incidencia.promotor_nombre,
+                        incidencia.promotor_rfc,
+                        incidencia.tienda_nombre || 'N/A',
+                        incidencia.tipo_incidencia,
+                        incidencia.descripcion,
+                        incidencia.estatus,
+                        incidencia.prioridad,
+                        incidencia.notas || '',
+                        incidencia.fecha_registro
+                    ]);
+
+                    row.eachCell((cell) => {
+                        cell.border = {
+                            top: { style: 'thin' },
+                            left: { style: 'thin' },
+                            bottom: { style: 'thin' },
+                            right: { style: 'thin' }
+                        };
+                    });
+                });
+
+                worksheet.columns = [
+                    { width: 8 },
+                    { width: 12 },
+                    { width: 30 },
+                    { width: 15 },
+                    { width: 25 },
+                    { width: 15 },
+                    { width: 50 },
+                    { width: 15 },
+                    { width: 12 },
+                    { width: 40 },
+                    { width: 20 }
+                ];
+
+                const buffer = await workbook.xlsx.writeBuffer();
+                const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                const nombreArchivo = `incidencias-${new Date().toISOString().split('T')[0]}.xlsx`;
+                saveAs(blob, nombreArchivo);
+
+                mostrarNotificacion('Reporte Excel descargado exitosamente', 'success');
+
+            } catch (error) {
+                console.error('Error generando Excel:', error);
+                mostrarNotificacion('Error al generar Excel', 'error');
+            }
+        }
+
+        // ===== UTILIDADES =====
+        function formatearFecha(fecha) {
+            const fechaObj = new Date(fecha + 'T00:00:00');
+            return fechaObj.toLocaleDateString('es-MX', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+
+        function truncarTexto(texto, maxLength) {
+            if (texto.length <= maxLength) return texto;
+            return texto.substring(0, maxLength) + '...';
+        }
+
+        function mostrarLoading() {
+            loadingContainer.style.display = 'block';
+            document.getElementById('reporte-container').style.display = 'none';
+        }
+
+        function ocultarLoading() {
+            loadingContainer.style.display = 'none';
+            document.getElementById('reporte-container').style.display = 'block';
+        }
+
+        function mostrarNotificacion(mensaje, tipo = 'info') {
+            const notificacion = document.createElement('div');
+            notificacion.className = `notification ${tipo}`;
+
+            const iconos = {
+                success: 'fas fa-check-circle',
+                error: 'fas fa-exclamation-circle',
+                warning: 'fas fa-exclamation-triangle',
+                info: 'fas fa-info-circle'
+            };
+
+            const titulos = {
+                success: 'Éxito',
+                error: 'Error',
+                warning: 'Advertencia',
+                info: 'Información'
+            };
+
+            notificacion.innerHTML = `
+                <i class="${iconos[tipo]} notification-icon"></i>
+                <div class="notification-content">
+                    <h4>${titulos[tipo]}</h4>
+                    <p>${mensaje}</p>
+                </div>
+            `;
+
+            document.getElementById('notifications-container').appendChild(notificacion);
+
+            setTimeout(() => {
+                if (notificacion.parentNode) {
+                    notificacion.remove();
+                }
+            }, 4000);
+        }
+
+        // ===== EXPONER FUNCIONES GLOBALES =====
+        window.verDetalle = verDetalle;
+        window.editarIncidencia = editarIncidencia;
+        window.eliminarIncidencia = eliminarIncidencia;
+
+        // ===== INICIALIZAR =====
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    </script>
+
+</body>
+
+</html>

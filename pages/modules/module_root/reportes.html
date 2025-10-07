@@ -1555,299 +1555,7 @@
             }
         }
 
-        // ===== RENDERIZAR TABLA TIENDAS CON INDICADOR DE TRABAJO EN DESCANSO =====
-        function renderizarTablaTiendasCorregida(asignaciones) {
-            const tbody = document.getElementById('tbody-tiendas');
-            tbody.innerHTML = '';
-
-            console.log('Renderizando tabla con', asignaciones.length, 'asignaciones');
-
-            const tiendasGroup = new Map();
-
-            asignaciones.forEach((asignacion, index) => {
-                const tiendaId = asignacion.tienda_id;
-
-                if (!tiendasGroup.has(tiendaId)) {
-                    tiendasGroup.set(tiendaId, {
-                        tienda: {
-                            id: asignacion.tienda_id,
-                            nombre: asignacion.tienda_nombre || 'Tienda Sin Nombre',
-                            numero: asignacion.tienda_numero || 'S/N',
-                            region: asignacion.tienda_region || 0,
-                            cadena: asignacion.tienda_cadena || 'N/A',
-                            ciudad: asignacion.tienda_ciudad || 'N/A',
-                            estado: asignacion.tienda_estado || 'N/A'
-                        },
-                        asignaciones: []
-                    });
-                }
-                tiendasGroup.get(tiendaId).asignaciones.push(asignacion);
-            });
-
-            console.log(`Se encontraron ${tiendasGroup.size} tiendas únicas`);
-
-            for (const [tiendaId, data] of tiendasGroup) {
-                const tienda = data.tienda;
-                const asignacionesTienda = data.asignaciones;
-
-                const promotoresGroup = new Map();
-                asignacionesTienda.forEach(asignacion => {
-                    const promotorId = asignacion.promotor_id;
-
-                    if (!promotoresGroup.has(promotorId)) {
-                        promotoresGroup.set(promotorId, {
-                            promotor: {
-                                id: asignacion.promotor_id,
-                                nombre: asignacion.promotor_nombre || 'Promotor Sin Nombre',
-                                rfc: asignacion.promotor_rfc || 'N/A',
-                                telefono: asignacion.promotor_telefono || 'N/A',
-                                correo: asignacion.promotor_correo || 'N/A',
-                                dia_descanso: asignacion.promotor_dia_descanso || null
-                            },
-                            dias: []
-                        });
-                    }
-                    promotoresGroup.get(promotorId).dias.push({
-                        fecha: asignacion.fecha,
-                        dia_semana: asignacion.dia_semana,
-                        claves: asignacion.claves || []
-                    });
-                });
-
-                // Calcular días trabajados
-                let totalDiasTrabajados = 0;
-                let diasTrabajoEnDescanso = 0;
-
-                let promotoresHTML = '';
-                for (const [promotorId, promotorData] of promotoresGroup) {
-                    const diasTrabajados = promotorData.dias.length;
-
-                    // Contar cuántos días trabajó en su día de descanso actual
-                    let diasEnDescanso = 0;
-                    if (promotorData.promotor.dia_descanso) {
-                        diasEnDescanso = promotorData.dias.filter(dia =>
-                            esDiaDescanso(dia.fecha, promotorData.promotor.dia_descanso)
-                        ).length;
-                    }
-
-                    totalDiasTrabajados += diasTrabajados;
-                    diasTrabajoEnDescanso += diasEnDescanso;
-
-                    const advertenciaDescanso = diasEnDescanso > 0
-                        ? `<span style="color: #f50b0b; font-size: 0.7rem; margin-left: 5px;">⚠️ ${diasEnDescanso} día(s) en descanso</span>`
-                        : '';
-
-                    promotoresHTML += `
-                <div class="promotor-dia" style="margin-bottom: 0.3rem;">
-                    <span class="promotor-nombre">${promotorData.promotor.nombre}</span>
-                    <span class="dias-trabajados">${diasTrabajados} días${advertenciaDescanso}</span>
-                </div>
-            `;
-                }
-
-                let diasCoberturaHTML = '';
-                for (const [promotorId, promotorData] of promotoresGroup) {
-                    const promotor = promotorData.promotor;
-                    const diasNormales = [];
-                    const diasEnDescanso = [];
-
-                    // Separar días normales de días trabajados en descanso
-                    promotorData.dias
-                        .sort((a, b) => new Date(a.fecha) - new Date(b.fecha))
-                        .forEach(dia => {
-                            const fechaObj = new Date(dia.fecha + 'T00:00:00');
-                            const diaCorto = fechaObj.toLocaleDateString('es-ES', { weekday: 'short' });
-                            const diaFormateado = `${diaCorto} ${fechaObj.getDate()}`;
-
-                            const esDescanso = esDiaDescanso(dia.fecha, promotor.dia_descanso);
-
-                            if (esDescanso) {
-                                diasEnDescanso.push(diaFormateado);
-                            } else {
-                                diasNormales.push(diaFormateado);
-                            }
-                        });
-
-                    const diaDescansoInfo = promotor.dia_descanso
-                        ? `<span style="font-size: 0.7rem; color: #f50b0b;">(Descanso actual: ${promotor.dia_descanso})</span>`
-                        : '';
-
-                    diasCoberturaHTML += `
-                <div class="promotor-cobertura" style="margin-bottom: 0.5rem; padding: 0.4rem; background: #f8fafc; border-radius: 6px; border-left: 3px solid var(--primary-color);">
-                    <div style="font-weight: 600; color: var(--text-primary); font-size: 0.8rem; margin-bottom: 0.2rem;">
-                        ${promotorData.promotor.nombre} ${diaDescansoInfo}
-                    </div>
-                    <div style="display: flex; flex-wrap: wrap; gap: 0.2rem;">
-                        ${diasNormales.map(dia => `<span class="fecha-badge" style="font-size: 0.7rem; padding: 0.2rem 0.4rem; background: var(--info-color); color: white;">${dia}</span>`).join('')}
-                        ${diasEnDescanso.map(dia => `<span class="dia-descanso-badge" style="font-size: 0.7rem; padding: 0.2rem 0.4rem; background: var(--warning-color); color: white; border: 1px solid var(--warning-color);">⚠️ ${dia}</span>`).join('')}
-                    </div>
-                </div>
-            `;
-                }
-
-                const advertenciaTotal = diasTrabajoEnDescanso > 0
-                    ? `<div style="font-size: 0.75rem; color: #f59e0b; margin-top: 0.3rem;">⚠️ ${diasTrabajoEnDescanso} asignación(es) en día de descanso</div>`
-                    : '';
-
-                const row = `
-            <tr>
-                <td>
-                    <strong>${tienda.nombre}</strong><br>
-                    <small>Número: ${tienda.numero}</small><br>
-                    <small>Región: ${tienda.region}</small><br>
-                    <small>Cadena: ${tienda.cadena}</small>
-                </td>
-                <td>
-                    <div class="tienda-info">
-                        <strong>Ciudad:</strong> ${tienda.ciudad}<br>
-                        <strong>Estado:</strong> ${tienda.estado}
-                    </div>
-                </td>
-                <td>
-                    <div class="dias-cobertura">
-                        ${promotoresHTML}
-                    </div>
-                </td>
-                <td>
-                    <div class="dias-cobertura-detalle">
-                        ${diasCoberturaHTML}
-                    </div>
-                </td>
-                <td>
-                    <div class="resumen-total">
-                        ${totalDiasTrabajados} días trabajados
-                        ${advertenciaTotal}
-                    </div>
-                </td>
-                <td>
-                    <button class="btn-detalle" onclick="verDetalleTienda(${tiendaId})">
-                        <i class="fas fa-eye"></i> Ver Detalle
-                    </button>
-                </td>
-            </tr>
-        `;
-
-                tbody.innerHTML += row;
-            }
-
-            console.log(`Tabla renderizada con ${tiendasGroup.size} tiendas`);
-        }
-
-        // ===== FUNCIONES AUXILIARES =====
-        function actualizarSubtituloReporte() {
-            if (!filtrosAplicados.fecha_inicio || !filtrosAplicados.fecha_fin) return;
-
-            const fechaInicioSeleccionada = new Date(filtrosAplicados.fecha_inicio + 'T00:00:00');
-            const fechaFinSeleccionada = new Date(filtrosAplicados.fecha_fin + 'T00:00:00');
-
-            const opciones = { day: 'numeric', month: 'long', year: 'numeric' };
-            const fechaInicioTexto = fechaInicioSeleccionada.toLocaleDateString('es-ES', opciones);
-            const fechaFinTexto = fechaFinSeleccionada.toLocaleDateString('es-ES', opciones);
-
-            const subtitulo = document.getElementById('reporte-subtitulo');
-            if (subtitulo) {
-                subtitulo.textContent = `Período del ${fechaInicioTexto} al ${fechaFinTexto}`;
-            }
-        }
-
-        function mostrarEstadisticas(estadisticasAPI) {
-            const totalTiendas = estadisticasAPI.total_tiendas || 0;
-            const totalPromotores = estadisticasAPI.total_promotores || 0;
-            const totalAsignaciones = estadisticasAPI.total_asignaciones || 0;
-            const diasPeriodo = estadisticasAPI.dias_periodo || calcularDiasPeriodo(filtrosAplicados.fecha_inicio, filtrosAplicados.fecha_fin);
-
-            document.getElementById('stat-tiendas').textContent = totalTiendas;
-            document.getElementById('stat-promotores').textContent = totalPromotores;
-            document.getElementById('stat-dias').textContent = diasPeriodo;
-            document.getElementById('stat-dias-trabajados').textContent = totalAsignaciones;
-
-            console.log(`Estadísticas mostradas: ${totalTiendas} tiendas, ${totalPromotores} promotores, ${totalAsignaciones} asignaciones`);
-        }
-
-        function calcularDiasPeriodo(fechaInicio, fechaFin) {
-            if (!fechaInicio || !fechaFin) return 0;
-            const inicio = new Date(fechaInicio);
-            const fin = new Date(fechaFin);
-            const diferencia = fin - inicio;
-            return Math.floor(diferencia / (1000 * 60 * 60 * 24)) + 1;
-        }
-
-        // ===== ESTADOS DE UI =====
-        function mostrarLoading() {
-            reporteLoading.style.display = 'block';
-            reporteContent.style.display = 'none';
-            reporteEmpty.style.display = 'none';
-            statsContainer.style.display = 'none';
-        }
-
-        function mostrarContenido() {
-            reporteLoading.style.display = 'none';
-            reporteContent.style.display = 'block';
-            reporteEmpty.style.display = 'none';
-            statsContainer.style.display = 'block';
-        }
-
-        function mostrarEstadoVacio() {
-            reporteLoading.style.display = 'none';
-            reporteContent.style.display = 'none';
-            reporteEmpty.style.display = 'block';
-
-            document.getElementById('stat-tiendas').textContent = '0';
-            document.getElementById('stat-promotores').textContent = '0';
-            document.getElementById('stat-dias').textContent = filtrosAplicados.fecha_inicio && filtrosAplicados.fecha_fin ?
-                calcularDiasPeriodo(filtrosAplicados.fecha_inicio, filtrosAplicados.fecha_fin) : '0';
-            document.getElementById('stat-dias-trabajados').textContent = '0';
-            statsContainer.style.display = 'block';
-        }
-
-        // ===== DETALLES =====
-        function verDetalleTienda(idTienda) {
-            if (!reporteActual || reporteActual.length === 0) {
-                mostrarNotificacion('No hay datos disponibles', 'warning');
-                return;
-            }
-
-            const asignacionesTienda = reporteActual.filter(a => a.tienda_id == idTienda);
-
-            if (asignacionesTienda.length > 0) {
-                const tiendaInfo = {
-                    id: asignacionesTienda[0].tienda_id,
-                    nombre: asignacionesTienda[0].tienda_nombre,
-                    numero: asignacionesTienda[0].tienda_numero || 'N/A',
-                    region: asignacionesTienda[0].tienda_region,
-                    cadena: asignacionesTienda[0].tienda_cadena || 'N/A',
-                    ciudad: asignacionesTienda[0].tienda_ciudad || 'N/A',
-                    estado: asignacionesTienda[0].tienda_estado || 'N/A',
-                    asignaciones: asignacionesTienda
-                };
-
-                mostrarModalDetalle('Tienda', tiendaInfo);
-            } else {
-                mostrarNotificacion('No hay detalles disponibles para esta tienda en el período seleccionado', 'info');
-            }
-        }
-
-        function mostrarModalDetalle(tipo, data) {
-            document.getElementById('detalle-title').innerHTML = `<i class="fas fa-info-circle"></i> Detalle de ${tipo}`;
-
-            const infoHtml = `
-        <h4><i class="fas fa-store"></i> ${data.nombre}</h4>
-        <p><strong>Número:</strong> ${data.numero}</p>
-        <p><strong>Cadena:</strong> ${data.cadena}</p>
-        <p><strong>Ciudad:</strong> ${data.ciudad}</p>
-        <p><strong>Estado:</strong> ${data.estado}</p>
-        <p><strong>Región:</strong> ${data.region}</p>
-    `;
-
-            document.getElementById('detalle-info').innerHTML = infoHtml;
-
-            renderizarTimelineDetalle(data.asignaciones);
-
-            modalDetalle.classList.add('active');
-            document.body.style.overflow = 'hidden';
-        }
-
-        // ===== RENDERIZAR TABLA TIENDAS CON DÍAS LABORABLES CORRECTOS =====
+        // ===== RENDERIZAR TABLA TIENDAS CON DÍAS LABORABLES CORRECTOS (ORIGINAL - SIN CAMBIOS) =====
         function renderizarTablaTiendasCorregida(asignaciones) {
             const tbody = document.getElementById('tbody-tiendas');
             tbody.innerHTML = '';
@@ -2034,6 +1742,174 @@
             console.log(`Tabla renderizada con ${tiendasGroup.size} tiendas`);
         }
 
+        // ===== FUNCIONES AUXILIARES =====
+        function actualizarSubtituloReporte() {
+            if (!filtrosAplicados.fecha_inicio || !filtrosAplicados.fecha_fin) return;
+
+            const fechaInicioSeleccionada = new Date(filtrosAplicados.fecha_inicio + 'T00:00:00');
+            const fechaFinSeleccionada = new Date(filtrosAplicados.fecha_fin + 'T00:00:00');
+
+            const opciones = { day: 'numeric', month: 'long', year: 'numeric' };
+            const fechaInicioTexto = fechaInicioSeleccionada.toLocaleDateString('es-ES', opciones);
+            const fechaFinTexto = fechaFinSeleccionada.toLocaleDateString('es-ES', opciones);
+
+            const subtitulo = document.getElementById('reporte-subtitulo');
+            if (subtitulo) {
+                subtitulo.textContent = `Período del ${fechaInicioTexto} al ${fechaFinTexto}`;
+            }
+        }
+
+        function mostrarEstadisticas(estadisticasAPI) {
+            const totalTiendas = estadisticasAPI.total_tiendas || 0;
+            const totalPromotores = estadisticasAPI.total_promotores || 0;
+            const totalAsignaciones = estadisticasAPI.total_asignaciones || 0;
+            const diasPeriodo = estadisticasAPI.dias_periodo || calcularDiasPeriodo(filtrosAplicados.fecha_inicio, filtrosAplicados.fecha_fin);
+
+            document.getElementById('stat-tiendas').textContent = totalTiendas;
+            document.getElementById('stat-promotores').textContent = totalPromotores;
+            document.getElementById('stat-dias').textContent = diasPeriodo;
+            document.getElementById('stat-dias-trabajados').textContent = totalAsignaciones;
+
+            console.log(`Estadísticas mostradas: ${totalTiendas} tiendas, ${totalPromotores} promotores, ${totalAsignaciones} asignaciones`);
+        }
+
+        function calcularDiasPeriodo(fechaInicio, fechaFin) {
+            if (!fechaInicio || !fechaFin) return 0;
+            const inicio = new Date(fechaInicio);
+            const fin = new Date(fechaFin);
+            const diferencia = fin - inicio;
+            return Math.floor(diferencia / (1000 * 60 * 60 * 24)) + 1;
+        }
+
+        // ===== ESTADOS DE UI =====
+        function mostrarLoading() {
+            reporteLoading.style.display = 'block';
+            reporteContent.style.display = 'none';
+            reporteEmpty.style.display = 'none';
+            statsContainer.style.display = 'none';
+        }
+
+        function mostrarContenido() {
+            reporteLoading.style.display = 'none';
+            reporteContent.style.display = 'block';
+            reporteEmpty.style.display = 'none';
+            statsContainer.style.display = 'block';
+        }
+
+        function mostrarEstadoVacio() {
+            reporteLoading.style.display = 'none';
+            reporteContent.style.display = 'none';
+            reporteEmpty.style.display = 'block';
+
+            document.getElementById('stat-tiendas').textContent = '0';
+            document.getElementById('stat-promotores').textContent = '0';
+            document.getElementById('stat-dias').textContent = filtrosAplicados.fecha_inicio && filtrosAplicados.fecha_fin ?
+                calcularDiasPeriodo(filtrosAplicados.fecha_inicio, filtrosAplicados.fecha_fin) : '0';
+            document.getElementById('stat-dias-trabajados').textContent = '0';
+            statsContainer.style.display = 'block';
+        }
+
+        // ===== DETALLES =====
+        function verDetalleTienda(idTienda) {
+            if (!reporteActual || reporteActual.length === 0) {
+                mostrarNotificacion('No hay datos disponibles', 'warning');
+                return;
+            }
+
+            const asignacionesTienda = reporteActual.filter(a => a.tienda_id == idTienda);
+
+            if (asignacionesTienda.length > 0) {
+                const tiendaInfo = {
+                    id: asignacionesTienda[0].tienda_id,
+                    nombre: asignacionesTienda[0].tienda_nombre,
+                    numero: asignacionesTienda[0].tienda_numero || 'N/A',
+                    region: asignacionesTienda[0].tienda_region,
+                    cadena: asignacionesTienda[0].tienda_cadena || 'N/A',
+                    ciudad: asignacionesTienda[0].tienda_ciudad || 'N/A',
+                    estado: asignacionesTienda[0].tienda_estado || 'N/A',
+                    asignaciones: asignacionesTienda
+                };
+
+                mostrarModalDetalle('Tienda', tiendaInfo);
+            } else {
+                mostrarNotificacion('No hay detalles disponibles para esta tienda en el período seleccionado', 'info');
+            }
+        }
+
+        function mostrarModalDetalle(tipo, data) {
+            document.getElementById('detalle-title').innerHTML = `<i class="fas fa-info-circle"></i> Detalle de ${tipo}`;
+
+            const infoHtml = `
+        <h4><i class="fas fa-store"></i> ${data.nombre}</h4>
+        <p><strong>Número:</strong> ${data.numero}</p>
+        <p><strong>Cadena:</strong> ${data.cadena}</p>
+        <p><strong>Ciudad:</strong> ${data.ciudad}</p>
+        <p><strong>Estado:</strong> ${data.estado}</p>
+        <p><strong>Región:</strong> ${data.region}</p>
+    `;
+
+            document.getElementById('detalle-info').innerHTML = infoHtml;
+
+            renderizarTimelineDetalle(data.asignaciones);
+
+            modalDetalle.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function renderizarTimelineDetalle(asignaciones) {
+            const timeline = document.getElementById('detalle-timeline');
+            timeline.innerHTML = '';
+
+            // Agrupar por fecha
+            const asignacionesPorFecha = {};
+            asignaciones.forEach(asignacion => {
+                if (!asignacionesPorFecha[asignacion.fecha]) {
+                    asignacionesPorFecha[asignacion.fecha] = [];
+                }
+                asignacionesPorFecha[asignacion.fecha].push(asignacion);
+            });
+
+            // Ordenar fechas
+            const fechasOrdenadas = Object.keys(asignacionesPorFecha).sort((a, b) => new Date(b) - new Date(a));
+
+            fechasOrdenadas.forEach(fecha => {
+                const asignacionesFecha = asignacionesPorFecha[fecha];
+                const fechaObj = new Date(fecha + 'T00:00:00');
+                const fechaFormateada = fechaObj.toLocaleDateString('es-ES', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+
+                let promotoresHTML = '';
+                asignacionesFecha.forEach(asignacion => {
+                    const clavesHTML = asignacion.claves && asignacion.claves.length > 0
+                        ? asignacion.claves.map(clave => `<span class="promotor-badge">${clave}</span>`).join('')
+                        : '<span class="text-muted">Sin claves</span>';
+
+                    promotoresHTML += `
+                <div style="margin-bottom: 1rem; padding: 0.8rem; background: #f8fafc; border-radius: 8px;">
+                    <strong style="color: var(--primary-color);">${asignacion.promotor_nombre}</strong><br>
+                    <small>RFC: ${asignacion.promotor_rfc || 'N/A'}</small><br>
+                    <div style="margin-top: 0.5rem;">
+                        <strong>Claves:</strong> ${clavesHTML}
+                    </div>
+                </div>
+            `;
+                });
+
+                const timelineItem = `
+            <div class="timeline-item">
+                <h4>${fechaFormateada}</h4>
+                ${promotoresHTML}
+            </div>
+        `;
+
+                timeline.innerHTML += timelineItem;
+            });
+        }
+
         function cerrarModalDetalle() {
             modalDetalle.classList.remove('active');
             document.body.style.overflow = 'auto';
@@ -2059,7 +1935,7 @@
             mostrarNotificacion('Filtros limpiados. Haga clic en "Consultar Reporte" para cargar nuevos datos.', 'info');
         }
 
-        // ===== GENERACIÓN DE EXCEL CON EXCELJS - CON COLORES REALES Y DÍAS DE DESCANSO =====
+        // ===== GENERACIÓN DE EXCEL FORMATO TABLA PLANA (UNA FILA POR PROMOTOR) =====
         async function descargarExcel() {
             if (!reporteActual || reporteActual.length === 0) {
                 mostrarNotificacion('No hay datos para exportar', 'warning');
@@ -2073,39 +1949,15 @@
 
                 const worksheet = workbook.addWorksheet('Reporte Tiendas-Promotores');
 
-                // Preparar datos agrupados por tienda
-                const tiendasGroup = {};
-                reporteActual.forEach(asignacion => {
-                    if (!tiendasGroup[asignacion.tienda_id]) {
-                        tiendasGroup[asignacion.tienda_id] = {
-                            tienda: {
-                                id: asignacion.tienda_id,
-                                nombre: asignacion.tienda_nombre,
-                                numero: asignacion.tienda_numero,
-                                region: asignacion.tienda_region,
-                                cadena: asignacion.tienda_cadena
-                            },
-                            promotores: {}
-                        };
-                    }
-
-                    if (!tiendasGroup[asignacion.tienda_id].promotores[asignacion.promotor_id]) {
-                        tiendasGroup[asignacion.tienda_id].promotores[asignacion.promotor_id] = {
-                            nombre: asignacion.promotor_nombre,
-                            dia_descanso: asignacion.promotor_dia_descanso,
-                            fechas: []
-                        };
-                    }
-
-                    tiendasGroup[asignacion.tienda_id].promotores[asignacion.promotor_id].fechas.push({
-                        fecha: asignacion.fecha,
-                        dia_semana: asignacion.dia_semana,
-                        claves: asignacion.claves || []
-                    });
-                });
-
-                // ENCABEZADOS PRINCIPALES
-                const headerRow = worksheet.addRow(['Promotor / Tienda', 'Días Trabajados Normales', 'Días Descanso Trabajados', 'Total Días', 'Período', 'Claves']);
+                // ENCABEZADOS
+                const headerRow = worksheet.addRow([
+                    'Nombre Tienda',
+                    'Número Tienda',
+                    'Región',
+                    'Nombre Promotor',
+                    'Días Trabajados',
+                    'Claves'
+                ]);
 
                 headerRow.eachCell((cell) => {
                     cell.fill = {
@@ -2120,201 +1972,165 @@
                     };
                     cell.alignment = { vertical: 'middle', horizontal: 'center' };
                     cell.border = {
-                        top: { style: 'thin' },
-                        left: { style: 'thin' },
-                        bottom: { style: 'thin' },
-                        right: { style: 'thin' }
+                        top: { style: 'medium' },
+                        left: { style: 'medium' },
+                        bottom: { style: 'medium' },
+                        right: { style: 'medium' }
                     };
                 });
                 headerRow.height = 25;
 
-                // Agregar datos agrupados por tienda
-                Object.entries(tiendasGroup).forEach(([tiendaId, tiendaData]) => {
-                    const tienda = tiendaData.tienda;
+                // Agrupar datos por tienda y promotor
+                const tiendasGroup = {};
+                reporteActual.forEach(asignacion => {
+                    const tiendaId = asignacion.tienda_id;
+                    const promotorId = asignacion.promotor_id;
 
-                    const tiendaRow = worksheet.addRow([
-                        `TIENDA: ${tienda.nombre} (${tienda.numero || 'N/A'}) - Región ${tienda.region}`,
-                        '', '', '', '', ''
-                    ]);
-
-                    worksheet.mergeCells(`A${tiendaRow.number}:F${tiendaRow.number}`);
-
-                    tiendaRow.eachCell((cell) => {
-                        cell.fill = {
-                            type: 'pattern',
-                            pattern: 'solid',
-                            fgColor: { argb: 'FF27AE60' }
+                    if (!tiendasGroup[tiendaId]) {
+                        tiendasGroup[tiendaId] = {
+                            nombre: asignacion.tienda_nombre,
+                            numero: asignacion.tienda_numero || 'S/N',
+                            region: asignacion.tienda_region,
+                            promotores: {}
                         };
-                        cell.font = {
-                            bold: true,
-                            color: { argb: 'FFFFFFFF' },
-                            size: 11
+                    }
+
+                    if (!tiendasGroup[tiendaId].promotores[promotorId]) {
+                        tiendasGroup[tiendaId].promotores[promotorId] = {
+                            nombre: asignacion.promotor_nombre,
+                            dia_descanso: asignacion.promotor_dia_descanso,
+                            fechas: [],
+                            claves: new Set()
                         };
-                        cell.alignment = { vertical: 'middle', horizontal: 'left' };
-                        cell.border = {
-                            top: { style: 'medium' },
-                            left: { style: 'medium' },
-                            bottom: { style: 'medium' },
-                            right: { style: 'medium' }
-                        };
-                    });
-                    tiendaRow.height = 20;
+                    }
 
-                    // Agregar cada promotor bajo la tienda
-                    Object.entries(tiendaData.promotores).forEach(([promotorId, promotorData]) => {
-                        const fechasOrdenadas = promotorData.fechas
-                            .sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
-
-                        const diasTrabajadosNormales = [];
-                        const diasDescansoTrabajados = [];
-
-                        // Separar días normales de días trabajados en descanso
-                        fechasOrdenadas.forEach(fecha => {
-                            const fechaObj = new Date(fecha.fecha + 'T00:00:00');
-                            const diaCorto = fechaObj.toLocaleDateString('es-ES', { weekday: 'short' });
-                            const mesCorto = fechaObj.toLocaleDateString('es-ES', { month: 'short' });
-                            const diaFormateado = `${diaCorto} ${fechaObj.getDate()} ${mesCorto}`;
-
-                            // Verificar si este día trabajado coincide con su día de descanso
-                            const esDescanso = esDiaDescanso(fecha.fecha, promotorData.dia_descanso);
-
-                            if (esDescanso) {
-                                diasDescansoTrabajados.push(diaFormateado);
-                            } else {
-                                diasTrabajadosNormales.push(diaFormateado);
-                            }
+                    tiendasGroup[tiendaId].promotores[promotorId].fechas.push(asignacion.fecha);
+                    
+                    if (asignacion.claves && asignacion.claves.length > 0) {
+                        asignacion.claves.forEach(clave => {
+                            tiendasGroup[tiendaId].promotores[promotorId].claves.add(clave);
                         });
+                    }
+                });
 
-                        const clavesPromotor = [...new Set(
-                            fechasOrdenadas.flatMap(fecha => fecha.claves || [])
-                        )];
+                // COLORES ALTERNADOS
+                const coloresTienda = [
+                    { fondo: 'FFE8F5E9', texto: 'FF1B5E20' },
+                    { fondo: 'FFF3E5F5', texto: 'FF4A148C' },
+                    { fondo: 'FFE1F5FE', texto: 'FF01579B' },
+                    { fondo: 'FFFFF3E0', texto: 'FFE65100' },
+                    { fondo: 'FFF1F8E9', texto: 'FF33691E' }
+                ];
 
-                        const fechaInicioPeriodoPromotor = fechasOrdenadas[0].fecha;
-                        const fechaFinPeriodoPromotor = fechasOrdenadas[fechasOrdenadas.length - 1].fecha;
+                // CREAR UNA FILA POR CADA PROMOTOR
+                let colorIndex = 0;
+                Object.entries(tiendasGroup).forEach(([tiendaId, tiendaData]) => {
+                    const colorTienda = coloresTienda[colorIndex % coloresTienda.length];
+                    const cantidadPromotores = Object.keys(tiendaData.promotores).length;
 
-                        // Texto para días de descanso
-                        const textoDescansos = diasDescansoTrabajados.length > 0
-                            ? diasDescansoTrabajados.join(', ')
-                            : 'Sin trabajo en descanso';
+                    // Por cada promotor en esta tienda, crear una fila
+                    Object.entries(tiendaData.promotores).forEach(([promotorId, promotorData], index) => {
+                        const diasTrabajados = promotorData.fechas.filter(fecha => 
+                            !esDiaDescanso(fecha, promotorData.dia_descanso)
+                        ).length;
 
-                        // Añadir info del día de descanso configurado
-                        const infoDescanso = promotorData.dia_descanso
-                            ? ` (Descanso configurado: ${promotorData.dia_descanso})`
-                            : ' (Sin día descanso configurado)';
+                        const clavesTexto = Array.from(promotorData.claves).join(', ') || 'Sin claves';
 
-                        const promotorRow = worksheet.addRow([
-                            `  • ${promotorData.nombre}${infoDescanso}`,
-                            diasTrabajadosNormales.length > 0 ? diasTrabajadosNormales.join(', ') : 'N/A',
-                            textoDescansos,
-                            `${fechasOrdenadas.length} días (${diasTrabajadosNormales.length} normales + ${diasDescansoTrabajados.length} descansos)`,
-                            `${fechaInicioPeriodoPromotor} al ${fechaFinPeriodoPromotor}`,
-                            clavesPromotor.join(', ') || 'Sin claves'
+                        const row = worksheet.addRow([
+                            tiendaData.nombre,
+                            tiendaData.numero,
+                            tiendaData.region,
+                            promotorData.nombre,
+                            diasTrabajados,
+                            clavesTexto
                         ]);
 
-                        promotorRow.eachCell((cell, colNumber) => {
+                        // Aplicar color alternado por tienda
+                        row.eachCell((cell) => {
                             cell.fill = {
                                 type: 'pattern',
                                 pattern: 'solid',
-                                fgColor: { argb: 'FFFFFFFF' }
+                                fgColor: { argb: colorTienda.fondo }
                             };
                             cell.font = {
-                                size: 10
+                                size: 11,
+                                color: { argb: colorTienda.texto }
                             };
                             cell.alignment = { vertical: 'middle', horizontal: 'left', wrapText: true };
                             cell.border = {
-                                top: { style: 'thin', color: { argb: 'FFE2E8F0' } },
-                                left: { style: 'thin', color: { argb: 'FFE2E8F0' } },
-                                bottom: { style: 'thin', color: { argb: 'FFE2E8F0' } },
-                                right: { style: 'thin', color: { argb: 'FFE2E8F0' } }
+                                top: { style: 'thin', color: { argb: 'FFDCDCDC' } },
+                                left: { style: 'thin', color: { argb: 'FFDCDCDC' } },
+                                bottom: { style: 'thin', color: { argb: 'FFDCDCDC' } },
+                                right: { style: 'thin', color: { argb: 'FFDCDCDC' } }
                             };
                         });
 
-                        // Resaltar en ROJO si trabajó en día de descanso
-                        if (diasDescansoTrabajados.length > 0) {
-                            const celdaDescanso = promotorRow.getCell(3);
-                            celdaDescanso.fill = {
-                                type: 'pattern',
-                                pattern: 'solid',
-                                fgColor: { argb: 'FFFFEBEE' }  // Fondo rojo claro
-                            };
-                            celdaDescanso.font = {
-                                size: 10,
-                                color: { argb: 'FFEF4444' },  // Texto rojo
-                                bold: true
-                            };
-                            celdaDescanso.border = {
-                                top: { style: 'thin', color: { argb: 'FFEF4444' } },
-                                left: { style: 'thin', color: { argb: 'FFEF4444' } },
-                                bottom: { style: 'thin', color: { argb: 'FFEF4444' } },
-                                right: { style: 'thin', color: { argb: 'FFEF4444' } }
-                            };
-                        }
-
-                        promotorRow.height = 20;
+                        row.height = 20;
                     });
 
-                    const totalDiasTienda = Object.values(tiendaData.promotores)
-                        .reduce((total, promotor) => total + promotor.fechas.length, 0);
-                    const totalPromotores = Object.keys(tiendaData.promotores).length;
+                    // FILA SUBTOTAL
+                    const totalDiasTienda = Object.values(tiendaData.promotores).reduce((sum, p) => {
+                        return sum + p.fechas.filter(fecha => !esDiaDescanso(fecha, p.dia_descanso)).length;
+                    }, 0);
 
-                    // Calcular total de días en descanso trabajados para la tienda
-                    let totalDescansosTienda = 0;
-                    Object.values(tiendaData.promotores).forEach(promotor => {
-                        promotor.fechas.forEach(fecha => {
-                            if (esDiaDescanso(fecha.fecha, promotor.dia_descanso)) {
-                                totalDescansosTienda++;
-                            }
-                        });
-                    });
-
-                    const infoDescansos = totalDescansosTienda > 0
-                        ? ` (ATENCIÓN: ${totalDescansosTienda} días trabajados en descanso)`
-                        : '';
-
-                    const totalRow = worksheet.addRow([
-                        `TOTAL TIENDA: ${totalPromotores} promotores, ${totalDiasTienda} días trabajados${infoDescansos}`,
-                        '', '', '', '', ''
+                    const subtotalRow = worksheet.addRow([
+                        `SUBTOTAL - ${tiendaData.nombre}`,
+                        '',
+                        '',
+                        `${cantidadPromotores} promotores`,
+                        totalDiasTienda,
+                        ''
                     ]);
 
-                    worksheet.mergeCells(`A${totalRow.number}:F${totalRow.number}`);
-
-                    totalRow.eachCell((cell) => {
+                    subtotalRow.eachCell((cell) => {
                         cell.fill = {
                             type: 'pattern',
                             pattern: 'solid',
-                            fgColor: { argb: totalDescansosTienda > 0 ? 'FFFFEBEE' : 'FFD5F4E6' }
+                            fgColor: { argb: 'FFD5F4E6' }
                         };
                         cell.font = {
                             bold: true,
-                            color: { argb: totalDescansosTienda > 0 ? 'FFEF4444' : 'FF27AE60' },
+                            color: { argb: 'FF27AE60' },
                             size: 10
                         };
                         cell.alignment = { vertical: 'middle', horizontal: 'left' };
                         cell.border = {
-                            top: { style: 'thin', color: { argb: totalDescansosTienda > 0 ? 'FFEF4444' : 'FF27AE60' } },
-                            left: { style: 'thin', color: { argb: totalDescansosTienda > 0 ? 'FFEF4444' : 'FF27AE60' } },
-                            bottom: { style: 'thin', color: { argb: totalDescansosTienda > 0 ? 'FFEF4444' : 'FF27AE60' } },
-                            right: { style: 'thin', color: { argb: totalDescansosTienda > 0 ? 'FFEF4444' : 'FF27AE60' } }
+                            top: { style: 'medium', color: { argb: 'FF27AE60' } },
+                            left: { style: 'medium', color: { argb: 'FF27AE60' } },
+                            bottom: { style: 'medium', color: { argb: 'FF27AE60' } },
+                            right: { style: 'medium', color: { argb: 'FF27AE60' } }
                         };
                     });
-                    totalRow.height = 18;
+                    subtotalRow.height = 22;
 
-                    worksheet.addRow(['', '', '', '', '', '']);
+                    colorIndex++;
                 });
 
+                // CONGELAR PRIMERA FILA
+                worksheet.views = [
+                    { state: 'frozen', xSplit: 0, ySplit: 1 }
+                ];
+
+                // FILTROS AUTOMÁTICOS
+                worksheet.autoFilter = {
+                    from: 'A1',
+                    to: 'F1'
+                };
+
+                // Ajustar ancho de columnas
                 worksheet.columns = [
-                    { width: 60 },  // Promotor/Tienda
-                    { width: 70 },  // Días Trabajados Normales
-                    { width: 50 },  // Días Descanso Trabajados
-                    { width: 30 },  // Total Días
-                    { width: 30 },  // Período
-                    { width: 35 }   // Claves
+                    { width: 35 },  // Nombre Tienda
+                    { width: 15 },  // Número Tienda
+                    { width: 12 },  // Región
+                    { width: 35 },  // Nombre Promotor
+                    { width: 18 },  // Días Trabajados
+                    { width: 40 }   // Claves
                 ];
 
                 // HOJA DE RESUMEN
-                const resumenSheet = workbook.addWorksheet('Resumen');
+                const resumenSheet = workbook.addWorksheet('📊 Resumen');
 
-                const tituloRow = resumenSheet.addRow(['RESUMEN ESTADÍSTICO']);
+                const tituloRow = resumenSheet.addRow(['RESUMEN ESTADÍSTICO DEL PERÍODO']);
                 resumenSheet.mergeCells('A1:B1');
                 tituloRow.getCell(1).fill = {
                     type: 'pattern',
@@ -2324,91 +2140,58 @@
                 tituloRow.getCell(1).font = {
                     bold: true,
                     color: { argb: 'FFFFFFFF' },
-                    size: 14
+                    size: 16
                 };
                 tituloRow.getCell(1).alignment = { vertical: 'middle', horizontal: 'center' };
-                tituloRow.height = 30;
+                tituloRow.height = 35;
 
                 resumenSheet.addRow([]);
 
-                // Calcular estadísticas de descansos
-                let totalDiasDescansoTrabajados = 0;
-                let promotoresConDescansoTrabajado = new Set();
-
-                Object.values(tiendasGroup).forEach(tiendaData => {
-                    Object.entries(tiendaData.promotores).forEach(([promotorId, promotor]) => {
-                        let trabajoEnDescanso = false;
-                        promotor.fechas.forEach(fecha => {
-                            if (esDiaDescanso(fecha.fecha, promotor.dia_descanso)) {
-                                totalDiasDescansoTrabajados++;
-                                trabajoEnDescanso = true;
-                            }
-                        });
-                        if (trabajoEnDescanso) {
-                            promotoresConDescansoTrabajado.add(promotorId);
-                        }
-                    });
-                });
-
                 const datosResumen = [
-                    ['Tiendas con Cobertura', document.getElementById('stat-tiendas').textContent],
-                    ['Promotores Activos', document.getElementById('stat-promotores').textContent],
-                    ['Días del Período', document.getElementById('stat-dias').textContent],
-                    ['Asignaciones Total', document.getElementById('stat-dias-trabajados').textContent],
+                    ['🏬 Tiendas con Cobertura', document.getElementById('stat-tiendas').textContent],
+                    ['👥 Promotores Activos', document.getElementById('stat-promotores').textContent],
+                    ['📅 Días del Período', document.getElementById('stat-dias').textContent],
+                    ['✅ Asignaciones Total', document.getElementById('stat-dias-trabajados').textContent],
                     [''],
-                    ['⚠️ DÍAS DESCANSO TRABAJADOS', totalDiasDescansoTrabajados.toString()],
-                    ['⚠️ Promotores que trabajaron en descanso', promotoresConDescansoTrabajado.size.toString()],
-                    [''],
-                    ['Período Consultado', document.getElementById('reporte-subtitulo').textContent],
-                    ['Fecha de Generación', new Date().toLocaleString('es-MX')]
+                    ['📆 Período Consultado', document.getElementById('reporte-subtitulo').textContent],
+                    ['🕒 Fecha de Generación', new Date().toLocaleString('es-MX')]
                 ];
 
-                datosResumen.forEach((fila, index) => {
+                datosResumen.forEach((fila) => {
                     const row = resumenSheet.addRow(fila);
 
                     if (fila[0] !== '') {
-                        row.getCell(1).font = { bold: true, size: 11 };
+                        row.getCell(1).font = { bold: true, size: 12 };
                         row.getCell(1).alignment = { vertical: 'middle', horizontal: 'left' };
-                        row.getCell(2).font = { size: 11 };
+                        row.getCell(2).font = { size: 12 };
                         row.getCell(2).alignment = { vertical: 'middle', horizontal: 'left' };
 
-                        // Resaltar filas de advertencia en rojo
-                        if (fila[0].includes('⚠️')) {
-                            row.getCell(1).fill = {
-                                type: 'pattern',
-                                pattern: 'solid',
-                                fgColor: { argb: 'FFFFEBEE' }
-                            };
-                            row.getCell(1).font = {
-                                bold: true,
-                                size: 11,
-                                color: { argb: 'FFEF4444' }
-                            };
-                            row.getCell(2).fill = {
-                                type: 'pattern',
-                                pattern: 'solid',
-                                fgColor: { argb: 'FFFFEBEE' }
-                            };
-                            row.getCell(2).font = {
-                                size: 11,
-                                color: { argb: 'FFEF4444' },
-                                bold: true
-                            };
-                        } else {
-                            row.getCell(1).fill = {
-                                type: 'pattern',
-                                pattern: 'solid',
-                                fgColor: { argb: 'FFF8FAFC' }
-                            };
-                        }
+                        row.getCell(1).fill = {
+                            type: 'pattern',
+                            pattern: 'solid',
+                            fgColor: { argb: 'FFF8FAFC' }
+                        };
+
+                        row.getCell(1).border = {
+                            top: { style: 'thin' },
+                            left: { style: 'thin' },
+                            bottom: { style: 'thin' },
+                            right: { style: 'thin' }
+                        };
+                        row.getCell(2).border = {
+                            top: { style: 'thin' },
+                            left: { style: 'thin' },
+                            bottom: { style: 'thin' },
+                            right: { style: 'thin' }
+                        };
                     }
 
-                    row.height = 20;
+                    row.height = 25;
                 });
 
                 resumenSheet.columns = [
                     { width: 35 },
-                    { width: 60 }
+                    { width: 65 }
                 ];
 
                 // Generar y descargar archivo
@@ -2421,7 +2204,7 @@
 
                 saveAs(blob, nombreArchivo);
 
-                mostrarNotificacion('Excel descargado exitosamente con análisis de días de descanso', 'success');
+                mostrarNotificacion('Excel descargado exitosamente - formato individual por promotor', 'success');
 
             } catch (error) {
                 console.error('Error generando Excel:', error);
@@ -2429,7 +2212,7 @@
             }
         }
 
-        // ===== GENERACIÓN DE PDF =====
+        // ===== GENERACIÓN DE PDF (SIN CAMBIOS) =====
         function descargarPDF() {
             if (!reporteActual || reporteActual.length === 0) {
                 mostrarNotificacion('No hay datos para exportar', 'warning');
