@@ -10,7 +10,7 @@
 
 <body>
 
-    <!-- ===== MÓDULO INCIDENCIAS PROMOTORES (DATOS REALES) ===== -->
+    <!-- ===== MÓDULO INCIDENCIAS PROMOTORES (CON RANGOS DE FECHAS) ===== -->
     <div class="incidencias-module">
         <!-- HEADER DEL MÓDULO -->
         <div class="module-header">
@@ -19,7 +19,7 @@
                     <i class="fas fa-exclamation-triangle header-icon"></i>
                     <div>
                         <h1>Gestión de Incidencias</h1>
-                        <p class="header-subtitle">Sistema de registro y seguimiento de incidencias de promotores</p>
+                        <p class="header-subtitle">Sistema de registro y seguimiento de incidencias de promotores con rangos de fechas</p>
                     </div>
                 </div>
                 <div class="header-actions">
@@ -104,7 +104,7 @@
                             <select id="filtro-tipo">
                                 <option value="">Todos los tipos</option>
                                 <option value="falta">🚫 Falta</option>
-                                <option value="retardo">⏰ Retardo</option>
+                                <option value="vacaciones">🏖️ Vacaciones</option>
                                 <option value="abandono">🏃 Abandono de Puesto</option>
                                 <option value="salud">🏥 Incapacidad/Salud</option>
                                 <option value="imprevisto">⚠️ Imprevisto</option>
@@ -146,7 +146,7 @@
                 <div class="reporte-header">
                     <div class="reporte-title">
                         <h3>Registro de Incidencias</h3>
-                        <p class="text-secondary">Listado completo de incidencias registradas</p>
+                        <p class="text-secondary">Listado completo de incidencias registradas con rangos de fechas</p>
                     </div>
                 </div>
 
@@ -155,7 +155,9 @@
                         <thead>
                             <tr>
                                 <th>ID</th>
-                                <th>Fecha</th>
+                                <th>Fecha Inicio</th>
+                                <th>Fecha Fin</th>
+                                <th>Días</th>
                                 <th>Promotor</th>
                                 <th>Tienda</th>
                                 <th>Tipo</th>
@@ -208,24 +210,45 @@
                             </div>
                             <div class="form-group">
                                 <label>Tienda</label>
-                                <input type="text" id="incidencia-tienda" placeholder="Nombre de la tienda (opcional)">
+                                <select id="incidencia-tienda">
+                                    <option value="">Seleccione una tienda (opcional)</option>
+                                </select>
                             </div>
                         </div>
                     </div>
 
                     <div class="form-section">
-                        <h4><i class="fas fa-calendar"></i> Detalles de la Incidencia</h4>
+                        <h4><i class="fas fa-calendar"></i> Rango de Fechas de la Incidencia</h4>
                         <div class="form-row">
                             <div class="form-group">
-                                <label>Fecha de Incidencia *</label>
+                                <label>Fecha de Inicio *</label>
                                 <input type="date" id="incidencia-fecha" required>
+                                <small class="text-muted">Fecha en que inicia la incidencia</small>
                             </div>
+                            <div class="form-group">
+                                <label>Fecha de Fin</label>
+                                <input type="date" id="incidencia-fecha-fin">
+                                <small class="text-muted">Fecha esperada de finalización (opcional)</small>
+                            </div>
+                        </div>
+                        
+                        <!-- Mostrar días calculados -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <div class="info-box" id="dias-calculados-box" style="display: none;">
+                                    <i class="fas fa-info-circle"></i>
+                                    <strong>Duración total:</strong> <span id="dias-calculados">0</span> días
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
                             <div class="form-group">
                                 <label>Tipo de Incidencia *</label>
                                 <select id="incidencia-tipo" required>
                                     <option value="">Seleccione el tipo</option>
                                     <option value="falta">🚫 Falta (No asistió)</option>
-                                    <option value="retardo">⏰ Retardo (Llegó tarde)</option>
+                                    <option value="vacaciones">🏖️ Vacaciones</option>
                                     <option value="abandono">🏃 Abandono de Puesto</option>
                                     <option value="salud">🏥 Incapacidad/Salud</option>
                                     <option value="imprevisto">⚠️ Imprevisto</option>
@@ -239,7 +262,7 @@
                         <h4><i class="fas fa-file-alt"></i> Descripción</h4>
                         <div class="form-group">
                             <label>Motivo/Descripción de la Incidencia *</label>
-                            <textarea id="incidencia-descripcion" rows="4" 
+                            <textarea id="incidencia-descripcion" rows="4"
                                 placeholder="Describa detalladamente lo sucedido..." required></textarea>
                             <small class="text-muted">Proporcione toda la información relevante sobre la incidencia</small>
                         </div>
@@ -270,7 +293,7 @@
                     <div class="form-section">
                         <div class="form-group">
                             <label>Notas Adicionales</label>
-                            <textarea id="incidencia-notas" rows="3" 
+                            <textarea id="incidencia-notas" rows="3"
                                 placeholder="Información adicional, seguimiento, resolución..."></textarea>
                         </div>
                     </div>
@@ -303,6 +326,80 @@
             <div class="modal-content" id="detalle-content">
                 <!-- Se llenará dinámicamente -->
             </div>
+            
+            <!-- Botón de extender (solo visible si la incidencia no es extensión) -->
+            <div class="modal-actions" id="modal-detalle-actions" style="display: none;">
+                <button type="button" class="btn-primary" id="btn-extender-incidencia">
+                    <i class="fas fa-calendar-plus"></i> Extender Plazo
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL EXTENDER INCIDENCIA ===== -->
+    <div class="modal-overlay" id="modal-extender">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2>
+                    <i class="fas fa-calendar-plus"></i> Extender Plazo de Incidencia
+                </h2>
+                <button class="modal-close" id="modal-close-extender">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="modal-content">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    <div>
+                        <strong>Información:</strong>
+                        <p>Se creará una nueva incidencia vinculada a la original, manteniendo el historial completo.</p>
+                    </div>
+                </div>
+                
+                <form id="form-extender">
+                    <input type="hidden" id="extender-id-original">
+                    
+                    <div class="form-group">
+                        <label>Incidencia Original</label>
+                        <input type="text" id="extender-info-original" readonly style="background: #f8fafc;">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Nueva Fecha de Inicio *</label>
+                        <input type="date" id="extender-fecha-inicio" required>
+                        <small class="text-muted">Fecha en que comienza la extensión</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Nueva Fecha de Fin *</label>
+                        <input type="date" id="extender-fecha-fin" required>
+                        <small class="text-muted">Nueva fecha esperada de finalización</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Motivo de la Extensión *</label>
+                        <textarea id="extender-motivo" rows="3" required
+                            placeholder="Explique por qué se extiende el plazo..."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="info-box">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Días adicionales:</strong> <span id="extender-dias-adicionales">0</span> días
+                        </div>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="btn-secondary" id="btn-cancelar-extender">
+                            <i class="fas fa-times"></i> Cancelar
+                        </button>
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-calendar-check"></i> Confirmar Extensión
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -310,7 +407,7 @@
     <div class="notifications-container" id="notifications-container"></div>
 
     <style>
-        /* ===== ESTILOS (IDÉNTICOS AL ANTERIOR) ===== */
+        /* ===== ESTILOS (Incluir todos los estilos anteriores más estos nuevos) ===== */
         :root {
             --primary-color: #27ae60;
             --primary-hover: #229954;
@@ -344,6 +441,72 @@
             padding: 20px;
         }
 
+        /* Info Box para días calculados */
+        .info-box {
+            background: #dbeafe;
+            border-left: 4px solid var(--info-color);
+            padding: 1rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 0.5rem;
+        }
+
+        .info-box i {
+            color: var(--info-color);
+            font-size: 1.2rem;
+        }
+
+        .info-box strong {
+            color: var(--text-primary);
+            margin-right: 5px;
+        }
+
+        /* Alert Box */
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .alert-info {
+            background: #dbeafe;
+            border-left: 4px solid var(--info-color);
+        }
+
+        .alert i {
+            color: var(--info-color);
+            font-size: 1.3rem;
+            margin-top: 2px;
+        }
+
+        .alert strong {
+            display: block;
+            margin-bottom: 0.3rem;
+            color: var(--text-primary);
+        }
+
+        .alert p {
+            margin: 0;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Badge para extensión */
+        .badge-extension {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fbbf24;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Resto de estilos... (incluir todos los anteriores) */
         .module-header {
             background: var(--surface);
             backdrop-filter: blur(20px);
@@ -443,22 +606,6 @@
         .stat-card:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-        }
-
-        .stat-card.stat-total:hover {
-            border-color: var(--primary-color);
-        }
-
-        .stat-card.stat-pendiente:hover {
-            border-color: var(--warning-color);
-        }
-
-        .stat-card.stat-revision:hover {
-            border-color: var(--info-color);
-        }
-
-        .stat-card.stat-resuelta:hover {
-            border-color: var(--success-color);
         }
 
         .stat-icon {
@@ -775,7 +922,7 @@
             color: #991b1b;
         }
 
-        .badge-retardo {
+        .badge-vacaciones {
             background: #fef3c7;
             color: #92400e;
         }
@@ -1100,12 +1247,14 @@
 
     <script>
         // ===== CONFIGURACIÓN API =====
-        const API_URL = '../../api/incidencias.php'; // Ajusta la ruta según tu estructura
+        const API_URL = '../../api/incidencias.php';
 
         // ===== VARIABLES GLOBALES =====
         let incidencias = [];
         let incidenciaEditando = null;
+        let incidenciaActual = null; // Para el modal de detalles
         let promotores = [];
+        let tiendas = [];
 
         // ===== ELEMENTOS DOM =====
         const btnNuevaIncidencia = document.getElementById('btn-nueva-incidencia');
@@ -1115,22 +1264,22 @@
 
         const modalIncidencia = document.getElementById('modal-incidencia');
         const modalDetalle = document.getElementById('modal-detalle');
+        const modalExtender = document.getElementById('modal-extender');
         const formIncidencia = document.getElementById('form-incidencia');
+        const formExtender = document.getElementById('form-extender');
         const loadingContainer = document.getElementById('loading-container');
 
         // ===== INICIALIZACIÓN =====
         async function init() {
-            console.log('Inicializando módulo de incidencias con datos reales...');
+            console.log('Inicializando módulo de incidencias con rangos de fechas...');
 
             configurarEventListeners();
-            
-            // Cargar promotores primero
+            configurarCalculoDias();
+
             await cargarPromotores();
-            
-            // Luego cargar incidencias
+            await cargarTiendas();
             await cargarIncidencias();
 
-            // Establecer fecha de hoy por defecto
             const hoy = new Date().toISOString().split('T')[0];
             document.getElementById('incidencia-fecha').value = hoy;
 
@@ -1146,8 +1295,14 @@
             document.getElementById('modal-close').addEventListener('click', cerrarModalIncidencia);
             document.getElementById('btn-cancelar').addEventListener('click', cerrarModalIncidencia);
             document.getElementById('modal-close-detalle').addEventListener('click', cerrarModalDetalle);
+            document.getElementById('modal-close-extender').addEventListener('click', cerrarModalExtender);
+            document.getElementById('btn-cancelar-extender').addEventListener('click', cerrarModalExtender);
 
             formIncidencia.addEventListener('submit', guardarIncidencia);
+            formExtender.addEventListener('submit', guardarExtension);
+
+            // Evento para botón de extender
+            document.getElementById('btn-extender-incidencia').addEventListener('click', abrirModalExtender);
 
             modalIncidencia.addEventListener('click', (e) => {
                 if (e.target === modalIncidencia) cerrarModalIncidencia();
@@ -1157,12 +1312,69 @@
                 if (e.target === modalDetalle) cerrarModalDetalle();
             });
 
+            modalExtender.addEventListener('click', (e) => {
+                if (e.target === modalExtender) cerrarModalExtender();
+            });
+
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
                     cerrarModalIncidencia();
                     cerrarModalDetalle();
+                    cerrarModalExtender();
                 }
             });
+        }
+
+        // ===== CONFIGURAR CÁLCULO AUTOMÁTICO DE DÍAS =====
+        function configurarCalculoDias() {
+            const fechaInicio = document.getElementById('incidencia-fecha');
+            const fechaFin = document.getElementById('incidencia-fecha-fin');
+            const diasBox = document.getElementById('dias-calculados-box');
+            const diasTexto = document.getElementById('dias-calculados');
+
+            function calcularDias() {
+                if (fechaInicio.value && fechaFin.value) {
+                    const inicio = new Date(fechaInicio.value);
+                    const fin = new Date(fechaFin.value);
+                    const diferencia = Math.ceil((fin - inicio) / (1000 * 60 * 60 * 24)) + 1;
+
+                    if (diferencia > 0) {
+                        diasTexto.textContent = diferencia;
+                        diasBox.style.display = 'block';
+                    } else {
+                        diasBox.style.display = 'none';
+                    }
+                } else {
+                    diasBox.style.display = 'none';
+                }
+            }
+
+            fechaInicio.addEventListener('change', calcularDias);
+            fechaFin.addEventListener('change', calcularDias);
+
+            // Para el modal de extensión
+            const extenderInicio = document.getElementById('extender-fecha-inicio');
+            const extenderFin = document.getElementById('extender-fecha-fin');
+            const extenderDias = document.getElementById('extender-dias-adicionales');
+
+            function calcularDiasExtension() {
+                if (extenderInicio.value && extenderFin.value) {
+                    const inicio = new Date(extenderInicio.value);
+                    const fin = new Date(extenderFin.value);
+                    const diferencia = Math.ceil((fin - inicio) / (1000 * 60 * 60 * 24)) + 1;
+
+                    if (diferencia > 0) {
+                        extenderDias.textContent = diferencia;
+                    } else {
+                        extenderDias.textContent = '0';
+                    }
+                } else {
+                    extenderDias.textContent = '0';
+                }
+            }
+
+            extenderInicio.addEventListener('change', calcularDiasExtension);
+            extenderFin.addEventListener('change', calcularDiasExtension);
         }
 
         // ===== CARGAR DATOS DESDE API =====
@@ -1170,19 +1382,15 @@
             try {
                 const response = await fetch(API_URL, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        accion: 'promotores'
-                    })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ accion: 'promotores' })
                 });
 
                 const resultado = await response.json();
 
                 if (resultado.success && resultado.data.promotores) {
                     promotores = resultado.data.promotores;
-                    
+
                     const selectPromotor = document.getElementById('incidencia-promotor');
                     const filtroPromotor = document.getElementById('filtro-promotor');
 
@@ -1195,7 +1403,7 @@
                         filtroPromotor.appendChild(option);
                     });
 
-                    console.log(`${promotores.length} promotores cargados`);
+                    console.log(`✅ ${promotores.length} promotores cargados`);
                 } else {
                     throw new Error(resultado.message || 'Error al cargar promotores');
                 }
@@ -1205,23 +1413,53 @@
             }
         }
 
+        async function cargarTiendas() {
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ accion: 'tiendas' })
+                });
+
+                const resultado = await response.json();
+
+                if (resultado.success && resultado.data.tiendas) {
+                    tiendas = resultado.data.tiendas;
+
+                    const selectTienda = document.getElementById('incidencia-tienda');
+                    selectTienda.innerHTML = '<option value="">Seleccione una tienda (opcional)</option>';
+
+                    tiendas.forEach(tienda => {
+                        const option = document.createElement('option');
+                        option.value = tienda.id_tienda;
+                        option.textContent = `${tienda.cadena} - ${tienda.nombre_tienda} (${tienda.ciudad}, ${tienda.estado})`;
+                        option.setAttribute('data-nombre', tienda.nombre_tienda);
+                        option.setAttribute('data-cadena', tienda.cadena);
+                        option.setAttribute('data-num', tienda.num_tienda);
+                        selectTienda.appendChild(option);
+                    });
+
+                    console.log(`✅ ${tiendas.length} tiendas cargadas`);
+                } else {
+                    throw new Error(resultado.message || 'Error al cargar tiendas');
+                }
+            } catch (error) {
+                console.error('Error cargando tiendas:', error);
+                mostrarNotificacion('Error al cargar tiendas: ' + error.message, 'error');
+            }
+        }
+
         async function cargarIncidencias(filtros = {}) {
             try {
                 mostrarLoading();
 
                 const response = await fetch(API_URL, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        accion: 'listar',
-                        ...filtros
-                    })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ accion: 'listar', ...filtros })
                 });
 
                 const resultado = await response.json();
-
                 ocultarLoading();
 
                 if (resultado.success && resultado.data) {
@@ -1247,11 +1485,17 @@
             e.preventDefault();
 
             try {
+                const selectTienda = document.getElementById('incidencia-tienda');
+                const idTienda = selectTienda.value ? parseInt(selectTienda.value) : null;
+                const nombreTienda = selectTienda.value ? selectTienda.options[selectTienda.selectedIndex].getAttribute('data-nombre') : null;
+
                 const datos = {
                     accion: incidenciaEditando ? 'actualizar' : 'crear',
                     fecha_incidencia: document.getElementById('incidencia-fecha').value,
+                    fecha_fin: document.getElementById('incidencia-fecha-fin').value || null,
                     id_promotor: parseInt(document.getElementById('incidencia-promotor').value),
-                    tienda_nombre: document.getElementById('incidencia-tienda').value,
+                    id_tienda: idTienda,
+                    tienda_nombre: nombreTienda,
                     tipo_incidencia: document.getElementById('incidencia-tipo').value,
                     descripcion: document.getElementById('incidencia-descripcion').value,
                     estatus: document.getElementById('incidencia-estatus').value,
@@ -1265,9 +1509,7 @@
 
                 const response = await fetch(API_URL, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(datos)
                 });
 
@@ -1289,6 +1531,44 @@
             }
         }
 
+        // ===== GUARDAR EXTENSIÓN =====
+        async function guardarExtension(e) {
+            e.preventDefault();
+
+            try {
+                const idOriginal = parseInt(document.getElementById('extender-id-original').value);
+                const fechaInicio = document.getElementById('extender-fecha-inicio').value;
+                const fechaFin = document.getElementById('extender-fecha-fin').value;
+                const motivo = document.getElementById('extender-motivo').value;
+
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        accion: 'extender',
+                        id_incidencia_original: idOriginal,
+                        fecha_inicio: fechaInicio,
+                        fecha_fin: fechaFin,
+                        motivo: motivo
+                    })
+                });
+
+                const resultado = await response.json();
+
+                if (resultado.success) {
+                    mostrarNotificacion('Incidencia extendida exitosamente', 'success');
+                    cerrarModalExtender();
+                    cerrarModalDetalle();
+                    await cargarIncidencias();
+                } else {
+                    throw new Error(resultado.message || 'Error al extender incidencia');
+                }
+            } catch (error) {
+                console.error('Error extendiendo incidencia:', error);
+                mostrarNotificacion('Error al extender incidencia: ' + error.message, 'error');
+            }
+        }
+
         // ===== RENDERIZAR TABLA =====
         function renderizarTabla() {
             const tbody = document.getElementById('tbody-incidencias');
@@ -1307,21 +1587,13 @@
                 const row = document.createElement('tr');
 
                 const tipoEmoji = {
-                    'falta': '🚫',
-                    'retardo': '⏰',
-                    'abandono': '🏃',
-                    'salud': '🏥',
-                    'imprevisto': '⚠️',
-                    'otro': '📝'
+                    'falta': '🚫', 'vacaciones': '🏖️', 'abandono': '🏃',
+                    'salud': '🏥', 'imprevisto': '⚠️', 'otro': '📝'
                 };
 
                 const tipoTexto = {
-                    'falta': 'Falta',
-                    'retardo': 'Retardo',
-                    'abandono': 'Abandono',
-                    'salud': 'Salud',
-                    'imprevisto': 'Imprevisto',
-                    'otro': 'Otro'
+                    'falta': 'Falta', 'vacaciones': 'Vacaciones', 'abandono': 'Abandono',
+                    'salud': 'Salud', 'imprevisto': 'Imprevisto', 'otro': 'Otro'
                 };
 
                 const estatusTexto = {
@@ -1330,14 +1602,31 @@
                     'resuelta': '✅ Resuelta'
                 };
 
+                let tiendaTexto = 'N/A';
+                if (incidencia.tienda_nombre) {
+                    if (incidencia.num_tienda) {
+                        tiendaTexto = `${incidencia.tienda_nombre} (#${incidencia.num_tienda})`;
+                    } else {
+                        tiendaTexto = incidencia.tienda_nombre;
+                    }
+                }
+
+                const fechaFin = incidencia.fecha_fin ? formatearFecha(incidencia.fecha_fin) : 'N/A';
+                const dias = incidencia.dias_totales ? `${incidencia.dias_totales} días` : '-';
+
+                const esExtension = incidencia.es_extension == 1;
+                const extensionBadge = esExtension ? '<span class="badge badge-extension"><i class="fas fa-link"></i> Extensión</span>' : '';
+
                 row.innerHTML = `
-                    <td><strong>#${incidencia.id_incidencia}</strong></td>
+                    <td><strong>#${incidencia.id_incidencia}</strong> ${extensionBadge}</td>
                     <td>${formatearFecha(incidencia.fecha_incidencia)}</td>
+                    <td>${fechaFin}</td>
+                    <td><strong>${dias}</strong></td>
                     <td>
                         <strong>${incidencia.promotor_nombre}</strong>
                         ${incidencia.prioridad === 'alta' ? '<span class="badge badge-prioridad-alta">🔴 Alta</span>' : ''}
                     </td>
-                    <td>${incidencia.tienda_nombre || 'N/A'}</td>
+                    <td>${tiendaTexto}</td>
                     <td><span class="badge badge-${incidencia.tipo_incidencia}">${tipoEmoji[incidencia.tipo_incidencia]} ${tipoTexto[incidencia.tipo_incidencia]}</span></td>
                     <td style="max-width: 300px;">${truncarTexto(incidencia.descripcion, 80)}</td>
                     <td><span class="badge badge-${incidencia.estatus}">${estatusTexto[incidencia.estatus]}</span></td>
@@ -1396,22 +1685,16 @@
             const incidencia = incidencias.find(i => i.id_incidencia === id);
             if (!incidencia) return;
 
+            incidenciaActual = incidencia;
+
             const tipoEmoji = {
-                'falta': '🚫',
-                'retardo': '⏰',
-                'abandono': '🏃',
-                'salud': '🏥',
-                'imprevisto': '⚠️',
-                'otro': '📝'
+                'falta': '🚫', 'vacaciones': '🏖️', 'abandono': '🏃',
+                'salud': '🏥', 'imprevisto': '⚠️', 'otro': '📝'
             };
 
             const tipoTexto = {
-                'falta': 'Falta',
-                'retardo': 'Retardo',
-                'abandono': 'Abandono de Puesto',
-                'salud': 'Incapacidad/Salud',
-                'imprevisto': 'Imprevisto',
-                'otro': 'Otro'
+                'falta': 'Falta', 'vacaciones': 'Vacaciones', 'abandono': 'Abandono de Puesto',
+                'salud': 'Incapacidad/Salud', 'imprevisto': 'Imprevisto', 'otro': 'Otro'
             };
 
             const estatusTexto = {
@@ -1421,16 +1704,39 @@
             };
 
             const prioridadTexto = {
-                'baja': '🟢 Baja',
-                'media': '🟡 Media',
-                'alta': '🔴 Alta'
+                'baja': '🟢 Baja', 'media': '🟡 Media', 'alta': '🔴 Alta'
             };
+
+            let tiendaTexto = 'N/A';
+            if (incidencia.tienda_nombre) {
+                if (incidencia.num_tienda) {
+                    tiendaTexto = `${incidencia.tienda_nombre} (#${incidencia.num_tienda})`;
+                } else {
+                    tiendaTexto = incidencia.tienda_nombre;
+                }
+            }
+
+            const fechaFin = incidencia.fecha_fin ? formatearFecha(incidencia.fecha_fin) : 'No especificada';
+            const dias = incidencia.dias_totales ? `${incidencia.dias_totales} días` : 'No calculado';
+
+            const esExtension = incidencia.es_extension == 1;
+            let extensionInfo = '';
+            if (esExtension) {
+                extensionInfo = `
+                    <div class="detalle-item">
+                        <strong>Extensión de Incidencia</strong>
+                        <p><span class="badge badge-extension"><i class="fas fa-link"></i> Esta es una extensión de la incidencia #${incidencia.incidencia_extendida_de}</span></p>
+                    </div>
+                `;
+            }
 
             const contenido = `
                 <div class="detalle-item">
                     <strong>ID de Incidencia</strong>
                     <p>#${incidencia.id_incidencia}</p>
                 </div>
+
+                ${extensionInfo}
 
                 <div class="detalle-item">
                     <strong>Promotor Afectado</strong>
@@ -1444,12 +1750,22 @@
 
                 <div class="detalle-item">
                     <strong>Tienda</strong>
-                    <p>${incidencia.tienda_nombre || 'N/A'}</p>
+                    <p>${tiendaTexto}</p>
                 </div>
 
                 <div class="detalle-item">
-                    <strong>Fecha de Incidencia</strong>
+                    <strong>Fecha de Inicio</strong>
                     <p>${formatearFecha(incidencia.fecha_incidencia)}</p>
+                </div>
+
+                <div class="detalle-item">
+                    <strong>Fecha de Fin</strong>
+                    <p>${fechaFin}</p>
+                </div>
+
+                <div class="detalle-item">
+                    <strong>Duración Total</strong>
+                    <p><strong>${dias}</strong></p>
                 </div>
 
                 <div class="detalle-item">
@@ -1493,8 +1809,44 @@
             `;
 
             document.getElementById('detalle-content').innerHTML = contenido;
+
+            // Mostrar botón de extender solo si no es extensión
+            const modalDetalleActions = document.getElementById('modal-detalle-actions');
+            if (!esExtension && incidencia.estatus !== 'resuelta') {
+                modalDetalleActions.style.display = 'flex';
+            } else {
+                modalDetalleActions.style.display = 'none';
+            }
+
             modalDetalle.classList.add('active');
             document.body.style.overflow = 'hidden';
+        }
+
+        // ===== MODAL EXTENDER =====
+        function abrirModalExtender() {
+            if (!incidenciaActual) return;
+
+            document.getElementById('extender-id-original').value = incidenciaActual.id_incidencia;
+            document.getElementById('extender-info-original').value = `#${incidenciaActual.id_incidencia} - ${incidenciaActual.promotor_nombre} (${formatearFecha(incidenciaActual.fecha_incidencia)})`;
+
+            // Establecer fecha inicio como el día después de la fecha fin original (o fecha incidencia si no hay fin)
+            const fechaBase = incidenciaActual.fecha_fin || incidenciaActual.fecha_incidencia;
+            const fechaSiguiente = new Date(fechaBase);
+            fechaSiguiente.setDate(fechaSiguiente.getDate() + 1);
+            document.getElementById('extender-fecha-inicio').value = fechaSiguiente.toISOString().split('T')[0];
+
+            document.getElementById('extender-fecha-fin').value = '';
+            document.getElementById('extender-motivo').value = '';
+            document.getElementById('extender-dias-adicionales').textContent = '0';
+
+            modalExtender.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function cerrarModalExtender() {
+            modalExtender.classList.remove('active');
+            document.body.style.overflow = 'auto';
+            document.getElementById('form-extender').reset();
         }
 
         // ===== ACCIONES =====
@@ -1505,6 +1857,7 @@
 
             const hoy = new Date().toISOString().split('T')[0];
             document.getElementById('incidencia-fecha').value = hoy;
+            document.getElementById('dias-calculados-box').style.display = 'none';
 
             modalIncidencia.classList.add('active');
             document.body.style.overflow = 'hidden';
@@ -1519,13 +1872,28 @@
 
             document.getElementById('incidencia-id').value = incidencia.id_incidencia;
             document.getElementById('incidencia-promotor').value = incidencia.id_promotor;
-            document.getElementById('incidencia-tienda').value = incidencia.tienda_nombre || '';
+
+            if (incidencia.id_tienda) {
+                document.getElementById('incidencia-tienda').value = incidencia.id_tienda;
+            } else {
+                document.getElementById('incidencia-tienda').value = '';
+            }
+
             document.getElementById('incidencia-fecha').value = incidencia.fecha_incidencia;
+            document.getElementById('incidencia-fecha-fin').value = incidencia.fecha_fin || '';
             document.getElementById('incidencia-tipo').value = incidencia.tipo_incidencia;
             document.getElementById('incidencia-descripcion').value = incidencia.descripcion;
             document.getElementById('incidencia-estatus').value = incidencia.estatus;
             document.getElementById('incidencia-prioridad').value = incidencia.prioridad;
             document.getElementById('incidencia-notas').value = incidencia.notas || '';
+
+            // Mostrar días calculados si hay ambas fechas
+            if (incidencia.fecha_incidencia && incidencia.fecha_fin) {
+                document.getElementById('dias-calculados').textContent = incidencia.dias_totales || '0';
+                document.getElementById('dias-calculados-box').style.display = 'block';
+            } else {
+                document.getElementById('dias-calculados-box').style.display = 'none';
+            }
 
             modalIncidencia.classList.add('active');
             document.body.style.overflow = 'hidden';
@@ -1539,9 +1907,7 @@
             try {
                 const response = await fetch(API_URL, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         accion: 'eliminar',
                         id_incidencia: id
@@ -1572,6 +1938,7 @@
         function cerrarModalDetalle() {
             modalDetalle.classList.remove('active');
             document.body.style.overflow = 'auto';
+            incidenciaActual = null;
         }
 
         // ===== EXPORTAR EXCEL =====
@@ -1589,17 +1956,9 @@
                 const worksheet = workbook.addWorksheet('Incidencias');
 
                 const headerRow = worksheet.addRow([
-                    'ID',
-                    'Fecha',
-                    'Promotor',
-                    'RFC',
-                    'Tienda',
-                    'Tipo',
-                    'Descripción',
-                    'Estatus',
-                    'Prioridad',
-                    'Notas',
-                    'Fecha Registro'
+                    'ID', 'Fecha Inicio', 'Fecha Fin', 'Días Totales', 'Promotor', 'RFC',
+                    'Tienda', 'Tipo', 'Descripción', 'Estatus', 'Prioridad', 'Notas',
+                    'Es Extensión', 'ID Original', 'Fecha Registro'
                 ]);
 
                 headerRow.eachCell((cell) => {
@@ -1624,17 +1983,26 @@
                 headerRow.height = 25;
 
                 incidencias.forEach((incidencia) => {
+                    let tiendaTexto = incidencia.tienda_nombre || 'N/A';
+                    if (incidencia.tienda_nombre && incidencia.num_tienda) {
+                        tiendaTexto = `${incidencia.tienda_nombre} (#${incidencia.num_tienda})`;
+                    }
+
                     const row = worksheet.addRow([
                         incidencia.id_incidencia,
                         incidencia.fecha_incidencia,
+                        incidencia.fecha_fin || 'N/A',
+                        incidencia.dias_totales || 'N/A',
                         incidencia.promotor_nombre,
                         incidencia.promotor_rfc,
-                        incidencia.tienda_nombre || 'N/A',
+                        tiendaTexto,
                         incidencia.tipo_incidencia,
                         incidencia.descripcion,
                         incidencia.estatus,
                         incidencia.prioridad,
                         incidencia.notas || '',
+                        incidencia.es_extension == 1 ? 'Sí' : 'No',
+                        incidencia.incidencia_extendida_de || 'N/A',
                         incidencia.fecha_registro
                     ]);
 
@@ -1649,17 +2017,9 @@
                 });
 
                 worksheet.columns = [
-                    { width: 8 },
-                    { width: 12 },
-                    { width: 30 },
-                    { width: 15 },
-                    { width: 25 },
-                    { width: 15 },
-                    { width: 50 },
-                    { width: 15 },
-                    { width: 12 },
-                    { width: 40 },
-                    { width: 20 }
+                    { width: 8 }, { width: 12 }, { width: 12 }, { width: 12 }, { width: 30 },
+                    { width: 15 }, { width: 25 }, { width: 15 }, { width: 50 }, { width: 15 },
+                    { width: 12 }, { width: 40 }, { width: 12 }, { width: 12 }, { width: 20 }
                 ];
 
                 const buffer = await workbook.xlsx.writeBuffer();

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reportes Tiendas → Promotores CORREGIDO</title>
+    <title>Reportes Tiendas → Promotores + EXPEDIENTES</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 
@@ -222,6 +222,310 @@
 
                 <div class="detalle-timeline" id="detalle-timeline">
                     <!-- Se llenará dinámicamente -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🆕 ===== MODAL EXPEDIENTE DE PROMOTOR ===== -->
+    <div class="modal-overlay" id="modal-expediente">
+        <div class="modal-container modal-expediente">
+            <div class="modal-header modal-header-expediente">
+                <h2 id="expediente-title">
+                    <i class="fas fa-id-card"></i> Expediente del Promotor
+                </h2>
+                <button class="btn-primary" id="btn-descargar-expediente" style="margin-left: auto; margin-right: 15px;">
+                    <i class="fas fa-download"></i> Descargar Expediente
+                </button>
+                <button class="modal-close" id="modal-close-expediente">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="modal-content" id="expediente-content">
+                <!-- LOADING -->
+                <div id="expediente-loading" style="display: none; text-align: center; padding: 40px;">
+                    <div class="loading-spinner" style="margin: 0 auto 20px;"></div>
+                    <p>Cargando expediente...</p>
+                </div>
+
+                <!-- CONTENIDO DEL EXPEDIENTE -->
+                <div id="expediente-data" style="display: none;">
+                    
+                    <!-- CABECERA CON FOTO Y DATOS PRINCIPALES -->
+                    <div class="expediente-header">
+                        <div class="expediente-avatar">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                        <div class="expediente-header-info">
+                            <h3 id="exp-nombre">Nombre del Promotor</h3>
+                            <div class="expediente-badges">
+                                <span class="exp-badge exp-badge-primary" id="exp-estatus">Activo</span>
+                                <span class="exp-badge exp-badge-secondary" id="exp-rfc">RFC</span>
+                            </div>
+                            <div class="expediente-quick-info">
+                                <div class="quick-info-item">
+                                    <i class="fas fa-phone"></i>
+                                    <span id="exp-telefono">-</span>
+                                </div>
+                                <div class="quick-info-item">
+                                    <i class="fas fa-envelope"></i>
+                                    <span id="exp-correo">-</span>
+                                </div>
+                                <div class="quick-info-item">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span id="exp-region">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ESTADÍSTICAS RÁPIDAS -->
+                    <div class="expediente-stats-grid">
+                        <div class="exp-stat-card">
+                            <div class="exp-stat-icon" style="background: #e8f5e9;">
+                                <i class="fas fa-calendar-check" style="color: #27ae60;"></i>
+                            </div>
+                            <div class="exp-stat-info">
+                                <h4 id="exp-stat-antiguedad">0</h4>
+                                <p>Antigüedad</p>
+                            </div>
+                        </div>
+                        <div class="exp-stat-card">
+                            <div class="exp-stat-icon" style="background: #e3f2fd;">
+                                <i class="fas fa-store" style="color: #2196f3;"></i>
+                            </div>
+                            <div class="exp-stat-info">
+                                <h4 id="exp-stat-tiendas">0</h4>
+                                <p>Tiendas Asignadas</p>
+                            </div>
+                        </div>
+                        <div class="exp-stat-card">
+                            <div class="exp-stat-icon" style="background: #fff3e0;">
+                                <i class="fas fa-briefcase" style="color: #ff9800;"></i>
+                            </div>
+                            <div class="exp-stat-info">
+                                <h4 id="exp-stat-asignaciones">0</h4>
+                                <p>Total Asignaciones</p>
+                            </div>
+                        </div>
+                        <div class="exp-stat-card">
+                            <div class="exp-stat-icon" style="background: #fce4ec;">
+                                <i class="fas fa-exclamation-triangle" style="color: #e91e63;"></i>
+                            </div>
+                            <div class="exp-stat-info">
+                                <h4 id="exp-stat-incidencias">0</h4>
+                                <p>Incidencias</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TABS DE NAVEGACIÓN -->
+                    <div class="expediente-tabs">
+                        <button class="exp-tab active" data-tab="informacion">
+                            <i class="fas fa-info-circle"></i> Información Personal
+                        </button>
+                        <button class="exp-tab" data-tab="estadisticas">
+                            <i class="fas fa-chart-bar"></i> Estadísticas
+                        </button>
+                        <button class="exp-tab" data-tab="asignaciones">
+                            <i class="fas fa-clipboard-list"></i> Asignaciones
+                        </button>
+                        <button class="exp-tab" data-tab="incidencias">
+                            <i class="fas fa-exclamation-circle"></i> Incidencias
+                        </button>
+                        <button class="exp-tab" data-tab="historial">
+                            <i class="fas fa-history"></i> Historial
+                        </button>
+                    </div>
+
+                    <!-- CONTENIDO DE LAS TABS -->
+                    <div class="expediente-tab-content">
+                        
+                        <!-- TAB: INFORMACIÓN PERSONAL (🔥 CORREGIDA PARA COINCIDIR CON LA BASE DE DATOS) -->
+                        <div class="exp-tab-pane active" id="tab-informacion">
+                            <div class="info-grid">
+                                <!-- DATOS PERSONALES -->
+                                <div class="info-section">
+                                    <h4><i class="fas fa-user"></i> Datos Personales</h4>
+                                    <div class="info-row">
+                                        <span class="info-label">Nombre Completo:</span>
+                                        <span class="info-value" id="exp-info-nombre">-</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="info-label">RFC:</span>
+                                        <span class="info-value" id="exp-info-rfc">-</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="info-label">NSS:</span>
+                                        <span class="info-value" id="exp-info-nss">-</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="info-label">Fecha Ingreso:</span>
+                                        <span class="info-value" id="exp-info-fingreso">-</span>
+                                    </div>
+                                </div>
+
+                                <!-- UBICACIÓN -->
+                                <div class="info-section">
+                                    <h4><i class="fas fa-map-marker-alt"></i> Ubicación</h4>
+                                    <div class="info-row">
+                                        <span class="info-label">Región:</span>
+                                        <span class="info-value" id="exp-info-region">-</span>
+                                    </div>
+                                </div>
+
+                                <!-- CONTACTO -->
+                                <div class="info-section">
+                                    <h4><i class="fas fa-phone"></i> Contacto</h4>
+                                    <div class="info-row">
+                                        <span class="info-label">Teléfono:</span>
+                                        <span class="info-value" id="exp-info-tel">-</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="info-label">Correo:</span>
+                                        <span class="info-value" id="exp-info-email">-</span>
+                                    </div>
+                                </div>
+
+                                <!-- DATOS BANCARIOS -->
+                                <div class="info-section">
+                                    <h4><i class="fas fa-university"></i> Datos Bancarios</h4>
+                                    <div class="info-row">
+                                        <span class="info-label">Banco:</span>
+                                        <span class="info-value" id="exp-info-banco">-</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="info-label">Número de Cuenta:</span>
+                                        <span class="info-value" id="exp-info-cuenta">-</span>
+                                    </div>
+                                </div>
+
+                                <!-- INFORMACIÓN LABORAL -->
+                                <div class="info-section">
+                                    <h4><i class="fas fa-briefcase"></i> Información Laboral</h4>
+                                    <div class="info-row">
+                                        <span class="info-label">Fecha Alta:</span>
+                                        <span class="info-value" id="exp-info-falta">-</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="info-label">Antigüedad:</span>
+                                        <span class="info-value" id="exp-info-antiguedad">-</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="info-label">Estatus:</span>
+                                        <span class="info-value" id="exp-info-estatus">-</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="info-label">Tipo Trabajo:</span>
+                                        <span class="info-value" id="exp-info-tipo-trabajo">-</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="info-label">Día Descanso:</span>
+                                        <span class="info-value" id="exp-info-descanso">-</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="info-label">Vacaciones:</span>
+                                        <span class="info-value" id="exp-info-vacaciones">-</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="info-label">Claves Asistencia:</span>
+                                        <span class="info-value" id="exp-info-claves">-</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TAB: ESTADÍSTICAS -->
+                        <div class="exp-tab-pane" id="tab-estadisticas">
+                            <div class="stats-section">
+                                <h4><i class="fas fa-chart-line"></i> Estadísticas del Período</h4>
+                                <p class="text-muted" id="exp-periodo-texto">Período seleccionado</p>
+                                
+                                <div class="stats-grid-full">
+                                    <div class="stat-box">
+                                        <div class="stat-box-header">
+                                            <i class="fas fa-calendar-day"></i>
+                                            <span>Días con Asignación</span>
+                                        </div>
+                                        <div class="stat-box-value" id="exp-stat-dias-asig">0</div>
+                                    </div>
+                                    <div class="stat-box">
+                                        <div class="stat-box-header">
+                                            <i class="fas fa-store-alt"></i>
+                                            <span>Tiendas Visitadas</span>
+                                        </div>
+                                        <div class="stat-box-value" id="exp-stat-tiendas-vis">0</div>
+                                    </div>
+                                    <div class="stat-box stat-box-danger">
+                                        <div class="stat-box-header">
+                                            <i class="fas fa-times-circle"></i>
+                                            <span>Total Incidencias</span>
+                                        </div>
+                                        <div class="stat-box-value" id="exp-stat-total-inc">0</div>
+                                    </div>
+                                </div>
+
+                                <h4 style="margin-top: 2rem;"><i class="fas fa-exclamation-triangle"></i> Desglose de Incidencias</h4>
+                                <div class="stats-grid-full">
+                                    <div class="stat-box stat-box-warning">
+                                        <div class="stat-box-header">
+                                            <i class="fas fa-user-slash"></i>
+                                            <span>Faltas</span>
+                                        </div>
+                                        <div class="stat-box-value" id="exp-stat-faltas">0</div>
+                                    </div>
+                                    <div class="stat-box stat-box-info">
+                                        <div class="stat-box-header">
+                                            <i class="fas fa-clock"></i>
+                                            <span>Retardos</span>
+                                        </div>
+                                        <div class="stat-box-value" id="exp-stat-retardos">0</div>
+                                    </div>
+                                    <div class="stat-box stat-box-danger">
+                                        <div class="stat-box-header">
+                                            <i class="fas fa-hospital"></i>
+                                            <span>Incapacidades</span>
+                                        </div>
+                                        <div class="stat-box-value" id="exp-stat-incapacidades">0</div>
+                                    </div>
+                                    <div class="stat-box">
+                                        <div class="stat-box-header">
+                                            <i class="fas fa-calendar-times"></i>
+                                            <span>Total Días Incidencia</span>
+                                        </div>
+                                        <div class="stat-box-value" id="exp-stat-dias-inc">0</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TAB: ASIGNACIONES -->
+                        <div class="exp-tab-pane" id="tab-asignaciones">
+                            <h4><i class="fas fa-clipboard-list"></i> Asignaciones en el Período</h4>
+                            <div id="exp-asignaciones-lista">
+                                <!-- Se llenará dinámicamente -->
+                            </div>
+                        </div>
+
+                        <!-- TAB: INCIDENCIAS -->
+                        <div class="exp-tab-pane" id="tab-incidencias">
+                            <h4><i class="fas fa-exclamation-circle"></i> Incidencias Registradas</h4>
+                            <div id="exp-incidencias-lista">
+                                <!-- Se llenará dinámicamente -->
+                            </div>
+                        </div>
+
+                        <!-- TAB: HISTORIAL -->
+                        <div class="exp-tab-pane" id="tab-historial">
+                            <h4><i class="fas fa-history"></i> Historial Completo de Asignaciones</h4>
+                            <p class="text-muted">Últimas 100 asignaciones registradas</p>
+                            <div id="exp-historial-lista">
+                                <!-- Se llenará dinámicamente -->
+                            </div>
+                        </div>
+
+                    </div>
                 </div>
             </div>
         </div>
@@ -672,12 +976,23 @@
             border: 1px solid var(--info-color);
         }
 
-        /* NUEVO: Badge para día de descanso */
         .dia-descanso-badge {
             display: inline-block;
             background: var(--danger-color);
             color: white;
             border: 1px solid var(--danger-color);
+            padding: 0.3rem 0.6rem;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin: 0.2rem 0.2rem 0.2rem 0;
+        }
+
+        .dia-incidencia-badge {
+            display: inline-block;
+            background: #ef4444 !important;
+            color: white !important;
+            border: 1px solid #ef4444 !important;
             padding: 0.3rem 0.6rem;
             border-radius: 15px;
             font-size: 0.75rem;
@@ -698,6 +1013,24 @@
 
         .btn-detalle:hover {
             background: #2563eb;
+            transform: translateY(-2px);
+        }
+
+        /* 🆕 Botón para ver expediente */
+        .btn-expediente {
+            background: var(--warning-color);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-left: 5px;
+        }
+
+        .btn-expediente:hover {
+            background: #ea580c;
             transform: translateY(-2px);
         }
 
@@ -729,7 +1062,6 @@
             color: var(--text-secondary);
         }
 
-        /* ===== DÍAS DE COBERTURA DETALLADA ===== */
         .dias-cobertura-detalle {
             display: flex;
             flex-direction: column;
@@ -828,6 +1160,7 @@
             justify-content: center;
             z-index: 2000;
             padding: 20px;
+            overflow-y: auto;
         }
 
         .modal-overlay.active {
@@ -847,6 +1180,12 @@
 
         .modal-container.modal-large {
             max-width: 900px;
+        }
+
+        /* 🆕 Modal de Expediente (Extra Grande) */
+        .modal-container.modal-expediente {
+            max-width: 1200px;
+            max-height: 95vh;
         }
 
         @keyframes modalSlideIn {
@@ -869,6 +1208,11 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+        }
+
+        /* 🆕 Header especial para expediente */
+        .modal-header-expediente {
+            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
         }
 
         .modal-header h2 {
@@ -938,6 +1282,404 @@
             border-radius: 50%;
             border: 3px solid white;
             box-shadow: 0 0 0 3px var(--primary-color);
+        }
+
+        /* 🆕 ===== ESTILOS ESPECÍFICOS PARA EXPEDIENTE ===== */
+        
+        /* HEADER DEL EXPEDIENTE CON FOTO */
+        .expediente-header {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            padding: 2rem;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-radius: var(--radius);
+            margin-bottom: 2rem;
+        }
+
+        .expediente-avatar {
+            width: 120px;
+            height: 120px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 4rem;
+            box-shadow: 0 10px 30px rgba(39, 174, 96, 0.3);
+            flex-shrink: 0;
+        }
+
+        .expediente-header-info {
+            flex: 1;
+        }
+
+        .expediente-header-info h3 {
+            margin: 0 0 1rem 0;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .expediente-badges {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .exp-badge {
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .exp-badge-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .exp-badge-secondary {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .expediente-quick-info {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .quick-info-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        .quick-info-item i {
+            color: var(--primary-color);
+        }
+
+        /* ESTADÍSTICAS DEL EXPEDIENTE */
+        .expediente-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .exp-stat-card {
+            background: white;
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            border: 2px solid var(--border-color);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .exp-stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .exp-stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+        }
+
+        .exp-stat-info h4 {
+            margin: 0 0 0.3rem 0;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .exp-stat-info p {
+            margin: 0;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        /* TABS DE NAVEGACIÓN */
+        .expediente-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--border-color);
+            overflow-x: auto;
+        }
+
+        .exp-tab {
+            background: none;
+            border: none;
+            padding: 1rem 1.5rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+            white-space: nowrap;
+        }
+
+        .exp-tab:hover {
+            color: var(--primary-color);
+        }
+
+        .exp-tab.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+
+        /* CONTENIDO DE LAS TABS */
+        .expediente-tab-content {
+            min-height: 400px;
+        }
+
+        .exp-tab-pane {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .exp-tab-pane.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* INFO GRID - INFORMACIÓN PERSONAL */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .info-section {
+            background: white;
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            border: 2px solid var(--border-color);
+        }
+
+        .info-section h4 {
+            margin: 0 0 1rem 0;
+            color: var(--primary-color);
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .info-value {
+            font-weight: 500;
+            color: var(--text-primary);
+            text-align: right;
+            font-size: 0.9rem;
+        }
+
+        /* ESTADÍSTICAS DETALLADAS */
+        .stats-section {
+            background: white;
+            border-radius: var(--radius);
+            padding: 2rem;
+            border: 2px solid var(--border-color);
+        }
+
+        .stats-section h4 {
+            margin: 0 0 1rem 0;
+            color: var(--primary-color);
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .stats-grid-full {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .stat-box {
+            background: #f8fafc;
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            border-left: 4px solid var(--primary-color);
+            transition: all 0.3s ease;
+        }
+
+        .stat-box:hover {
+            background: white;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-box-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .stat-box-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .stat-box-danger {
+            border-left-color: var(--danger-color);
+        }
+
+        .stat-box-danger .stat-box-value {
+            color: var(--danger-color);
+        }
+
+        .stat-box-warning {
+            border-left-color: var(--warning-color);
+        }
+
+        .stat-box-warning .stat-box-value {
+            color: var(--warning-color);
+        }
+
+        .stat-box-info {
+            border-left-color: var(--info-color);
+        }
+
+        .stat-box-info .stat-box-value {
+            color: var(--info-color);
+        }
+
+        /* LISTAS DE ASIGNACIONES E INCIDENCIAS */
+        .asignacion-item,
+        .incidencia-item,
+        .historial-item {
+            background: white;
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border: 2px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .asignacion-item:hover,
+        .incidencia-item:hover,
+        .historial-item:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .asignacion-header,
+        .incidencia-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .asignacion-title,
+        .incidencia-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .asignacion-badge,
+        .incidencia-badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .badge-activo {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .badge-inactivo {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .badge-falta {
+            background: #ef4444;
+            color: white;
+        }
+
+        .badge-retardo {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .badge-salud {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .asignacion-details,
+        .incidencia-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+
+        .detail-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .detail-value {
+            font-size: 0.95rem;
+            color: var(--text-primary);
         }
 
         /* ===== NOTIFICACIONES ===== */
@@ -1083,6 +1825,58 @@
             .reporte-table td {
                 padding: 10px 8px;
             }
+
+            /* 🆕 Responsive para expediente */
+            .expediente-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .expediente-avatar {
+                width: 100px;
+                height: 100px;
+                font-size: 3rem;
+            }
+
+            .expediente-quick-info {
+                flex-direction: column;
+                align-items: center;
+                gap: 0.5rem;
+            }
+
+            .expediente-stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .expediente-tabs {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid-full {
+                grid-template-columns: 1fr;
+            }
+
+            .asignacion-details,
+            .incidencia-details {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-header {
+                flex-wrap: wrap;
+            }
+
+            #btn-descargar-expediente {
+                order: 3;
+                width: 100%;
+                margin-left: 0 !important;
+                margin-right: 0 !important;
+                margin-top: 10px;
+            }
         }
 
         @media (max-width: 480px) {
@@ -1169,19 +1963,6 @@
         .gap-3 {
             gap: 1rem;
         }
-
-        /* Badge para días trabajados en descanso */
-        .dia-descanso-badge {
-            display: inline-block;
-            background: #f50b0b !important;
-            color: white !important;
-            border: 1px solid #f50b0b !important;
-            padding: 0.3rem 0.6rem;
-            border-radius: 15px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            margin: 0.2rem 0.2rem 0.2rem 0;
-        }
     </style>
 
     <!-- ===== SCRIPTS ===== -->
@@ -1194,8 +1975,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 
     <script>
-        // ===== VARIABLES GLOBALES CORREGIDAS =====
+        // ===== VARIABLES GLOBALES =====
         let reporteActual = null;
+        let promotoresListaGlobal = [];
+        let expedienteActual = null;
         let filtrosAplicados = {
             fecha_inicio: null,
             fecha_fin: null
@@ -1224,6 +2007,7 @@
         const btnLimpiarFiltros = document.getElementById('btn-limpiar-filtros');
         const btnDescargarExcel = document.getElementById('btn-descargar-excel');
         const btnDescargarPdf = document.getElementById('btn-descargar-pdf');
+        const btnDescargarExpediente = document.getElementById('btn-descargar-expediente');
 
         const statsContainer = document.getElementById('stats-container');
         const reporteContainer = document.getElementById('reporte-container');
@@ -1233,6 +2017,7 @@
         const initialState = document.getElementById('initial-state');
 
         const modalDetalle = document.getElementById('modal-detalle');
+        const modalExpediente = document.getElementById('modal-expediente');
 
         // ===== FUNCIÓN PARA OBTENER FECHAS DINÁMICAS =====
         function obtenerFechasSemanaActual() {
@@ -1266,9 +2051,8 @@
 
         // ===== FUNCIÓN AUXILIAR: Obtener día de la semana de una fecha =====
         function obtenerDiaSemanaNumero(fechaString) {
-            // Crear fecha en formato local para evitar problemas de zona horaria
             const fecha = new Date(fechaString + 'T00:00:00');
-            return fecha.getDay(); // 0 = Domingo, 1 = Lunes, ..., 6 = Sábado
+            return fecha.getDay();
         }
 
         // ===== FUNCIÓN AUXILIAR: Verificar si una fecha es día de descanso =====
@@ -1287,9 +2071,9 @@
             return numeroDiaFecha === numeroDiaDescanso;
         }
 
-        // ===== INICIALIZACIÓN CORREGIDA =====
+        // ===== INICIALIZACIÓN =====
         function init() {
-            console.log('Inicializando módulo CORREGIDO Reportes Tiendas → Promotores...');
+            console.log('Inicializando módulo Reportes Tiendas → Promotores + EXPEDIENTES...');
 
             establecerFechasPorDefecto();
             configurarEventListeners();
@@ -1298,7 +2082,7 @@
             cargarPromotores();
             cargarTiendas();
 
-            console.log('Sistema iniciado. Haga clic en "Consultar Reporte" para cargar datos.');
+            console.log('Sistema iniciado con módulo de EXPEDIENTES ✅');
         }
 
         // ===== CARGA DINÁMICA DE DATOS =====
@@ -1326,6 +2110,7 @@
 
                 if (resultado.success && resultado.data.promotores) {
                     const promotores = resultado.data.promotores;
+                    promotoresListaGlobal = promotores;
 
                     filtroPromotor.innerHTML = '<option value="">Todos los promotores</option>';
 
@@ -1406,20 +2191,31 @@
             btnLimpiarFiltros.addEventListener('click', limpiarFiltros);
             btnDescargarExcel.addEventListener('click', descargarExcel);
             btnDescargarPdf.addEventListener('click', descargarPDF);
+            btnDescargarExpediente.addEventListener('click', descargarExpedientePDF);
 
             document.getElementById('modal-close-detalle').addEventListener('click', cerrarModalDetalle);
             modalDetalle.addEventListener('click', (e) => {
                 if (e.target === modalDetalle) cerrarModalDetalle();
             });
 
+            document.getElementById('modal-close-expediente').addEventListener('click', cerrarModalExpediente);
+            modalExpediente.addEventListener('click', (e) => {
+                if (e.target === modalExpediente) cerrarModalExpediente();
+            });
+
+            document.querySelectorAll('.exp-tab').forEach(tab => {
+                tab.addEventListener('click', () => cambiarTabExpediente(tab.dataset.tab));
+            });
+
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
                     cerrarModalDetalle();
+                    cerrarModalExpediente();
                 }
             });
         }
 
-        // ===== MANEJO DE RANGO DE FECHAS MEJORADO =====
+        // ===== MANEJO DE RANGO DE FECHAS =====
         function actualizarRangoFechas() {
             const rangoTexto = document.getElementById('rango-fechas-texto');
 
@@ -1456,9 +2252,9 @@
             }
         }
 
-        // ===== CONSULTA DE REPORTE CORREGIDA =====
+        // ===== CONSULTA DE REPORTE =====
         async function consultarReporte() {
-            console.log('Iniciando consulta de reporte CORREGIDA...');
+            console.log('Iniciando consulta de reporte...');
 
             if (!fechaInicio.value || !fechaFin.value) {
                 mostrarNotificacion('Por favor seleccione un rango de fechas válido', 'warning');
@@ -1485,15 +2281,13 @@
 
                 if (filtroPromotor.value && filtroPromotor.value.trim() !== '') {
                     datosConsulta.filtro_promotor = parseInt(filtroPromotor.value);
-                    console.log(`Filtro por promotor: ${filtroPromotor.value}`);
                 }
 
                 if (filtroTienda.value && filtroTienda.value.trim() !== '') {
                     datosConsulta.filtro_tienda = parseInt(filtroTienda.value);
-                    console.log(`Filtro por tienda: ${filtroTienda.value}`);
                 }
 
-                console.log('Enviando consulta CORREGIDA con datos:', datosConsulta);
+                console.log('Enviando consulta con datos:', datosConsulta);
 
                 const response = await fetch('../../api/reportes.php', {
                     method: 'POST',
@@ -1508,7 +2302,7 @@
                 }
 
                 const resultado = await response.json();
-                console.log('Respuesta del servidor CORREGIDA:', resultado);
+                console.log('Respuesta del servidor:', resultado);
 
                 if (!resultado.success) {
                     throw new Error(resultado.message || 'Error desconocido en la respuesta del servidor');
@@ -1518,12 +2312,6 @@
                 const estadisticasAPI = resultado.data.estadisticas || {};
 
                 console.log(`Asignaciones encontradas: ${asignacionesAPI.length}`);
-                console.log('Estadísticas:', estadisticasAPI);
-
-                if (resultado.data.debug_info) {
-                    console.log('Debug info:', resultado.data.debug_info);
-                    console.log('Estrategia usada:', resultado.data.estrategia_usada);
-                }
 
                 if (asignacionesAPI.length === 0) {
                     mostrarEstadoVacio();
@@ -1531,10 +2319,6 @@
                         `No se encontraron asignaciones para el período ${filtrosAplicados.fecha_inicio} al ${filtrosAplicados.fecha_fin}`,
                         'info'
                     );
-
-                    if (resultado.data.debug_info && resultado.data.debug_info.tiendas_muestra) {
-                        console.log('Tiendas disponibles en BD:', resultado.data.debug_info.tiendas_muestra);
-                    }
                 } else {
                     reporteActual = asignacionesAPI;
                     mostrarEstadisticas(estadisticasAPI);
@@ -1555,7 +2339,7 @@
             }
         }
 
-        // ===== RENDERIZAR TABLA TIENDAS CON DÍAS LABORABLES CORRECTOS (ORIGINAL - SIN CAMBIOS) =====
+        // ===== RENDERIZAR TABLA TIENDAS =====
         function renderizarTablaTiendasCorregida(asignaciones) {
             const tbody = document.getElementById('tbody-tiendas');
             tbody.innerHTML = '';
@@ -1564,9 +2348,7 @@
 
             const tiendasGroup = new Map();
 
-            asignaciones.forEach((asignacion, index) => {
-                console.log(`Procesando asignación ${index}:`, asignacion);
-
+            asignaciones.forEach((asignacion) => {
                 const tiendaId = asignacion.tienda_id;
 
                 if (!tiendasGroup.has(tiendaId)) {
@@ -1592,8 +2374,6 @@
                 const tienda = data.tienda;
                 const asignacionesTienda = data.asignaciones;
 
-                console.log(`Procesando tienda ${tienda.nombre} con ${asignacionesTienda.length} asignaciones`);
-
                 const promotoresGroup = new Map();
                 asignacionesTienda.forEach(asignacion => {
                     const promotorId = asignacion.promotor_id;
@@ -1614,13 +2394,15 @@
                     promotoresGroup.get(promotorId).dias.push({
                         fecha: asignacion.fecha,
                         dia_semana: asignacion.dia_semana,
-                        claves: asignacion.claves || []
+                        claves: asignacion.claves || [],
+                        tiene_incidencia: asignacion.tiene_incidencia || false,
+                        info_incidencia: asignacion.info_incidencia || null
                     });
                 });
 
-                // Calcular días trabajados REALES (excluyendo descansos)
                 let totalDiasTrabajados = 0;
                 let totalDiasDescanso = 0;
+                let totalIncidencias = 0;
                 let totalAsignaciones = 0;
 
                 let promotoresHTML = '';
@@ -1628,7 +2410,6 @@
                     const diasConAsignacion = promotorData.dias.length;
                     totalAsignaciones += diasConAsignacion;
 
-                    // Contar cuántos días trabajó en su día de descanso actual
                     let diasEnDescanso = 0;
                     if (promotorData.promotor.dia_descanso) {
                         diasEnDescanso = promotorData.dias.filter(dia =>
@@ -1636,22 +2417,33 @@
                         ).length;
                     }
 
-                    // DÍAS LABORABLES = días con asignación - días que eran de descanso
-                    const diasTrabajadosReales = diasConAsignacion - diasEnDescanso;
+                    let diasConIncidencia = promotorData.dias.filter(dia => dia.tiene_incidencia).length;
+
+                    const diasTrabajadosReales = diasConAsignacion - diasEnDescanso - diasConIncidencia;
 
                     totalDiasTrabajados += diasTrabajadosReales;
                     totalDiasDescanso += diasEnDescanso;
+                    totalIncidencias += diasConIncidencia;
 
                     const infoDescanso = diasEnDescanso > 0
                         ? `<span style="color: #f59e0b; font-size: 0.7rem; margin-left: 5px;">(-${diasEnDescanso} descanso${diasEnDescanso > 1 ? 's' : ''})</span>`
                         : '';
 
+                    const infoIncidencias = diasConIncidencia > 0
+                        ? `<span style="color: #ef4444; font-size: 0.7rem; margin-left: 5px;">(-${diasConIncidencia} incidencia${diasConIncidencia > 1 ? 's' : ''})</span>`
+                        : '';
+
                     promotoresHTML += `
-                <div class="promotor-dia" style="margin-bottom: 0.3rem;">
-                    <span class="promotor-nombre">${promotorData.promotor.nombre}</span>
-                    <span class="dias-trabajados">${diasTrabajadosReales} días laborables ${infoDescanso}</span>
-                </div>
-            `;
+                        <div class="promotor-dia" style="margin-bottom: 0.3rem;">
+                            <span class="promotor-nombre">${promotorData.promotor.nombre}</span>
+                            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                <span class="dias-trabajados">${diasTrabajadosReales} días ${infoDescanso}${infoIncidencias}</span>
+                                <button class="btn-expediente" onclick="verExpedientePromotor(${promotorData.promotor.id})" title="Ver Expediente">
+                                    <i class="fas fa-id-card"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
                 }
 
                 let diasCoberturaHTML = '';
@@ -1659,8 +2451,8 @@
                     const promotor = promotorData.promotor;
                     const diasNormales = [];
                     const diasEnDescanso = [];
+                    const diasConIncidencias = [];
 
-                    // Separar días normales de días trabajados en descanso
                     promotorData.dias
                         .sort((a, b) => new Date(a.fecha) - new Date(b.fecha))
                         .forEach(dia => {
@@ -1669,8 +2461,15 @@
                             const diaFormateado = `${diaCorto} ${fechaObj.getDate()}`;
 
                             const esDescanso = esDiaDescanso(dia.fecha, promotor.dia_descanso);
+                            const tieneIncidencia = dia.tiene_incidencia;
 
-                            if (esDescanso) {
+                            if (tieneIncidencia) {
+                                const tipoIncidencia = dia.info_incidencia?.tipo || 'incidencia';
+                                diasConIncidencias.push({
+                                    dia: diaFormateado,
+                                    tipo: tipoIncidencia
+                                });
+                            } else if (esDescanso) {
                                 diasEnDescanso.push(diaFormateado);
                             } else {
                                 diasNormales.push(diaFormateado);
@@ -1678,63 +2477,66 @@
                         });
 
                     const diaDescansoInfo = promotor.dia_descanso
-                        ? `<span style="font-size: 0.7rem; color: #6c757d;">(Descanso actual: ${promotor.dia_descanso})</span>`
+                        ? `<span style="font-size: 0.7rem; color: #6c757d;">(Descanso: ${promotor.dia_descanso})</span>`
                         : '';
 
                     diasCoberturaHTML += `
-                <div class="promotor-cobertura" style="margin-bottom: 0.5rem; padding: 0.4rem; background: #f8fafc; border-radius: 6px; border-left: 3px solid var(--primary-color);">
-                    <div style="font-weight: 600; color: var(--text-primary); font-size: 0.8rem; margin-bottom: 0.2rem;">
-                        ${promotorData.promotor.nombre} ${diaDescansoInfo}
-                    </div>
-                    <div style="display: flex; flex-wrap: wrap; gap: 0.2rem;">
-                        ${diasNormales.map(dia => `<span class="fecha-badge" style="font-size: 0.7rem; padding: 0.2rem 0.4rem; background: var(--info-color); color: white; border: 1px solid var(--info-color); border-radius: 12px;">${dia}</span>`).join('')}
-                        ${diasEnDescanso.map(dia => `<span style="font-size: 0.7rem; padding: 0.2rem 0.4rem; background: #f59e0b; color: white; border: 1px solid #f59e0b; border-radius: 12px; display: inline-block; margin: 0.1rem;">⚠️ ${dia}</span>`).join('')}
-                    </div>
-                </div>
-            `;
+                        <div class="promotor-cobertura">
+                            <div style="font-weight: 600; color: var(--text-primary); font-size: 0.8rem; margin-bottom: 0.2rem;">
+                                ${promotorData.promotor.nombre} ${diaDescansoInfo}
+                            </div>
+                            <div style="display: flex; flex-wrap: wrap; gap: 0.2rem;">
+                                ${diasNormales.map(dia => `<span class="fecha-badge">${dia}</span>`).join('')}
+                                ${diasEnDescanso.map(dia => `<span style="font-size: 0.7rem; padding: 0.2rem 0.4rem; background: #f59e0b; color: white; border: 1px solid #f59e0b; border-radius: 12px; display: inline-block; margin: 0.1rem;">⏸️ ${dia}</span>`).join('')}
+                                ${diasConIncidencias.map(item => `<span style="font-size: 0.7rem; padding: 0.2rem 0.4rem; background: #ef4444; color: white; border: 1px solid #ef4444; border-radius: 12px; display: inline-block; margin: 0.1rem;">❌ ${item.dia}</span>`).join('')}
+                            </div>
+                        </div>
+                    `;
                 }
 
-                // Texto del resumen con desglose
-                const resumenTexto = totalDiasDescanso > 0
-                    ? `<div style="font-weight: 700; font-size: 0.95rem;">${totalDiasTrabajados} días laborables</div><div style="font-size: 0.75rem; color: #6c757d; margin-top: 0.3rem;">(${totalAsignaciones} asignaciones - ${totalDiasDescanso} descanso${totalDiasDescanso > 1 ? 's' : ''})</div>`
+                const resumenTexto = (totalDiasDescanso > 0 || totalIncidencias > 0)
+                    ? `<div style="font-weight: 700; font-size: 0.95rem;">${totalDiasTrabajados} días laborables</div>
+                       <div style="font-size: 0.75rem; color: #6c757d; margin-top: 0.3rem;">
+                           (${totalAsignaciones} asignaciones${totalDiasDescanso > 0 ? ` - ${totalDiasDescanso} descanso${totalDiasDescanso > 1 ? 's' : ''}` : ''}${totalIncidencias > 0 ? ` - ${totalIncidencias} incidencia${totalIncidencias > 1 ? 's' : ''}` : ''})
+                       </div>`
                     : `<div style="font-weight: 700; font-size: 0.95rem;">${totalDiasTrabajados} días laborables</div>`;
 
                 const row = `
-            <tr>
-                <td>
-                    <strong>${tienda.nombre}</strong><br>
-                    <small>Número: ${tienda.numero}</small><br>
-                    <small>Región: ${tienda.region}</small><br>
-                    <small>Cadena: ${tienda.cadena}</small>
-                </td>
-                <td>
-                    <div class="tienda-info">
-                        <strong>Ciudad:</strong> ${tienda.ciudad}<br>
-                        <strong>Estado:</strong> ${tienda.estado}
-                    </div>
-                </td>
-                <td>
-                    <div class="dias-cobertura">
-                        ${promotoresHTML}
-                    </div>
-                </td>
-                <td>
-                    <div class="dias-cobertura-detalle">
-                        ${diasCoberturaHTML}
-                    </div>
-                </td>
-                <td>
-                    <div class="resumen-total">
-                        ${resumenTexto}
-                    </div>
-                </td>
-                <td>
-                    <button class="btn-detalle" onclick="verDetalleTienda(${tiendaId})">
-                        <i class="fas fa-eye"></i> Ver Detalle
-                    </button>
-                </td>
-            </tr>
-        `;
+                    <tr>
+                        <td>
+                            <strong>${tienda.nombre}</strong><br>
+                            <small>Número: ${tienda.numero}</small><br>
+                            <small>Región: ${tienda.region}</small><br>
+                            <small>Cadena: ${tienda.cadena}</small>
+                        </td>
+                        <td>
+                            <div class="tienda-info">
+                                <strong>Ciudad:</strong> ${tienda.ciudad}<br>
+                                <strong>Estado:</strong> ${tienda.estado}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="dias-cobertura">
+                                ${promotoresHTML}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="dias-cobertura-detalle">
+                                ${diasCoberturaHTML}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="resumen-total">
+                                ${resumenTexto}
+                            </div>
+                        </td>
+                        <td>
+                            <button class="btn-detalle" onclick="verDetalleTienda(${tiendaId})">
+                                <i class="fas fa-eye"></i> Ver Detalle
+                            </button>
+                        </td>
+                    </tr>
+                `;
 
                 tbody.innerHTML += row;
             }
@@ -1781,7 +2583,6 @@
             return Math.floor(diferencia / (1000 * 60 * 60 * 24)) + 1;
         }
 
-        // ===== ESTADOS DE UI =====
         function mostrarLoading() {
             reporteLoading.style.display = 'block';
             reporteContent.style.display = 'none';
@@ -1840,13 +2641,13 @@
             document.getElementById('detalle-title').innerHTML = `<i class="fas fa-info-circle"></i> Detalle de ${tipo}`;
 
             const infoHtml = `
-        <h4><i class="fas fa-store"></i> ${data.nombre}</h4>
-        <p><strong>Número:</strong> ${data.numero}</p>
-        <p><strong>Cadena:</strong> ${data.cadena}</p>
-        <p><strong>Ciudad:</strong> ${data.ciudad}</p>
-        <p><strong>Estado:</strong> ${data.estado}</p>
-        <p><strong>Región:</strong> ${data.region}</p>
-    `;
+                <h4><i class="fas fa-store"></i> ${data.nombre}</h4>
+                <p><strong>Número:</strong> ${data.numero}</p>
+                <p><strong>Cadena:</strong> ${data.cadena}</p>
+                <p><strong>Ciudad:</strong> ${data.ciudad}</p>
+                <p><strong>Estado:</strong> ${data.estado}</p>
+                <p><strong>Región:</strong> ${data.region}</p>
+            `;
 
             document.getElementById('detalle-info').innerHTML = infoHtml;
 
@@ -1860,7 +2661,6 @@
             const timeline = document.getElementById('detalle-timeline');
             timeline.innerHTML = '';
 
-            // Agrupar por fecha
             const asignacionesPorFecha = {};
             asignaciones.forEach(asignacion => {
                 if (!asignacionesPorFecha[asignacion.fecha]) {
@@ -1869,7 +2669,6 @@
                 asignacionesPorFecha[asignacion.fecha].push(asignacion);
             });
 
-            // Ordenar fechas
             const fechasOrdenadas = Object.keys(asignacionesPorFecha).sort((a, b) => new Date(b) - new Date(a));
 
             fechasOrdenadas.forEach(fecha => {
@@ -1889,22 +2688,22 @@
                         : '<span class="text-muted">Sin claves</span>';
 
                     promotoresHTML += `
-                <div style="margin-bottom: 1rem; padding: 0.8rem; background: #f8fafc; border-radius: 8px;">
-                    <strong style="color: var(--primary-color);">${asignacion.promotor_nombre}</strong><br>
-                    <small>RFC: ${asignacion.promotor_rfc || 'N/A'}</small><br>
-                    <div style="margin-top: 0.5rem;">
-                        <strong>Claves:</strong> ${clavesHTML}
-                    </div>
-                </div>
-            `;
+                        <div style="margin-bottom: 1rem; padding: 0.8rem; background: #f8fafc; border-radius: 8px;">
+                            <strong style="color: var(--primary-color);">${asignacion.promotor_nombre}</strong><br>
+                            <small>RFC: ${asignacion.promotor_rfc || 'N/A'}</small><br>
+                            <div style="margin-top: 0.5rem;">
+                                <strong>Claves:</strong> ${clavesHTML}
+                            </div>
+                        </div>
+                    `;
                 });
 
                 const timelineItem = `
-            <div class="timeline-item">
-                <h4>${fechaFormateada}</h4>
-                ${promotoresHTML}
-            </div>
-        `;
+                    <div class="timeline-item">
+                        <h4>${fechaFormateada}</h4>
+                        ${promotoresHTML}
+                    </div>
+                `;
 
                 timeline.innerHTML += timelineItem;
             });
@@ -1913,6 +2712,476 @@
         function cerrarModalDetalle() {
             modalDetalle.classList.remove('active');
             document.body.style.overflow = 'auto';
+        }
+
+        // 🆕 ===== FUNCIONES PARA EXPEDIENTE DE PROMOTOR =====
+        
+        async function verExpedientePromotor(idPromotor) {
+            console.log(`Ver expediente del promotor ID: ${idPromotor}`);
+            
+            modalExpediente.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            
+            document.getElementById('expediente-loading').style.display = 'block';
+            document.getElementById('expediente-data').style.display = 'none';
+            
+            try {
+                const fechaInicioPeriodo = filtrosAplicados.fecha_inicio || document.getElementById('fecha-inicio').value;
+                const fechaFinPeriodo = filtrosAplicados.fecha_fin || document.getElementById('fecha-fin').value;
+                
+                const response = await fetch('../../api/reportes.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        tipo_reporte: 'expediente',
+                        id_promotor: idPromotor,
+                        fecha_inicio: fechaInicioPeriodo,
+                        fecha_fin: fechaFinPeriodo
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Error HTTP: ${response.status}`);
+                }
+                
+                const resultado = await response.json();
+                console.log('Expediente recibido:', resultado);
+                
+                if (resultado.success && resultado.data) {
+                    expedienteActual = resultado.data;
+                    renderizarExpediente(resultado.data);
+                    mostrarNotificacion('Expediente cargado exitosamente', 'success');
+                } else {
+                    throw new Error(resultado.message || 'Error al cargar expediente');
+                }
+                
+            } catch (error) {
+                console.error('Error cargando expediente:', error);
+                mostrarNotificacion('Error al cargar expediente: ' + error.message, 'error');
+                cerrarModalExpediente();
+            }
+        }
+        
+        // 🔥 FUNCIÓN CORREGIDA PARA RENDERIZAR EXPEDIENTE (SOLO CAMPOS REALES DE LA BD)
+        function renderizarExpediente(expediente) {
+            console.log('Renderizando expediente:', expediente);
+            
+            const promotor = expediente.promotor;
+            const stats = expediente.estadisticas_generales;
+            const statsPeriodo = expediente.estadisticas_periodo;
+            const asignaciones = expediente.asignaciones;
+            const incidencias = expediente.incidencias;
+            const historial = expediente.historial_completo;
+            const periodo = expediente.periodo;
+            
+            // HEADER
+            document.getElementById('exp-nombre').textContent = promotor.nombre_completo;
+            document.getElementById('exp-estatus').textContent = promotor.estatus || 'ACTIVO';
+            document.getElementById('exp-rfc').textContent = promotor.rfc || 'Sin RFC';
+            document.getElementById('exp-telefono').textContent = promotor.telefono || 'No disponible';
+            document.getElementById('exp-correo').textContent = promotor.correo || 'No disponible';
+            document.getElementById('exp-region').textContent = `Región ${promotor.region || '0'}`;
+            
+            // ESTADÍSTICAS RÁPIDAS
+            document.getElementById('exp-stat-antiguedad').textContent = promotor.antiguedad_texto || 'N/A';
+            document.getElementById('exp-stat-tiendas').textContent = stats.total_tiendas_asignadas || 0;
+            document.getElementById('exp-stat-asignaciones').textContent = stats.total_periodos_asignacion || 0;
+            document.getElementById('exp-stat-incidencias').textContent = statsPeriodo.total_incidencias || 0;
+            
+            // TAB: INFORMACIÓN PERSONAL (🔥 SOLO CAMPOS REALES)
+            document.getElementById('exp-info-nombre').textContent = promotor.nombre_completo;
+            document.getElementById('exp-info-rfc').textContent = promotor.rfc || 'N/A';
+            document.getElementById('exp-info-nss').textContent = promotor.nss || 'N/A';
+            
+            // Fecha de ingreso
+            document.getElementById('exp-info-fingreso').textContent = promotor.fecha_ingreso ? 
+                new Date(promotor.fecha_ingreso).toLocaleDateString('es-ES') : 'N/A';
+            
+            // Región
+            document.getElementById('exp-info-region').textContent = promotor.region || '0';
+            
+            // Contacto
+            document.getElementById('exp-info-tel').textContent = promotor.telefono || 'N/A';
+            document.getElementById('exp-info-email').textContent = promotor.correo || 'N/A';
+            
+            // Datos Bancarios
+            document.getElementById('exp-info-banco').textContent = promotor.banco || 'N/A';
+            document.getElementById('exp-info-cuenta').textContent = promotor.numero_cuenta || 'N/A';
+            
+            // Información Laboral
+            document.getElementById('exp-info-falta').textContent = promotor.fecha_alta ? 
+                new Date(promotor.fecha_alta).toLocaleDateString('es-ES') : 'N/A';
+            document.getElementById('exp-info-antiguedad').textContent = promotor.antiguedad_texto || 'N/A';
+            document.getElementById('exp-info-estatus').textContent = promotor.estatus || 'ACTIVO';
+            document.getElementById('exp-info-tipo-trabajo').textContent = promotor.tipo_trabajo || 'fijo';
+            document.getElementById('exp-info-descanso').textContent = promotor.dia_descanso_nombre || 'No definido';
+            document.getElementById('exp-info-vacaciones').textContent = promotor.vacaciones ? 'Sí' : 'No';
+            
+            const clavesHTML = promotor.claves_array && promotor.claves_array.length > 0 ?
+                promotor.claves_array.map(c => `<span class="promotor-badge">${c}</span>`).join(' ') :
+                'Sin claves';
+            document.getElementById('exp-info-claves').innerHTML = clavesHTML;
+            
+            // TAB: ESTADÍSTICAS
+            const fechaInicioPeriodo = new Date(periodo.fecha_inicio).toLocaleDateString('es-ES');
+            const fechaFinPeriodo = new Date(periodo.fecha_fin).toLocaleDateString('es-ES');
+            document.getElementById('exp-periodo-texto').textContent = `Del ${fechaInicioPeriodo} al ${fechaFinPeriodo} (${periodo.dias_totales} días)`;
+            
+            document.getElementById('exp-stat-dias-asig').textContent = statsPeriodo.dias_con_asignacion || 0;
+            document.getElementById('exp-stat-tiendas-vis').textContent = statsPeriodo.tiendas_visitadas || 0;
+            document.getElementById('exp-stat-total-inc').textContent = statsPeriodo.total_incidencias || 0;
+            
+            document.getElementById('exp-stat-faltas').textContent = statsPeriodo.faltas || 0;
+            document.getElementById('exp-stat-retardos').textContent = statsPeriodo.retardos || 0;
+            document.getElementById('exp-stat-incapacidades').textContent = statsPeriodo.incapacidades || 0;
+            document.getElementById('exp-stat-dias-inc').textContent = statsPeriodo.total_dias_incidencia || 0;
+            
+            // TAB: ASIGNACIONES
+            renderizarAsignacionesExpediente(asignaciones);
+            
+            // TAB: INCIDENCIAS
+            renderizarIncidenciasExpediente(incidencias);
+            
+            // TAB: HISTORIAL
+            renderizarHistorialExpediente(historial);
+            
+            // Ocultar loading y mostrar datos
+            document.getElementById('expediente-loading').style.display = 'none';
+            document.getElementById('expediente-data').style.display = 'block';
+            
+            // Resetear a la primera tab
+            cambiarTabExpediente('informacion');
+        }
+        
+        function renderizarAsignacionesExpediente(asignaciones) {
+            const container = document.getElementById('exp-asignaciones-lista');
+            
+            if (!asignaciones || asignaciones.length === 0) {
+                container.innerHTML = '<p class="text-muted">No hay asignaciones en este período</p>';
+                return;
+            }
+            
+            let html = '';
+            asignaciones.forEach(asig => {
+                const fechaInicio = new Date(asig.fecha_inicio).toLocaleDateString('es-ES');
+                const fechaFin = asig.fecha_fin ? new Date(asig.fecha_fin).toLocaleDateString('es-ES') : 'Actual';
+                const badgeClass = asig.activo ? 'badge-activo' : 'badge-inactivo';
+                
+                html += `
+                    <div class="asignacion-item">
+                        <div class="asignacion-header">
+                            <div class="asignacion-title">${asig.nombre_tienda}</div>
+                            <span class="asignacion-badge ${badgeClass}">${asig.activo ? 'Activa' : 'Inactiva'}</span>
+                        </div>
+                        <div class="asignacion-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Número de Tienda</span>
+                                <span class="detail-value">${asig.num_tienda || 'N/A'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Ciudad</span>
+                                <span class="detail-value">${asig.ciudad}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Estado</span>
+                                <span class="detail-value">${asig.estado}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Región</span>
+                                <span class="detail-value">${asig.region}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Cadena</span>
+                                <span class="detail-value">${asig.cadena}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Fecha Inicio</span>
+                                <span class="detail-value">${fechaInicio}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Fecha Fin</span>
+                                <span class="detail-value">${fechaFin}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        function renderizarIncidenciasExpediente(incidencias) {
+            const container = document.getElementById('exp-incidencias-lista');
+            
+            if (!incidencias || incidencias.length === 0) {
+                container.innerHTML = '<p class="text-muted">No hay incidencias registradas en este período</p>';
+                return;
+            }
+            
+            let html = '';
+            incidencias.forEach(inc => {
+                const fechaInicio = new Date(inc.fecha_incidencia).toLocaleDateString('es-ES');
+                const fechaFin = inc.fecha_fin ? new Date(inc.fecha_fin).toLocaleDateString('es-ES') : 'N/A';
+                
+                let badgeClass = 'badge-falta';
+                if (inc.tipo_incidencia === 'retardo') badgeClass = 'badge-retardo';
+                if (inc.tipo_incidencia === 'salud') badgeClass = 'badge-salud';
+                
+                const tipoTexto = inc.tipo_incidencia.charAt(0).toUpperCase() + inc.tipo_incidencia.slice(1);
+                
+                html += `
+                    <div class="incidencia-item">
+                        <div class="incidencia-header">
+                            <div class="incidencia-title">${tipoTexto}</div>
+                            <span class="incidencia-badge ${badgeClass}">${inc.dias_totales || 1} día${inc.dias_totales > 1 ? 's' : ''}</span>
+                        </div>
+                        <div class="incidencia-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Fecha Inicio</span>
+                                <span class="detail-value">${fechaInicio}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Fecha Fin</span>
+                                <span class="detail-value">${fechaFin}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Estatus</span>
+                                <span class="detail-value">${inc.estatus || 'N/A'}</span>
+                            </div>
+                            <div class="detail-item" style="grid-column: 1 / -1;">
+                                <span class="detail-label">Descripción</span>
+                                <span class="detail-value">${inc.descripcion || 'Sin descripción'}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        function renderizarHistorialExpediente(historial) {
+            const container = document.getElementById('exp-historial-lista');
+            
+            if (!historial || historial.length === 0) {
+                container.innerHTML = '<p class="text-muted">No hay historial disponible</p>';
+                return;
+            }
+            
+            let html = '';
+            historial.forEach(item => {
+                const fechaInicio = new Date(item.fecha_inicio).toLocaleDateString('es-ES');
+                const fechaFin = item.fecha_fin ? new Date(item.fecha_fin).toLocaleDateString('es-ES') : 'Actual';
+                const badgeClass = item.activo ? 'badge-activo' : 'badge-inactivo';
+                
+                html += `
+                    <div class="historial-item">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
+                            <strong style="font-size: 1rem;">${item.nombre_tienda}</strong>
+                            <span class="asignacion-badge ${badgeClass}" style="font-size: 0.75rem;">${item.activo ? 'Activa' : 'Finalizada'}</span>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.5rem; font-size: 0.85rem;">
+                            <div>
+                                <span style="color: var(--text-secondary);">Número:</span>
+                                <strong>${item.num_tienda || 'N/A'}</strong>
+                            </div>
+                            <div>
+                                <span style="color: var(--text-secondary);">Ciudad:</span>
+                                <strong>${item.ciudad}</strong>
+                            </div>
+                            <div>
+                                <span style="color: var(--text-secondary);">Estado:</span>
+                                <strong>${item.estado}</strong>
+                            </div>
+                            <div>
+                                <span style="color: var(--text-secondary);">Inicio:</span>
+                                <strong>${fechaInicio}</strong>
+                            </div>
+                            <div>
+                                <span style="color: var(--text-secondary);">Fin:</span>
+                                <strong>${fechaFin}</strong>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        function cambiarTabExpediente(tabName) {
+            document.querySelectorAll('.exp-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.exp-tab-pane').forEach(pane => {
+                pane.classList.remove('active');
+            });
+            
+            document.querySelector(`.exp-tab[data-tab="${tabName}"]`).classList.add('active');
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+        }
+        
+        function cerrarModalExpediente() {
+            modalExpediente.classList.remove('active');
+            document.body.style.overflow = 'auto';
+            expedienteActual = null;
+        }
+
+        // 🆕 ===== FUNCIÓN PARA DESCARGAR EXPEDIENTE EN PDF =====
+        async function descargarExpedientePDF() {
+            if (!expedienteActual) {
+                mostrarNotificacion('No hay expediente cargado para descargar', 'warning');
+                return;
+            }
+
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('p', 'mm', 'a4');
+                
+                const promotor = expedienteActual.promotor;
+                const periodo = expedienteActual.periodo;
+                
+                // ENCABEZADO
+                doc.setFillColor(39, 174, 96);
+                doc.rect(0, 0, 210, 40, 'F');
+                
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(24);
+                doc.setFont('helvetica', 'bold');
+                doc.text('EXPEDIENTE DEL PROMOTOR', 105, 15, { align: 'center' });
+                
+                doc.setFontSize(16);
+                doc.setFont('helvetica', 'normal');
+                doc.text(promotor.nombre_completo, 105, 25, { align: 'center' });
+                
+                doc.setFontSize(10);
+                doc.text(`RFC: ${promotor.rfc || 'N/A'} | Estatus: ${promotor.estatus || 'N/A'}`, 105, 33, { align: 'center' });
+                
+                // RESTABLECER COLOR DE TEXTO
+                doc.setTextColor(0, 0, 0);
+                
+                let yPos = 50;
+                
+                // INFORMACIÓN BÁSICA
+                doc.setFontSize(14);
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor(39, 174, 96);
+                doc.text('Información Personal', 15, yPos);
+                doc.setTextColor(0, 0, 0);
+                yPos += 8;
+                
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'normal');
+                
+                const infoBasica = [
+                    ['Teléfono:', promotor.telefono || 'N/A'],
+                    ['Correo:', promotor.correo || 'N/A'],
+                    ['Región:', `Región ${promotor.region || '0'}`],
+                    ['RFC:', promotor.rfc || 'N/A'],
+                    ['NSS:', promotor.nss || 'N/A'],
+                    ['Fecha Ingreso:', promotor.fecha_ingreso ? new Date(promotor.fecha_ingreso).toLocaleDateString('es-ES') : 'N/A']
+                ];
+                
+                infoBasica.forEach(([label, value]) => {
+                    doc.setFont('helvetica', 'bold');
+                    doc.text(label, 15, yPos);
+                    doc.setFont('helvetica', 'normal');
+                    doc.text(value, 60, yPos);
+                    yPos += 6;
+                });
+                
+                yPos += 5;
+                
+                // ESTADÍSTICAS DEL PERÍODO
+                doc.setFontSize(14);
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor(39, 174, 96);
+                doc.text('Estadísticas del Período', 15, yPos);
+                doc.setTextColor(0, 0, 0);
+                yPos += 8;
+                
+                doc.setFontSize(10);
+                doc.text(`Período: ${new Date(periodo.fecha_inicio).toLocaleDateString('es-ES')} al ${new Date(periodo.fecha_fin).toLocaleDateString('es-ES')}`, 15, yPos);
+                yPos += 8;
+                
+                const statsPeriodo = expedienteActual.estadisticas_periodo;
+                const estadisticas = [
+                    ['Días con Asignación:', statsPeriodo.dias_con_asignacion || 0],
+                    ['Tiendas Visitadas:', statsPeriodo.tiendas_visitadas || 0],
+                    ['Total Incidencias:', statsPeriodo.total_incidencias || 0],
+                    ['Faltas:', statsPeriodo.faltas || 0],
+                    ['Retardos:', statsPeriodo.retardos || 0],
+                    ['Incapacidades:', statsPeriodo.incapacidades || 0]
+                ];
+                
+                estadisticas.forEach(([label, value]) => {
+                    doc.setFont('helvetica', 'bold');
+                    doc.text(label, 15, yPos);
+                    doc.setFont('helvetica', 'normal');
+                    doc.text(String(value), 70, yPos);
+                    yPos += 6;
+                });
+                
+                // NUEVA PÁGINA PARA ASIGNACIONES
+                doc.addPage();
+                yPos = 20;
+                
+                doc.setFontSize(14);
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor(39, 174, 96);
+                doc.text('Asignaciones Actuales', 15, yPos);
+                doc.setTextColor(0, 0, 0);
+                yPos += 10;
+                
+                const asignaciones = expedienteActual.asignaciones || [];
+                if (asignaciones.length > 0) {
+                    doc.setFontSize(9);
+                    asignaciones.forEach((asig, index) => {
+                        if (yPos > 270) {
+                            doc.addPage();
+                            yPos = 20;
+                        }
+                        
+                        doc.setFont('helvetica', 'bold');
+                        doc.text(`${index + 1}. ${asig.nombre_tienda}`, 15, yPos);
+                        yPos += 5;
+                        
+                        doc.setFont('helvetica', 'normal');
+                        doc.text(`   Ciudad: ${asig.ciudad}, Estado: ${asig.estado}`, 15, yPos);
+                        yPos += 5;
+                        doc.text(`   Fecha Inicio: ${new Date(asig.fecha_inicio).toLocaleDateString('es-ES')}`, 15, yPos);
+                        yPos += 5;
+                        doc.text(`   Estatus: ${asig.activo ? 'Activa' : 'Inactiva'}`, 15, yPos);
+                        yPos += 8;
+                    });
+                } else {
+                    doc.setFont('helvetica', 'italic');
+                    doc.text('No hay asignaciones en este período', 15, yPos);
+                }
+                
+                // PIE DE PÁGINA
+                const totalPages = doc.internal.getNumberOfPages();
+                for (let i = 1; i <= totalPages; i++) {
+                    doc.setPage(i);
+                    doc.setFontSize(8);
+                    doc.setTextColor(128, 128, 128);
+                    doc.text(`Página ${i} de ${totalPages}`, 105, 290, { align: 'center' });
+                    doc.text(`Generado: ${new Date().toLocaleString('es-ES')}`, 105, 285, { align: 'center' });
+                }
+                
+                // DESCARGAR
+                const nombreArchivo = `expediente-${promotor.nombre_completo.replace(/ /g, '-')}-${new Date().toISOString().split('T')[0]}.pdf`;
+                doc.save(nombreArchivo);
+                
+                mostrarNotificacion('Expediente descargado exitosamente', 'success');
+                
+            } catch (error) {
+                console.error('Error generando PDF del expediente:', error);
+                mostrarNotificacion('Error al generar PDF del expediente: ' + error.message, 'error');
+            }
         }
 
         // ===== LIMPIAR FILTROS =====
@@ -1932,10 +3201,10 @@
                 initialState.style.display = 'block';
             }
 
-            mostrarNotificacion('Filtros limpiados. Haga clic en "Consultar Reporte" para cargar nuevos datos.', 'info');
+            mostrarNotificacion('Filtros limpiados', 'info');
         }
 
-        // ===== GENERACIÓN DE EXCEL FORMATO TABLA PLANA (UNA FILA POR PROMOTOR) =====
+        // ===== GENERACIÓN DE EXCEL ===== 
         async function descargarExcel() {
             if (!reporteActual || reporteActual.length === 0) {
                 mostrarNotificacion('No hay datos para exportar', 'warning');
@@ -1949,14 +3218,18 @@
 
                 const worksheet = workbook.addWorksheet('Reporte Tiendas-Promotores');
 
-                // ENCABEZADOS
                 const headerRow = worksheet.addRow([
                     'Nombre Tienda',
                     'Número Tienda',
                     'Región',
                     'Nombre Promotor',
-                    'Días Trabajados',
-                    'Claves'
+                    'Día Descanso',
+                    'Total Asignaciones',
+                    'Días Descanso',
+                    'Incidencias',
+                    'Días Laborables',
+                    'Claves',
+                    'Detalle Incidencias'
                 ]);
 
                 headerRow.eachCell((cell) => {
@@ -1970,7 +3243,7 @@
                         color: { argb: 'FFFFFFFF' },
                         size: 12
                     };
-                    cell.alignment = { vertical: 'middle', horizontal: 'center' };
+                    cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
                     cell.border = {
                         top: { style: 'medium' },
                         left: { style: 'medium' },
@@ -1978,9 +3251,8 @@
                         right: { style: 'medium' }
                     };
                 });
-                headerRow.height = 25;
+                headerRow.height = 30;
 
-                // Agrupar datos por tienda y promotor
                 const tiendasGroup = {};
                 reporteActual.forEach(asignacion => {
                     const tiendaId = asignacion.tienda_id;
@@ -1998,22 +3270,35 @@
                     if (!tiendasGroup[tiendaId].promotores[promotorId]) {
                         tiendasGroup[tiendaId].promotores[promotorId] = {
                             nombre: asignacion.promotor_nombre,
-                            dia_descanso: asignacion.promotor_dia_descanso,
+                            dia_descanso: asignacion.promotor_dia_descanso || 'No definido',
                             fechas: [],
-                            claves: new Set()
+                            claves: new Set(),
+                            incidencias: []
                         };
                     }
 
-                    tiendasGroup[tiendaId].promotores[promotorId].fechas.push(asignacion.fecha);
-                    
+                    tiendasGroup[tiendaId].promotores[promotorId].fechas.push({
+                        fecha: asignacion.fecha,
+                        es_descanso: esDiaDescanso(asignacion.fecha, asignacion.promotor_dia_descanso),
+                        tiene_incidencia: asignacion.tiene_incidencia || false,
+                        info_incidencia: asignacion.info_incidencia || null
+                    });
+
                     if (asignacion.claves && asignacion.claves.length > 0) {
                         asignacion.claves.forEach(clave => {
                             tiendasGroup[tiendaId].promotores[promotorId].claves.add(clave);
                         });
                     }
+
+                    if (asignacion.tiene_incidencia && asignacion.info_incidencia) {
+                        tiendasGroup[tiendaId].promotores[promotorId].incidencias.push({
+                            fecha: asignacion.fecha,
+                            tipo: asignacion.info_incidencia.tipo,
+                            descripcion: asignacion.info_incidencia.descripcion
+                        });
+                    }
                 });
 
-                // COLORES ALTERNADOS
                 const coloresTienda = [
                     { fondo: 'FFE8F5E9', texto: 'FF1B5E20' },
                     { fondo: 'FFF3E5F5', texto: 'FF4A148C' },
@@ -2022,31 +3307,95 @@
                     { fondo: 'FFF1F8E9', texto: 'FF33691E' }
                 ];
 
-                // CREAR UNA FILA POR CADA PROMOTOR
                 let colorIndex = 0;
                 Object.entries(tiendasGroup).forEach(([tiendaId, tiendaData]) => {
                     const colorTienda = coloresTienda[colorIndex % coloresTienda.length];
                     const cantidadPromotores = Object.keys(tiendaData.promotores).length;
 
-                    // Por cada promotor en esta tienda, crear una fila
                     Object.entries(tiendaData.promotores).forEach(([promotorId, promotorData], index) => {
-                        const diasTrabajados = promotorData.fechas.filter(fecha => 
-                            !esDiaDescanso(fecha, promotorData.dia_descanso)
-                        ).length;
-
+                        const totalAsignaciones = promotorData.fechas.length;
+                        const diasDescanso = promotorData.fechas.filter(f => f.es_descanso).length;
+                        const cantidadIncidencias = promotorData.fechas.filter(f => f.tiene_incidencia).length;
+                        const diasLaborables = totalAsignaciones - diasDescanso - cantidadIncidencias;
                         const clavesTexto = Array.from(promotorData.claves).join(', ') || 'Sin claves';
+
+                        let detalleIncidencias = 'Sin incidencias';
+                        if (promotorData.incidencias.length > 0) {
+                            const incidenciasOrdenadas = [...promotorData.incidencias].sort((a, b) => 
+                                new Date(a.fecha) - new Date(b.fecha)
+                            );
+
+                            const grupos = [];
+                            let grupoActual = null;
+
+                            incidenciasOrdenadas.forEach((inc, index) => {
+                                const fechaActual = new Date(inc.fecha + 'T00:00:00');
+                                
+                                if (!grupoActual || grupoActual.tipo !== inc.tipo) {
+                                    if (grupoActual) grupos.push(grupoActual);
+                                    grupoActual = {
+                                        tipo: inc.tipo,
+                                        fechaInicio: inc.fecha,
+                                        fechaFin: inc.fecha,
+                                        dias: 1
+                                    };
+                                } else {
+                                    const fechaAnterior = new Date(grupoActual.fechaFin + 'T00:00:00');
+                                    const diffDias = Math.floor((fechaActual - fechaAnterior) / (1000 * 60 * 60 * 24));
+                                    
+                                    if (diffDias === 1) {
+                                        grupoActual.fechaFin = inc.fecha;
+                                        grupoActual.dias++;
+                                    } else {
+                                        grupos.push(grupoActual);
+                                        grupoActual = {
+                                            tipo: inc.tipo,
+                                            fechaInicio: inc.fecha,
+                                            fechaFin: inc.fecha,
+                                            dias: 1
+                                        };
+                                    }
+                                }
+                                
+                                if (index === incidenciasOrdenadas.length - 1) {
+                                    grupos.push(grupoActual);
+                                }
+                            });
+
+                            detalleIncidencias = grupos.map(grupo => {
+                                const tipoEmoji = {
+                                    'falta': '🚫',
+                                    'retardo': '⏰',
+                                    'abandono': '🏃',
+                                    'salud': '🏥',
+                                    'imprevisto': '⚠️',
+                                    'otro': '📝'
+                                };
+                                const emoji = tipoEmoji[grupo.tipo] || '❌';
+                                
+                                if (grupo.dias === 1) {
+                                    return `${emoji} ${grupo.fechaInicio}: ${grupo.tipo}`;
+                                } else {
+                                    return `📅 ${grupo.fechaInicio} al ${grupo.fechaFin}: ${grupo.tipo} (${grupo.dias} días)`;
+                                }
+                            }).join(' | ');
+                        }
 
                         const row = worksheet.addRow([
                             tiendaData.nombre,
                             tiendaData.numero,
                             tiendaData.region,
                             promotorData.nombre,
-                            diasTrabajados,
-                            clavesTexto
+                            promotorData.dia_descanso,
+                            totalAsignaciones,
+                            diasDescanso,
+                            cantidadIncidencias,
+                            diasLaborables,
+                            clavesTexto,
+                            detalleIncidencias
                         ]);
 
-                        // Aplicar color alternado por tienda
-                        row.eachCell((cell) => {
+                        row.eachCell((cell, colNumber) => {
                             cell.fill = {
                                 type: 'pattern',
                                 pattern: 'solid',
@@ -2056,29 +3405,65 @@
                                 size: 11,
                                 color: { argb: colorTienda.texto }
                             };
-                            cell.alignment = { vertical: 'middle', horizontal: 'left', wrapText: true };
+                            cell.alignment = {
+                                vertical: 'middle',
+                                horizontal: 'left',
+                                wrapText: true
+                            };
                             cell.border = {
                                 top: { style: 'thin', color: { argb: 'FFDCDCDC' } },
                                 left: { style: 'thin', color: { argb: 'FFDCDCDC' } },
                                 bottom: { style: 'thin', color: { argb: 'FFDCDCDC' } },
                                 right: { style: 'thin', color: { argb: 'FFDCDCDC' } }
                             };
+
+                            if (colNumber === 8 && cantidadIncidencias > 0) {
+                                cell.fill = {
+                                    type: 'pattern',
+                                    pattern: 'solid',
+                                    fgColor: { argb: 'FFFECACA' }
+                                };
+                                cell.font = {
+                                    bold: true,
+                                    size: 11,
+                                    color: { argb: 'FF991B1B' }
+                                };
+                            }
+
+                            if (colNumber === 9) {
+                                cell.font = {
+                                    bold: true,
+                                    size: 12,
+                                    color: { argb: 'FF1B5E20' }
+                                };
+                            }
                         });
 
-                        row.height = 20;
+                        row.height = 22;
                     });
 
-                    // FILA SUBTOTAL
-                    const totalDiasTienda = Object.values(tiendaData.promotores).reduce((sum, p) => {
-                        return sum + p.fechas.filter(fecha => !esDiaDescanso(fecha, p.dia_descanso)).length;
-                    }, 0);
+                    const totalAsignacionesTienda = Object.values(tiendaData.promotores).reduce(
+                        (sum, p) => sum + p.fechas.length, 0
+                    );
+                    const totalDescansostienda = Object.values(tiendaData.promotores).reduce(
+                        (sum, p) => sum + p.fechas.filter(f => f.es_descanso).length, 0
+                    );
+                    const totalIncidenciasTienda = Object.values(tiendaData.promotores).reduce(
+                        (sum, p) => sum + p.fechas.filter(f => f.tiene_incidencia).length, 0
+                    );
+                    const totalLaborablesTienda = totalAsignacionesTienda - totalDescansostienda - totalIncidenciasTienda;
 
                     const subtotalRow = worksheet.addRow([
                         `SUBTOTAL - ${tiendaData.nombre}`,
                         '',
                         '',
                         `${cantidadPromotores} promotores`,
-                        totalDiasTienda,
+                        '',
+                        totalAsignacionesTienda,
+                        totalDescansostienda,
+                        totalIncidenciasTienda,
+                        totalLaborablesTienda,
+                        '',
                         ''
                     ]);
 
@@ -2091,7 +3476,7 @@
                         cell.font = {
                             bold: true,
                             color: { argb: 'FF27AE60' },
-                            size: 10
+                            size: 11
                         };
                         cell.alignment = { vertical: 'middle', horizontal: 'left' };
                         cell.border = {
@@ -2101,100 +3486,78 @@
                             right: { style: 'medium', color: { argb: 'FF27AE60' } }
                         };
                     });
-                    subtotalRow.height = 22;
+                    subtotalRow.height = 25;
 
                     colorIndex++;
                 });
 
-                // CONGELAR PRIMERA FILA
+                const totalGeneralAsignaciones = reporteActual.length;
+                const totalGeneralDescansos = reporteActual.filter(a =>
+                    esDiaDescanso(a.fecha, a.promotor_dia_descanso)
+                ).length;
+                const totalGeneralIncidencias = reporteActual.filter(a => a.tiene_incidencia).length;
+                const totalGeneralLaborables = totalGeneralAsignaciones - totalGeneralDescansos - totalGeneralIncidencias;
+
+                worksheet.addRow([]);
+
+                const totalRow = worksheet.addRow([
+                    'TOTALES GENERALES',
+                    '',
+                    '',
+                    `${Object.keys(tiendasGroup).length} tiendas`,
+                    '',
+                    totalGeneralAsignaciones,
+                    totalGeneralDescansos,
+                    totalGeneralIncidencias,
+                    totalGeneralLaborables,
+                    '',
+                    ''
+                ]);
+
+                totalRow.eachCell((cell) => {
+                    cell.fill = {
+                        type: 'pattern',
+                        pattern: 'solid',
+                        fgColor: { argb: 'FF27AE60' }
+                    };
+                    cell.font = {
+                        bold: true,
+                        color: { argb: 'FFFFFFFF' },
+                        size: 13
+                    };
+                    cell.alignment = { vertical: 'middle', horizontal: 'center' };
+                    cell.border = {
+                        top: { style: 'medium' },
+                        left: { style: 'medium' },
+                        bottom: { style: 'medium' },
+                        right: { style: 'medium' }
+                    };
+                });
+                totalRow.height = 28;
+
                 worksheet.views = [
                     { state: 'frozen', xSplit: 0, ySplit: 1 }
                 ];
 
-                // FILTROS AUTOMÁTICOS
                 worksheet.autoFilter = {
                     from: 'A1',
-                    to: 'F1'
+                    to: 'K1'
                 };
 
-                // Ajustar ancho de columnas
                 worksheet.columns = [
-                    { width: 35 },  // Nombre Tienda
-                    { width: 15 },  // Número Tienda
-                    { width: 12 },  // Región
-                    { width: 35 },  // Nombre Promotor
-                    { width: 18 },  // Días Trabajados
-                    { width: 40 }   // Claves
-                ];
-
-                // HOJA DE RESUMEN
-                const resumenSheet = workbook.addWorksheet('📊 Resumen');
-
-                const tituloRow = resumenSheet.addRow(['RESUMEN ESTADÍSTICO DEL PERÍODO']);
-                resumenSheet.mergeCells('A1:B1');
-                tituloRow.getCell(1).fill = {
-                    type: 'pattern',
-                    pattern: 'solid',
-                    fgColor: { argb: 'FF27AE60' }
-                };
-                tituloRow.getCell(1).font = {
-                    bold: true,
-                    color: { argb: 'FFFFFFFF' },
-                    size: 16
-                };
-                tituloRow.getCell(1).alignment = { vertical: 'middle', horizontal: 'center' };
-                tituloRow.height = 35;
-
-                resumenSheet.addRow([]);
-
-                const datosResumen = [
-                    ['🏬 Tiendas con Cobertura', document.getElementById('stat-tiendas').textContent],
-                    ['👥 Promotores Activos', document.getElementById('stat-promotores').textContent],
-                    ['📅 Días del Período', document.getElementById('stat-dias').textContent],
-                    ['✅ Asignaciones Total', document.getElementById('stat-dias-trabajados').textContent],
-                    [''],
-                    ['📆 Período Consultado', document.getElementById('reporte-subtitulo').textContent],
-                    ['🕒 Fecha de Generación', new Date().toLocaleString('es-MX')]
-                ];
-
-                datosResumen.forEach((fila) => {
-                    const row = resumenSheet.addRow(fila);
-
-                    if (fila[0] !== '') {
-                        row.getCell(1).font = { bold: true, size: 12 };
-                        row.getCell(1).alignment = { vertical: 'middle', horizontal: 'left' };
-                        row.getCell(2).font = { size: 12 };
-                        row.getCell(2).alignment = { vertical: 'middle', horizontal: 'left' };
-
-                        row.getCell(1).fill = {
-                            type: 'pattern',
-                            pattern: 'solid',
-                            fgColor: { argb: 'FFF8FAFC' }
-                        };
-
-                        row.getCell(1).border = {
-                            top: { style: 'thin' },
-                            left: { style: 'thin' },
-                            bottom: { style: 'thin' },
-                            right: { style: 'thin' }
-                        };
-                        row.getCell(2).border = {
-                            top: { style: 'thin' },
-                            left: { style: 'thin' },
-                            bottom: { style: 'thin' },
-                            right: { style: 'thin' }
-                        };
-                    }
-
-                    row.height = 25;
-                });
-
-                resumenSheet.columns = [
                     { width: 35 },
-                    { width: 65 }
+                    { width: 15 },
+                    { width: 10 },
+                    { width: 35 },
+                    { width: 15 },
+                    { width: 12 },
+                    { width: 12 },
+                    { width: 12 },
+                    { width: 15 },
+                    { width: 40 },
+                    { width: 60 }
                 ];
 
-                // Generar y descargar archivo
                 const buffer = await workbook.xlsx.writeBuffer();
                 const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
 
@@ -2204,7 +3567,7 @@
 
                 saveAs(blob, nombreArchivo);
 
-                mostrarNotificacion('Excel descargado exitosamente - formato individual por promotor', 'success');
+                mostrarNotificacion('Excel descargado exitosamente', 'success');
 
             } catch (error) {
                 console.error('Error generando Excel:', error);
@@ -2212,7 +3575,7 @@
             }
         }
 
-        // ===== GENERACIÓN DE PDF (SIN CAMBIOS) =====
+        // ===== GENERACIÓN DE PDF =====
         function descargarPDF() {
             if (!reporteActual || reporteActual.length === 0) {
                 mostrarNotificacion('No hay datos para exportar', 'warning');
@@ -2390,15 +3753,15 @@
             };
 
             notificacion.innerHTML = `
-        <i class="${iconos[tipo]} notification-icon"></i>
-        <div class="notification-content">
-            <h4>${titulos[tipo]}</h4>
-            <p>${mensaje}</p>
-        </div>
-        <button class="notification-close">
-            <i class="fas fa-times"></i>
-        </button>
-    `;
+                <i class="${iconos[tipo]} notification-icon"></i>
+                <div class="notification-content">
+                    <h4>${titulos[tipo]}</h4>
+                    <p>${mensaje}</p>
+                </div>
+                <button class="notification-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
 
             notificacion.querySelector('.notification-close').addEventListener('click', () => {
                 notificacion.remove();
@@ -2415,10 +3778,11 @@
 
         // ===== EXPONER FUNCIONES GLOBALES =====
         window.verDetalleTienda = verDetalleTienda;
+        window.verExpedientePromotor = verExpedientePromotor;
         window.limpiarFiltros = limpiarFiltros;
 
         // ===== INICIALIZACIÓN FINAL =====
-        console.log('Módulo CORREGIDO Tiendas → Promotores con DÍAS DE DESCANSO iniciado');
+        console.log('🎉 Módulo Tiendas → Promotores + EXPEDIENTES iniciado ✅');
 
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', init);
