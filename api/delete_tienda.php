@@ -25,14 +25,18 @@ if (!in_array($_SERVER['REQUEST_METHOD'], ['DELETE', 'POST'])) {
 
 try {
     // ===== VERIFICAR SESIÓN Y ROL ROOT =====
-    if (!isset($_SESSION['user_id']) || !isset($_SESSION['rol']) || $_SESSION['rol'] !== 'root') {
-        http_response_code(403);
-        echo json_encode([
-            'success' => false,
-            'message' => 'Acceso denegado. Se requiere rol ROOT.'
-        ]);
-        exit;
-    }
+    // ===== VERIFICAR ROL =====
+if (!isset($_SESSION['rol']) || strtolower($_SESSION['rol']) !== 'root') {
+    error_log('DELETE_TIENDA: Acceso denegado - Rol: ' . ($_SESSION['rol'] ?? 'NO_SET'));
+    http_response_code(403);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Acceso denegado. Solo el rol ROOT puede eliminar tiendas.',
+        'error' => 'insufficient_permissions',
+        'required_role' => 'ROOT'
+    ]);
+    exit;
+}
 
     // ===== OBTENER DATOS =====
     $input = null;

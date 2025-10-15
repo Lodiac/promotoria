@@ -25,14 +25,17 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 try {
     // ===== VERIFICAR SESIÓN Y ROL ROOT =====
-    if (!isset($_SESSION['user_id']) || !isset($_SESSION['rol']) || $_SESSION['rol'] !== 'root') {
-        http_response_code(403);
-        echo json_encode([
-            'success' => false,
-            'message' => 'Acceso denegado. Se requiere rol ROOT.'
-        ]);
-        exit;
-    }
+$roles_permitidos = ['root', 'supervisor'];
+if (!isset($_SESSION['rol']) || !in_array(strtolower($_SESSION['rol']), $roles_permitidos)) {
+    error_log('CREATE_TIENDA: Acceso denegado - Rol: ' . ($_SESSION['rol'] ?? 'NO_SET'));
+    http_response_code(403);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Acceso denegado. Se requiere rol ROOT o SUPERVISOR para crear tiendas.',
+        'error' => 'insufficient_permissions'
+    ]);
+    exit;
+}
 
     // ===== OBTENER DATOS =====
     $input = null;

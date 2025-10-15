@@ -205,9 +205,27 @@ try {
         throw new Exception('Error verificando tabla promotores: ' . $table_error->getMessage());
     }
 
-    // ===== CONSTRUIR CONSULTA BASE =====
-    $sql_base = "FROM promotores WHERE estado = 1";
+    // ===== CONSTRUIR CONSULTA BASE CON FILTRO DE ZONA PARA SUPERVISOR =====
+    $sql_base = "FROM promotores p WHERE p.estado = 1";
     $params = [];
+    
+    // 🆕 FILTRO POR ZONA PARA SUPERVISORES
+    $rol = strtolower($_SESSION['rol']);
+    if ($rol === 'supervisor') {
+        $usuario_id = $_SESSION['user_id'];
+        $sql_base .= " AND EXISTS (
+            SELECT 1 
+            FROM promotor_tienda_asignaciones pta
+            INNER JOIN tiendas t ON pta.id_tienda = t.id_tienda
+            INNER JOIN zona_supervisor zs ON zs.id_zona = t.id_zona
+            WHERE pta.id_promotor = p.id_promotor
+            AND pta.activo = 1
+            AND zs.id_supervisor = :usuario_id
+            AND zs.activa = 1
+        )";
+        $params[':usuario_id'] = $usuario_id;
+        error_log('GET_PROMOTORES: Filtro de zona aplicado para supervisor ID: ' . $usuario_id);
+    }
 
     // ===== APLICAR FILTRO DE BÚSQUEDA - MEJORADO PARA JSON Y DÍA DE DESCANSO =====
     if (!empty($search_field) && !empty($search_value)) {
@@ -217,20 +235,20 @@ try {
         if (in_array($search_field, $valid_search_fields)) {
             if (in_array($search_field, ['vacaciones', 'incidencias', 'region'])) {
                 // Búsqueda exacta para campos numéricos simples
-                $sql_base .= " AND {$search_field} = :search_value";
+                $sql_base .= " AND p.{$search_field} = :search_value";
                 $params[':search_value'] = intval($search_value);
             } elseif ($search_field === 'dia_descanso') {
                 // ✅ BÚSQUEDA POR DÍA DE DESCANSO
-                $sql_base .= " AND dia_descanso = :search_value";
+                $sql_base .= " AND p.dia_descanso = :search_value";
                 $params[':search_value'] = $search_value;
                 error_log('GET_PROMOTORES: Filtro día de descanso aplicado - valor: ' . $search_value);
             } elseif ($search_field === 'numero_tienda') {
                 // ===== BÚSQUEDA MEJORADA PARA NUMERO_TIENDA JSON =====
                 $sql_base .= " AND (
-                    numero_tienda = :search_value_exact
-                    OR JSON_EXTRACT(numero_tienda, '$') = :search_value_json
-                    OR JSON_CONTAINS(numero_tienda, :search_value_json_str)
-                    OR numero_tienda LIKE :search_value_like
+                    p.numero_tienda = :search_value_exact
+                    OR JSON_EXTRACT(p.numero_tienda, '$') = :search_value_json
+                    OR JSON_CONTAINS(p.numero_tienda, :search_value_json_str)
+                    OR p.numero_tienda LIKE :search_value_like
                 )";
                 $params[':search_value_exact'] = $search_value;
                 $params[':search_value_json'] = intval($search_value);
@@ -238,13 +256,13 @@ try {
                 $params[':search_value_like'] = '%' . $search_value . '%';
             } elseif ($search_field === 'fecha_ingreso') {
                 // Búsqueda de fecha
-                $sql_base .= " AND DATE({$search_field}) = :search_value";
+                $sql_base .= " AND DATE(p.{$search_field}) = :search_value";
                 $params[':search_value'] = $search_value;
             } elseif ($search_field === 'clave_asistencia') {
                 // MEJORADO: Búsqueda en campo JSON y en tabla claves_tienda
                 $sql_base .= " AND (
-                    JSON_EXTRACT(clave_asistencia, '$') LIKE :search_value 
-                    OR id_promotor IN (
+                    JSON_EXTRACT(p.clave_asistencia, '$') LIKE :search_value 
+                    OR p.id_promotor IN (
                         SELECT DISTINCT id_promotor_actual 
                         FROM claves_tienda 
                         WHERE codigo_clave LIKE :search_value_clave 
@@ -257,7 +275,7 @@ try {
                 $params[':search_value_clave'] = '%' . $search_value . '%';
             } else {
                 // Búsqueda LIKE para campos de texto
-                $sql_base .= " AND {$search_field} LIKE :search_value";
+                $sql_base .= " AND p.{$search_field} LIKE :search_value";
                 $params[':search_value'] = '%' . $search_value . '%';
             }
             error_log('GET_PROMOTORES: Filtro aplicado - ' . $search_field . ' = ' . $search_value);
@@ -285,29 +303,29 @@ try {
     $offset = ($page - 1) * $limit;
     
     $sql_data = "SELECT 
-                    id_promotor,
-                    nombre,
-                    apellido,
-                    telefono,
-                    correo,
-                    rfc,
-                    nss,
-                    clave_asistencia,
-                    banco,
-                    numero_cuenta,
-                    estatus,
-                    vacaciones,
-                    incidencias,
-                    fecha_ingreso,
-                    tipo_trabajo,
-                    region,
-                    numero_tienda,
-                    dia_descanso,
-                    estado,
-                    fecha_alta,
-                    fecha_modificacion
+                    p.id_promotor,
+                    p.nombre,
+                    p.apellido,
+                    p.telefono,
+                    p.correo,
+                    p.rfc,
+                    p.nss,
+                    p.clave_asistencia,
+                    p.banco,
+                    p.numero_cuenta,
+                    p.estatus,
+                    p.vacaciones,
+                    p.incidencias,
+                    p.fecha_ingreso,
+                    p.tipo_trabajo,
+                    p.region,
+                    p.numero_tienda,
+                    p.dia_descanso,
+                    p.estado,
+                    p.fecha_alta,
+                    p.fecha_modificacion
                  " . $sql_base . "
-                 ORDER BY fecha_modificacion DESC
+                 ORDER BY p.fecha_modificacion DESC
                  LIMIT :limit OFFSET :offset";
     
     $params[':limit'] = $limit;
@@ -590,7 +608,8 @@ try {
             'clave_asistencia' => true,
             'dia_descanso' => true,
             'version' => '1.4 - Con Día de Descanso'
-        ]
+        ],
+        'user_rol' => $rol  // 🆕 Incluir rol del usuario en respuesta
     ];
     
     // Agregar estadísticas de claves si se solicitaron

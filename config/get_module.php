@@ -48,12 +48,14 @@ $allowedModules = [
         'cadenas',
         'reportes',
         'horas',
+        'zonas',
         'usuarios',
         'incidencias'
     ],
     'supervisor' => [
         'bienvenida',
         'cadenas',
+        'zonas',
         'promotores'
     ],
     'usuario' => [

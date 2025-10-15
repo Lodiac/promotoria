@@ -1,253 +1,3788 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <title>Gestión de Promotores</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light">
-
-<div class="container py-5">
-  <div class="d-flex justify-content-between align-items-center mb-4 bg-light" style="border: 5ch 5px;">
-    <h2>Gestión de Promotores</h2>
-    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNuevo">
-      ➕ Nuevo Promotor
-    </button>
-  </div>
-
-  <!-- Buscador -->
-  <div class="input-group mb-4">
-    <select id="filtro" class="form-select" style="max-width: 200px;">
-      <option value="nombre">Nombre</option>
-      <option value="apellido">Apellido</option>
-      <option value="rfc">RFC</option>
-    </select>
-    <input type="text" id="busqueda" class="form-control" placeholder="Buscar...">
-  </div>
-
-  <!-- Tabla -->
-  <div class="table-responsive">
-    <table class="table table-striped align-middle">
-      <thead class="table-dark">
-        <tr>
-          <th>ID</th>
-          <th>Nombre</th>
-          <th>Apellido</th>
-          <th>Teléfono</th>
-          <th>Correo</th>
-          <th>RFC</th>
-          <th>Estatus</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody id="tablaPromotores"></tbody>
-    </table>
-  </div>
-</div>
-
-<!-- Modal Nuevo -->
-<div class="modal fade" id="modalNuevo" tabindex="-1">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <form id="formNuevo">
-        <div class="modal-header">
-          <h5 class="modal-title">Nuevo Promotor</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+<!-- ===== MÓDULO GESTIÓN DE PROMOTORES CON SISTEMA DE MÚLTIPLES CLAVES FILTRADAS POR MÚLTIPLES TIENDAS + DÍA DE DESCANSO ===== -->
+<div class="promotores-module">
+    <!-- HEADER DEL MÓDULO -->
+    <div class="module-header">
+        <div class="header-content">
+            <div class="header-title">
+                <i class="fas fa-users header-icon"></i>
+                <h1>Gestión de Promotores</h1>
+            </div>
+            <div class="header-actions">
+                <button class="btn-primary" id="btn-nuevo-promotor">
+                    <i class="fas fa-plus"></i> Nuevo Promotor
+                </button>
+            </div>
         </div>
-        <div class="modal-body row g-3">
-          <div class="col-md-6"><label class="form-label">Nombre</label><input type="text" class="form-control" name="nombre" required></div>
-          <div class="col-md-6"><label class="form-label">Apellido</label><input type="text" class="form-control" name="apellido" required></div>
-          <div class="col-md-6"><label class="form-label">Teléfono</label><input type="text" class="form-control" name="telefono" required></div>
-          <div class="col-md-6"><label class="form-label">Correo</label><input type="email" class="form-control" name="correo" required></div>
-          <div class="col-md-6"><label class="form-label">RFC</label><input type="text" class="form-control" name="rfc" required></div>
-          <div class="col-md-6"><label class="form-label">NSS</label><input type="text" class="form-control" name="nss" required></div>
-          <div class="col-md-6"><label class="form-label">Clave Asistencia</label><input type="text" class="form-control" name="clave_asistencia" required></div>
-          <div class="col-md-6"><label class="form-label">Banco</label><input type="text" class="form-control" name="banco"></div>
-          <div class="col-md-6"><label class="form-label">Cuenta</label><input type="text" class="form-control" name="numero_cuenta"></div>
-          <div class="col-md-6"><label class="form-label">Estatus</label>
-            <select class="form-select" name="estatus" required>
-              <option value="ACTIVO">ACTIVO</option>
-              <option value="BAJA">BAJA</option>
-            </select>
-          </div>
-          <div class="col-md-6"><label class="form-label">Vacaciones</label>
-            <select class="form-select" name="vacaciones" required>
-              <option value="0">No</option>
-              <option value="1">Sí</option>
-            </select>
-          </div>
-          <div class="col-md-6"><label class="form-label">Estado</label>
-            <select class="form-select" name="estado" required>
-              <option value="1">Activo</option>
-              <option value="0">Inactivo</option>
-            </select>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="submit" class="btn btn-success">Crear</button>
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        </div>
-      </form>
     </div>
-  </div>
-</div>
 
-<!-- Modal Editar -->
-<div class="modal fade" id="modalEditar" tabindex="-1">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <form id="formEditar">
-        <input type="hidden" name="id_promotor" id="edit_id_promotor">
-        <div class="modal-header">
-          <h5 class="modal-title">Editar Promotor</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body row g-3">
-          <div class="col-md-6"><label class="form-label">Nombre</label><input type="text" class="form-control" id="edit_nombre" name="nombre" required></div>
-          <div class="col-md-6"><label class="form-label">Apellido</label><input type="text" class="form-control" id="edit_apellido" name="apellido" required></div>
-          <div class="col-md-6"><label class="form-label">Teléfono</label><input type="text" class="form-control" id="edit_telefono" name="telefono" required></div>
-          <div class="col-md-6"><label class="form-label">Correo</label><input type="email" class="form-control" id="edit_correo" name="correo" required></div>
-          <div class="col-md-6"><label class="form-label">RFC</label><input type="text" class="form-control" id="edit_rfc" name="rfc" required></div>
-          <div class="col-md-6"><label class="form-label">NSS</label><input type="text" class="form-control" id="edit_nss" name="nss" required></div>
-          <div class="col-md-6"><label class="form-label">Clave Asistencia</label><input type="text" class="form-control" id="edit_clave_asistencia" name="clave_asistencia" required></div>
-          <div class="col-md-6"><label class="form-label">Banco</label><input type="text" class="form-control" id="edit_banco" name="banco"></div>
-          <div class="col-md-6"><label class="form-label">Cuenta</label><input type="text" class="form-control" id="edit_numero_cuenta" name="numero_cuenta"></div>
-          <div class="col-md-6"><label class="form-label">Estatus</label>
-            <select class="form-select" id="edit_estatus" name="estatus" required>
-              <option value="ACTIVO">ACTIVO</option>
-              <option value="BAJA">BAJA</option>
+    <!-- CONTROLES DE BÚSQUEDA -->
+    <div class="search-controls">
+        <div class="search-box">
+            <select id="search-field" class="search-select">
+                <option value="">Seleccionar campo...</option>
+                <option value="nombre">Nombre</option>
+                <option value="apellido">Apellido</option>
+                <option value="telefono">Teléfono</option>
+                <option value="correo">Correo</option>
+                <option value="rfc">RFC</option>
+                <option value="nss">NSS</option>
+                <option value="clave_asistencia">Claves Asistencia</option>
+                <option value="banco">Banco</option>
+                <option value="numero_cuenta">Número Cuenta</option>
+                <option value="estatus">Estatus</option>
+                <option value="fecha_ingreso">Fecha Ingreso</option>
+                <option value="tipo_trabajo">Tipo Trabajo</option>
+                <option value="region">Región</option>
+                <option value="numero_tienda">Número Tienda</option>
+                <option value="dia_descanso">Día Descanso</option>
             </select>
-          </div>
-          <div class="col-md-6"><label class="form-label">Vacaciones</label>
-            <select class="form-select" id="edit_vacaciones" name="vacaciones" required>
-              <option value="0">No</option>
-              <option value="1">Sí</option>
-            </select>
-          </div>
-          <div class="col-md-6"><label class="form-label">Estado</label>
-            <select class="form-select" id="edit_estado" name="estado" required>
-              <option value="1">Activo</option>
-              <option value="0">Inactivo</option>
-            </select>
-          </div>
+            <input type="text" id="search-value" placeholder="Valor a buscar..." class="search-input" disabled>
+            <button id="btn-buscar" class="btn-search" disabled>
+                <i class="fas fa-search"></i>
+            </button>
+            <button id="btn-limpiar" class="btn-clear">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
-        <div class="modal-footer">
-          <button type="submit" class="btn btn-warning">Actualizar</button>
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        </div>
-      </form>
     </div>
-  </div>
+
+    <!-- TABLA DE PROMOTORES -->
+    <div class="table-container">
+        <div class="table-wrapper">
+            <table class="promotores-table" id="promotores-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre Completo</th>
+                        <th>Teléfono</th>
+                        <th>Correo</th>
+                        <th>RFC</th>
+                        <th>Claves Asignadas</th>
+                        <th>Región</th>
+                        <th>Tiendas Asignadas</th>
+                        <th>Día Descanso</th>
+                        <th>Estatus</th>
+                        <th>Vacaciones</th>
+                        <th>Fecha Modificación</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="promotores-tbody">
+                    <!-- Los datos se cargarán dinámicamente -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- LOADING TABLA -->
+        <div class="table-loading" id="table-loading">
+            <div class="loading-spinner"></div>
+            <p>Cargando promotores...</p>
+        </div>
+
+        <!-- EMPTY STATE -->
+        <div class="empty-state" id="empty-state" style="display: none;">
+            <i class="fas fa-user-slash"></i>
+            <h3>No se encontraron promotores</h3>
+            <p>No hay promotores que coincidan con los criterios de búsqueda.</p>
+        </div>
+    </div>
+
+    <!-- PAGINACIÓN -->
+    <div class="pagination-container" id="pagination-container">
+        <div class="pagination-info">
+            <span id="pagination-info">Cargando...</span>
+        </div>
+        <div class="pagination-controls">
+            <button id="btn-prev" class="btn-pagination" disabled>
+                <i class="fas fa-chevron-left"></i> Anterior
+            </button>
+            <span class="pagination-pages" id="pagination-pages"></span>
+            <button id="btn-next" class="btn-pagination" disabled>
+                Siguiente <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<!-- ===== MODAL VER/EDITAR PROMOTOR ===== -->
+<div class="modal-overlay" id="modal-promotor">
+    <div class="modal-container modal-large">
+        <div class="modal-header">
+            <h2 id="modal-title">
+                <i class="fas fa-user"></i> Información del Promotor
+            </h2>
+            <button class="modal-close" id="modal-close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <form class="modal-form" id="form-promotor">
+            <input type="hidden" id="promotor-id">
+
+            <!-- MODO VISTA -->
+            <div class="view-mode" id="view-mode">
+                <!-- INFORMACIÓN PERSONAL -->
+                <div class="info-section">
+                    <h3><i class="fas fa-user"></i> Información Personal</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <label>Nombre Completo</label>
+                            <div class="info-value" id="view-nombre-completo">-</div>
+                        </div>
+                        <div class="info-item">
+                            <label>Teléfono</label>
+                            <div class="info-value" id="view-telefono">-</div>
+                        </div>
+                        <div class="info-item">
+                            <label>Correo Electrónico</label>
+                            <div class="info-value" id="view-correo">-</div>
+                        </div>
+                        <div class="info-item">
+                            <label>Fecha de Ingreso</label>
+                            <div class="info-value" id="view-fecha-ingreso">-</div>
+                        </div>
+                        <div class="info-item">
+                            <label>Tipo de Trabajo</label>
+                            <div class="info-value" id="view-tipo-trabajo">-</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- INFORMACIÓN FISCAL -->
+                <div class="info-section">
+                    <h3><i class="fas fa-file-invoice"></i> Información Fiscal</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <label>RFC</label>
+                            <div class="info-value" id="view-rfc">-</div>
+                        </div>
+                        <div class="info-item">
+                            <label>NSS</label>
+                            <div class="info-value" id="view-nss">-</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CLAVES DE ASISTENCIA -->
+                <div class="info-section">
+                    <h3><i class="fas fa-key"></i> Claves de Asistencia</h3>
+                    <div class="claves-selector-container">
+                        <div class="claves-disponibles" id="view-claves-disponibles">
+                            <!-- Se cargarán dinámicamente -->
+                        </div>
+                        <div class="claves-seleccionadas">
+                            <label>Claves Asignadas:</label>
+                            <div class="claves-asignadas-list" id="view-claves-asignadas-list">
+                                <!-- Se mostrarán las claves seleccionadas -->
+                            </div>
+                        </div>
+                    </div>
+                    <input type="hidden" id="view-claves-json" name="claves_asistencia">
+                </div>
+
+                <!-- INFORMACIÓN BANCARIA -->
+                <div class="info-section">
+                    <h3><i class="fas fa-university"></i> Información Bancaria</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <label>Banco</label>
+                            <div class="info-value" id="view-banco">No especificado</div>
+                        </div>
+                        <div class="info-item">
+                            <label>Número de Cuenta</label>
+                            <div class="info-value" id="view-cuenta">No especificado</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- INFORMACIÓN ADICIONAL -->
+                <div class="info-section">
+                    <h3><i class="fas fa-map-marker-alt"></i> Información Adicional</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <label>Región</label>
+                            <div class="info-value" id="view-region">-</div>
+                        </div>
+                        <div class="info-item">
+                            <label>Tiendas Asignadas</label>
+                            <div class="info-value" id="view-tiendas-asignadas">No asignado</div>
+                        </div>
+                        <div class="info-item">
+                            <label>Día de Descanso</label>
+                            <div class="info-value" id="view-dia-descanso">No especificado</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CONFIGURACIÓN Y ESTADO -->
+                <div class="info-section">
+                    <h3><i class="fas fa-cogs"></i> Estado y Configuración</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <label>Estatus</label>
+                            <div class="info-value">
+                                <span class="status-badge" id="view-estatus-badge">ACTIVO</span>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <label>Estado Especial</label>
+                            <div class="info-value" id="view-badges-container">
+                                <!-- Los badges se agregarán dinámicamente aquí -->
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <label>Fecha de Alta</label>
+                            <div class="info-value" id="view-fecha-alta">-</div>
+                        </div>
+                        <div class="info-item">
+                            <label>Última Modificación</label>
+                            <div class="info-value" id="view-fecha-mod">-</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MODO EDICIÓN -->
+            <div class="edit-mode" id="edit-mode" style="display: none;">
+                <!-- INFORMACIÓN PERSONAL -->
+                <div class="form-section">
+                    <h3><i class="fas fa-user"></i> Información Personal</h3>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="promotor-nombre">Nombre *</label>
+                            <input type="text" id="promotor-nombre" maxlength="100" required
+                                placeholder="Nombre del promotor">
+                        </div>
+                        <div class="form-group">
+                            <label for="promotor-apellido">Apellido *</label>
+                            <input type="text" id="promotor-apellido" maxlength="100" required
+                                placeholder="Apellido del promotor">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="promotor-telefono">Teléfono *</label>
+                            <input type="tel" id="promotor-telefono" maxlength="20" required
+                                placeholder="Ej: 5551234567">
+                        </div>
+                        <div class="form-group">
+                            <label for="promotor-correo">Correo Electrónico *</label>
+                            <input type="email" id="promotor-correo" maxlength="100" required
+                                placeholder="promotor@empresa.com">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="promotor-fecha-ingreso">Fecha de Ingreso *</label>
+                            <input type="date" id="promotor-fecha-ingreso" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="promotor-tipo-trabajo">Tipo de Trabajo *</label>
+                            <select id="promotor-tipo-trabajo" required>
+                                <option value="">Seleccionar tipo...</option>
+                                <option value="fijo">Fijo</option>
+                                <option value="cubredescansos">Cubre Descansos</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- INFORMACIÓN FISCAL -->
+                <div class="form-section">
+                    <h3><i class="fas fa-file-invoice"></i> Información Fiscal</h3>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="promotor-rfc">RFC *</label>
+                            <input type="text" id="promotor-rfc" maxlength="13" required placeholder="PEXJ850101XXX"
+                                style="text-transform: uppercase;">
+                        </div>
+                        <div class="form-group">
+                            <label for="promotor-nss">NSS *</label>
+                            <input type="text" id="promotor-nss" maxlength="20" required placeholder="12345678901">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- INFORMACIÓN ADICIONAL -->
+                <div class="form-section">
+                    <h3><i class="fas fa-map-marker-alt"></i> Información Adicional</h3>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="promotor-region">Región *</label>
+                            <input type="number" id="promotor-region" min="0" max="999" required placeholder="0"
+                                value="0">
+                            <small class="field-help">Número de región (obligatorio, mínimo 0)</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="promotor-dia-descanso">Día de Descanso</label>
+                            <select id="promotor-dia-descanso">
+                                <option value="">Sin especificar</option>
+                                <option value="1">Lunes</option>
+                                <option value="2">Martes</option>
+                                <option value="3">Miércoles</option>
+                                <option value="4">Jueves</option>
+                                <option value="5">Viernes</option>
+                                <option value="6">Sábado</option>
+                                <option value="7">Domingo</option>
+                            </select>
+                            <small class="field-help">Día de descanso semanal del promotor (opcional)</small>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="promotor-tiendas">Tiendas Asignadas *</label>
+                            <div class="tiendas-input-container">
+                                <input type="text" id="promotor-nueva-tienda" placeholder="Ej: 123" pattern="[0-9]+"
+                                    min="1" max="9999">
+                                <button type="button" id="btn-agregar-tienda" class="btn-secondary">
+                                    <i class="fas fa-plus"></i> Agregar Tienda
+                                </button>
+                            </div>
+                            <div class="tiendas-asignadas-list" id="tiendas-asignadas-list">
+                                <!-- Se cargarán las tiendas existentes del promotor -->
+                            </div>
+                            <input type="hidden" id="promotor-tiendas-json" name="numero_tienda">
+                            <small class="field-help">Muestra las tiendas actuales del promotor. Puede agregar o quitar
+                                tiendas adicionales.</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CLAVES DE ASISTENCIA -->
+                <div class="form-section">
+                    <h3><i class="fas fa-key"></i> Claves de Asistencia</h3>
+
+                    <div class="form-group">
+                        <label>Claves Disponibles</label>
+                        <div class="claves-selector-container">
+                            <div class="claves-disponibles" id="claves-disponibles">
+                                <!-- Se cargarán dinámicamente -->
+                            </div>
+                            <div class="claves-seleccionadas">
+                                <label>Claves Asignadas:</label>
+                                <div class="claves-asignadas-list" id="claves-asignadas-list">
+                                    <!-- Se mostrarán las claves seleccionadas -->
+                                </div>
+                            </div>
+                        </div>
+                        <input type="hidden" id="promotor-claves-json" name="claves_asistencia">
+                    </div>
+                </div>
+
+                <!-- INFORMACIÓN BANCARIA -->
+                <div class="form-section">
+                    <h3><i class="fas fa-university"></i> Información Bancaria</h3>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="promotor-banco">Banco</label>
+                            <input type="text" id="promotor-banco" maxlength="100"
+                                placeholder="Ej: BBVA, Santander, Banorte">
+                        </div>
+                        <div class="form-group">
+                            <label for="promotor-cuenta">Número de Cuenta</label>
+                            <input type="text" id="promotor-cuenta" maxlength="50" placeholder="1234567890">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CONFIGURACIÓN -->
+                <div class="form-section">
+                    <h3><i class="fas fa-cogs"></i> Configuración</h3>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="promotor-estatus">Estatus *</label>
+                            <select id="promotor-estatus" required>
+                                <option value="ACTIVO">Activo</option>
+                                <option value="BAJA">Baja</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Estados Especiales</label>
+                            <div class="readonly-badges" id="edit-badges-container">
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle"></i>
+                                    Los estados de vacaciones e incidencias son de solo lectura
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <!-- Botones para modo vista -->
+                <div class="view-actions" id="view-actions">
+                    <button type="button" class="btn-secondary" id="btn-cerrar-vista">
+                        <i class="fas fa-times"></i> Cerrar
+                    </button>
+                    <button type="button" class="btn-primary" id="btn-editar-promotor">
+                        <i class="fas fa-edit"></i> Editar
+                    </button>
+                </div>
+
+                <!-- Botones para modo edición -->
+                <div class="edit-actions" id="edit-actions" style="display: none;">
+                    <button type="button" class="btn-secondary" id="btn-cancelar-edicion">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                    <button type="submit" class="btn-primary" id="btn-guardar">
+                        <i class="fas fa-save"></i> Guardar
+                    </button>
+                </div>
+
+                <!-- Botones para nuevo promotor -->
+                <div class="new-actions" id="new-actions" style="display: none;">
+                    <button type="button" class="btn-secondary" id="btn-cancelar-nuevo">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                    <button type="submit" class="btn-primary" id="btn-crear">
+                        <i class="fas fa-save"></i> Crear
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ===== MODAL CONFIRMAR ELIMINACIÓN - COMENTADO ===== -->
+<!--
+<div class="modal-overlay" id="modal-confirmar">
+    <div class="modal-container modal-small">
+        <div class="modal-header">
+            <h2>
+                <i class="fas fa-exclamation-triangle text-warning"></i>
+                Confirmar Eliminación
+            </h2>
+        </div>
+
+        <div class="modal-body">
+            <p>¿Estás seguro que deseas eliminar este promotor?</p>
+            <div class="delete-details" id="delete-details"></div>
+            <p class="text-warning">
+                <strong>Esta acción no se puede deshacer.</strong>
+            </p>
+        </div>
+
+        <div class="modal-actions">
+            <button type="button" class="btn-secondary" id="btn-cancelar-delete">
+                Cancelar
+            </button>
+            <button type="button" class="btn-danger" id="btn-confirmar-delete">
+                <i class="fas fa-trash"></i> Eliminar
+            </button>
+        </div>
+    </div>
+</div>
+-->
+
+<!-- ===== MODAL HISTORIAL PROMOTOR ===== -->
+<div class="modal-overlay" id="modal-historial">
+    <div class="modal-container modal-large">
+        <div class="modal-header">
+            <h2><i class="fas fa-history"></i> Historial de <span id="historial-promotor-nombre"></span></h2>
+            <button class="modal-close" id="modal-close-historial">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="modal-content">
+            <div class="promotor-info" id="promotor-info">
+                <!-- Se llenará dinámicamente -->
+            </div>
+            <div class="historial-timeline" id="historial-timeline">
+                <!-- Se llenará dinámicamente -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== SISTEMA DE NOTIFICACIONES ===== -->
+<div class="notifications-container" id="notifications-container"></div>
+
+<style>
+    /* ===== ESTILOS PROMOTORES MODULE CON SISTEMA DE MÚLTIPLES CLAVES FILTRADAS POR MÚLTIPLES TIENDAS ===== */
+    .promotores-module {
+        padding: 0;
+        max-width: 100%;
+    }
+
+    /* ===== VARIABLES CSS - TEMA VERDE ===== */
+    :root {
+        --primary-color: #27ae60;
+        --primary-hover: #229954;
+        --primary-light: #d5f4e6;
+        --secondary-color: #6c757d;
+        --success-color: #10b981;
+        --warning-color: #f59e0b;
+        --danger-color: #ef4444;
+        --info-color: #3b82f6;
+        --background: #f8fafc;
+        --surface: rgba(255, 255, 255, 0.95);
+        --text-primary: #2d3748;
+        --text-secondary: #718096;
+        --border-color: #e2e8f0;
+        --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        --shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.15);
+        --radius: 12px;
+    }
+
+    /* ===== HEADER DEL MÓDULO ===== */
+    .module-header {
+        background: var(--surface);
+        backdrop-filter: blur(20px);
+        border-radius: var(--radius);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: var(--shadow);
+    }
+
+    .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .header-title {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .header-icon {
+        width: 50px;
+        height: 50px;
+        background: var(--primary-color);
+        border-radius: var(--radius);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+        box-shadow: 0 8px 20px rgba(39, 174, 96, 0.3);
+    }
+
+    .header-title h1 {
+        margin: 0;
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+
+    /* ===== CONTROLES DE BÚSQUEDA ===== */
+    .search-controls {
+        background: var(--surface);
+        backdrop-filter: blur(20px);
+        border-radius: var(--radius);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: var(--shadow);
+    }
+
+    .search-box {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .search-select {
+        min-width: 200px;
+        padding: 12px 15px;
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        background: white;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+    }
+
+    .search-select:focus {
+        border-color: var(--primary-color);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.1);
+    }
+
+    .search-input {
+        flex: 1;
+        min-width: 250px;
+        padding: 12px 15px;
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+    }
+
+    .search-input:focus {
+        border-color: var(--primary-color);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.1);
+    }
+
+    .search-input:disabled {
+        background: #f8f9fa;
+        color: #666;
+        cursor: not-allowed;
+    }
+
+    /* ===== NUEVOS ESTILOS PARA SELECTOR DE MÚLTIPLES TIENDAS ===== */
+    .tiendas-input-container {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .tiendas-input-container input {
+        flex: 1;
+        padding: 8px 12px;
+        border: 2px solid var(--border-color);
+        border-radius: 6px;
+        font-size: 0.9rem;
+    }
+
+    .tiendas-asignadas-list {
+        min-height: 40px;
+        background: #f8fafc;
+        border: 2px dashed var(--border-color);
+        border-radius: 8px;
+        padding: 8px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        align-items: flex-start;
+    }
+
+    .tiendas-asignadas-list.empty::after {
+        content: "No hay tiendas asignadas";
+        color: var(--text-secondary);
+        font-style: italic;
+        width: 100%;
+        text-align: center;
+        padding: 8px 0;
+    }
+
+    .tienda-badge {
+        background: var(--info-color);
+        color: white;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.3s ease;
+    }
+
+    .tienda-badge:hover {
+        background: #2563eb;
+        transform: translateY(-1px);
+    }
+
+    .tienda-remove {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 0.8rem;
+        cursor: pointer;
+        padding: 0;
+        margin-left: 4px;
+        border-radius: 50%;
+        width: 14px;
+        height: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+    }
+
+    .tienda-remove:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* ===== ESTILOS PARA MOSTRAR TIENDAS EN VISTA ===== */
+    .tiendas-display {
+        background: white;
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        padding: 1rem;
+        min-height: 40px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        align-items: flex-start;
+    }
+
+    .tienda-display-badge {
+        background: var(--info-color);
+        color: white;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .tienda-display-badge i {
+        font-size: 0.7rem;
+    }
+
+    /* ===== NUEVOS ESTILOS PARA SELECTOR DE CLAVES FILTRADAS POR MÚLTIPLES TIENDAS ===== */
+    .claves-selector-container {
+        background: #f8fafc;
+        border-radius: var(--radius);
+        padding: 1.5rem;
+        border: 2px solid var(--border-color);
+        margin-top: 0.5rem;
+    }
+
+    .claves-disponibles {
+        margin-bottom: 1.5rem;
+    }
+
+    .claves-disponibles h4 {
+        margin: 0 0 1rem 0;
+        color: var(--text-primary);
+        font-size: 1rem;
+        font-weight: 600;
+    }
+
+    .claves-info {
+        background: #e3f2fd;
+        padding: 0.75rem;
+        border-radius: 6px;
+        margin-bottom: 1rem;
+        font-size: 0.85rem;
+        color: #1565c0;
+        border: 1px solid #bbdefb;
+    }
+
+    .claves-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .clave-item {
+        background: white;
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        padding: 0.75rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .clave-item:hover:not(.disabled) {
+        border-color: var(--primary-color);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .clave-item.selected {
+        background: var(--primary-light);
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+        font-weight: 600;
+    }
+
+    .clave-item.disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        background: #f8f9fa;
+    }
+
+    .clave-item input[type="checkbox"] {
+        margin: 0;
+        cursor: pointer;
+    }
+
+    .clave-item.disabled input[type="checkbox"] {
+        cursor: not-allowed;
+    }
+
+    .clave-item-info {
+        flex: 1;
+    }
+
+    .clave-item-code {
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .clave-item-desc {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+    }
+
+    .claves-seleccionadas {
+        border-top: 1px solid var(--border-color);
+        padding-top: 1rem;
+    }
+
+    .claves-seleccionadas label {
+        display: block;
+        margin-bottom: 0.75rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .claves-asignadas-list {
+        min-height: 60px;
+        background: white;
+        border: 2px dashed var(--border-color);
+        border-radius: 8px;
+        padding: 1rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        align-items: flex-start;
+    }
+
+    .claves-asignadas-list.empty::after {
+        content: "No hay claves asignadas";
+        color: var(--text-secondary);
+        font-style: italic;
+        width: 100%;
+        text-align: center;
+    }
+
+    .clave-asignada-badge {
+        background: var(--primary-color);
+        color: white;
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .clave-asignada-badge:hover {
+        background: var(--primary-hover);
+        transform: translateY(-1px);
+    }
+
+    .clave-asignada-remove {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 0.9rem;
+        cursor: pointer;
+        padding: 0;
+        margin-left: 0.25rem;
+        border-radius: 50%;
+        width: 16px;
+        height: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+    }
+
+    .clave-asignada-remove:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* ===== ESTILOS PARA MOSTRAR CLAVES EN VISTA ===== */
+    .claves-display {
+        background: white;
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        padding: 1rem;
+        min-height: 60px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        align-items: flex-start;
+    }
+
+    .clave-display-badge {
+        background: var(--primary-light);
+        color: var(--primary-color);
+        border: 1px solid var(--primary-color);
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .clave-display-badge i {
+        font-size: 0.7rem;
+    }
+
+    /* ===== BOTONES ===== */
+    .btn-primary,
+    .btn-secondary,
+    .btn-danger,
+    .btn-search,
+    .btn-clear,
+    .btn-action,
+    .btn-pagination {
+        border: none;
+        border-radius: 8px;
+        padding: 12px 20px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+        font-size: 0.9rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-primary {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+        background: var(--primary-hover);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(39, 174, 96, 0.3);
+    }
+
+    .btn-secondary {
+        background: var(--secondary-color);
+        color: white;
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+        background: #5a6268;
+        transform: translateY(-2px);
+    }
+
+    .btn-danger {
+        background: var(--danger-color);
+        color: white;
+    }
+
+    .btn-danger:hover:not(:disabled) {
+        background: #dc2626;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-search {
+        background: var(--info-color);
+        color: white;
+        padding: 12px 16px;
+    }
+
+    .btn-search:hover:not(:disabled) {
+        background: #2563eb;
+        transform: translateY(-2px);
+    }
+
+    .btn-clear {
+        background: var(--secondary-color);
+        color: white;
+        padding: 12px 16px;
+    }
+
+    .btn-clear:hover {
+        background: #5a6268;
+        transform: translateY(-2px);
+    }
+
+    .btn-action {
+        padding: 8px 12px;
+        font-size: 0.8rem;
+        margin: 0 2px;
+    }
+
+    .btn-action.view {
+        background: var(--info-color);
+        color: white;
+    }
+
+    .btn-action.view:hover {
+        background: #2563eb;
+        transform: translateY(-2px);
+    }
+
+    .btn-action.delete {
+        background: var(--danger-color);
+        color: white;
+    }
+
+    .btn-action.delete:hover {
+        background: #dc2626;
+        transform: translateY(-2px);
+    }
+
+    .btn-action.history {
+        background: var(--warning-color);
+        color: white;
+    }
+
+    .btn-action.history:hover {
+        background: #d97706;
+        transform: translateY(-2px);
+    }
+
+    .btn-pagination {
+        background: white;
+        color: var(--text-primary);
+        border: 2px solid var(--border-color);
+    }
+
+    .btn-pagination:hover:not(:disabled) {
+        background: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+        transform: translateY(-2px);
+    }
+
+    .btn-pagination:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    /* ===== TABLA ===== */
+    .table-container {
+        background: var(--surface);
+        backdrop-filter: blur(20px);
+        border-radius: var(--radius);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: var(--shadow);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .table-wrapper {
+        overflow-x: auto;
+    }
+
+    .promotores-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 0;
+    }
+
+    .promotores-table th {
+        background: var(--primary-color);
+        color: white;
+        padding: 15px 12px;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.9rem;
+        white-space: nowrap;
+    }
+
+    .promotores-table th:first-child {
+        border-radius: 8px 0 0 0;
+    }
+
+    .promotores-table th:last-child {
+        border-radius: 0 8px 0 0;
+    }
+
+    .promotores-table td {
+        padding: 15px 12px;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 0.9rem;
+        vertical-align: middle;
+    }
+
+    .promotores-table tbody tr {
+        transition: all 0.3s ease;
+    }
+
+    .promotores-table tbody tr:hover {
+        background: rgba(39, 174, 96, 0.05);
+    }
+
+    .promotores-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    /* ===== BADGES Y ESTADOS ===== */
+    .status-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .status-badge.activo {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .status-badge.baja {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .vacaciones-badge {
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .vacaciones-badge.si {
+        background: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeaa7;
+    }
+
+    .vacaciones-badge.no {
+        background: #d1ecf1;
+        color: #0c5460;
+        border: 1px solid #bee5eb;
+    }
+
+    /* ===== BADGES ESPECIALES ===== */
+    .special-badge {
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-right: 5px;
+        margin-bottom: 5px;
+        display: inline-block;
+    }
+
+    .special-badge.vacaciones {
+        background: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeaa7;
+    }
+
+    .special-badge.incidencias {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .readonly-badges {
+        padding: 10px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+    }
+
+    .readonly-badges .text-muted {
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+    }
+
+    /* ===== ESTILOS PARA CAMPOS ADICIONALES ===== */
+    .field-help {
+        display: block;
+        margin-top: 5px;
+        color: var(--text-secondary);
+        font-size: 0.8rem;
+        font-style: italic;
+    }
+
+    .info-item.full-width {
+        grid-column: 1 / -1;
+    }
+
+    /* ===== LOADING Y EMPTY STATES ===== */
+    .table-loading,
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--text-secondary);
+    }
+
+    .loading-spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid rgba(39, 174, 96, 0.1);
+        border-radius: 50%;
+        border-top-color: var(--primary-color);
+        animation: spin 1s linear infinite;
+        margin: 0 auto 20px;
+    }
+
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        color: var(--border-color);
+        margin-bottom: 1rem;
+    }
+
+    .empty-state h3 {
+        margin: 0 0 0.5rem 0;
+        color: var(--text-primary);
+    }
+
+    /* ===== PAGINACIÓN ===== */
+    .pagination-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: var(--surface);
+        backdrop-filter: blur(20px);
+        border-radius: var(--radius);
+        padding: 1rem 1.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: var(--shadow);
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .pagination-info {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+
+    .pagination-controls {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .pagination-pages {
+        color: var(--text-primary);
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    /* ===== MODALES ===== */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(10px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+        padding: 20px;
+    }
+
+    .modal-overlay.active {
+        display: flex;
+    }
+
+    .modal-container {
+        background: white;
+        border-radius: var(--radius);
+        width: 100%;
+        max-width: 600px;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        animation: modalSlideIn 0.3s ease;
+    }
+
+    .modal-container.modal-large {
+        max-width: 900px;
+    }
+
+    .modal-container.modal-small {
+        max-width: 400px;
+    }
+
+    @keyframes modalSlideIn {
+        from {
+            transform: translateY(-50px);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .modal-header {
+        background: var(--primary-color);
+        color: white;
+        padding: 1.5rem 2rem;
+        border-radius: var(--radius) var(--radius) 0 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal-header h2 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .modal-close {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        color: white;
+        cursor: pointer;
+        padding: 5px;
+        border-radius: 50%;
+        transition: all 0.3s ease;
+    }
+
+    .modal-close:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .modal-body {
+        padding: 2rem;
+    }
+
+    .modal-content,
+    .modal-form {
+        padding: 2rem;
+    }
+
+    /* ===== ESTILOS MODO VISTA ===== */
+    .view-mode {
+        display: block;
+    }
+
+    .info-section {
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background: #f8fafc;
+        border-radius: var(--radius);
+        border-left: 4px solid var(--primary-color);
+    }
+
+    .info-section h3 {
+        margin: 0 0 1.5rem 0;
+        font-size: 1.1rem;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .info-item {
+        background: white;
+        padding: 1rem;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+    }
+
+    .info-item:hover {
+        border-color: var(--primary-color);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .info-item label {
+        display: block;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .info-value {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        word-break: break-word;
+    }
+
+    /* ===== ESTILOS MODO EDICIÓN ===== */
+    .edit-mode {
+        display: none;
+    }
+
+    .form-section {
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background: #f8fafc;
+        border-radius: var(--radius);
+        border-left: 4px solid var(--primary-color);
+    }
+
+    .form-section h3 {
+        margin: 0 0 1rem 0;
+        font-size: 1.1rem;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        box-sizing: border-box;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        border-color: var(--primary-color);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.1);
+    }
+
+    .modal-actions {
+        padding: 1.5rem 2rem;
+        border-top: 1px solid var(--border-color);
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+    }
+
+    .delete-details {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 1rem;
+        margin: 1rem 0;
+        border-left: 4px solid var(--warning-color);
+    }
+
+    .text-warning {
+        color: var(--warning-color);
+    }
+
+    /* ===== ESTILOS DEL HISTORIAL ===== */
+    .promotor-info {
+        background: #f8fafc;
+        border-radius: var(--radius);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border-left: 4px solid var(--primary-color);
+    }
+
+    .promotor-info h4 {
+        margin: 0 0 1rem 0;
+        color: var(--text-primary);
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+
+    .stats-grid-small {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 1rem;
+        margin: 1rem 0;
+    }
+
+    .stat-mini {
+        background: white;
+        border-radius: 8px;
+        padding: 1rem;
+        text-align: center;
+        border: 2px solid var(--border-color);
+        transition: all 0.3s ease;
+    }
+
+    .stat-mini:hover {
+        border-color: var(--primary-color);
+        transform: translateY(-2px);
+    }
+
+    .stat-mini h5 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin: 0 0 0.5rem 0;
+    }
+
+    .stat-mini p {
+        margin: 0;
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        font-weight: 600;
+    }
+
+    .historial-timeline {
+        position: relative;
+        padding-left: 2rem;
+    }
+
+    .historial-timeline::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        background: var(--primary-color);
+        border-radius: 2px;
+    }
+
+    .historial-timeline h4 {
+        margin: 0 0 1.5rem 0;
+        color: var(--text-primary);
+        font-size: 1.1rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .timeline-item {
+        position: relative;
+        margin-bottom: 2rem;
+        background: white;
+        border-radius: var(--radius);
+        padding: 1.5rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        margin-left: 1.5rem;
+        border: 1px solid var(--border-color);
+    }
+
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: -2.25rem;
+        top: 1.5rem;
+        width: 12px;
+        height: 12px;
+        background: var(--primary-color);
+        border-radius: 50%;
+        border: 3px solid white;
+        box-shadow: 0 0 0 3px var(--primary-color);
+    }
+
+    .timeline-item.active::before {
+        background: var(--success-color);
+        box-shadow: 0 0 0 3px var(--success-color);
+    }
+
+    /* ===== NOTIFICACIONES ===== */
+    .notifications-container {
+        position: fixed;
+        top: 100px;
+        right: 20px;
+        z-index: 3000;
+        max-width: 400px;
+    }
+
+    .notification {
+        background: white;
+        border-radius: var(--radius);
+        padding: 1rem 1.5rem;
+        margin-bottom: 10px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        border-left: 4px solid;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        animation: notificationSlideIn 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .notification.success {
+        border-left-color: var(--success-color);
+    }
+
+    .notification.error {
+        border-left-color: var(--danger-color);
+    }
+
+    .notification.warning {
+        border-left-color: var(--warning-color);
+    }
+
+    .notification.info {
+        border-left-color: var(--info-color);
+    }
+
+    @keyframes notificationSlideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    .notification-icon {
+        font-size: 1.2rem;
+    }
+
+    .notification.success .notification-icon {
+        color: var(--success-color);
+    }
+
+    .notification.error .notification-icon {
+        color: var(--danger-color);
+    }
+
+    .notification.warning .notification-icon {
+        color: var(--warning-color);
+    }
+
+    .notification.info .notification-icon {
+        color: var(--info-color);
+    }
+
+    .notification-content h4 {
+        margin: 0 0 5px 0;
+        font-size: 0.95rem;
+        font-weight: 600;
+    }
+
+    .notification-content p {
+        margin: 0;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+    }
+
+    .notification-close {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: none;
+        border: none;
+        font-size: 1rem;
+        color: #999;
+        cursor: pointer;
+        padding: 2px;
+    }
+
+    .notification-close:hover {
+        color: var(--text-primary);
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+        .header-content {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .header-actions {
+            width: 100%;
+        }
+
+        .search-box {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .search-select,
+        .search-input {
+            min-width: auto;
+            width: 100%;
+        }
+
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .modal-container {
+            margin: 10px;
+            max-width: calc(100% - 20px);
+        }
+
+        .pagination-container {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .table-wrapper {
+            font-size: 0.8rem;
+        }
+
+        .promotores-table th,
+        .promotores-table td {
+            padding: 10px 8px;
+        }
+
+        .stats-grid-small {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .claves-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .tiendas-input-container {
+            flex-direction: column;
+            align-items: stretch;
+        }
+    }
+
+    @media (max-width: 480px) {
+
+        .modal-form,
+        .modal-body,
+        .modal-content {
+            padding: 1rem;
+        }
+
+        .modal-header {
+            padding: 1rem;
+        }
+
+        .modal-actions {
+            padding: 1rem;
+            flex-direction: column;
+        }
+
+        .form-section,
+        .info-section {
+            padding: 1rem;
+        }
+
+        .timeline-item {
+            margin-left: 1rem;
+            padding: 1rem;
+        }
+
+        .historial-timeline {
+            padding-left: 1.5rem;
+        }
+
+        .info-grid {
+            gap: 1rem;
+        }
+
+        .info-item {
+            padding: 0.75rem;
+        }
+
+        .claves-selector-container {
+            padding: 1rem;
+        }
+    }
+
+    /* ===== ANIMACIONES ===== */
+    @keyframes slideInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    .fade-in {
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* ===== UTILIDADES ===== */
+    .text-center {
+        text-align: center;
+    }
+
+    .text-muted {
+        color: var(--text-secondary);
+    }
+
+    .fw-bold {
+        font-weight: 700;
+    }
+
+    .mb-0 {
+        margin-bottom: 0;
+    }
+
+    .mt-1 {
+        margin-top: 0.25rem;
+    }
+
+    .d-none {
+        display: none;
+    }
+
+    .d-flex {
+        display: flex;
+    }
+
+    .align-items-center {
+        align-items: center;
+    }
+
+    .justify-content-between {
+        justify-content: space-between;
+    }
+
+    .gap-2 {
+        gap: 0.5rem;
+    }
+
+    .gap-3 {
+        gap: 1rem;
+    }
+
+    /* ===== ESTILOS ADICIONALES PARA HISTORIAL CON FECHAS DE FIN ===== */
+    .timeline-item.completed::before {
+        background: var(--success-color);
+        box-shadow: 0 0 0 3px var(--success-color);
+    }
+
+    .timeline-item.deleted::before {
+        background: var(--danger-color);
+        box-shadow: 0 0 0 3px var(--danger-color);
+    }
+
+    .timeline-status {
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .timeline-status.active {
+        background: var(--success-color);
+        color: white;
+    }
+
+    .timeline-status.completed {
+        background: var(--info-color);
+        color: white;
+    }
+
+    .timeline-status.deleted {
+        background: var(--danger-color);
+        color: white;
+    }
+
+    .timeline-badge-active {
+        background: linear-gradient(135deg, var(--success-color), #27ae60);
+        color: white;
+        padding: 8px 15px;
+        border-radius: 20px;
+        text-align: center;
+        font-weight: 700;
+        font-size: 0.8rem;
+        margin-top: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+</style>
+
 <script>
-async function cargarPromotores() {
-  try {
-    const res = await fetch("../../api/get_promotores.php");
-    const json = await res.json();
+    // ===== VARIABLES GLOBALES =====
+    let currentPage = 1;
+    let totalPages = 1;
+    let currentSearch = { field: '', value: '' };
+    let isEditing = false;
+    let isNewPromotor = false;
+    let currentPromotorData = null;
+    let allPromotores = [];
+    let clavesDisponibles = [];
+    let clavesAsignadas = [];
+    let clavesAsignadasVista = [];
+    let clavesModificadas = false;
+    let tiendasAsignadas = [];
+    let tiendasAsignadasVista = [];
 
-    if (!json.error && Array.isArray(json.data)) {
-      const tbody = document.getElementById("tablaPromotores");
-      tbody.innerHTML = "";
+    // ===== VARIABLES COMENTADAS PARA ELIMINAR PROMOTOR =====
+    // let promotorAEliminar = null;
 
-      json.data.forEach(p => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${p.id}</td>
-          <td>${p.nombre}</td>
-          <td>${p.apellido}</td>
-          <td>${p.telefono}</td>
-          <td>${p.correo}</td>
-          <td>${p.rfc}</td>
-          <td>${p.estatus}</td>
-          <td>
-            <button class="btn btn-sm btn-warning btn-editar">Editar</button>
-            <button class="btn btn-sm btn-danger btn-eliminar">Eliminar</button>
-          </td>`;
+    // ===== MAPEO DE DÍAS DE LA SEMANA =====
+    const DIAS_SEMANA = {
+        '1': 'Lunes',
+        '2': 'Martes',
+        '3': 'Miércoles',
+        '4': 'Jueves',
+        '5': 'Viernes',
+        '6': 'Sábado',
+        '7': 'Domingo'
+    };
 
-        // Asignar eventos de manera segura
-        tr.querySelector(".btn-editar").addEventListener("click", () => abrirEditar(p));
-        tr.querySelector(".btn-eliminar").addEventListener("click", () => eliminarPromotor(p.id));
+    // ===== ELEMENTOS DOM =====
+    const loadingElement = document.getElementById('table-loading');
+    const tableContainer = document.getElementById('promotores-table');
+    const emptyState = document.getElementById('empty-state');
+    const searchField = document.getElementById('search-field');
+    const searchValue = document.getElementById('search-value');
+    const btnBuscar = document.getElementById('btn-buscar');
+    const btnLimpiar = document.getElementById('btn-limpiar');
+    const btnNuevoPromotor = document.getElementById('btn-nuevo-promotor');
+    const promotoresTbody = document.getElementById('promotores-tbody');
+    const paginationContainer = document.getElementById('pagination-container');
+    const paginationInfo = document.getElementById('pagination-info');
+    const paginationPages = document.getElementById('pagination-pages');
+    const btnPrev = document.getElementById('btn-prev');
+    const btnNext = document.getElementById('btn-next');
 
-        tbody.appendChild(tr);
-      });
-    } else {
-      console.warn("⚠️ El servidor no devolvió un array:", json);
+    // Modales
+    const modalPromotor = document.getElementById('modal-promotor');
+    // const modalConfirmar = document.getElementById('modal-confirmar'); // COMENTADO
+    const modalHistorial = document.getElementById('modal-historial');
+    const modalTitle = document.getElementById('modal-title');
+    const formPromotor = document.getElementById('form-promotor');
+
+    // Modos del modal
+    const viewMode = document.getElementById('view-mode');
+    const editMode = document.getElementById('edit-mode');
+    const viewActions = document.getElementById('view-actions');
+    const editActions = document.getElementById('edit-actions');
+    const newActions = document.getElementById('new-actions');
+
+    // ===== FUNCIÓN: PARSEAR MÚLTIPLES TIENDAS DESDE JSON =====
+    function parseMultiplesTiendas(tiendasData) {
+        console.log('🏪 PARSEANDO TIENDAS - Input:', tiendasData, 'Tipo:', typeof tiendasData);
+
+        if (!tiendasData) {
+            console.log('⚠️ Sin datos de tienda');
+            return [];
+        }
+
+        if (typeof tiendasData === 'number') {
+            console.log('✅ Tienda como número:', [tiendasData]);
+            return [tiendasData];
+        }
+
+        if (typeof tiendasData === 'string') {
+            const numeroSimple = parseInt(tiendasData.trim());
+            if (!isNaN(numeroSimple) && numeroSimple > 0) {
+                console.log('✅ Tienda como string numérica:', [numeroSimple]);
+                return [numeroSimple];
+            }
+
+            try {
+                const parsed = JSON.parse(tiendasData);
+                if (Array.isArray(parsed)) {
+                    const tiendas = parsed.map(t => parseInt(t)).filter(t => !isNaN(t) && t > 0);
+                    console.log('✅ Tiendas desde JSON:', tiendas);
+                    return tiendas;
+                }
+            } catch (e) {
+                console.log('⚠️ No es JSON válido, tratando como texto');
+            }
+        }
+
+        if (Array.isArray(tiendasData)) {
+            const tiendas = tiendasData.map(t => parseInt(t)).filter(t => !isNaN(t) && t > 0);
+            console.log('✅ Tiendas desde array:', tiendas);
+            return tiendas;
+        }
+
+        console.log('❌ No se pudo parsear:', tiendasData);
+        return [];
     }
-  } catch (error) {
-    console.error("Error cargando promotores:", error);
-  }
-}
 
+    // ===== CARGAR CLAVES DISPONIBLES =====
+    async function cargarClavesDisponibles(tiendas = []) {
+        console.log('🔑 FILTRO POR MÚLTIPLES TIENDAS - Cargando claves para tiendas:', tiendas);
 
-// Abre el modal de edición con los datos del promotor
-function abrirEditar(p) {
-  document.getElementById("edit_id_promotor").value = p.id; 
-  document.getElementById("edit_nombre").value = p.nombre;
-  document.getElementById("edit_apellido").value = p.apellido;
-  document.getElementById("edit_telefono").value = p.telefono;
-  document.getElementById("edit_correo").value = p.correo;
-  document.getElementById("edit_rfc").value = p.rfc;
-  document.getElementById("edit_nss").value = p.nss;
-  document.getElementById("edit_clave_asistencia").value = p.clave_asistencia;
-  document.getElementById("edit_banco").value = p.banco;
-  document.getElementById("edit_numero_cuenta").value = p.numero_cuenta;
-  document.getElementById("edit_estatus").value = p.estatus;
-  document.getElementById("edit_vacaciones").value = p.vacaciones;
-  document.getElementById("edit_estado").value = p.estado;
+        try {
+            if (!tiendas || tiendas.length === 0) {
+                console.warn('⚠️ No se proporcionaron tiendas válidas, no se cargan claves');
+                clavesDisponibles = [];
+                return clavesDisponibles;
+            }
 
-  const modal = new bootstrap.Modal(document.getElementById("modalEditar"));
-  modal.show();
-}
+            const tiendasValidas = tiendas.filter(t => t && t > 0);
+            if (tiendasValidas.length === 0) {
+                console.warn('⚠️ No hay tiendas válidas, no se cargan claves');
+                clavesDisponibles = [];
+                return clavesDisponibles;
+            }
 
-// Guardar cambios en edición
-document.getElementById("formEditar").addEventListener("submit", async e => {
-  e.preventDefault();
-  const formData = new FormData(e.target);
-  const res = await fetch("../../api/update_promotor.php", { method:"POST", body: formData });
-  const result = await res.json();
-  alert(result.message);
-  if(result.success){
-    bootstrap.Modal.getInstance(document.getElementById("modalEditar")).hide();
-    cargarPromotores();
-  }
-});
+            let apiUrl = `../../api/get_claves_disponibles.php?numero_tienda=${tiendasValidas.join(',')}`;
 
-// Eliminar promotor
-async function eliminarPromotor(id){
-  if(!confirm("¿Seguro que deseas eliminar este promotor?")) return;
-  const formData = new FormData();
-  formData.append("id", id);
-  const res = await fetch("../../api/delete_promotor.php", { method:"POST", body: formData });
-  const result = await res.json();
-  alert(result.message);
-  if(result.success) cargarPromotores();
-}
+            console.log('📡 URL de API con filtro de múltiples tiendas:', apiUrl);
 
-// Crear nuevo promotor
-document.getElementById("formNuevo").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  try {
-    const formData = new FormData(e.target);
-    const response = await fetch("../../api/save_promotor.php", { method: "POST", body: formData });
-    const res = await response.json();
+            const response = await fetch(apiUrl, {
+                method: 'GET',
+                cache: 'no-cache',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
 
-    if (!res.error) {
-      alert("✅ " + res.message);
-      cargarPromotores();
-      e.target.reset();
-      bootstrap.Modal.getInstance(document.getElementById("modalNuevo")).hide();
-    } else {
-      alert("⚠️ " + res.message);
+            if (!response.ok) {
+                throw new Error(`Error HTTP ${response.status}`);
+            }
+
+            const data = await response.json();
+            console.log('📥 RESPUESTA COMPLETA de API claves:', data);
+
+            if (!data.success) {
+                throw new Error(data.message || 'Error cargando claves');
+            }
+
+            let clavesRaw = data.data || [];
+
+            console.log('🔍 VERIFICACIÓN ADICIONAL: Consultando claves realmente asignadas...');
+
+            try {
+                const promotoresResponse = await fetch('../../api/get_promotores.php?include_claves_info=true', {
+                    method: 'GET',
+                    cache: 'no-cache',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (promotoresResponse.ok) {
+                    const promotoresData = await promotoresResponse.json();
+
+                    if (promotoresData.success && promotoresData.data) {
+                        const clavesAsignadasReales = new Set();
+
+                        promotoresData.data.forEach(promotor => {
+                            if (promotor.estatus === 'ACTIVO' && promotor.claves_codigos && Array.isArray(promotor.claves_codigos)) {
+                                promotor.claves_codigos.forEach(codigo => {
+                                    clavesAsignadasReales.add(codigo);
+                                });
+                            }
+                        });
+
+                        console.log('🔍 CLAVES REALMENTE ASIGNADAS:', Array.from(clavesAsignadasReales));
+
+                        clavesRaw = clavesRaw.map(clave => ({
+                            ...clave,
+                            en_uso: clavesAsignadasReales.has(clave.codigo_clave)
+                        }));
+
+                        console.log('✅ ESTADO DE CLAVES CORREGIDO BASADO EN PROMOTORES ACTIVOS');
+                    }
+                }
+            } catch (verificacionError) {
+                console.warn('⚠️ Error en verificación adicional, usando datos originales:', verificacionError.message);
+            }
+
+            clavesDisponibles = clavesRaw;
+
+            console.log('🔍 ANÁLISIS DE CLAVES RECIBIDAS:');
+            console.log(`   - Tiendas solicitadas: ${tiendasValidas.join(', ')}`);
+            console.log(`   - Total claves recibidas: ${clavesDisponibles.length}`);
+
+            if (clavesDisponibles.length > 0) {
+                console.log('   - Detalle de claves (DESPUÉS DE VERIFICACIÓN):');
+                clavesDisponibles.forEach((clave, index) => {
+                    console.log(`     ${index + 1}. Código: ${clave.codigo_clave}, Tienda: ${clave.numero_tienda}, En uso: ${clave.en_uso}`);
+                });
+
+                const clavesOtraTienda = clavesDisponibles.filter(c => !tiendasValidas.includes(parseInt(c.numero_tienda)));
+                if (clavesOtraTienda.length > 0) {
+                    console.error('❌ ERROR: Se recibieron claves de otras tiendas!');
+                    console.error('   Claves incorrectas:', clavesOtraTienda);
+                    mostrarNotificacion(`Error: Se recibieron ${clavesOtraTienda.length} claves de otras tiendas. Verifique la API.`, 'error');
+                } else {
+                    console.log('✅ Todas las claves pertenecen a las tiendas correctas');
+                }
+
+                const clavesEnUso = clavesDisponibles.filter(c => c.en_uso).length;
+                const clavesDisponiblesCount = clavesDisponibles.length - clavesEnUso;
+                console.log(`📊 ESTADÍSTICAS: ${clavesDisponiblesCount} disponibles, ${clavesEnUso} ocupadas de ${clavesDisponibles.length} total`);
+            }
+
+            return clavesDisponibles;
+
+        } catch (error) {
+            console.error('❌ Error cargando claves:', error);
+            mostrarNotificacion('Error cargando claves disponibles: ' + error.message, 'error');
+            clavesDisponibles = [];
+            return clavesDisponibles;
+        }
     }
-  } catch (error) {
-    console.error("Error en fetch:", error);
-    alert("❌ Error al guardar el promotor.");
-  }
-});
 
-// Cargar lista al abrir
-cargarPromotores();
+    // ===== GESTIÓN DE MÚLTIPLES TIENDAS =====
+    function agregarTienda() {
+        const input = document.getElementById('promotor-nueva-tienda');
+        const numeroTienda = parseInt(input.value);
+
+        if (!numeroTienda || numeroTienda < 1 || numeroTienda > 9999) {
+            mostrarNotificacion('Ingrese un número de tienda válido (1-9999)', 'warning');
+            return;
+        }
+
+        if (tiendasAsignadas.includes(numeroTienda)) {
+            mostrarNotificacion('La tienda ya está asignada', 'warning');
+            return;
+        }
+
+        tiendasAsignadas.push(numeroTienda);
+        input.value = '';
+        actualizarTiendasAsignadas();
+        recargarClavesParaTiendas();
+    }
+
+    function removerTienda(numeroTienda) {
+        const index = tiendasAsignadas.indexOf(numeroTienda);
+        if (index > -1) {
+            tiendasAsignadas.splice(index, 1);
+            actualizarTiendasAsignadas();
+            recargarClavesParaTiendas();
+        }
+    }
+
+    function actualizarTiendasAsignadas() {
+        const container = document.getElementById('tiendas-asignadas-list');
+
+        if (tiendasAsignadas.length === 0) {
+            container.innerHTML = '';
+            container.classList.add('empty');
+        } else {
+            container.classList.remove('empty');
+            container.innerHTML = tiendasAsignadas.map(tienda => {
+                return `
+                <div class="tienda-badge" data-tienda="${tienda}">
+                    <i class="fas fa-store"></i>
+                    Tienda ${tienda}
+                    <button type="button" class="tienda-remove" 
+                            onclick="removerTienda(${tienda})">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            }).join('');
+        }
+
+        document.getElementById('promotor-tiendas-json').value = JSON.stringify(tiendasAsignadas);
+    }
+
+    async function recargarClavesParaTiendas() {
+        if (tiendasAsignadas.length > 0) {
+            console.log('🔄 Recargando claves para tiendas:', tiendasAsignadas);
+
+            const clavesValidasActuales = clavesAsignadas.filter(codigo => {
+                const clave = clavesDisponibles.find(c => c.codigo_clave === codigo);
+                return clave && tiendasAsignadas.includes(parseInt(clave.numero_tienda));
+            });
+
+            clavesAsignadas = clavesValidasActuales;
+            actualizarClavesAsignadas();
+
+            await cargarClavesDisponibles(tiendasAsignadas);
+            renderizarClavesDisponibles();
+
+            mostrarNotificacion(`Claves actualizadas para ${tiendasAsignadas.length} tienda(s)`, 'info');
+        } else {
+            console.log('🔄 Sin tiendas seleccionadas - Limpiando claves...');
+            clavesDisponibles = [];
+            clavesAsignadas = [];
+            renderizarClavesDisponibles();
+            actualizarClavesAsignadas();
+        }
+    }
+
+    // ===== MOSTRAR TIENDAS EN VISTA =====
+    function mostrarTiendasEnVista(tiendas) {
+        const container = document.getElementById('view-tiendas-asignadas');
+
+        if (!tiendas || tiendas.length === 0) {
+            container.innerHTML = '<span class="text-muted">No asignado</span>';
+            return;
+        }
+
+        const tiendasHtml = tiendas.map(tienda =>
+            `<span class="tienda-display-badge">
+            <i class="fas fa-store"></i>
+            Tienda ${tienda}
+        </span>`
+        ).join('');
+
+        container.innerHTML = tiendasHtml;
+    }
+
+    // ===== RENDERIZAR CLAVES DISPONIBLES EN VISTA =====
+    function renderizarClavesDisponiblesVista() {
+        const container = document.getElementById('view-claves-disponibles');
+        const tiendas = tiendasAsignadasVista.length > 0 ? tiendasAsignadasVista :
+            (currentPromotorData ? parseMultiplesTiendas(currentPromotorData.numero_tienda) : []);
+
+        console.log('🎨 RENDERIZANDO CLAVES EN VISTA:');
+        console.log(`   - Tiendas del promotor: ${tiendas.join(', ')}`);
+        console.log(`   - Claves disponibles: ${clavesDisponibles.length}`);
+
+        if (!tiendas || tiendas.length === 0) {
+            console.warn('⚠️ Promotor sin tiendas asignadas');
+            container.innerHTML = `
+            <h4>Claves Disponibles (Sin tiendas asignadas)</h4>
+            <div style="text-align: center; padding: 2rem; background: #f8f9fa; border-radius: 8px; border: 2px dashed #dee2e6;">
+                <i class="fas fa-exclamation-triangle" style="font-size: 2rem; color: #ffc107; margin-bottom: 1rem;"></i>
+                <p style="color: var(--text-secondary); margin: 0;">
+                    El promotor no tiene tiendas asignadas.<br>
+                    No se pueden mostrar claves de asistencia.
+                </p>
+            </div>
+        `;
+            return;
+        }
+
+        if (!clavesDisponibles || clavesDisponibles.length === 0) {
+            console.warn(`⚠️ No hay claves disponibles para las tiendas ${tiendas.join(', ')}`);
+            container.innerHTML = `
+            <h4>Claves Disponibles (Tiendas: ${tiendas.join(', ')})</h4>
+            <div style="text-align: center; padding: 2rem; background: #f8f9fa; border-radius: 8px; border: 2px dashed #dee2e6;">
+                <i class="fas fa-store" style="font-size: 2rem; color: #6c757d; margin-bottom: 1rem;"></i>
+                <p style="color: var(--text-secondary); margin: 0;">
+                    No hay claves disponibles para las tiendas ${tiendas.join(', ')}
+                </p>
+            </div>
+        `;
+            return;
+        }
+
+        const clavesFiltradas = clavesDisponibles.filter(clave =>
+            tiendas.includes(parseInt(clave.numero_tienda))
+        );
+
+        if (clavesFiltradas.length !== clavesDisponibles.length) {
+            console.error(`❌ ERROR: Se detectaron claves de otras tiendas!`);
+            console.error(`   - Claves totales: ${clavesDisponibles.length}`);
+            console.error(`   - Claves de tiendas ${tiendas.join(', ')}: ${clavesFiltradas.length}`);
+            mostrarNotificacion(`Error: Se detectaron claves de otras tiendas. Usando solo las de tiendas ${tiendas.join(', ')}`, 'warning');
+        }
+
+        const clavesRealmenteDisponibles = clavesFiltradas.filter(clave =>
+            !clave.en_uso || clavesAsignadasVista.includes(clave.codigo_clave)
+        );
+
+        console.log(`✅ Mostrando SOLO claves disponibles: ${clavesRealmenteDisponibles.length} de ${clavesFiltradas.length} total`);
+
+        container.innerHTML = `
+        <h4>Claves Disponibles (Tiendas: ${tiendas.join(', ')}) - ${clavesRealmenteDisponibles.length} disponibles de ${clavesFiltradas.length} total</h4>
+        <div class="claves-info">
+            <i class="fas fa-info-circle"></i>
+            Mostrando ÚNICAMENTE las ${clavesRealmenteDisponibles.length} claves disponibles (no ocupadas) de las tiendas ${tiendas.join(', ')}
+        </div>
+        <div class="claves-grid" id="view-claves-grid">
+            ${clavesRealmenteDisponibles.map(clave => `
+                <div class="clave-item" 
+                     data-id="${clave.id_clave}" data-codigo="${clave.codigo_clave}">
+                    <input type="checkbox" 
+                           id="view-clave-${clave.codigo_clave}" 
+                           ${clavesAsignadasVista.includes(clave.codigo_clave) ? 'checked' : ''}>
+                    <div class="clave-item-info">
+                        <div class="clave-item-code">${clave.codigo_clave}</div>
+                        <div class="clave-item-desc">
+                            Tienda: ${clave.numero_tienda} | Región: ${clave.region || 'N/A'}
+                        </div>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+
+        container.querySelectorAll('.clave-item').forEach(item => {
+            const checkbox = item.querySelector('input[type="checkbox"]');
+            const codigo = item.dataset.codigo;
+
+            if (clavesAsignadasVista.includes(codigo)) {
+                item.classList.add('selected');
+            }
+
+            item.addEventListener('click', (e) => {
+                if (e.target.type !== 'checkbox') {
+                    checkbox.checked = !checkbox.checked;
+                }
+
+                if (checkbox.checked) {
+                    agregarClaveAsignadaVista(codigo);
+                } else {
+                    removerClaveAsignadaVista(codigo);
+                }
+
+                item.classList.toggle('selected', checkbox.checked);
+                actualizarClavesAsignadasVista();
+            });
+        });
+    }
+
+    // ===== RENDERIZAR CLAVES DISPONIBLES EN EDICIÓN =====
+    function renderizarClavesDisponibles() {
+        const container = document.getElementById('claves-disponibles');
+
+        if (!clavesDisponibles || clavesDisponibles.length === 0) {
+            const tiendas = tiendasAsignadas.length > 0 ? tiendasAsignadas.join(', ') : 'No seleccionadas';
+            container.innerHTML = `
+            <h4>Claves Disponibles (Tiendas: ${tiendas})</h4>
+            <div style="text-align: center; padding: 2rem; background: #f8f9fa; border-radius: 8px; border: 2px dashed #dee2e6;">
+                <i class="fas fa-store" style="font-size: 2rem; color: #6c757d; margin-bottom: 1rem;"></i>
+                <p style="color: var(--text-secondary); margin: 0;">
+                    ${tiendasAsignadas.length > 0 ?
+                    'No hay claves disponibles para estas tiendas' :
+                    'Seleccione al menos una tienda para ver las claves disponibles'
+                }
+                </p>
+            </div>
+        `;
+            return;
+        }
+
+        console.log('🔍 DEBUG FILTRO - ANTES:');
+        console.log(`   - Total claves recibidas: ${clavesDisponibles.length}`);
+        console.log(`   - Es nuevo promotor: ${isNewPromotor}`);
+        console.log(`   - Claves asignadas actuales: ${clavesAsignadas.length}`, clavesAsignadas);
+
+        clavesDisponibles.forEach((clave, index) => {
+            console.log(`   ${index + 1}. ${clave.codigo_clave} - Tienda: ${clave.numero_tienda} - En uso: ${clave.en_uso} (tipo: ${typeof clave.en_uso})`);
+        });
+
+        const clavesRealmenteDisponibles = clavesDisponibles.filter(clave => {
+            const noEstaEnUso = !clave.en_uso;
+            const yaEstaAsignada = clavesAsignadas.includes(clave.codigo_clave);
+            const mostrar = noEstaEnUso || yaEstaAsignada;
+
+            console.log(`   🔍 ${clave.codigo_clave}: en_uso=${clave.en_uso}, yaAsignada=${yaEstaAsignada}, mostrar=${mostrar}`);
+
+            return mostrar;
+        });
+
+        const tiendas = tiendasAsignadas.join(', ') || 'No seleccionadas';
+
+        console.log('🔍 DEBUG FILTRO - DESPUÉS:');
+        console.log(`   - Claves filtradas (disponibles): ${clavesRealmenteDisponibles.length}`);
+        console.log(`   - Claves filtradas:`, clavesRealmenteDisponibles.map(c => c.codigo_clave));
+        console.log(`   - Claves ocupadas:`, clavesDisponibles.filter(c => c.en_uso).map(c => c.codigo_clave));
+
+        container.innerHTML = `
+        <h4>Claves Disponibles (Tiendas: ${tiendas})</h4>
+        <div class="claves-info">
+            <i class="fas fa-info-circle"></i>
+            Mostrando solo las ${clavesRealmenteDisponibles.length} claves disponibles (no ocupadas) de ${clavesDisponibles.length} claves total en la tienda No. ${tiendas}
+        </div>
+        <div class="claves-grid" id="claves-grid">
+            ${clavesRealmenteDisponibles.map(clave => `
+                <div class="clave-item" 
+                     data-id="${clave.id_clave}" data-codigo="${clave.codigo_clave}">
+                    <input type="checkbox" 
+                           id="clave-${clave.codigo_clave}" 
+                           ${clavesAsignadas.includes(clave.codigo_clave) ? 'checked' : ''}>
+                    <div class="clave-item-info">
+                        <div class="clave-item-code">${clave.codigo_clave}</div>
+                        <div class="clave-item-desc">
+                            Tienda: ${clave.numero_tienda} | Región: ${clave.region || 'N/A'} | Estado: DISPONIBLE
+                        </div>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+
+        container.querySelectorAll('.clave-item').forEach(item => {
+            const checkbox = item.querySelector('input[type="checkbox"]');
+            const codigo = item.dataset.codigo;
+
+            if (clavesAsignadas.includes(codigo)) {
+                item.classList.add('selected');
+            }
+
+            item.addEventListener('click', (e) => {
+                if (e.target.type !== 'checkbox') {
+                    checkbox.checked = !checkbox.checked;
+                }
+
+                if (checkbox.checked) {
+                    agregarClaveAsignada(codigo);
+                } else {
+                    removerClaveAsignada(codigo);
+                }
+
+                item.classList.toggle('selected', checkbox.checked);
+                actualizarClavesAsignadas();
+            });
+        });
+    }
+
+    // ===== FUNCIONES AUXILIARES PARA CLAVES =====
+    function agregarClaveAsignadaVista(codigo) {
+        if (!clavesAsignadasVista.includes(codigo)) {
+            clavesAsignadasVista.push(codigo);
+            clavesModificadas = true;
+        }
+    }
+
+    function removerClaveAsignadaVista(codigo) {
+        const index = clavesAsignadasVista.indexOf(codigo);
+        if (index > -1) {
+            clavesAsignadasVista.splice(index, 1);
+            clavesModificadas = true;
+        }
+    }
+
+    function actualizarClavesAsignadasVista() {
+        const container = document.getElementById('view-claves-asignadas-list');
+
+        if (clavesAsignadasVista.length === 0) {
+            container.innerHTML = '';
+            container.classList.add('empty');
+        } else {
+            container.classList.remove('empty');
+            container.innerHTML = clavesAsignadasVista.map(codigo => {
+                return `
+                <div class="clave-asignada-badge" data-codigo="${codigo}">
+                    <i class="fas fa-key"></i>
+                    ${codigo}
+                    <button type="button" class="clave-asignada-remove" 
+                            onclick="removerClaveDesdeAsignadasVista('${codigo}')">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            }).join('');
+        }
+
+        document.getElementById('view-claves-json').value = JSON.stringify(clavesAsignadasVista);
+    }
+
+    function removerClaveDesdeAsignadasVista(codigo) {
+        removerClaveAsignadaVista(codigo);
+
+        const checkbox = document.getElementById(`view-clave-${codigo}`);
+        if (checkbox) {
+            checkbox.checked = false;
+            checkbox.closest('.clave-item').classList.remove('selected');
+        }
+
+        actualizarClavesAsignadasVista();
+    }
+
+    function agregarClaveAsignada(codigo) {
+        if (!clavesAsignadas.includes(codigo)) {
+            clavesAsignadas.push(codigo);
+        }
+    }
+
+    function removerClaveAsignada(codigo) {
+        const index = clavesAsignadas.indexOf(codigo);
+        if (index > -1) {
+            clavesAsignadas.splice(index, 1);
+        }
+    }
+
+    function actualizarClavesAsignadas() {
+        const container = document.getElementById('claves-asignadas-list');
+
+        if (clavesAsignadas.length === 0) {
+            container.innerHTML = '';
+            container.classList.add('empty');
+        } else {
+            container.classList.remove('empty');
+            container.innerHTML = clavesAsignadas.map(codigo => {
+                const clave = clavesDisponibles.find(c => c.codigo_clave === codigo);
+                return `
+                <div class="clave-asignada-badge" data-codigo="${codigo}">
+                    <i class="fas fa-key"></i>
+                    ${codigo}
+                    <button type="button" class="clave-asignada-remove" 
+                            onclick="removerClaveDesdeAsignadas('${codigo}')">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            }).join('');
+        }
+
+        document.getElementById('promotor-claves-json').value = JSON.stringify(clavesAsignadas);
+    }
+
+    function removerClaveDesdeAsignadas(codigo) {
+        removerClaveAsignada(codigo);
+
+        const checkbox = document.getElementById(`clave-${codigo}`);
+        if (checkbox) {
+            checkbox.checked = false;
+            checkbox.closest('.clave-item').classList.remove('selected');
+        }
+
+        actualizarClavesAsignadas();
+    }
+
+    // ===== PARSEAR CLAVES =====
+    function parseClaves(clavesData) {
+        if (!clavesData) return [];
+
+        if (typeof clavesData === 'string') {
+            try {
+                const parsed = JSON.parse(clavesData);
+                return Array.isArray(parsed) ? parsed : [];
+            } catch (e) {
+                return [clavesData];
+            }
+        }
+
+        if (Array.isArray(clavesData)) {
+            return clavesData;
+        }
+
+        return [];
+    }
+
+    // ===== FUNCIONES DE ESTADO DE UI =====
+    function showLoading() {
+        console.log('🔄 Mostrando loader...');
+        loadingElement.style.display = 'block';
+        tableContainer.style.display = 'none';
+        emptyState.style.display = 'none';
+        paginationContainer.style.display = 'none';
+    }
+
+    function showContent() {
+        console.log('📊 Mostrando contenido...');
+        loadingElement.style.display = 'none';
+        tableContainer.style.display = 'table';
+        emptyState.style.display = 'none';
+        paginationContainer.style.display = 'flex';
+    }
+
+    function showEmptyState(message = 'No se encontraron promotores') {
+        console.log('📭 Mostrando estado vacío...');
+        loadingElement.style.display = 'none';
+        tableContainer.style.display = 'none';
+        emptyState.style.display = 'block';
+        paginationContainer.style.display = 'none';
+
+        const emptyTitle = emptyState.querySelector('h3');
+        if (emptyTitle) emptyTitle.textContent = message;
+    }
+
+    function showError(message) {
+        console.log('❌ Mostrando error:', message);
+        loadingElement.style.display = 'none';
+        tableContainer.style.display = 'none';
+        emptyState.style.display = 'none';
+        paginationContainer.style.display = 'none';
+
+        mostrarNotificacion('Error: ' + message, 'error');
+    }
+
+    // ===== FUNCIONES DE MODOS DEL MODAL =====
+    function mostrarModoVista() {
+        viewMode.style.display = 'block';
+        editMode.style.display = 'none';
+        viewActions.style.display = 'flex';
+        editActions.style.display = 'none';
+        newActions.style.display = 'none';
+        modalTitle.innerHTML = '<i class="fas fa-eye"></i> Información del Promotor';
+    }
+
+    async function mostrarModoEdicion() {
+        viewMode.style.display = 'none';
+        editMode.style.display = 'block';
+        viewActions.style.display = 'none';
+        editActions.style.display = 'flex';
+        newActions.style.display = 'none';
+        modalTitle.innerHTML = '<i class="fas fa-edit"></i> Editar Promotor';
+    }
+
+    async function mostrarModoNuevo() {
+        viewMode.style.display = 'none';
+        editMode.style.display = 'block';
+        viewActions.style.display = 'none';
+        editActions.style.display = 'none';
+        newActions.style.display = 'flex';
+        modalTitle.innerHTML = '<i class="fas fa-plus"></i> Nuevo Promotor';
+
+        clavesDisponibles = [];
+        clavesAsignadas = [];
+        tiendasAsignadas = [];
+        renderizarClavesDisponibles();
+        actualizarClavesAsignadas();
+        actualizarTiendasAsignadas();
+    }
+
+    // ===== LLENAR VISTA PROMOTOR =====
+    async function llenarVistaPromotor(promotor) {
+        document.getElementById('promotor-id').value = promotor.id_promotor;
+
+        // Información personal
+        document.getElementById('view-nombre-completo').textContent = promotor.nombre_completo;
+        document.getElementById('view-telefono').textContent = promotor.telefono;
+        document.getElementById('view-correo').textContent = promotor.correo;
+        document.getElementById('view-fecha-ingreso').textContent = promotor.fecha_ingreso_formatted || 'No especificado';
+        document.getElementById('view-tipo-trabajo').textContent = promotor.tipo_trabajo_formatted || promotor.tipo_trabajo || 'No especificado';
+
+        // Información fiscal
+        document.getElementById('view-rfc').textContent = promotor.rfc;
+        document.getElementById('view-nss').textContent = promotor.nss;
+
+        // Claves
+        let claves = [];
+
+        if (promotor.claves_codigos && Array.isArray(promotor.claves_codigos)) {
+            claves = promotor.claves_codigos;
+        } else {
+            claves = parseClaves(promotor.clave_asistencia);
+        }
+
+        clavesAsignadasVista = [...claves];
+        clavesModificadas = false;
+
+        // Tiendas
+        tiendasAsignadasVista = parseMultiplesTiendas(promotor.numero_tienda);
+
+        console.log('🔄 Vista inicializada con claves originales:', clavesAsignadasVista);
+        console.log('🏪 TIENDAS CARGADAS DESDE BD:', tiendasAsignadasVista);
+
+        if (tiendasAsignadasVista.length > 0) {
+            await cargarClavesDisponibles(tiendasAsignadasVista);
+            console.log(`🔑 Claves cargadas para las tiendas existentes ${tiendasAsignadasVista.join(', ')}:`, clavesDisponibles.length);
+        } else {
+            console.log('⚠️ Promotor sin tiendas asignadas - No se cargan claves');
+            clavesDisponibles = [];
+        }
+
+        renderizarClavesDisponiblesVista();
+        actualizarClavesAsignadasVista();
+
+        // Información bancaria
+        document.getElementById('view-banco').textContent = promotor.banco || 'No especificado';
+        document.getElementById('view-cuenta').textContent = promotor.numero_cuenta || 'No especificado';
+
+        // Información adicional
+        document.getElementById('view-region').textContent = promotor.region !== undefined ? promotor.region : '0';
+
+        // DÍA DE DESCANSO
+        const diaDescanso = promotor.dia_descanso ? DIAS_SEMANA[promotor.dia_descanso] : 'No especificado';
+        document.getElementById('view-dia-descanso').textContent = diaDescanso;
+
+        mostrarTiendasEnVista(tiendasAsignadasVista);
+
+        // Estado y configuración
+        const estatusBadge = document.getElementById('view-estatus-badge');
+        estatusBadge.textContent = promotor.estatus;
+        estatusBadge.className = `status-badge ${promotor.estatus.toLowerCase()}`;
+
+        const badgesContainer = document.getElementById('view-badges-container');
+        badgesContainer.innerHTML = generarBadgesEspeciales(promotor);
+
+        document.getElementById('view-fecha-alta').textContent = promotor.fecha_alta_formatted || 'N/A';
+        document.getElementById('view-fecha-mod').textContent = promotor.fecha_modificacion_formatted || 'N/A';
+    }
+
+    // ===== LLENAR FORMULARIO EDICIÓN =====
+    async function llenarFormularioEdicion(promotor) {
+        document.getElementById('promotor-id').value = promotor.id_promotor;
+        document.getElementById('promotor-nombre').value = promotor.nombre;
+        document.getElementById('promotor-apellido').value = promotor.apellido;
+        document.getElementById('promotor-telefono').value = promotor.telefono;
+        document.getElementById('promotor-correo').value = promotor.correo;
+        document.getElementById('promotor-rfc').value = promotor.rfc;
+        document.getElementById('promotor-nss').value = promotor.nss;
+        document.getElementById('promotor-banco').value = promotor.banco || '';
+        document.getElementById('promotor-cuenta').value = promotor.numero_cuenta || '';
+        document.getElementById('promotor-estatus').value = promotor.estatus;
+        document.getElementById('promotor-fecha-ingreso').value = promotor.fecha_ingreso || '';
+        document.getElementById('promotor-tipo-trabajo').value = promotor.tipo_trabajo || 'fijo';
+        document.getElementById('promotor-region').value = promotor.region !== undefined ? promotor.region : 0;
+
+        // DÍA DE DESCANSO
+        document.getElementById('promotor-dia-descanso').value = promotor.dia_descanso || '';
+
+        // Claves
+        let claves = [];
+
+        if (clavesModificadas && clavesAsignadasVista.length > 0) {
+            console.log('✅ Usando claves modificadas desde vista:', clavesAsignadasVista);
+            claves = [...clavesAsignadasVista];
+        } else {
+            if (promotor.claves_codigos && Array.isArray(promotor.claves_codigos)) {
+                claves = promotor.claves_codigos;
+            } else {
+                claves = parseClaves(promotor.clave_asistencia);
+            }
+            console.log('📋 Usando claves originales del promotor:', claves);
+        }
+
+        clavesAsignadas = [...claves];
+
+        // Tiendas
+        tiendasAsignadas = [...parseMultiplesTiendas(promotor.numero_tienda)];
+        console.log('🏪 TIENDAS CARGADAS DESDE BD PARA EDICIÓN:', tiendasAsignadas);
+
+        if (tiendasAsignadas.length > 0) {
+            await cargarClavesDisponibles(tiendasAsignadas);
+            console.log(`🔑 Claves cargadas para edición de las tiendas existentes ${tiendasAsignadas.join(', ')}:`, clavesDisponibles.length);
+        } else {
+            console.log('⚠️ Promotor sin tiendas asignadas en edición - No se cargan claves');
+            clavesDisponibles = [];
+        }
+
+        actualizarTiendasAsignadas();
+        renderizarClavesDisponibles();
+        actualizarClavesAsignadas();
+
+        const editBadgesContainer = document.getElementById('edit-badges-container');
+        editBadgesContainer.innerHTML = `
+        <div style="margin-bottom: 10px;">
+            ${generarBadgesEspeciales(promotor)}
+        </div>
+        <small class="text-muted">
+            <i class="fas fa-info-circle"></i>
+            Los estados de vacaciones e incidencias son de solo lectura
+        </small>
+    `;
+    }
+
+    // ===== CAMBIAR A MODO EDICIÓN =====
+    async function cambiarAModoEdicion() {
+        if (!currentPromotorData) return;
+
+        isEditing = true;
+
+        if (clavesModificadas) {
+            console.log('🔄 Sincronizando cambios de claves desde vista a edición');
+            console.log('Claves originales:', parseClaves(currentPromotorData.clave_asistencia));
+            console.log('Claves modificadas en vista:', clavesAsignadasVista);
+
+            currentPromotorData.clave_asistencia = JSON.stringify(clavesAsignadasVista);
+
+            if (currentPromotorData.claves_codigos) {
+                currentPromotorData.claves_codigos = [...clavesAsignadasVista];
+            }
+        }
+
+        await llenarFormularioEdicion(currentPromotorData);
+        mostrarModoEdicion();
+    }
+
+    // ===== CANCELAR EDICIÓN =====
+    function cancelarEdicion() {
+        if (currentPromotorData) {
+            if (!clavesModificadas) {
+                llenarVistaPromotor(currentPromotorData);
+            }
+            mostrarModoVista();
+        } else {
+            cerrarModalPromotor();
+        }
+    }
+
+    async function abrirModalNuevo() {
+        isEditing = false;
+        isNewPromotor = true;
+        currentPromotorData = null;
+
+        limpiarFormulario();
+        await mostrarModoNuevo();
+        abrirModal(modalPromotor);
+    }
+
+    // ===== LIMPIAR FORMULARIO =====
+    function limpiarFormulario() {
+        formPromotor.reset();
+        document.getElementById('promotor-id').value = '';
+        document.getElementById('promotor-estatus').value = 'ACTIVO';
+        document.getElementById('promotor-tipo-trabajo').value = 'fijo';
+        document.getElementById('promotor-region').value = '0';
+        document.getElementById('promotor-dia-descanso').value = '';
+
+        clavesAsignadas = [];
+        document.getElementById('promotor-claves-json').value = '';
+
+        tiendasAsignadas = [];
+        document.getElementById('promotor-tiendas-json').value = '';
+        actualizarTiendasAsignadas();
+
+        const editBadgesContainer = document.getElementById('edit-badges-container');
+        editBadgesContainer.innerHTML = `
+        <small class="text-muted">
+            <i class="fas fa-info-circle"></i>
+            Los estados de vacaciones e incidencias se configuran automáticamente
+        </small>
+    `;
+    }
+
+    function abrirModal(modal) {
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function cerrarModalPromotor() {
+        modalPromotor.classList.remove('active');
+        document.body.style.overflow = 'auto';
+        limpiarFormulario();
+        currentPromotorData = null;
+        isEditing = false;
+        isNewPromotor = false;
+    }
+
+    // ===== INICIALIZACIÓN =====
+    async function init() {
+        console.log('🚀 Inicializando módulo promotores con DÍA DE DESCANSO...');
+        configurarEventListeners();
+    }
+
+    // ===== EVENT LISTENERS =====
+    function configurarEventListeners() {
+        // Búsqueda
+        searchField.addEventListener('change', handleSearchFieldChange);
+        searchValue.addEventListener('keypress', handleSearchKeypress);
+        btnBuscar.addEventListener('click', realizarBusqueda);
+        btnLimpiar.addEventListener('click', limpiarBusqueda);
+
+        // Botones principales
+        btnNuevoPromotor.addEventListener('click', abrirModalNuevo);
+
+        // Paginación
+        btnPrev.addEventListener('click', () => cambiarPagina(currentPage - 1));
+        btnNext.addEventListener('click', () => cambiarPagina(currentPage + 1));
+
+        // Modales - cerrar
+        document.getElementById('modal-close').addEventListener('click', cerrarModalPromotor);
+        document.getElementById('btn-cerrar-vista').addEventListener('click', cerrarModalPromotor);
+        document.getElementById('btn-cancelar-edicion').addEventListener('click', cancelarEdicion);
+        document.getElementById('btn-cancelar-nuevo').addEventListener('click', cerrarModalPromotor);
+        
+        // ===== EVENT LISTENERS COMENTADOS - ELIMINAR PROMOTOR =====
+        // document.getElementById('btn-cancelar-delete').addEventListener('click', cerrarModalConfirmar);
+        // document.getElementById('btn-confirmar-delete').addEventListener('click', confirmarEliminacion);
+        
+        document.getElementById('modal-close-historial').addEventListener('click', cerrarModalHistorial);
+
+        // Botones de acción
+        document.getElementById('btn-editar-promotor').addEventListener('click', cambiarAModoEdicion);
+
+        // Agregar tiendas
+        document.getElementById('btn-agregar-tienda').addEventListener('click', agregarTienda);
+
+        document.getElementById('promotor-nueva-tienda').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                agregarTienda();
+            }
+        });
+
+        // Formulario
+        formPromotor.addEventListener('submit', guardarPromotor);
+
+        // Formateo automático RFC
+        document.getElementById('promotor-rfc').addEventListener('input', function (e) {
+            e.target.value = e.target.value.toUpperCase();
+        });
+
+        // Validación de región
+        document.getElementById('promotor-region').addEventListener('input', function (e) {
+            if (e.target.value < 0) e.target.value = 0;
+        });
+
+        // Validación de nueva tienda
+        document.getElementById('promotor-nueva-tienda').addEventListener('input', function (e) {
+            if (e.target.value < 1) e.target.value = '';
+        });
+
+        // Cerrar modales con ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                cerrarModalPromotor();
+                // cerrarModalConfirmar(); // COMENTADO
+                cerrarModalHistorial();
+            }
+        });
+
+        // Cerrar modales clicking fuera
+        modalPromotor.addEventListener('click', (e) => {
+            if (e.target === modalPromotor) cerrarModalPromotor();
+        });
+
+        // ===== EVENT LISTENER COMENTADO - MODAL CONFIRMAR =====
+        // modalConfirmar.addEventListener('click', (e) => {
+        //     if (e.target === modalConfirmar) cerrarModalConfirmar();
+        // });
+
+        modalHistorial.addEventListener('click', (e) => {
+            if (e.target === modalHistorial) cerrarModalHistorial();
+        });
+    }
+
+    // ===== CARGA DE DATOS =====
+    async function cargarPromotores() {
+        console.log('🔄 Iniciando carga de promotores...');
+
+        try {
+            showLoading();
+
+            const params = new URLSearchParams({
+                page: currentPage,
+                limit: 10,
+                include_claves_info: 'true'
+            });
+
+            if (currentSearch.field && currentSearch.value) {
+                params.append('search_field', currentSearch.field);
+                params.append('search_value', currentSearch.value);
+            }
+
+            const apiUrl = `../../api/get_promotores.php?${params}`;
+            console.log('📡 Llamando API:', apiUrl);
+
+            const response = await fetch(apiUrl, {
+                method: 'GET',
+                cache: 'no-cache',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            console.log('📥 Respuesta recibida - Status:', response.status);
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('❌ Error HTTP:', response.status, errorText);
+                throw new Error(`Error HTTP ${response.status}: ${errorText}`);
+            }
+
+            const responseText = await response.text();
+            console.log('📄 Respuesta en texto (primeros 200 chars):', responseText.substring(0, 200));
+
+            let data;
+            try {
+                data = JSON.parse(responseText);
+            } catch (jsonError) {
+                console.error('❌ Error parsing JSON:', jsonError);
+                console.error('❌ Respuesta completa:', responseText);
+                throw new Error('Respuesta inválida del servidor. Verifique que la API esté funcionando correctamente.');
+            }
+
+            console.log('✅ Datos parseados exitosamente:', data);
+
+            if (!data.success) {
+                console.error('❌ API reporta error:', data.message);
+                throw new Error(data.message || 'Error al cargar promotores');
+            }
+
+            console.log(`📊 ${data.data ? data.data.length : 0} promotores recibidos`);
+
+            if (data.estadisticas_claves) {
+                console.log('📈 Estadísticas claves:', data.estadisticas_claves);
+            }
+
+            allPromotores = data.data || [];
+
+            renderizarPromotores(allPromotores);
+            actualizarPaginacion(data.pagination);
+
+            if (allPromotores.length === 0) {
+                showEmptyState('No se encontraron promotores');
+            } else {
+                showContent();
+            }
+
+        } catch (error) {
+            console.error('❌ Error completo cargando promotores:', error);
+            showError(error.message);
+        }
+    }
+
+    // ===== BÚSQUEDA =====
+    function handleSearchFieldChange() {
+        const hasField = searchField.value !== '';
+        searchValue.disabled = !hasField;
+        btnBuscar.disabled = !hasField;
+
+        if (hasField) {
+            const field = searchField.value;
+            let placeholder = 'Valor a buscar...';
+
+            if (field === 'fecha_ingreso') {
+                placeholder = 'Formato: YYYY-MM-DD (ej: 2024-01-15)';
+            } else if (field === 'tipo_trabajo') {
+                placeholder = 'fijo o cubredescansos';
+            } else if (field === 'estatus') {
+                placeholder = 'ACTIVO o BAJA';
+            } else if (field === 'region') {
+                placeholder = 'Número de región (ej: 1, 2, 3)';
+            } else if (field === 'numero_tienda') {
+                placeholder = 'Número de tienda (ej: 123)';
+            } else if (field === 'clave_asistencia') {
+                placeholder = 'Código de clave (ej: CLV001)';
+            } else if (field === 'dia_descanso') {
+                placeholder = '1=Lunes, 2=Martes, ... 7=Domingo';
+            }
+
+            searchValue.placeholder = placeholder;
+            searchValue.focus();
+        } else {
+            searchValue.value = '';
+            searchValue.placeholder = 'Valor a buscar...';
+        }
+    }
+
+    function handleSearchKeypress(e) {
+        if (e.key === 'Enter' && !btnBuscar.disabled) {
+            realizarBusqueda();
+        }
+    }
+
+    function realizarBusqueda() {
+        const field = searchField.value;
+        const value = searchValue.value.trim();
+
+        if (!field || !value) {
+            mostrarNotificacion('Selecciona un campo y escribe un valor para buscar', 'warning');
+            return;
+        }
+
+        currentSearch = { field, value };
+        currentPage = 1;
+        cargarPromotores();
+    }
+
+    function limpiarBusqueda() {
+        searchField.value = '';
+        searchValue.value = '';
+        searchValue.disabled = true;
+        btnBuscar.disabled = true;
+        searchValue.placeholder = 'Valor a buscar...';
+        currentSearch = { field: '', value: '' };
+        currentPage = 1;
+        cargarPromotores();
+    }
+
+    // ===== RENDERIZADO =====
+    function renderizarPromotores(promotores) {
+        console.log('🎨 Renderizando', promotores.length, 'promotores con DÍA DE DESCANSO');
+
+        promotoresTbody.innerHTML = '';
+
+        if (promotores.length === 0) {
+            showEmptyState('No se encontraron promotores con los criterios de búsqueda');
+            return;
+        }
+
+        promotores.forEach(promotor => {
+            let clavesDisplay = 'Sin claves';
+
+            if (promotor.claves_texto && promotor.claves_texto.trim()) {
+                clavesDisplay = promotor.claves_texto;
+            } else if (promotor.claves_codigos && promotor.claves_codigos.length > 0) {
+                clavesDisplay = promotor.claves_codigos.slice(0, 2).join(', ') +
+                    (promotor.claves_codigos.length > 2 ? ` +${promotor.claves_codigos.length - 2}` : '');
+            } else {
+                const claves = parseClaves(promotor.clave_asistencia);
+                if (claves.length > 0) {
+                    clavesDisplay = claves.slice(0, 2).join(', ') +
+                        (claves.length > 2 ? ` +${claves.length - 2}` : '');
+                }
+            }
+
+            let tiendasDisplay;
+
+            if (promotor.numero_tienda !== null && promotor.numero_tienda !== undefined) {
+
+                const numeroDirecto = typeof promotor.numero_tienda === 'number' ?
+                    promotor.numero_tienda :
+                    parseInt(promotor.numero_tienda);
+
+                if (!isNaN(numeroDirecto) && numeroDirecto > 0) {
+                    tiendasDisplay = numeroDirecto.toString();
+                } else {
+                    const tiendas = parseMultiplesTiendas(promotor.numero_tienda);
+                    if (tiendas.length > 0) {
+                        if (tiendas.length === 1) {
+                            tiendasDisplay = tiendas[0].toString();
+                        } else {
+                            tiendasDisplay = tiendas.join(', ');
+                        }
+                    } else {
+                        tiendasDisplay = 'Sin tienda';
+                    }
+                }
+            } else {
+                tiendasDisplay = 'Sin tienda';
+            }
+
+            // DÍA DE DESCANSO
+            const diaDescansoDisplay = promotor.dia_descanso ? DIAS_SEMANA[promotor.dia_descanso] : 'N/A';
+
+            const todasLasClaves = promotor.claves_codigos ? promotor.claves_codigos.join(', ') : clavesDisplay;
+
+            const row = document.createElement('tr');
+            row.innerHTML = `
+            <td>${promotor.id_promotor}</td>
+            <td><strong>${promotor.nombre_completo}</strong></td>
+            <td>${promotor.telefono}</td>
+            <td>${promotor.correo}</td>
+            <td>${promotor.rfc}</td>
+            <td>
+                <span class="clave-display-badge" title="${todasLasClaves}">
+                    <i class="fas fa-key"></i>
+                    ${clavesDisplay}
+                </span>
+            </td>
+            <td><span class="status-badge">${promotor.region || 0}</span></td>
+            <td>
+                <span class="tienda-display-badge" title="Tienda: ${tiendasDisplay}">
+                    <i class="fas fa-store"></i>
+                    ${tiendasDisplay}
+                </span>
+            </td>
+            <td><span class="status-badge">${diaDescansoDisplay}</span></td>
+            <td><span class="status-badge ${promotor.estatus.toLowerCase()}">${promotor.estatus}</span></td>
+            <td><span class="vacaciones-badge ${promotor.vacaciones ? 'si' : 'no'}">${promotor.vacaciones ? 'Sí' : 'No'}</span></td>
+            <td>${promotor.fecha_modificacion_formatted || 'N/A'}</td>
+            <td>
+                <button class="btn-action history" onclick="verHistorialPromotor(${promotor.id_promotor})" title="Ver Historial">
+                    <i class="fas fa-history"></i>
+                </button>
+                <button class="btn-action view" onclick="verPromotor(${promotor.id_promotor})" title="Ver Información">
+                    <i class="fas fa-eye"></i>
+                </button>
+            </td>
+        `;
+            // ===== BOTÓN ELIMINAR COMENTADO =====
+            // <button class="btn-action delete" onclick="eliminarPromotor(${promotor.id_promotor}, '${promotor.nombre_completo}', '${promotor.correo}')" title="Eliminar">
+            //     <i class="fas fa-trash"></i>
+            // </button>
+            
+            promotoresTbody.appendChild(row);
+        });
+    }
+
+    function actualizarPaginacion(pagination) {
+        if (!pagination) {
+            console.warn('⚠️ Sin datos de paginación');
+            return;
+        }
+
+        currentPage = pagination.current_page || 1;
+        totalPages = pagination.total_pages || 1;
+
+        paginationInfo.textContent = `Mostrando ${pagination.per_page || 0} de ${pagination.total_records || 0} registros`;
+        paginationPages.textContent = `Página ${currentPage} de ${totalPages}`;
+
+        btnPrev.disabled = !pagination.has_prev;
+        btnNext.disabled = !pagination.has_next;
+    }
+
+    function cambiarPagina(page) {
+        if (page < 1 || page > totalPages) return;
+        currentPage = page;
+        cargarPromotores();
+    }
+
+    // ===== VER PROMOTOR =====
+    async function verPromotor(id) {
+        console.log('👁️ Viendo promotor ID:', id);
+
+        try {
+            const promotorData = allPromotores.find(p => p.id_promotor == id);
+
+            if (!promotorData) {
+                throw new Error('No se encontraron los datos del promotor');
+            }
+
+            currentPromotorData = promotorData;
+            isEditing = false;
+            isNewPromotor = false;
+
+            await llenarVistaPromotor(promotorData);
+
+            mostrarModoVista();
+            abrirModal(modalPromotor);
+
+        } catch (error) {
+            console.error('❌ Error cargando promotor:', error);
+            mostrarNotificacion('Error al cargar información del promotor: ' + error.message, 'error');
+        }
+    }
+
+    // ===== GENERAR BADGES ESPECIALES =====
+    function generarBadgesEspeciales(promotor) {
+        let badges = '';
+
+        if (promotor.vacaciones) {
+            badges += '<span class="special-badge vacaciones">En Vacaciones</span>';
+        }
+
+        if (promotor.incidencias) {
+            badges += '<span class="special-badge incidencias">Con Incidencias</span>';
+        }
+
+        if (!badges) {
+            badges = '<span class="text-muted">Sin estados especiales</span>';
+        }
+
+        return badges;
+    }
+
+    // ===== GUARDAR PROMOTOR =====
+    async function guardarPromotor(e) {
+        e.preventDefault();
+
+        const formData = {
+            nombre: document.getElementById('promotor-nombre').value.trim(),
+            apellido: document.getElementById('promotor-apellido').value.trim(),
+            telefono: document.getElementById('promotor-telefono').value.trim(),
+            correo: document.getElementById('promotor-correo').value.trim(),
+            rfc: document.getElementById('promotor-rfc').value.trim(),
+            nss: document.getElementById('promotor-nss').value.trim(),
+            banco: document.getElementById('promotor-banco').value.trim(),
+            numero_cuenta: document.getElementById('promotor-cuenta').value.trim(),
+            estatus: document.getElementById('promotor-estatus').value,
+            fecha_ingreso: document.getElementById('promotor-fecha-ingreso').value,
+            tipo_trabajo: document.getElementById('promotor-tipo-trabajo').value,
+            region: parseInt(document.getElementById('promotor-region').value) || 0,
+            dia_descanso: document.getElementById('promotor-dia-descanso').value || null,
+            numero_tienda: tiendasAsignadas,
+            claves_asistencia: clavesAsignadas
+        };
+
+        if (isEditing && currentPromotorData) {
+            formData.id_promotor = currentPromotorData.id_promotor;
+        }
+
+        // Validaciones básicas
+        const required = ['nombre', 'apellido', 'telefono', 'correo', 'rfc', 'nss', 'fecha_ingreso', 'tipo_trabajo', 'region'];
+        for (const field of required) {
+            if (field === 'region') {
+                if (formData[field] === undefined || formData[field] === null || isNaN(formData[field])) {
+                    mostrarNotificacion('El campo "Región" es requerido y debe ser un número', 'warning');
+                    return;
+                }
+            } else if (!formData[field]) {
+                mostrarNotificacion(`El campo '${field}' es requerido`, 'warning');
+                return;
+            }
+        }
+
+        if (!formData.numero_tienda || formData.numero_tienda.length === 0) {
+            mostrarNotificacion('Debe asignar al menos una tienda para las claves de asistencia', 'warning');
+            return;
+        }
+
+        if (clavesAsignadas.length === 0) {
+            mostrarNotificacion('Debe asignar al menos una clave de asistencia', 'warning');
+            return;
+        }
+
+        if (formData.rfc.length < 10) {
+            mostrarNotificacion('RFC inválido', 'warning');
+            return;
+        }
+
+        if (!formData.correo.includes('@')) {
+            mostrarNotificacion('Email inválido', 'warning');
+            return;
+        }
+
+        if (!['fijo', 'cubredescansos'].includes(formData.tipo_trabajo)) {
+            mostrarNotificacion('Tipo de trabajo inválido', 'warning');
+            return;
+        }
+
+        if (formData.region < 0 || formData.region > 999) {
+            mostrarNotificacion('La región debe estar entre 0 y 999', 'warning');
+            return;
+        }
+
+        for (const tienda of formData.numero_tienda) {
+            if (tienda < 1 || tienda > 9999) {
+                mostrarNotificacion(`El número de tienda ${tienda} debe estar entre 1 y 9999`, 'warning');
+                return;
+            }
+        }
+
+        const btnGuardar = isNewPromotor ? document.getElementById('btn-crear') : document.getElementById('btn-guardar');
+        const originalText = btnGuardar.innerHTML;
+
+        btnGuardar.disabled = true;
+        btnGuardar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+
+        try {
+            const url = (isEditing && !isNewPromotor) ? '../../api/update_promotor.php' : '../../api/create_promotor.php';
+
+            console.log('=== GUARDANDO CON DÍA DE DESCANSO ===');
+            console.log('Tiendas asignadas:', formData.numero_tienda);
+            console.log('Claves desde edición:', clavesAsignadas);
+            console.log('Día de descanso:', formData.dia_descanso);
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            });
+
+            const responseText = await response.text();
+            console.log('Respuesta guardar:', responseText);
+
+            let data;
+            try {
+                data = JSON.parse(responseText);
+            } catch (jsonError) {
+                throw new Error('Respuesta inválida del servidor');
+            }
+
+            if (!data.success) {
+                throw new Error(data.message || 'Error al guardar promotor');
+            }
+
+            const accion = isNewPromotor ? 'creado' : 'actualizado';
+            let mensaje = `Promotor ${accion} correctamente`;
+
+            if (data.claves_changes) {
+                const cambios = data.claves_changes;
+                if (cambios.liberadas > 0 || cambios.asignadas > 0) {
+                    mensaje += ` (${cambios.liberadas} claves liberadas, ${cambios.asignadas} claves asignadas)`;
+                }
+            }
+
+            mostrarNotificacion(mensaje, 'success');
+
+            clavesModificadas = false;
+
+            cerrarModalPromotor();
+            cargarPromotores();
+
+        } catch (error) {
+            console.error(`❌ Error ${isNewPromotor ? 'creando' : 'actualizando'} promotor:`, error);
+            mostrarNotificacion(`Error al ${isNewPromotor ? 'crear' : 'actualizar'} promotor: ` + error.message, 'error');
+        } finally {
+            btnGuardar.disabled = false;
+            btnGuardar.innerHTML = originalText;
+        }
+    }
+
+    // ===== FUNCIONES COMENTADAS - ELIMINAR PROMOTOR =====
+    /*
+    let promotorAEliminar = null;
+
+    function eliminarPromotor(id, nombre, correo) {
+        promotorAEliminar = { id, nombre, correo };
+
+        document.getElementById('delete-details').innerHTML = `
+            <strong>ID:</strong> ${id}<br>
+            <strong>Nombre:</strong> ${nombre}<br>
+            <strong>Correo:</strong> ${correo}
+        `;
+
+        abrirModal(modalConfirmar);
+    }
+
+    function cerrarModalConfirmar() {
+        modalConfirmar.classList.remove('active');
+        document.body.style.overflow = 'auto';
+        promotorAEliminar = null;
+    }
+
+    async function confirmarEliminacion() {
+        if (!promotorAEliminar) return;
+
+        const btnConfirmar = document.getElementById('btn-confirmar-delete');
+        btnConfirmar.disabled = true;
+        btnConfirmar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Eliminando...';
+
+        try {
+            const response = await fetch('../../api/delete_promotor.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    id_promotor: promotorAEliminar.id
+                })
+            });
+
+            const responseText = await response.text();
+            let data;
+            try {
+                data = JSON.parse(responseText);
+            } catch (jsonError) {
+                throw new Error('Respuesta inválida del servidor');
+            }
+
+            if (!data.success) {
+                throw new Error(data.message || 'Error al eliminar promotor');
+            }
+
+            mostrarNotificacion('Promotor eliminado correctamente', 'success');
+
+            cerrarModalConfirmar();
+            cargarPromotores();
+
+        } catch (error) {
+            console.error('❌ Error eliminando promotor:', error);
+            mostrarNotificacion('Error al eliminar promotor: ' + error.message, 'error');
+        } finally {
+            btnConfirmar.disabled = false;
+            btnConfirmar.innerHTML = '<i class="fas fa-trash"></i> Eliminar';
+        }
+    }
+    */
+
+    // ===== VER HISTORIAL PROMOTOR =====
+    async function verHistorialPromotor(idPromotor) {
+        try {
+            console.log('📖 Cargando historial del promotor:', idPromotor);
+
+            const response = await fetch(`../../api/get_historial_promotor.php?id_promotor=${idPromotor}`);
+            const data = await response.json();
+
+            if (data.success) {
+                document.getElementById('historial-promotor-nombre').textContent = data.promotor.nombre_completo;
+
+                let clavesTexto = 'Sin claves asignadas';
+
+                if (data.promotor.claves_codigos && data.promotor.claves_codigos.length > 0) {
+                    clavesTexto = data.promotor.claves_codigos.join(', ');
+                } else if (data.promotor.claves_texto) {
+                    clavesTexto = data.promotor.claves_texto;
+                } else {
+                    const claves = parseClaves(data.promotor.clave_asistencia);
+                    if (claves.length > 0) {
+                        clavesTexto = claves.join(', ');
+                    }
+                }
+
+                const tiendas = parseMultiplesTiendas(data.promotor.numero_tienda);
+                const tiendasTexto = tiendas.length > 0 ? tiendas.join(', ') : 'Sin tiendas asignadas';
+
+                const diaDescansoTexto = data.promotor.dia_descanso ? DIAS_SEMANA[data.promotor.dia_descanso] : 'No especificado';
+
+                let estadisticasClaves = '';
+                if (data.estadisticas && data.estadisticas.claves) {
+                    const statsClaves = data.estadisticas.claves;
+                    estadisticasClaves = `
+                    <div class="stat-mini">
+                        <h5>${statsClaves.total_claves_asignadas || 0}</h5>
+                        <p>Claves Asignadas</p>
+                    </div>
+                    <div class="stat-mini">
+                        <h5>${statsClaves.claves_activas || 0}</h5>
+                        <p>Claves Activas</p>
+                    </div>
+                `;
+                }
+
+                document.getElementById('promotor-info').innerHTML = `
+                <h4><i class="fas fa-user"></i> Información del Promotor</h4>
+                <div class="stats-grid-small">
+                    <div class="stat-mini">
+                        <h5>${data.estadisticas.total_asignaciones}</h5>
+                        <p>Total Asignaciones</p>
+                    </div>
+                    <div class="stat-mini">
+                        <h5>${data.estadisticas.asignaciones_activas}</h5>
+                        <p>Activas</p>
+                    </div>
+                    <div class="stat-mini">
+                        <h5>${data.estadisticas.total_dias_asignado}</h5>
+                        <p>Días Totales</p>
+                    </div>
+                    <div class="stat-mini">
+                        <h5>${data.estadisticas.tiendas_distintas}</h5>
+                        <p>Tiendas Diferentes</p>
+                    </div>
+                    ${estadisticasClaves}
+                </div>
+                <div style="margin-top: 1.5rem;">
+                    <p><strong>Nombre:</strong> ${data.promotor.nombre_completo}</p>
+                    <p><strong>Teléfono:</strong> ${data.promotor.telefono}</p>
+                    <p><strong>Email:</strong> ${data.promotor.correo}</p>
+                    <p><strong>RFC:</strong> ${data.promotor.rfc}</p>
+                    <p><strong>Fecha Ingreso:</strong> ${data.promotor.fecha_ingreso_formatted}</p>
+                    <p><strong>Tipo Trabajo:</strong> ${data.promotor.tipo_trabajo_formatted}</p>
+                    <p><strong>Región:</strong> ${data.promotor.region !== undefined ? data.promotor.region : '0'}</p>
+                    <p><strong>Tiendas Asignadas:</strong> <span style="font-family: monospace; background: #e3f2fd; padding: 2px 6px; border-radius: 4px;">${tiendasTexto}</span></p>
+                    <p><strong>Día Descanso:</strong> <span style="font-family: monospace; background: #fff3cd; padding: 2px 6px; border-radius: 4px;">${diaDescansoTexto}</span></p>
+                    <p><strong>Claves Asignadas:</strong> <span style="font-family: monospace; background: #f0f0f0; padding: 2px 6px; border-radius: 4px;">${clavesTexto}</span></p>
+                    <p><strong>Estatus:</strong> ${data.promotor.estatus}</p>
+                    <p><strong>Estados Especiales:</strong> ${generarBadgesEspeciales(data.promotor)}</p>
+                    <p><strong>Fecha Alta:</strong> ${data.promotor.fecha_alta_formatted}</p>
+                </div>
+            `;
+
+                renderHistorialTimeline(data.historial);
+
+                abrirModal(modalHistorial);
+            } else {
+                throw new Error(data.message || 'Error al cargar historial');
+            }
+
+        } catch (error) {
+            console.error('❌ Error cargando historial:', error);
+            mostrarNotificacion('Error al cargar historial del promotor: ' + error.message, 'error');
+        }
+    }
+
+    function renderHistorialTimeline(historial) {
+        const timeline = document.getElementById('historial-timeline');
+        timeline.innerHTML = '<h4><i class="fas fa-history"></i> Historial de Asignaciones con Reactivación Automática</h4>';
+
+        if (historial.length === 0) {
+            timeline.innerHTML += '<p style="text-align: center; color: var(--text-secondary);">No hay historial de asignaciones</p>';
+            return;
+        }
+
+        const idPromotor = historial[0]?.id_promotor || currentPromotorData?.id_promotor;
+
+        historial.forEach((item, index) => {
+            const esActiva = (item.actualmente_asignado == 1 || item.actualmente_asignado === '1' || item.actualmente_asignado === true);
+            const tieneActivo = (item.activo == 1 || item.activo === '1' || item.activo === true);
+            const tieneFechaFin = item.fecha_fin !== null && item.fecha_fin !== undefined && item.fecha_fin !== '';
+
+            console.log(`📊 HISTORIAL ITEM ${item.id_asignacion}:`, {
+                actualmente_asignado: item.actualmente_asignado,
+                activo: item.activo,
+                fecha_fin: item.fecha_fin,
+                esActiva: esActiva,
+                tieneActivo: tieneActivo,
+                tieneFechaFin: tieneFechaFin
+            });
+
+            let estadoClass = '';
+            let estadoTexto = '';
+            let fechaTexto = '';
+
+            if (esActiva) {
+                estadoClass = 'active';
+                estadoTexto = 'ASIGNACIÓN ACTIVA';
+                fechaTexto = `Desde: ${item.fecha_inicio_formatted}`;
+            } else if (tieneFechaFin) {
+                estadoClass = 'completed';
+                estadoTexto = 'ASIGNACIÓN FINALIZADA';
+                fechaTexto = `${item.fecha_inicio_formatted} hasta ${item.fecha_fin_formatted}`;
+            } else {
+                estadoClass = 'deleted';
+                estadoTexto = 'ASIGNACIÓN REEMPLAZADA';
+                fechaTexto = `Inicio: ${item.fecha_inicio_formatted}`;
+            }
+
+            const motivoCambio = item.motivo_cambio || '';
+
+            timeline.innerHTML += `
+            <div class="timeline-item ${estadoClass}">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <div style="font-weight: 700; color: var(--text-primary); font-size: 1.1rem;">
+                        ${item.tienda_identificador}
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span class="timeline-status ${estadoClass}">${estadoTexto}</span>
+                        <button class="btn-action delete" 
+                                onclick="eliminarAsignacion(${item.id_asignacion}, '${item.tienda_identificador}', ${idPromotor})"
+                                title="Eliminar asignación">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                <div>
+                    <p><strong>Período:</strong> ${fechaTexto}</p>
+                    <p><strong>Duración:</strong> ${item.dias_asignado} días</p>
+                    <p><strong>Motivo de asignación:</strong> ${item.motivo_asignacion}</p>
+                    ${motivoCambio ? `<p><strong>Motivo de finalización:</strong> ${motivoCambio}</p>` : ''}
+                    <p><strong>Usuario que asignó:</strong> ${item.usuario_asigno || 'Sistema'}</p>
+                    ${item.usuario_cambio ? `<p><strong>Usuario que finalizó:</strong> ${item.usuario_cambio}</p>` : ''}
+                </div>
+                ${esActiva ? '<div class="timeline-badge-active">TRABAJANDO ACTUALMENTE</div>' : ''}
+            </div>
+        `;
+        });
+    }
+
+    async function eliminarAsignacion(idAsignacion, tiendaNombre, idPromotor) {
+        if (!confirm(`¿Estás seguro de eliminar la asignación a ${tiendaNombre}?\n\nSi es la asignación activa actual, se reactivará automáticamente la asignación anterior.`)) {
+            return;
+        }
+
+        try {
+            console.log('🗑️ Eliminando asignación ID:', idAsignacion);
+
+            const response = await fetch('/promotoria/api/finalizar_asignacion.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    id_asignacion: idAsignacion
+                })
+            });
+
+            const data = await response.json();
+
+            if (!data.success) {
+                throw new Error(data.message || 'Error al eliminar asignación');
+            }
+
+            let mensaje = data.message;
+            if (data.asignacion_anterior_reactivada) {
+                mensaje += ` (Asignación anterior ID ${data.id_asignacion_anterior} reactivada)`;
+            }
+
+            mostrarNotificacion(mensaje, 'success');
+
+            console.log('🔄 Cerrando modal de historial...');
+            cerrarModalHistorial();
+
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            console.log('🔄 Recargando historial desde API...');
+            await verHistorialPromotor(idPromotor);
+
+            if (typeof cargarPromotores === 'function') {
+                console.log('🔄 Recargando tabla de promotores...');
+                await cargarPromotores();
+            }
+
+        } catch (error) {
+            console.error('❌ Error eliminando asignación:', error);
+            mostrarNotificacion('Error al eliminar asignación: ' + error.message, 'error');
+        }
+    }
+
+    window.eliminarAsignacion = eliminarAsignacion;
+
+    function cerrarModalHistorial() {
+        modalHistorial.classList.remove('active');
+        document.body.style.overflow = 'auto';
+    }
+
+    // ===== NOTIFICACIONES =====
+    function mostrarNotificacion(mensaje, tipo = 'info') {
+        const notificacion = document.createElement('div');
+        notificacion.className = `notification ${tipo}`;
+
+        const iconos = {
+            success: 'fas fa-check-circle',
+            error: 'fas fa-exclamation-circle',
+            warning: 'fas fa-exclamation-triangle',
+            info: 'fas fa-info-circle'
+        };
+
+        const titulos = {
+            success: 'Éxito',
+            error: 'Error',
+            warning: 'Advertencia',
+            info: 'Información'
+        };
+
+        notificacion.innerHTML = `
+        <i class="${iconos[tipo]} notification-icon"></i>
+        <div class="notification-content">
+            <h4>${titulos[tipo]}</h4>
+            <p>${mensaje}</p>
+        </div>
+        <button class="notification-close">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+
+        notificacion.querySelector('.notification-close').addEventListener('click', () => {
+            notificacion.remove();
+        });
+
+        setTimeout(() => {
+            if (notificacion.parentNode) {
+                notificacion.remove();
+            }
+        }, 5000);
+
+        document.getElementById('notifications-container').appendChild(notificacion);
+    }
+
+    // ===== EXPONER FUNCIONES GLOBALES =====
+    window.verPromotor = verPromotor;
+    // window.eliminarPromotor = eliminarPromotor; // COMENTADO
+    window.verHistorialPromotor = verHistorialPromotor;
+    window.removerClaveDesdeAsignadas = removerClaveDesdeAsignadas;
+    window.removerClaveDesdeAsignadasVista = removerClaveDesdeAsignadasVista;
+    window.removerTienda = removerTienda;
+
+    // ===== INICIALIZACIÓN =====
+    console.log('👥 Iniciando módulo Gestión de Promotores con DÍA DE DESCANSO...');
+    console.log('✨ Características implementadas:');
+    console.log('📅 Sistema de día de descanso (1=Lunes ... 7=Domingo)');
+    console.log('🏪 Sistema de múltiples tiendas por promotor (JSON)');
+    console.log('🔑 Sistema de claves filtradas por múltiples tiendas');
+    console.log('✅ Filtro de claves disponibles (no ocupadas)');
+    console.log('❌ Función ELIMINAR PROMOTOR deshabilitada');
+
+    init().then(() => {
+        console.log('⏰ Iniciando carga de datos...');
+        cargarPromotores();
+    }).catch(error => {
+        console.error('❌ Error en inicialización:', error);
+    });
+
+    console.log('✅ Módulo promotores con día de descanso inicializado correctamente');
 </script>
-

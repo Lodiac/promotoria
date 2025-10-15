@@ -49,17 +49,20 @@ try {
         exit;
     }
 
-    // ===== VERIFICAR ROL =====
-    if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'root') {
-        error_log('GET_TIENDAS: Rol incorrecto - ' . ($_SESSION['rol'] ?? 'NO_SET'));
-        http_response_code(403);
-        echo json_encode([
-            'success' => false,
-            'message' => 'Acceso denegado. Se requiere rol ROOT.',
-            'error' => 'insufficient_permissions'
-        ]);
-        exit;
-    }
+
+   // ===== VERIFICAR ROL =====
+// ===== VERIFICAR ROL (ROOT y SUPERVISOR pueden VER) =====
+$roles_permitidos = ['root', 'supervisor'];
+if (!isset($_SESSION['rol']) || !in_array(strtolower($_SESSION['rol']), $roles_permitidos)) {
+    error_log('GET_TIENDAS: Acceso denegado - Rol: ' . ($_SESSION['rol'] ?? 'NO_SET'));
+    http_response_code(403);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Acceso denegado. Se requiere rol ROOT o SUPERVISOR.',
+        'error' => 'insufficient_permissions'
+    ]);
+    exit;
+}
 
     error_log('GET_TIENDAS: Sesión válida - Usuario: ' . ($_SESSION['username'] ?? 'NO_USERNAME') . ', Rol: ' . $_SESSION['rol']);
 
@@ -125,9 +128,23 @@ try {
         throw new Exception('Error verificando tabla tiendas: ' . $table_error->getMessage());
     }
 
-    // ===== CONSTRUIR CONSULTA BASE =====
-    $sql_base = "FROM tiendas WHERE estado_reg = 1";
+    // ===== CONSTRUIR CONSULTA BASE CON FILTRO DE ZONA PARA SUPERVISOR =====
+    $sql_base = "FROM tiendas t WHERE t.estado_reg = 1";
     $params = [];
+    
+    // 🆕 FILTRO POR ZONA PARA SUPERVISORES
+    $rol = strtolower($_SESSION['rol']);
+    if ($rol === 'supervisor') {
+        $usuario_id = $_SESSION['user_id'];
+        $sql_base .= " AND EXISTS (
+            SELECT 1 FROM zona_supervisor zs
+            WHERE zs.id_zona = t.id_zona
+            AND zs.id_supervisor = :usuario_id
+            AND zs.activa = 1
+        )";
+        $params[':usuario_id'] = $usuario_id;
+        error_log('GET_TIENDAS: Filtro de zona aplicado para supervisor ID: ' . $usuario_id);
+    }
 
     // ===== APLICAR FILTRO DE BÚSQUEDA =====
     if (!empty($search_field) && !empty($search_value)) {
@@ -137,11 +154,11 @@ try {
         if (in_array($search_field, $valid_search_fields)) {
             if ($search_field === 'num_tienda' || $search_field === 'region' || $search_field === 'promotorio_ideal') {
                 // Búsqueda exacta para campos numéricos
-                $sql_base .= " AND {$search_field} = :search_value";
+                $sql_base .= " AND t.{$search_field} = :search_value";
                 $params[':search_value'] = intval($search_value);
             } else {
                 // Búsqueda LIKE para campos de texto (incluye categoria)
-                $sql_base .= " AND {$search_field} LIKE :search_value";
+                $sql_base .= " AND t.{$search_field} LIKE :search_value";
                 $params[':search_value'] = '%' . $search_value . '%';
             }
             error_log('GET_TIENDAS: Filtro aplicado - ' . $search_field . ' = ' . $search_value);
@@ -169,21 +186,21 @@ try {
     $offset = ($page - 1) * $limit;
     
     $sql_data = "SELECT 
-                    id_tienda,
-                    region,
-                    cadena,
-                    num_tienda,
-                    nombre_tienda,
-                    ciudad,
-                    estado,
-                    promotorio_ideal,
-                    tipo,
-                    categoria,
-                    comision,
-                    fecha_alta,
-                    fecha_modificacion
+                    t.id_tienda,
+                    t.region,
+                    t.cadena,
+                    t.num_tienda,
+                    t.nombre_tienda,
+                    t.ciudad,
+                    t.estado,
+                    t.promotorio_ideal,
+                    t.tipo,
+                    t.categoria,
+                    t.comision,
+                    t.fecha_alta,
+                    t.fecha_modificacion
                  " . $sql_base . "
-                 ORDER BY fecha_modificacion DESC
+                 ORDER BY t.fecha_modificacion DESC
                  LIMIT :limit OFFSET :offset";
     
     $params[':limit'] = $limit;
@@ -233,7 +250,8 @@ try {
             'field' => $search_field,
             'value' => $search_value,
             'applied' => !empty($search_field) && !empty($search_value)
-        ]
+        ],
+        'user_rol' => $rol  // 🆕 Incluir rol del usuario en respuesta
     ];
 
     error_log('GET_TIENDAS: Respuesta preparada - Enviando JSON');

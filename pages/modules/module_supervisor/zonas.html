@@ -1,0 +1,2726 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Zonas y Regiones - Sistema de Promotoría</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* ===== RESET Y ESTILOS GENERALES ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* ===== VARIABLES CSS ===== */
+        :root {
+            --zone-primary: #667eea;
+            --zone-primary-hover: #5a67d8;
+            --zone-secondary: #764ba2;
+            --zone-light: #e0e7ff;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --info-color: #3b82f6;
+            --text-primary: #2d3748;
+            --text-secondary: #718096;
+            --border-color: #e2e8f0;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            --radius: 12px;
+        }
+
+        /* ===== MÓDULO PRINCIPAL ===== */
+        .zonas-module {
+            padding: 0;
+            max-width: 100%;
+        }
+
+        /* ===== HEADER DEL MÓDULO ===== */
+        .module-header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: var(--shadow);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--zone-primary) 0%, var(--zone-secondary) 100%);
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .header-title h1 {
+            margin: 0;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        /* ===== CONTROLES DE BÚSQUEDA ===== */
+        .search-controls {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: var(--shadow);
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .search-select,
+        .search-input {
+            padding: 12px 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-select {
+            min-width: 200px;
+            background: white;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .search-select:focus,
+        .search-input:focus {
+            border-color: var(--zone-primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .search-input:disabled {
+            background: #f8f9fa;
+            color: #666;
+            cursor: not-allowed;
+        }
+
+        /* ===== BOTONES ===== */
+        .btn-primary,
+        .btn-secondary,
+        .btn-danger,
+        .btn-search,
+        .btn-clear,
+        .btn-action,
+        .btn-pagination {
+            border: none;
+            border-radius: 8px;
+            padding: 12px 20px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--zone-primary) 0%, var(--zone-secondary) 100%);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+        }
+
+        .btn-danger:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-search {
+            background: linear-gradient(135deg, var(--success-color) 0%, #059669 100%);
+            color: white;
+            padding: 12px 16px;
+        }
+
+        .btn-search:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-clear {
+            background: #6c757d;
+            color: white;
+            padding: 12px 16px;
+        }
+
+        .btn-clear:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .btn-action {
+            padding: 8px 12px;
+            font-size: 0.8rem;
+            margin: 0 2px;
+        }
+
+        .btn-action.view {
+            background: var(--info-color);
+            color: white;
+        }
+
+        .btn-action.view:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+        }
+
+        .btn-action.edit {
+            background: var(--warning-color);
+            color: white;
+        }
+
+        .btn-action.edit:hover {
+            background: #d97706;
+            transform: translateY(-2px);
+        }
+
+        .btn-action.delete {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .btn-action.delete:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* ===== TABLA ===== */
+        .table-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        .zonas-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0;
+        }
+
+        .zonas-table th {
+            background: linear-gradient(135deg, var(--zone-primary) 0%, var(--zone-secondary) 100%);
+            color: white;
+            padding: 15px 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+
+        .zonas-table th:first-child {
+            border-radius: 8px 0 0 0;
+        }
+
+        .zonas-table th:last-child {
+            border-radius: 0 8px 0 0;
+        }
+
+        .zonas-table td {
+            padding: 15px 12px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+            vertical-align: middle;
+        }
+
+        .zonas-table tbody tr {
+            transition: all 0.3s ease;
+        }
+
+        .zonas-table tbody tr:hover {
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .zonas-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* ===== BADGES Y ESTADOS ===== */
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            display: inline-block;
+        }
+
+        .status-badge.activo {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-badge.inactivo {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .count-badge {
+            background: var(--zone-light);
+            color: var(--zone-primary);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        /* ===== LISTAS DE ASIGNACIONES ===== */
+        .asignacion-container {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-end;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .asignacion-container .form-group {
+            flex: 1;
+            min-width: 250px;
+            margin-bottom: 0;
+        }
+
+        .select-asignacion {
+            width: 100%;
+            padding: 10px 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .select-asignacion:focus {
+            border-color: var(--zone-primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .lista-asignados,
+        .lista-asignaciones {
+            background: #f8fafc;
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            min-height: 80px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            align-items: flex-start;
+        }
+
+        .lista-asignados.empty::after,
+        .lista-asignaciones.empty::after {
+            content: "No hay elementos asignados";
+            color: var(--text-secondary);
+            font-style: italic;
+            width: 100%;
+            text-align: center;
+            padding: 1rem 0;
+        }
+
+        .asignado-badge {
+            background: white;
+            border: 2px solid var(--zone-primary);
+            color: var(--zone-primary);
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .asignado-badge:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+
+        .asignado-remove {
+            background: none;
+            border: none;
+            color: var(--danger-color);
+            font-size: 0.9rem;
+            cursor: pointer;
+            padding: 0;
+            margin-left: 0.25rem;
+            transition: all 0.2s ease;
+        }
+
+        .asignado-remove:hover {
+            color: #c0392b;
+            transform: scale(1.2);
+        }
+
+        /* ===== AUTOCOMPLETE PARA TIENDAS ===== */
+        .autocomplete-container {
+            position: relative;
+            flex: 1;
+            min-width: 250px;
+        }
+
+        /* 🆕 WRAPPER PARA INPUT + BOTÓN */
+        .autocomplete-wrapper {
+            position: relative;
+            display: flex;
+            gap: 0;
+        }
+
+        .autocomplete-wrapper .autocomplete-input {
+            border-radius: 8px 0 0 8px;
+            border-right: none;
+            flex: 1;
+        }
+
+        .autocomplete-input {
+            width: 100%;
+            padding: 10px 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .autocomplete-input:focus {
+            border-color: var(--zone-primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .autocomplete-input::placeholder {
+            color: #999;
+        }
+
+        /* 🆕 BOTÓN DESPLEGABLE */
+        .autocomplete-dropdown-btn {
+            background: white;
+            border: 2px solid var(--border-color);
+            border-left: none;
+            border-radius: 0 8px 8px 0;
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 45px;
+        }
+
+        .autocomplete-dropdown-btn:hover {
+            background: var(--zone-light);
+            border-color: var(--zone-primary);
+        }
+
+        .autocomplete-dropdown-btn:focus {
+            outline: none;
+            border-color: var(--zone-primary);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .autocomplete-wrapper .autocomplete-input:focus {
+            border-color: var(--zone-primary);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .autocomplete-wrapper .autocomplete-input:focus+.autocomplete-dropdown-btn {
+            border-color: var(--zone-primary);
+        }
+
+        .autocomplete-dropdown-btn i {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            transition: transform 0.3s ease;
+        }
+
+        .autocomplete-dropdown-btn.active i {
+            transform: rotate(180deg);
+        }
+
+        .autocomplete-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid var(--zone-primary);
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            margin-top: -2px;
+        }
+
+        .autocomplete-suggestions.active {
+            display: block;
+        }
+
+        .autocomplete-suggestion {
+            padding: 12px 15px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .autocomplete-suggestion:last-child {
+            border-bottom: none;
+        }
+
+        .autocomplete-suggestion:hover,
+        .autocomplete-suggestion.selected {
+            background: var(--zone-light);
+        }
+
+        .autocomplete-suggestion-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+
+        .autocomplete-suggestion-details {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .autocomplete-suggestion-badge {
+            background: #e0e7ff;
+            color: var(--zone-primary);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .autocomplete-no-results {
+            padding: 20px;
+            text-align: center;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        .autocomplete-loading {
+            padding: 12px 15px;
+            text-align: center;
+            color: var(--text-secondary);
+        }
+
+        /* ===== LOADING Y EMPTY STATES ===== */
+        .table-loading,
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(102, 126, 234, 0.1);
+            border-radius: 50%;
+            border-top-color: var(--zone-primary);
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            color: var(--border-color);
+            margin-bottom: 1rem;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        /* ===== PAGINACIÓN ===== */
+        .pagination-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius);
+            padding: 1rem 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: var(--shadow);
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .pagination-info {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .pagination-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .pagination-pages {
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .btn-pagination {
+            background: white;
+            color: var(--text-primary);
+            border: 2px solid var(--border-color);
+        }
+
+        .btn-pagination:hover:not(:disabled) {
+            background: var(--zone-primary);
+            color: white;
+            border-color: var(--zone-primary);
+            transform: translateY(-2px);
+        }
+
+        /* ===== MODALES ===== */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-container {
+            background: white;
+            border-radius: var(--radius);
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        .modal-container.modal-large {
+            max-width: 900px;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--zone-primary) 0%, var(--zone-secondary) 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+            border-radius: var(--radius) var(--radius) 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: white;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-form {
+            padding: 2rem;
+        }
+
+        /* ===== MODO VISTA ===== */
+        .view-mode {
+            display: block;
+        }
+
+        .info-section {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: #f8fafc;
+            border-radius: var(--radius);
+            border-left: 4px solid var(--zone-primary);
+        }
+
+        .info-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .info-section h3 {
+            margin: 0 0 1.5rem 0;
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .info-item {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .info-item:hover {
+            border-color: var(--zone-primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .info-item label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            word-break: break-word;
+        }
+
+        .info-item.full-width {
+            grid-column: 1 / -1;
+        }
+
+        /* ===== MODO EDICIÓN ===== */
+        .edit-mode {
+            display: none;
+        }
+
+        .form-section {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: #f8fafc;
+            border-radius: var(--radius);
+            border-left: 4px solid var(--zone-primary);
+        }
+
+        .form-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-section h3 {
+            margin: 0 0 1rem 0;
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: var(--zone-primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-helper {
+            display: block;
+            margin-top: 0.25rem;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .modal-actions {
+            padding: 1.5rem 2rem;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        /* ===== NOTIFICACIONES ===== */
+        .notifications-container {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            z-index: 3000;
+            max-width: 400px;
+        }
+
+        .notification {
+            background: white;
+            border-radius: var(--radius);
+            padding: 1rem 1.5rem;
+            margin-bottom: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            border-left: 4px solid;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            animation: notificationSlideIn 0.3s ease;
+            position: relative;
+        }
+
+        .notification.success {
+            border-left-color: var(--success-color);
+        }
+
+        .notification.error {
+            border-left-color: var(--danger-color);
+        }
+
+        .notification.warning {
+            border-left-color: var(--warning-color);
+        }
+
+        .notification.info {
+            border-left-color: var(--info-color);
+        }
+
+        @keyframes notificationSlideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .notification-icon {
+            font-size: 1.2rem;
+            margin-top: 2px;
+        }
+
+        .notification.success .notification-icon {
+            color: var(--success-color);
+        }
+
+        .notification.error .notification-icon {
+            color: var(--danger-color);
+        }
+
+        .notification.warning .notification-icon {
+            color: var(--warning-color);
+        }
+
+        .notification.info .notification-icon {
+            color: var(--info-color);
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-content h4 {
+            margin: 0 0 5px 0;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .notification-content p {
+            margin: 0;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .notification-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 1rem;
+            color: #999;
+            cursor: pointer;
+            padding: 2px;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+
+        .notification-close:hover {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .header-title {
+                flex-direction: column;
+            }
+
+            .search-box {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-select,
+            .search-input {
+                min-width: auto;
+                width: 100%;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-container {
+                margin: 10px;
+                max-width: calc(100% - 20px);
+            }
+
+            .pagination-container {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .asignacion-container {
+                flex-direction: column;
+            }
+
+            .modal-actions {
+                flex-direction: column;
+            }
+
+            .modal-actions button {
+                width: 100%;
+            }
+
+            .notifications-container {
+                left: 20px;
+                right: 20px;
+                max-width: none;
+            }
+
+            .table-wrapper {
+                overflow-x: scroll;
+            }
+
+            .zonas-table {
+                min-width: 800px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+
+            .module-header {
+                padding: 1rem;
+            }
+
+            .header-title h1 {
+                font-size: 1.5rem;
+            }
+
+            .modal-form {
+                padding: 1rem;
+            }
+
+            .modal-header {
+                padding: 1rem;
+            }
+
+            .modal-header h2 {
+                font-size: 1.2rem;
+            }
+
+            .modal-actions {
+                padding: 1rem;
+            }
+
+            .info-section,
+            .form-section {
+                padding: 1rem;
+            }
+        }
+
+        /* ===== SCROLLBAR PERSONALIZADO ===== */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--zone-primary);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--zone-primary-hover);
+        }
+
+        /* ===== PROMOTORES EN TIENDAS ===== */
+        .tienda-badge-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tienda-badge-with-promotores {
+            cursor: help;
+        }
+
+        .promotores-tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%) translateY(-5px);
+            background: white;
+            border: 2px solid var(--zone-primary);
+            border-radius: 8px;
+            padding: 0.75rem;
+            min-width: 200px;
+            max-width: 300px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            display: none;
+            animation: tooltipFadeIn 0.2s ease;
+        }
+
+        .tienda-badge-wrapper:hover .promotores-tooltip {
+            display: block;
+        }
+
+        @keyframes tooltipFadeIn {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(-5px);
+            }
+        }
+
+        .promotores-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 8px solid transparent;
+            border-top-color: var(--zone-primary);
+        }
+
+        .promotores-tooltip h5 {
+            margin: 0 0 0.5rem 0;
+            font-size: 0.85rem;
+            color: var(--zone-primary);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .promotores-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .promotores-list li {
+            padding: 0.25rem 0;
+            font-size: 0.8rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .promotores-list li i {
+            color: var(--zone-primary);
+            font-size: 0.7rem;
+        }
+
+        .promotor-count {
+            background: var(--zone-primary);
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-left: 0.25rem;
+        }
+
+        .no-promotores {
+            font-style: italic;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
+
+
+        /* ===== BANNER INFORMATIVO PARA SUPERVISOR ===== */
+        .info-banner {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            display: none;
+            /* Oculto por defecto */
+            align-items: center;
+            gap: 1rem;
+            box-shadow: 0 8px 25px rgba(245, 158, 11, 0.3);
+        }
+
+        .info-banner.active {
+            display: flex;
+            /* Se muestra cuando tiene clase active */
+        }
+
+        .info-banner i {
+            font-size: 1.5rem;
+        }
+
+        .info-banner-content h3 {
+            margin: 0 0 0.25rem 0;
+            font-size: 1.1rem;
+        }
+
+        .info-banner-content p {
+            margin: 0;
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="zonas-module">
+        <div class="module-header">
+            <div class="header-content">
+                <div class="header-title">
+                    <i class="fas fa-map-marked-alt header-icon"></i>
+                    <h1>Gestión de Zonas y Regiones</h1>
+                </div>
+                <button class="btn-primary" id="btn-nueva-zona">
+                    <i class="fas fa-plus"></i> Nueva Zona
+                </button>
+            </div>
+        </div>
+        <!-- 🆕 BANNER INFORMATIVO PARA SUPERVISORES -->
+        <div class="info-banner" id="supervisor-banner">
+            <i class="fas fa-user-shield"></i>
+            <div class="info-banner-content">
+                <h3>Modo Supervisor</h3>
+                <p>Estás viendo solo las zonas asignadas a tu cargo</p>
+            </div>
+        </div>
+
+        <div class="search-controls">
+            <div class="search-box">
+                <select id="search-field" class="search-select">
+                    <option value="">Seleccionar campo...</option>
+                    <option value="nombre_zona">Nombre Zona</option>
+                    <option value="region_numero">Número de Región</option>
+                    <option value="supervisor">Supervisor Asignado</option>
+                    <option value="tienda">Tienda Asignada</option>
+                </select>
+                <input type="text" id="search-value" placeholder="Valor a buscar..." class="search-input" disabled>
+                <button id="btn-buscar" class="btn-search" disabled>
+                    <i class="fas fa-search"></i>
+                </button>
+                <button id="btn-limpiar" class="btn-clear">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <div class="table-wrapper">
+                <table class="zonas-table" id="zonas-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre Zona</th>
+                            <th>Región</th>
+                            <th>Descripción</th>
+                            <th>Supervisores</th>
+                            <th>Tiendas</th>
+                            <th>Estado</th>
+                            <th>Fecha Creación</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="zonas-tbody">
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="table-loading" id="table-loading">
+                <div class="loading-spinner"></div>
+                <p>Cargando zonas...</p>
+            </div>
+
+            <div class="empty-state" id="empty-state" style="display: none;">
+                <i class="fas fa-map-slash"></i>
+                <h3>No se encontraron zonas</h3>
+                <p>No hay zonas que coincidan con los criterios de búsqueda.</p>
+            </div>
+        </div>
+
+        <div class="pagination-container" id="pagination-container">
+            <div class="pagination-info">
+                <span id="pagination-info">Cargando...</span>
+            </div>
+            <div class="pagination-controls">
+                <button id="btn-prev" class="btn-pagination" disabled>
+                    <i class="fas fa-chevron-left"></i> Anterior
+                </button>
+                <span class="pagination-pages" id="pagination-pages"></span>
+                <button id="btn-next" class="btn-pagination" disabled>
+                    Siguiente <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-zona">
+        <div class="modal-container modal-large">
+            <div class="modal-header">
+                <h2 id="modal-title">
+                    <i class="fas fa-map-marked-alt"></i> Información de Zona
+                </h2>
+                <button class="modal-close" id="modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <form class="modal-form" id="form-zona">
+                <input type="hidden" id="zona-id">
+
+                <!-- MODO VISTA -->
+                <div class="view-mode" id="view-mode">
+                    <div class="info-section">
+                        <h3><i class="fas fa-info-circle"></i> Información General</h3>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <label>Nombre de la Zona</label>
+                                <div class="info-value" id="view-nombre-zona">-</div>
+                            </div>
+                            <div class="info-item">
+                                <label>Región</label>
+                                <div class="info-value" id="view-region">-</div>
+                            </div>
+                            <div class="info-item full-width">
+                                <label>Descripción</label>
+                                <div class="info-value" id="view-descripcion">-</div>
+                            </div>
+                            <div class="info-item">
+                                <label>Estado</label>
+                                <div class="info-value">
+                                    <span class="status-badge" id="view-estado-badge">-</span>
+                                </div>
+                            </div>
+                            <div class="info-item">
+                                <label>Fecha de Creación</label>
+                                <div class="info-value" id="view-fecha-creacion">-</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="info-section">
+                        <h3><i class="fas fa-user-tie"></i> Supervisores Asignados</h3>
+                        <div id="view-supervisores-list" class="lista-asignaciones">
+                        </div>
+                    </div>
+
+                    <div class="info-section">
+                        <h3><i class="fas fa-store"></i> Tiendas Asignadas</h3>
+                        <div id="view-tiendas-list" class="lista-asignaciones">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MODO EDICIÓN -->
+                <div class="edit-mode" id="edit-mode" style="display: none;">
+                    <div class="form-section">
+                        <h3><i class="fas fa-info-circle"></i> Información General</h3>
+
+                        <div class="form-group">
+                            <label for="zona-nombre">Nombre de la Zona *</label>
+                            <input type="text" id="zona-nombre" maxlength="100" required
+                                placeholder="Ej: Zona Centro-Norte">
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="zona-region">Región *</label>
+                                <select id="zona-region" required>
+                                    <option value="">Seleccionar región...</option>
+                                </select>
+                                <small class="form-helper">Región a la que pertenece la zona</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="zona-estado">Estado *</label>
+                                <select id="zona-estado" required>
+                                    <option value="1">Activo</option>
+                                    <option value="0">Inactivo</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="zona-descripcion">Descripción</label>
+                            <textarea id="zona-descripcion" rows="3"
+                                placeholder="Descripción de la zona, municipios incluidos, etc."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3><i class="fas fa-user-tie"></i> Asignar Supervisores</h3>
+
+                        <div class="asignacion-container">
+                            <div class="form-group">
+                                <label for="supervisor-select">Seleccionar Supervisor</label>
+                                <select id="supervisor-select" class="select-asignacion">
+                                    <option value="">Seleccionar supervisor...</option>
+                                </select>
+                            </div>
+                            <button type="button" id="btn-agregar-supervisor" class="btn-secondary">
+                                <i class="fas fa-plus"></i> Asignar Supervisor
+                            </button>
+                        </div>
+
+                        <div class="lista-asignados" id="supervisores-asignados-list">
+                        </div>
+                        <input type="hidden" id="supervisores-asignados-json">
+                    </div>
+
+                    <!-- 🆕 SECCIÓN DE TIENDAS CON SISTEMA HÍBRIDO -->
+                    <div class="form-section">
+                        <h3><i class="fas fa-store"></i> Asignar Tiendas</h3>
+
+                        <div class="form-group">
+                            <label for="tienda-input">Buscar o Seleccionar Tienda</label>
+                            <div class="autocomplete-container">
+                                <!-- 🆕 WRAPPER CON INPUT Y BOTÓN FLECHA -->
+                                <div class="autocomplete-wrapper">
+                                    <input type="text" id="tienda-input" class="autocomplete-input"
+                                        placeholder="Escribe el nombre o haz clic en la flecha..." autocomplete="off">
+                                    <button type="button" id="tienda-dropdown-btn" class="autocomplete-dropdown-btn"
+                                        title="Ver todas las tiendas disponibles">
+                                        <i class="fas fa-chevron-down"></i>
+                                    </button>
+                                </div>
+                                <div id="tienda-suggestions" class="autocomplete-suggestions"></div>
+                            </div>
+                            <small class="form-helper">Escribe para buscar o haz clic en la flecha para ver
+                                todas</small>
+                        </div>
+
+                        <div class="lista-asignados" id="tiendas-asignadas-list">
+                        </div>
+                        <input type="hidden" id="tiendas-asignadas-json">
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <div class="view-actions" id="view-actions">
+                        <button type="button" class="btn-secondary" id="btn-cerrar-vista">
+                            <i class="fas fa-times"></i> Cerrar
+                        </button>
+                        <button type="button" class="btn-primary" id="btn-editar-zona">
+                            <i class="fas fa-edit"></i> Editar
+                        </button>
+                    </div>
+
+                    <div class="edit-actions" id="edit-actions" style="display: none;">
+                        <button type="button" class="btn-secondary" id="btn-cancelar-edicion">
+                            <i class="fas fa-times"></i> Cancelar
+                        </button>
+                        <button type="submit" class="btn-primary" id="btn-guardar">
+                            <i class="fas fa-save"></i> Guardar
+                        </button>
+                    </div>
+
+                    <div class="new-actions" id="new-actions" style="display: none;">
+                        <button type="button" class="btn-secondary" id="btn-cancelar-nuevo">
+                            <i class="fas fa-times"></i> Cancelar
+                        </button>
+                        <button type="submit" class="btn-primary" id="btn-crear">
+                            <i class="fas fa-save"></i> Crear Zona
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="notifications-container" id="notifications-container"></div>
+
+    <script>
+        window.API_CONFIG = {
+            baseURL: '/promotoria/api/zonas.php',
+            endpoints: {
+                list: '?action=list',
+                getOne: '?action=get_one',
+                create: '?action=create',
+                update: '?action=update',
+                delete: '?action=delete',
+                supervisores: '?action=get_supervisores',
+                tiendas: '?action=get_tiendas',
+                regiones: '?action=get_regiones'
+            }
+        };
+
+        console.log('========================================');
+        console.log('🔧 CONFIGURACIÓN API ZONAS');
+        console.log('========================================');
+        console.log('📍 URL Base:', window.API_CONFIG.baseURL);
+        console.log('========================================');
+    </script>
+
+   <script>
+class ZonasModule {
+    constructor() {
+        console.log('🏗️ Inicializando módulo de zonas...');
+
+        this.currentPage = 1;
+        this.itemsPerPage = 10;
+        this.totalItems = 0;
+        this.totalPages = 0;
+        this.searchField = '';
+        this.searchValue = '';
+        this.editMode = false;
+        this.isNewZona = false;
+        this.supervisoresAsignados = [];
+        this.tiendasAsignadas = [];
+        this.currentZona = null;
+        this.supervisoresData = [];
+        this.tiendasData = [];
+        this.regionesData = [];
+        this.selectedRegionId = null;
+        this.promotoresPorTienda = {};
+        this.userRol = null; // 🆕 Rol del usuario
+
+        this.init();
+    }
+
+    init() {
+        console.log('📌 Vinculando eventos...');
+        this.bindEvents();
+        console.log('📊 Cargando datos iniciales...');
+        this.loadInitialData();
+    }
+
+    bindEvents() {
+        const btnNuevaZona = document.getElementById('btn-nueva-zona');
+
+        if (!btnNuevaZona) {
+            console.error('❌ ERROR: No se encontró el botón #btn-nueva-zona');
+            return;
+        }
+
+        document.getElementById('search-field').addEventListener('change', () => this.handleSearchFieldChange());
+        document.getElementById('search-value').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') this.handleSearch();
+        });
+        document.getElementById('btn-buscar').addEventListener('click', () => this.handleSearch());
+        document.getElementById('btn-limpiar').addEventListener('click', () => this.handleClearSearch());
+        document.getElementById('btn-prev').addEventListener('click', () => this.changePage(this.currentPage - 1));
+        document.getElementById('btn-next').addEventListener('click', () => this.changePage(this.currentPage + 1));
+
+        btnNuevaZona.addEventListener('click', () => {
+            console.log('🆕 Clic en botón Nueva Zona');
+            this.openNewZonaModal();
+        });
+
+        document.getElementById('modal-close').addEventListener('click', () => this.closeModal());
+        document.getElementById('btn-cerrar-vista').addEventListener('click', () => this.closeModal());
+        document.getElementById('btn-editar-zona').addEventListener('click', () => this.enableEditMode());
+        document.getElementById('btn-cancelar-edicion').addEventListener('click', () => this.cancelEdit());
+        document.getElementById('btn-cancelar-nuevo').addEventListener('click', () => this.closeModal());
+        document.getElementById('form-zona').addEventListener('submit', (e) => this.handleSubmit(e));
+        document.getElementById('btn-agregar-supervisor').addEventListener('click', () => this.addSupervisor());
+        document.getElementById('zona-region').addEventListener('change', (e) => this.handleRegionChange(e));
+
+        const tiendaInput = document.getElementById('tienda-input');
+        const tiendaSuggestions = document.getElementById('tienda-suggestions');
+        const tiendaDropdownBtn = document.getElementById('tienda-dropdown-btn');
+
+        tiendaInput.addEventListener('input', (e) => this.handleTiendaSearch(e.target.value));
+        tiendaInput.addEventListener('focus', (e) => {
+            if (e.target.value && e.target.value.length >= 2) {
+                this.handleTiendaSearch(e.target.value);
+            }
+        });
+
+        tiendaDropdownBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.toggleTiendasDropdown();
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.autocomplete-container')) {
+                tiendaSuggestions.classList.remove('active');
+                tiendaDropdownBtn.classList.remove('active');
+            }
+        });
+
+        tiendaInput.addEventListener('keydown', (e) => this.handleTiendaKeyboard(e));
+
+        document.getElementById('modal-zona').addEventListener('click', (e) => {
+            if (e.target.id === 'modal-zona') this.closeModal();
+        });
+
+        console.log('✅ Todos los eventos vinculados correctamente');
+    }
+
+    handleRegionChange(e) {
+        const regionId = parseInt(e.target.value);
+        console.log('🗺️ Región seleccionada:', regionId);
+        this.selectedRegionId = regionId;
+
+        const tiendaInput = document.getElementById('tienda-input');
+        if (tiendaInput) {
+            tiendaInput.value = '';
+            document.getElementById('tienda-suggestions').classList.remove('active');
+            document.getElementById('tienda-dropdown-btn').classList.remove('active');
+        }
+    }
+
+    async loadInitialData() {
+        console.log('📥 Cargando datos iniciales...');
+        await this.loadZonas();
+    }
+
+    async apiRequest(endpoint, options = {}) {
+        const fullUrl = window.API_CONFIG.baseURL + endpoint;
+        console.log('🌐 API Request:', fullUrl);
+
+        try {
+            const response = await fetch(fullUrl, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...options.headers
+                },
+                ...options
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Error en la solicitud');
+            }
+
+            return data;
+        } catch (error) {
+            console.error('❌ Error en API request:', error);
+            throw error;
+        }
+    }
+
+    async loadZonas() {
+        console.log('📋 === INICIO loadZonas() ===');
+        this.showTableLoading();
+
+        try {
+            const params = new URLSearchParams({
+                page: this.currentPage,
+                limit: this.itemsPerPage
+            });
+
+            if (this.searchField && this.searchValue) {
+                params.append('search_field', this.searchField);
+                params.append('search_value', this.searchValue);
+            }
+
+            const fullUrl = API_CONFIG.baseURL + '?' + params.toString();
+
+            const response = await fetch(fullUrl, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'same-origin'
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // 🆕 Guardar el rol del usuario
+                this.userRol = data.user_rol || 'usuario';
+                console.log('👤 Rol del usuario:', this.userRol);
+                
+                // 🆕 Adaptar la interfaz según el rol
+                this.adaptInterfaceByRole();
+                
+                this.totalItems = data.pagination.total;
+                this.totalPages = data.pagination.total_pages;
+
+                this.hideTableLoading();
+
+                if (data.data.length === 0) {
+                    this.showEmptyState();
+                } else {
+                    this.renderTable(data.data);
+                }
+
+                this.updatePagination();
+            } else {
+                this.hideTableLoading();
+                this.showNotification('error', 'Error', data.message || 'Error al cargar zonas');
+            }
+        } catch (error) {
+            console.error('❌ Error:', error);
+            this.hideTableLoading();
+            this.showNotification('error', 'Error de Conexión',
+                'No se pudieron cargar las zonas. Detalles: ' + error.message);
+        }
+    }
+
+    // 🆕 NUEVA FUNCIÓN: Adaptar interfaz según el rol
+    adaptInterfaceByRole() {
+        console.log('🎨 Adaptando interfaz para rol:', this.userRol);
+        
+        const btnNuevaZona = document.getElementById('btn-nueva-zona');
+        const supervisorBanner = document.getElementById('supervisor-banner');
+        const moduleTitle = document.getElementById('module-title');
+        
+        if (this.userRol === 'supervisor') {
+            // Modo Supervisor
+            if (btnNuevaZona) btnNuevaZona.style.display = 'none';
+            if (supervisorBanner) supervisorBanner.classList.add('active');
+            if (moduleTitle) moduleTitle.textContent = 'Mis Zonas Asignadas';
+            console.log('✅ Interfaz adaptada para SUPERVISOR');
+        } else {
+            // Modo Root/Admin
+            if (btnNuevaZona) btnNuevaZona.style.display = 'inline-flex';
+            if (supervisorBanner) supervisorBanner.classList.remove('active');
+            if (moduleTitle) moduleTitle.textContent = 'Gestión de Zonas y Regiones';
+            console.log('✅ Interfaz adaptada para ROOT');
+        }
+    }
+
+    renderTable(data) {
+        const tbody = document.getElementById('zonas-tbody');
+
+        if (!tbody) {
+            console.error('❌ No se encontró el elemento #zonas-tbody');
+            return;
+        }
+
+        tbody.innerHTML = '';
+
+        if (data.length === 0) {
+            this.showEmptyState();
+            return;
+        }
+
+        data.forEach((zona) => {
+            const row = document.createElement('tr');
+            
+            // 🆕 Botones según el rol
+            let actionButtons = '';
+            
+            if (this.userRol === 'root') {
+                // Root: Ver, Editar y Eliminar
+                actionButtons = `
+                    <button class="btn-action view" onclick="zonasModule.viewZona(${zona.id_zona})">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="btn-action edit" onclick="zonasModule.editZona(${zona.id_zona})">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn-action delete" onclick="zonasModule.deleteZona(${zona.id_zona})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                `;
+            } else {
+                // Supervisor: Solo Ver
+                actionButtons = `
+                    <button class="btn-action view" onclick="zonasModule.viewZona(${zona.id_zona})">
+                        <i class="fas fa-eye"></i> Ver
+                    </button>
+                `;
+            }
+            
+            row.innerHTML = `
+                <td>${zona.id_zona}</td>
+                <td><strong>${zona.nombre_zona}</strong></td>
+                <td>Región ${zona.numero_region} - ${zona.nombre_region}</td>
+                <td>${zona.descripcion || '-'}</td>
+                <td><span class="count-badge">${zona.total_supervisores || 0}</span></td>
+                <td><span class="count-badge">${zona.total_tiendas || 0}</span></td>
+                <td>
+                    <span class="status-badge ${zona.activa ? 'activo' : 'inactivo'}">
+                        ${zona.activa ? 'Activo' : 'Inactivo'}
+                    </span>
+                </td>
+                <td>${zona.fecha_creacion_formatted || '-'}</td>
+                <td>${actionButtons}</td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+
+    async loadPromotoresDeTiendas() {
+        if (this.tiendasAsignadas.length === 0) {
+            this.promotoresPorTienda = {};
+            return;
+        }
+
+        try {
+            const tiendasIds = this.tiendasAsignadas.map(t => t.id_tienda);
+            console.log('👥 Cargando promotores para tiendas:', tiendasIds);
+
+            const response = await this.apiRequest(
+                `?action=get_promotores_tiendas&tiendas=${encodeURIComponent(JSON.stringify(tiendasIds))}`
+            );
+
+            if (response.success) {
+                this.promotoresPorTienda = response.data;
+                console.log('✅ Promotores cargados:', this.promotoresPorTienda);
+                this.renderTiendasAsignadas();
+            }
+        } catch (error) {
+            console.error('❌ Error al cargar promotores:', error);
+            this.promotoresPorTienda = {};
+        }
+    }
+
+    async viewZona(id) {
+        console.log('👁️ Viendo zona:', id);
+        try {
+            const response = await this.apiRequest(`?action=get_one&id=${id}`);
+
+            if (response.success) {
+                this.currentZona = response.data;
+                this.isNewZona = false;
+                this.editMode = false;
+                this.tiendasAsignadas = this.currentZona.tiendas || [];
+                await this.loadPromotoresDeTiendas();
+                this.showViewMode();
+                this.populateViewMode(this.currentZona);
+                this.openModal();
+            }
+        } catch (error) {
+            console.error('❌ Error al ver zona:', error);
+            this.showNotification('error', 'Error', 'No se pudo cargar la zona');
+        }
+    }
+
+    async editZona(id) {
+        console.log('✏️ Editando zona:', id);
+        try {
+            const response = await this.apiRequest(`?action=get_one&id=${id}`);
+
+            if (response.success) {
+                this.currentZona = response.data;
+                this.isNewZona = false;
+                this.editMode = true;
+                this.showEditMode();
+                await this.loadCatalogos();
+                await this.populateEditMode(this.currentZona);
+                this.openModal();
+            }
+        } catch (error) {
+            console.error('❌ Error al editar zona:', error);
+            this.showNotification('error', 'Error', 'No se pudo cargar la zona');
+        }
+    }
+
+    async deleteZona(id) {
+        console.log('🗑️ Eliminando zona:', id);
+        if (!confirm('¿Está seguro de que desea eliminar esta zona?')) {
+            return;
+        }
+
+        try {
+            const response = await this.apiRequest(``, {
+                method: 'DELETE',
+                body: JSON.stringify({ id: id, action: 'delete' })
+            });
+
+            if (response.success) {
+                this.showNotification('success', 'Éxito', 'Zona eliminada correctamente');
+                this.loadZonas();
+            }
+        } catch (error) {
+            console.error('❌ Error al eliminar zona:', error);
+            this.showNotification('error', 'Error', 'No se pudo eliminar la zona');
+        }
+    }
+
+    async openNewZonaModal() {
+        console.log('🆕 Abriendo modal Nueva Zona');
+
+        try {
+            this.currentZona = null;
+            this.isNewZona = true;
+            this.editMode = true;
+            this.supervisoresAsignados = [];
+            this.tiendasAsignadas = [];
+            this.selectedRegionId = null;
+
+            document.getElementById('modal-title').innerHTML = '<i class="fas fa-plus"></i> Nueva Zona';
+            document.getElementById('form-zona').reset();
+
+            this.showEditMode();
+
+            console.log('📚 Cargando catálogos...');
+            await this.loadCatalogos();
+
+            this.renderSupervisoresAsignados();
+            this.renderTiendasAsignadas();
+
+            document.getElementById('view-actions').style.display = 'none';
+            document.getElementById('edit-actions').style.display = 'none';
+            document.getElementById('new-actions').style.display = 'flex';
+
+            this.openModal();
+
+        } catch (error) {
+            console.error('❌ Error al abrir modal:', error);
+            this.showNotification('error', 'Error', 'No se pudo abrir el formulario: ' + error.message);
+        }
+    }
+
+    async loadCatalogos() {
+        console.log('📚 Cargando catálogos...');
+        try {
+            console.log('🗺️ Cargando regiones...');
+            const regionesResponse = await this.apiRequest('?action=get_regiones');
+            if (regionesResponse.success) {
+                this.regionesData = regionesResponse.data;
+                console.log('✅ Regiones cargadas:', this.regionesData.length);
+                this.loadRegionesSelect();
+            }
+
+            console.log('👥 Cargando supervisores...');
+            const supervisoresResponse = await this.apiRequest('?action=get_supervisores');
+            if (supervisoresResponse.success) {
+                this.supervisoresData = supervisoresResponse.data;
+                console.log('✅ Supervisores cargados:', this.supervisoresData.length);
+                this.loadSupervisoresSelect();
+            }
+
+            console.log('🏪 Cargando tiendas...');
+            const tiendasResponse = await this.apiRequest('?action=get_tiendas');
+            if (tiendasResponse.success) {
+                this.tiendasData = tiendasResponse.data;
+                console.log('✅ Tiendas cargadas:', this.tiendasData.length);
+            }
+        } catch (error) {
+            console.error('❌ Error al cargar catálogos:', error);
+            this.showNotification('error', 'Error', 'No se pudieron cargar los catálogos: ' + error.message);
+            throw error;
+        }
+    }
+
+    loadRegionesSelect() {
+        const regionSelect = document.getElementById('zona-region');
+        regionSelect.innerHTML = '<option value="">Seleccionar región...</option>';
+
+        this.regionesData.forEach(region => {
+            const option = document.createElement('option');
+            option.value = region.id_region;
+            option.textContent = `Región ${region.numero_region} - ${region.nombre_region}`;
+            regionSelect.appendChild(option);
+        });
+
+        console.log('✅ Select de regiones poblado');
+    }
+
+    loadSupervisoresSelect() {
+        const supervisorSelect = document.getElementById('supervisor-select');
+        supervisorSelect.innerHTML = '<option value="">Seleccionar supervisor...</option>';
+
+        this.supervisoresData
+            .filter(sup => !this.supervisoresAsignados.find(s => s.id === sup.id))
+            .forEach(sup => {
+                const option = document.createElement('option');
+                option.value = sup.id;
+                option.textContent = sup.nombre_completo || `${sup.nombre} ${sup.apellido}`;
+                supervisorSelect.appendChild(option);
+            });
+
+        console.log('✅ Select de supervisores poblado');
+    }
+
+    toggleTiendasDropdown() {
+        const suggestionsContainer = document.getElementById('tienda-suggestions');
+        const dropdownBtn = document.getElementById('tienda-dropdown-btn');
+        const tiendaInput = document.getElementById('tienda-input');
+
+        console.log('🔽 Toggle dropdown de tiendas');
+
+        if (suggestionsContainer.classList.contains('active')) {
+            suggestionsContainer.classList.remove('active');
+            dropdownBtn.classList.remove('active');
+            return;
+        }
+
+        let tiendasDisponibles = this.tiendasData;
+
+        if (this.selectedRegionId) {
+            const regionSeleccionada = this.regionesData.find(r => r.id_region === this.selectedRegionId);
+            if (regionSeleccionada) {
+                const numeroRegion = regionSeleccionada.numero_region;
+                tiendasDisponibles = tiendasDisponibles.filter(tienda => tienda.region == numeroRegion);
+                console.log(`🗺️ Filtrando por región ${numeroRegion}:`, tiendasDisponibles.length, 'tiendas');
+            }
+        }
+
+        tiendasDisponibles = tiendasDisponibles.filter(tienda =>
+            !this.tiendasAsignadas.find(t => t.id_tienda === tienda.id_tienda)
+        );
+
+        console.log('✅ Tiendas disponibles para dropdown:', tiendasDisponibles.length);
+
+        if (!tiendaInput.value || tiendaInput.value.length === 0) {
+            this.renderTiendaSuggestions(tiendasDisponibles, true);
+            dropdownBtn.classList.add('active');
+        } else {
+            this.handleTiendaSearch(tiendaInput.value);
+        }
+
+        tiendaInput.focus();
+    }
+
+    handleTiendaSearch(searchTerm) {
+        console.log('🔍 Buscando tiendas:', searchTerm);
+
+        const suggestionsContainer = document.getElementById('tienda-suggestions');
+
+        if (!searchTerm || searchTerm.length < 2) {
+            suggestionsContainer.classList.remove('active');
+            return;
+        }
+
+        let tiendasFiltradas = this.tiendasData;
+
+        if (this.selectedRegionId) {
+            const regionSeleccionada = this.regionesData.find(r => r.id_region === this.selectedRegionId);
+            if (regionSeleccionada) {
+                const numeroRegion = regionSeleccionada.numero_region;
+                tiendasFiltradas = tiendasFiltradas.filter(tienda => tienda.region == numeroRegion);
+            }
+        }
+
+        tiendasFiltradas = tiendasFiltradas.filter(tienda =>
+            !this.tiendasAsignadas.find(t => t.id_tienda === tienda.id_tienda)
+        );
+
+        const searchLower = searchTerm.toLowerCase();
+        tiendasFiltradas = tiendasFiltradas.filter(tienda => {
+            return tienda.nombre_tienda.toLowerCase().includes(searchLower) ||
+                (tienda.cadena && tienda.cadena.toLowerCase().includes(searchLower)) ||
+                (tienda.ciudad && tienda.ciudad.toLowerCase().includes(searchLower)) ||
+                (tienda.num_tienda && tienda.num_tienda.toString().includes(searchLower));
+        });
+
+        console.log('✅ Tiendas encontradas:', tiendasFiltradas.length);
+
+        this.renderTiendaSuggestions(tiendasFiltradas, false);
+    }
+
+    renderTiendaSuggestions(tiendas, showAll = false) {
+        const suggestionsContainer = document.getElementById('tienda-suggestions');
+
+        if (tiendas.length === 0) {
+            suggestionsContainer.innerHTML = '<div class="autocomplete-no-results">No se encontraron tiendas disponibles</div>';
+            suggestionsContainer.classList.add('active');
+            return;
+        }
+
+        suggestionsContainer.innerHTML = '';
+
+        const limite = showAll ? 50 : 10;
+        const tiendasToShow = tiendas.slice(0, limite);
+
+        console.log(`📋 Mostrando ${tiendasToShow.length} de ${tiendas.length} tiendas`);
+
+        tiendasToShow.forEach((tienda, index) => {
+            const suggestion = document.createElement('div');
+            suggestion.className = 'autocomplete-suggestion';
+            suggestion.dataset.index = index;
+            suggestion.dataset.tiendaId = tienda.id_tienda;
+
+            suggestion.innerHTML = `
+                <div class="autocomplete-suggestion-name">${tienda.nombre_tienda}</div>
+                <div class="autocomplete-suggestion-details">
+                    <span class="autocomplete-suggestion-badge">${tienda.cadena || 'Sin cadena'}</span>
+                    <span>${tienda.ciudad || 'Sin ciudad'}</span>
+                    ${tienda.num_tienda ? `<span>#${tienda.num_tienda}</span>` : ''}
+                    ${tienda.region ? `<span>Región ${tienda.region}</span>` : ''}
+                </div>
+            `;
+
+            suggestion.addEventListener('click', () => {
+                this.selectTiendaFromAutocomplete(tienda);
+            });
+
+            suggestionsContainer.appendChild(suggestion);
+        });
+
+        if (tiendas.length > limite) {
+            const moreInfo = document.createElement('div');
+            moreInfo.className = 'autocomplete-no-results';
+            moreInfo.style.borderTop = '2px solid var(--border-color)';
+            moreInfo.style.fontWeight = '600';
+            moreInfo.innerHTML = `<i class="fas fa-info-circle"></i> Mostrando ${limite} de ${tiendas.length} tiendas. Escribe para filtrar más.`;
+            suggestionsContainer.appendChild(moreInfo);
+        }
+
+        suggestionsContainer.classList.add('active');
+    }
+
+    async selectTiendaFromAutocomplete(tienda) {
+        console.log('✅ Tienda seleccionada:', tienda.nombre_tienda);
+
+        if (this.selectedRegionId) {
+            const regionSeleccionada = this.regionesData.find(r => r.id_region === this.selectedRegionId);
+            if (regionSeleccionada && tienda.region != regionSeleccionada.numero_region) {
+                this.showNotification('warning', 'Atención', 'La tienda no pertenece a la región seleccionada');
+                return;
+            }
+        }
+
+        if (this.tiendasAsignadas.find(t => t.id_tienda === tienda.id_tienda)) {
+            this.showNotification('warning', 'Atención', 'Esta tienda ya está asignada');
+            return;
+        }
+
+        this.tiendasAsignadas.push(tienda);
+
+        await this.loadPromotoresDeTiendas();
+        this.renderTiendasAsignadas();
+
+        document.getElementById('tienda-input').value = '';
+        document.getElementById('tienda-suggestions').classList.remove('active');
+        document.getElementById('tienda-dropdown-btn').classList.remove('active');
+        document.getElementById('tienda-input').focus();
+
+        this.showNotification('success', 'Éxito', `Tienda "${tienda.nombre_tienda}" asignada`);
+    }
+
+    async removeTienda(id) {
+        this.tiendasAsignadas = this.tiendasAsignadas.filter(t => t.id_tienda !== id);
+        await this.loadPromotoresDeTiendas();
+        this.renderTiendasAsignadas();
+    }
+
+    async populateEditMode(zona) {
+        document.getElementById('modal-title').innerHTML = '<i class="fas fa-edit"></i> Editar Zona';
+        document.getElementById('zona-id').value = zona.id_zona;
+        document.getElementById('zona-nombre').value = zona.nombre_zona;
+        document.getElementById('zona-region').value = zona.id_region;
+        document.getElementById('zona-estado').value = zona.activa ? '1' : '0';
+        document.getElementById('zona-descripcion').value = zona.descripcion || '';
+
+        this.selectedRegionId = zona.id_region;
+
+        this.supervisoresAsignados = (zona.supervisores || []).map(sup => ({
+            id: sup.id,
+            nombre: sup.nombre,
+            apellido: sup.apellido,
+            nombre_completo: `${sup.nombre} ${sup.apellido}`
+        }));
+
+        this.tiendasAsignadas = zona.tiendas || [];
+
+        this.renderSupervisoresAsignados();
+        this.loadSupervisoresSelect();
+
+        await this.loadPromotoresDeTiendas();
+    }
+
+    handleTiendaKeyboard(e) {
+        const suggestionsContainer = document.getElementById('tienda-suggestions');
+        const suggestions = suggestionsContainer.querySelectorAll('.autocomplete-suggestion');
+
+        if (suggestions.length === 0) return;
+
+        const currentSelected = suggestionsContainer.querySelector('.autocomplete-suggestion.selected');
+        let currentIndex = currentSelected ? parseInt(currentSelected.dataset.index) : -1;
+
+        switch (e.key) {
+            case 'ArrowDown':
+                e.preventDefault();
+                currentIndex = Math.min(currentIndex + 1, suggestions.length - 1);
+                break;
+            case 'ArrowUp':
+                e.preventDefault();
+                currentIndex = Math.max(currentIndex - 1, 0);
+                break;
+            case 'Enter':
+                e.preventDefault();
+                if (currentIndex >= 0) {
+                    const tiendaId = parseInt(suggestions[currentIndex].dataset.tiendaId);
+                    const tienda = this.tiendasData.find(t => t.id_tienda === tiendaId);
+                    if (tienda) this.selectTiendaFromAutocomplete(tienda);
+                }
+                return;
+            case 'Escape':
+                suggestionsContainer.classList.remove('active');
+                document.getElementById('tienda-dropdown-btn').classList.remove('active');
+                return;
+            default:
+                return;
+        }
+
+        suggestions.forEach((s, i) => {
+            if (i === currentIndex) {
+                s.classList.add('selected');
+                s.scrollIntoView({ block: 'nearest' });
+            } else {
+                s.classList.remove('selected');
+            }
+        });
+    }
+
+    populateViewMode(zona) {
+        document.getElementById('modal-title').innerHTML = '<i class="fas fa-map-marked-alt"></i> Información de Zona';
+        document.getElementById('view-nombre-zona').textContent = zona.nombre_zona;
+        document.getElementById('view-region').textContent = `Región ${zona.numero_region} - ${zona.nombre_region}`;
+        document.getElementById('view-descripcion').textContent = zona.descripcion || 'Sin descripción';
+
+        const estadoBadge = document.getElementById('view-estado-badge');
+        estadoBadge.textContent = zona.activa ? 'Activo' : 'Inactivo';
+        estadoBadge.className = 'status-badge ' + (zona.activa ? 'activo' : 'inactivo');
+
+        document.getElementById('view-fecha-creacion').textContent = zona.fecha_creacion_formatted || '-';
+
+        const supervisoresList = document.getElementById('view-supervisores-list');
+        supervisoresList.innerHTML = '';
+        if (zona.supervisores && zona.supervisores.length > 0) {
+            zona.supervisores.forEach(sup => {
+                const badge = document.createElement('span');
+                badge.className = 'asignado-badge';
+                badge.innerHTML = `<i class="fas fa-user-tie"></i> ${sup.nombre} ${sup.apellido}`;
+                supervisoresList.appendChild(badge);
+            });
+            supervisoresList.classList.remove('empty');
+        } else {
+            supervisoresList.classList.add('empty');
+        }
+
+        const tiendasList = document.getElementById('view-tiendas-list');
+        tiendasList.innerHTML = '';
+        if (zona.tiendas && zona.tiendas.length > 0) {
+            zona.tiendas.forEach(tienda => {
+                const promotores = this.promotoresPorTienda[tienda.id_tienda] || [];
+                const hasPromotores = promotores.length > 0;
+
+                const wrapper = document.createElement('div');
+                wrapper.className = 'tienda-badge-wrapper';
+
+                const badge = document.createElement('span');
+                badge.className = `asignado-badge ${hasPromotores ? 'tienda-badge-with-promotores' : ''}`;
+
+                badge.innerHTML = `
+                    <i class="fas fa-store"></i> 
+                    ${tienda.nombre_tienda}
+                    ${hasPromotores ? `<span class="promotor-count" title="${promotores.length} promotor(es)">${promotores.length}</span>` : ''}
+                `;
+
+                if (hasPromotores) {
+                    const tooltip = document.createElement('div');
+                    tooltip.className = 'promotores-tooltip';
+                    tooltip.innerHTML = `
+                        <h5><i class="fas fa-users"></i> Promotores en esta tienda</h5>
+                        <ul class="promotores-list">
+                            ${promotores.map(p => `
+                                <li><i class="fas fa-user"></i> ${p.nombre_completo}</li>
+                            `).join('')}
+                        </ul>
+                    `;
+                    wrapper.appendChild(badge);
+                    wrapper.appendChild(tooltip);
+                } else {
+                    wrapper.appendChild(badge);
+                }
+
+                tiendasList.appendChild(wrapper);
+            });
+            tiendasList.classList.remove('empty');
+        } else {
+            tiendasList.classList.add('empty');
+        }
+    }
+
+    addSupervisor() {
+        const supervisorSelect = document.getElementById('supervisor-select');
+        const supervisorId = parseInt(supervisorSelect.value);
+
+        if (!supervisorId) {
+            this.showNotification('warning', 'Atención', 'Seleccione un supervisor');
+            return;
+        }
+
+        const supervisor = this.supervisoresData.find(s => s.id === supervisorId);
+
+        if (supervisor && !this.supervisoresAsignados.find(s => s.id === supervisorId)) {
+            this.supervisoresAsignados.push({
+                id: supervisor.id,
+                nombre: supervisor.nombre,
+                apellido: supervisor.apellido,
+                nombre_completo: supervisor.nombre_completo || `${supervisor.nombre} ${supervisor.apellido}`
+            });
+            this.renderSupervisoresAsignados();
+            this.loadSupervisoresSelect();
+        }
+    }
+
+    removeSupervisor(id) {
+        this.supervisoresAsignados = this.supervisoresAsignados.filter(s => s.id !== id);
+        this.renderSupervisoresAsignados();
+        this.loadSupervisoresSelect();
+    }
+
+    renderSupervisoresAsignados() {
+        const list = document.getElementById('supervisores-asignados-list');
+        list.innerHTML = '';
+
+        if (this.supervisoresAsignados.length > 0) {
+            this.supervisoresAsignados.forEach(sup => {
+                const badge = document.createElement('span');
+                badge.className = 'asignado-badge';
+                badge.innerHTML = `
+                    <i class="fas fa-user-tie"></i>
+                    ${sup.nombre_completo || `${sup.nombre} ${sup.apellido}`}
+                    <button type="button" class="asignado-remove" onclick="zonasModule.removeSupervisor(${sup.id})">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                list.appendChild(badge);
+            });
+            list.classList.remove('empty');
+        } else {
+            list.classList.add('empty');
+        }
+    }
+
+    renderTiendasAsignadas() {
+        const list = document.getElementById('tiendas-asignadas-list');
+        list.innerHTML = '';
+
+        if (this.tiendasAsignadas.length > 0) {
+            this.tiendasAsignadas.forEach(tienda => {
+                const promotores = this.promotoresPorTienda[tienda.id_tienda] || [];
+                const hasPromotores = promotores.length > 0;
+
+                const wrapper = document.createElement('div');
+                wrapper.className = 'tienda-badge-wrapper';
+
+                const badge = document.createElement('span');
+                badge.className = `asignado-badge ${hasPromotores ? 'tienda-badge-with-promotores' : ''}`;
+                badge.innerHTML = `
+                    <i class="fas fa-store"></i>
+                    ${tienda.nombre_tienda}
+                    ${hasPromotores ? `<span class="promotor-count" title="${promotores.length} promotor(es)">${promotores.length}</span>` : ''}
+                    <button type="button" class="asignado-remove" onclick="zonasModule.removeTienda(${tienda.id_tienda})">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+
+                if (hasPromotores) {
+                    const tooltip = document.createElement('div');
+                    tooltip.className = 'promotores-tooltip';
+                    tooltip.innerHTML = `
+                        <h5><i class="fas fa-users"></i> Promotores en esta tienda</h5>
+                        <ul class="promotores-list">
+                            ${promotores.map(p => `
+                                <li><i class="fas fa-user"></i> ${p.nombre_completo}</li>
+                            `).join('')}
+                        </ul>
+                    `;
+                    wrapper.appendChild(badge);
+                    wrapper.appendChild(tooltip);
+                } else {
+                    wrapper.appendChild(badge);
+                }
+
+                list.appendChild(wrapper);
+            });
+            list.classList.remove('empty');
+        } else {
+            list.classList.add('empty');
+        }
+    }
+
+    async handleSubmit(e) {
+        e.preventDefault();
+        console.log('💾 Guardando zona...');
+
+        const formData = {
+            nombre_zona: document.getElementById('zona-nombre').value.trim(),
+            id_region: parseInt(document.getElementById('zona-region').value),
+            activa: parseInt(document.getElementById('zona-estado').value),
+            descripcion: document.getElementById('zona-descripcion').value.trim(),
+            supervisores: this.supervisoresAsignados.map(s => s.id),
+            tiendas: this.tiendasAsignadas.map(t => t.id_tienda)
+        };
+
+        try {
+            if (this.isNewZona) {
+                const response = await this.apiRequest('', {
+                    method: 'POST',
+                    body: JSON.stringify({ ...formData, action: 'create' })
+                });
+
+                if (response.success) {
+                    this.showNotification('success', 'Éxito', 'Zona creada correctamente');
+                    this.closeModal();
+                    this.loadZonas();
+                }
+            } else {
+                formData.id_zona = parseInt(document.getElementById('zona-id').value);
+
+                const response = await this.apiRequest('', {
+                    method: 'PUT',
+                    body: JSON.stringify({ ...formData, action: 'update' })
+                });
+
+                if (response.success) {
+                    this.showNotification('success', 'Éxito', 'Zona actualizada correctamente');
+                    this.closeModal();
+                    this.loadZonas();
+                }
+            }
+        } catch (error) {
+            console.error('❌ Error al guardar zona:', error);
+            this.showNotification('error', 'Error', error.message || 'No se pudo guardar la zona');
+        }
+    }
+
+    handleSearchFieldChange() {
+        const searchField = document.getElementById('search-field').value;
+        const searchInput = document.getElementById('search-value');
+        const btnBuscar = document.getElementById('btn-buscar');
+
+        if (searchField) {
+            searchInput.disabled = false;
+            btnBuscar.disabled = false;
+            searchInput.focus();
+        } else {
+            searchInput.disabled = true;
+            btnBuscar.disabled = true;
+            searchInput.value = '';
+        }
+    }
+
+    handleSearch() {
+        this.searchField = document.getElementById('search-field').value;
+        this.searchValue = document.getElementById('search-value').value.trim();
+
+        if (!this.searchField || !this.searchValue) {
+            this.showNotification('warning', 'Atención', 'Seleccione un campo y valor de búsqueda');
+            return;
+        }
+
+        this.currentPage = 1;
+        this.loadZonas();
+    }
+
+    handleClearSearch() {
+        document.getElementById('search-field').value = '';
+        document.getElementById('search-value').value = '';
+        document.getElementById('search-value').disabled = true;
+        document.getElementById('btn-buscar').disabled = true;
+
+        this.searchField = '';
+        this.searchValue = '';
+        this.currentPage = 1;
+        this.loadZonas();
+    }
+
+    changePage(page) {
+        if (page < 1 || page > this.totalPages) return;
+
+        this.currentPage = page;
+        this.loadZonas();
+    }
+
+    updatePagination() {
+        const startItem = (this.currentPage - 1) * this.itemsPerPage + 1;
+        const endItem = Math.min(this.currentPage * this.itemsPerPage, this.totalItems);
+
+        document.getElementById('pagination-info').textContent =
+            `Mostrando ${startItem} - ${endItem} de ${this.totalItems} zonas`;
+
+        document.getElementById('pagination-pages').textContent =
+            `Página ${this.currentPage} de ${this.totalPages || 1}`;
+
+        document.getElementById('btn-prev').disabled = this.currentPage === 1;
+        document.getElementById('btn-next').disabled = this.currentPage === this.totalPages || this.totalPages === 0;
+    }
+
+    openModal() {
+        document.getElementById('modal-zona').classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    closeModal() {
+        document.getElementById('modal-zona').classList.remove('active');
+        document.body.style.overflow = '';
+        document.getElementById('form-zona').reset();
+        this.supervisoresAsignados = [];
+        this.tiendasAsignadas = [];
+        this.selectedRegionId = null;
+    }
+
+    showViewMode() {
+        document.getElementById('view-mode').style.display = 'block';
+        document.getElementById('edit-mode').style.display = 'none';
+        
+        // 🆕 Si es supervisor, ocultar botón de editar
+        const btnEditarZona = document.getElementById('btn-editar-zona');
+        if (this.userRol === 'supervisor') {
+            if (btnEditarZona) btnEditarZona.style.display = 'none';
+        } else {
+            if (btnEditarZona) btnEditarZona.style.display = 'inline-flex';
+        }
+        
+        document.getElementById('view-actions').style.display = 'flex';
+        document.getElementById('edit-actions').style.display = 'none';
+        document.getElementById('new-actions').style.display = 'none';
+    }
+
+    showEditMode() {
+        document.getElementById('view-mode').style.display = 'none';
+        document.getElementById('edit-mode').style.display = 'block';
+
+        if (this.isNewZona) {
+            document.getElementById('view-actions').style.display = 'none';
+            document.getElementById('edit-actions').style.display = 'none';
+            document.getElementById('new-actions').style.display = 'flex';
+        } else {
+            document.getElementById('view-actions').style.display = 'none';
+            document.getElementById('edit-actions').style.display = 'flex';
+            document.getElementById('new-actions').style.display = 'none';
+        }
+    }
+
+    async enableEditMode() {
+        this.editMode = true;
+        this.showEditMode();
+        await this.loadCatalogos();
+        await this.populateEditMode(this.currentZona);
+    }
+
+    cancelEdit() {
+        if (this.currentZona) {
+            this.editMode = false;
+            this.showViewMode();
+            this.populateViewMode(this.currentZona);
+        }
+    }
+
+    showTableLoading() {
+        document.getElementById('table-loading').style.display = 'block';
+        document.querySelector('.table-wrapper').style.display = 'none';
+        document.getElementById('empty-state').style.display = 'none';
+    }
+
+    hideTableLoading() {
+        document.getElementById('table-loading').style.display = 'none';
+        document.querySelector('.table-wrapper').style.display = 'block';
+    }
+
+    showEmptyState() {
+        document.querySelector('.table-wrapper').style.display = 'none';
+        document.getElementById('empty-state').style.display = 'block';
+    }
+
+    showNotification(type, title, message) {
+        const container = document.getElementById('notifications-container');
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+
+        const icon = this.getNotificationIcon(type);
+
+        notification.innerHTML = `
+            <i class="fas ${icon} notification-icon"></i>
+            <div class="notification-content">
+                <h4>${title}</h4>
+                <p>${message}</p>
+            </div>
+            <button class="notification-close">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+
+        container.appendChild(notification);
+
+        setTimeout(() => {
+            notification.style.animation = 'notificationSlideIn 0.3s ease reverse';
+            setTimeout(() => notification.remove(), 300);
+        }, 5000);
+
+        notification.querySelector('.notification-close').addEventListener('click', () => {
+            notification.style.animation = 'notificationSlideIn 0.3s ease reverse';
+            setTimeout(() => notification.remove(), 300);
+        });
+    }
+
+    getNotificationIcon(type) {
+        const icons = {
+            success: 'fa-check-circle',
+            error: 'fa-times-circle',
+            warning: 'fa-exclamation-triangle',
+            info: 'fa-info-circle'
+        };
+        return icons[type] || icons.info;
+    }
+}
+
+// Inicialización
+(function () {
+    console.log('📦 Script del módulo zonas cargado');
+
+    let zonasModuleInstance = null;
+
+    function initZonasModule() {
+        console.log('🔄 initZonasModule() llamado');
+
+        if (zonasModuleInstance) {
+            console.log('⚠️ Módulo ya inicializado');
+            return zonasModuleInstance;
+        }
+
+        const tabla = document.getElementById('zonas-table');
+        const btnNueva = document.getElementById('btn-nueva-zona');
+
+        if (!tabla || !btnNueva) {
+            console.error('❌ Elementos del módulo no encontrados');
+            setTimeout(initZonasModule, 100);
+            return null;
+        }
+
+        console.log('✅ Elementos encontrados, inicializando...');
+
+        try {
+            zonasModuleInstance = new ZonasModule();
+            window.zonasModule = zonasModuleInstance;
+            return zonasModuleInstance;
+        } catch (error) {
+            console.error('❌ Error al inicializar:', error);
+            return null;
+        }
+    }
+
+    window.initZonasModule = initZonasModule;
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initZonasModule);
+    } else {
+        initZonasModule();
+    }
+
+    setTimeout(() => {
+        if (!zonasModuleInstance) {
+            initZonasModule();
+        }
+    }, 100);
+})();
+</script>
