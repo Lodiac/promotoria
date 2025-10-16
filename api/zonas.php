@@ -477,18 +477,21 @@ function createZona($input) {
             return;
         }
 
-        // Verificar duplicados
-        error_log("🔍 Verificando duplicados...");
-        $sql_check = "SELECT id_zona FROM zonas WHERE nombre_zona = :nombre AND activa = 1 LIMIT 1";
-        $duplicate = Database::selectOne($sql_check, [':nombre' => $nombre_zona]);
+        // Verificar duplicados POR REGIÓN
+        error_log("🔍 Verificando duplicados en región $id_region...");
+        $sql_check = "SELECT id_zona FROM zonas WHERE nombre_zona = :nombre AND id_region = :id_region AND activa = 1 LIMIT 1";
+        $duplicate = Database::selectOne($sql_check, [
+            ':nombre' => $nombre_zona,
+            ':id_region' => $id_region
+        ]);
 
         if ($duplicate) {
-            error_log("❌ Duplicado encontrado: " . print_r($duplicate, true));
+            error_log("❌ Duplicado encontrado: ID " . $duplicate['id_zona']);
             http_response_code(409);
             echo json_encode([
-                'success' => false,
-                'message' => "Ya existe una zona con el nombre '{$nombre_zona}'"
-            ], JSON_UNESCAPED_UNICODE);
+            'success' => false,
+            'message' => "Ya existe una zona con el nombre '$nombre_zona'"
+        ], JSON_UNESCAPED_UNICODE);
             return;
         }
 
@@ -680,23 +683,6 @@ function updateZona($input) {
             $update_params[':nombre_zona'] = $nombre_zona;
         }
 
-        // if ($id_region !== null) {
-        //     // Verificar que la región existe
-        //     $sql_check_region = "SELECT id_region FROM regiones WHERE id_region = :id AND activa = 1";
-        //     $region_exists = Database::selectOne($sql_check_region, [':id' => $id_region]);
-
-        //     if (!$region_exists) {
-        //         http_response_code(400);
-        //         echo json_encode([
-        //             'success' => false,
-        //             'message' => 'La región especificada no existe o está inactiva'
-        //         ], JSON_UNESCAPED_UNICODE);
-        //         return;
-        //     }
-
-        //     $update_fields[] = "id_region = :id_region";
-        //     $update_params[':id_region'] = $id_region;
-        // }
         if ($id_region !== null) {
         // 🆕 YA NO VALIDAMOS - ES LIBRE
             $update_fields[] = "id_region = :id_region";
@@ -908,11 +894,12 @@ function getSupervisores() {
     }
 }
 
-// ===== FUNCIÓN: OBTENER TIENDAS DISPONIBLES =====
+// ===== 🆕 FUNCIÓN MODIFICADA: OBTENER TIENDAS DISPONIBLES (SIN ZONA ASIGNADA) =====
 function getTiendas() {
     try {
-        error_log("🏪 Obteniendo tiendas");
+        error_log("🏪 Obteniendo tiendas disponibles");
         
+        // 🆕 SOLO TIENDAS SIN ZONA ASIGNADA (id_zona IS NULL)
         $sql = "SELECT 
                     id_tienda,
                     nombre_tienda,
@@ -924,10 +911,11 @@ function getTiendas() {
                     id_zona
                 FROM tiendas
                 WHERE estado_reg = 1
+                AND id_zona IS NULL
                 ORDER BY nombre_tienda";
 
         $tiendas = Database::select($sql);
-        error_log("✅ Tiendas encontradas: " . count($tiendas));
+        error_log("✅ Tiendas disponibles (sin zona asignada): " . count($tiendas));
 
         http_response_code(200);
         echo json_encode([

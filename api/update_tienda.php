@@ -24,19 +24,18 @@ if (!in_array($_SERVER['REQUEST_METHOD'], ['PUT', 'POST'])) {
 }
 
 try {
-    // ===== VERIFICAR SESIÓN Y ROL ROOT =====
-    // ===== VERIFICAR ROL =====
-$roles_permitidos = ['root', 'supervisor'];
-if (!isset($_SESSION['rol']) || !in_array(strtolower($_SESSION['rol']), $roles_permitidos)) {
-    error_log('UPDATE_TIENDA: Acceso denegado - Rol: ' . ($_SESSION['rol'] ?? 'NO_SET'));
-    http_response_code(403);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Acceso denegado. Se requiere rol ROOT o SUPERVISOR para editar tiendas.',
-        'error' => 'insufficient_permissions'
-    ]);
-    exit;
-}
+    // ===== VERIFICAR SESIÓN Y ROL =====
+    $roles_permitidos = ['root', 'supervisor'];
+    if (!isset($_SESSION['rol']) || !in_array(strtolower($_SESSION['rol']), $roles_permitidos)) {
+        error_log('UPDATE_TIENDA: Acceso denegado - Rol: ' . ($_SESSION['rol'] ?? 'NO_SET'));
+        http_response_code(403);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Acceso denegado. Se requiere rol ROOT o SUPERVISOR para editar tiendas.',
+            'error' => 'insufficient_permissions'
+        ]);
+        exit;
+    }
 
     // ===== OBTENER DATOS =====
     $input = null;
@@ -83,7 +82,7 @@ if (!isset($_SESSION['rol']) || !in_array(strtolower($_SESSION['rol']), $roles_p
         exit;
     }
 
-    // ===== VERIFICAR QUE LA TIENDA EXISTE Y ESTÁ ACTIVA (INCLUYE NUEVOS CAMPOS) =====
+    // ===== VERIFICAR QUE LA TIENDA EXISTE Y ESTÁ ACTIVA =====
     $sql_check = "SELECT 
                       id_tienda,
                       region,
@@ -96,6 +95,11 @@ if (!isset($_SESSION['rol']) || !in_array(strtolower($_SESSION['rol']), $roles_p
                       tipo,
                       categoria,
                       comision,
+                      direccion_completa,
+                      referencia_ubicacion,
+                      latitud,
+                      longitud,
+                      coordenadas,
                       estado_reg
                   FROM tiendas 
                   WHERE id_tienda = :id_tienda 
@@ -141,7 +145,7 @@ if (!isset($_SESSION['rol']) || !in_array(strtolower($_SESSION['rol']), $roles_p
         exit;
     }
 
-    // ===== SANITIZAR Y VALIDAR DATOS (INCLUYE NUEVOS CAMPOS) =====
+    // ===== SANITIZAR Y VALIDAR DATOS =====
     $region = intval($input['region']);
     $cadena = Database::sanitize(trim($input['cadena']));
     $num_tienda = intval($input['num_tienda']);
@@ -149,13 +153,23 @@ if (!isset($_SESSION['rol']) || !in_array(strtolower($_SESSION['rol']), $roles_p
     $ciudad = Database::sanitize(trim($input['ciudad']));
     $estado = Database::sanitize(trim($input['estado']));
     
-    // CAMPOS EXISTENTES (OPCIONALES)
+    // CAMPOS OPCIONALES EXISTENTES
     $tipo = Database::sanitize(trim($input['tipo'] ?? ''));
     $promotorio_ideal = !empty($input['promotorio_ideal']) ? intval($input['promotorio_ideal']) : null;
-    
-    // NUEVOS CAMPOS
     $categoria = Database::sanitize(trim($input['categoria'] ?? ''));
     $comision = isset($input['comision']) ? floatval($input['comision']) : 0.00;
+
+    // 🆕 CAMPOS DE GEOLOCALIZACIÓN
+    $direccion_completa = Database::sanitize(trim($input['direccion_completa'] ?? ''));
+    $referencia_ubicacion = Database::sanitize(trim($input['referencia_ubicacion'] ?? ''));
+    $latitud = isset($input['latitud']) && $input['latitud'] !== '' ? floatval($input['latitud']) : null;
+    $longitud = isset($input['longitud']) && $input['longitud'] !== '' ? floatval($input['longitud']) : null;
+    
+    // Campo coordenadas (concatenación de latitud,longitud)
+    $coordenadas = null;
+    if ($latitud !== null && $longitud !== null) {
+        $coordenadas = $latitud . ',' . $longitud;
+    }
 
     // Validaciones básicas
     if ($region <= 0) {
@@ -185,7 +199,6 @@ if (!isset($_SESSION['rol']) || !in_array(strtolower($_SESSION['rol']), $roles_p
         exit;
     }
 
-    // Validaciones para campos existentes
     if (!empty($tipo) && strlen($tipo) > 100) {
         http_response_code(400);
         echo json_encode([
@@ -204,7 +217,6 @@ if (!isset($_SESSION['rol']) || !in_array(strtolower($_SESSION['rol']), $roles_p
         exit;
     }
 
-    // Validaciones para NUEVOS CAMPOS
     if (!empty($categoria) && strlen($categoria) > 100) {
         http_response_code(400);
         echo json_encode([
@@ -219,6 +231,25 @@ if (!isset($_SESSION['rol']) || !in_array(strtolower($_SESSION['rol']), $roles_p
         echo json_encode([
             'success' => false,
             'message' => 'La comisión no puede ser negativa'
+        ]);
+        exit;
+    }
+
+    // 🆕 Validaciones de geolocalización
+    if ($latitud !== null && ($latitud < -90 || $latitud > 90)) {
+        http_response_code(400);
+        echo json_encode([
+            'success' => false,
+            'message' => 'La latitud debe estar entre -90 y 90'
+        ]);
+        exit;
+    }
+
+    if ($longitud !== null && ($longitud < -180 || $longitud > 180)) {
+        http_response_code(400);
+        echo json_encode([
+            'success' => false,
+            'message' => 'La longitud debe estar entre -180 y 180'
         ]);
         exit;
     }
@@ -247,7 +278,7 @@ if (!isset($_SESSION['rol']) || !in_array(strtolower($_SESSION['rol']), $roles_p
         exit;
     }
 
-    // ===== ACTUALIZAR TIENDA (INCLUYE NUEVOS CAMPOS) =====
+    // ===== ACTUALIZAR TIENDA (CON GEOLOCALIZACIÓN) =====
     $sql_update = "UPDATE tiendas SET
                        region = :region,
                        cadena = :cadena,
@@ -259,6 +290,11 @@ if (!isset($_SESSION['rol']) || !in_array(strtolower($_SESSION['rol']), $roles_p
                        tipo = :tipo,
                        categoria = :categoria,
                        comision = :comision,
+                       direccion_completa = :direccion_completa,
+                       referencia_ubicacion = :referencia_ubicacion,
+                       latitud = :latitud,
+                       longitud = :longitud,
+                       coordenadas = :coordenadas,
                        fecha_modificacion = NOW()
                    WHERE id_tienda = :id_tienda 
                    AND estado_reg = 1";
@@ -274,6 +310,11 @@ if (!isset($_SESSION['rol']) || !in_array(strtolower($_SESSION['rol']), $roles_p
         ':tipo' => !empty($tipo) ? $tipo : null,
         ':categoria' => !empty($categoria) ? $categoria : null,
         ':comision' => $comision,
+        ':direccion_completa' => !empty($direccion_completa) ? $direccion_completa : null,
+        ':referencia_ubicacion' => !empty($referencia_ubicacion) ? $referencia_ubicacion : null,
+        ':latitud' => $latitud,
+        ':longitud' => $longitud,
+        ':coordenadas' => $coordenadas,
         ':id_tienda' => $id_tienda
     ];
 
@@ -288,7 +329,7 @@ if (!isset($_SESSION['rol']) || !in_array(strtolower($_SESSION['rol']), $roles_p
         exit;
     }
 
-    // ===== OBTENER LA TIENDA ACTUALIZADA (INCLUYE NUEVOS CAMPOS) =====
+    // ===== OBTENER LA TIENDA ACTUALIZADA =====
     $sql_get = "SELECT 
                     id_tienda,
                     region,
@@ -301,6 +342,11 @@ if (!isset($_SESSION['rol']) || !in_array(strtolower($_SESSION['rol']), $roles_p
                     tipo,
                     categoria,
                     comision,
+                    direccion_completa,
+                    referencia_ubicacion,
+                    latitud,
+                    longitud,
+                    coordenadas,
                     fecha_alta,
                     fecha_modificacion
                 FROM tiendas 
@@ -318,11 +364,18 @@ if (!isset($_SESSION['rol']) || !in_array(strtolower($_SESSION['rol']), $roles_p
     if ($tienda_actualizada['comision'] !== null) {
         $tienda_actualizada['comision_formatted'] = number_format($tienda_actualizada['comision'], 2);
     }
+    if ($tienda_actualizada['latitud'] !== null) {
+        $tienda_actualizada['latitud_formatted'] = number_format($tienda_actualizada['latitud'], 8);
+    }
+    if ($tienda_actualizada['longitud'] !== null) {
+        $tienda_actualizada['longitud_formatted'] = number_format($tienda_actualizada['longitud'], 8);
+    }
 
     // ===== LOG DE AUDITORÍA =====
-    error_log("Tienda actualizada - ID: {$id_tienda} - Nombre: {$nombre_tienda} - Cadena: {$cadena} - Tipo: " . ($tipo ?: 'N/A') . " - Promotorio: " . ($promotorio_ideal ?: 'N/A') . " - Categoría: " . ($categoria ?: 'N/A') . " - Comisión: {$comision} - Usuario: " . $_SESSION['username'] . " - IP: " . $_SERVER['REMOTE_ADDR']);
+    $log_ubicacion = ($latitud && $longitud) ? "Lat: {$latitud}, Lng: {$longitud}" : "Sin cambio ubicación";
+    error_log("Tienda actualizada - ID: {$id_tienda} - Nombre: {$nombre_tienda} - Cadena: {$cadena} - Tipo: " . ($tipo ?: 'N/A') . " - Promotorio: " . ($promotorio_ideal ?: 'N/A') . " - Categoría: " . ($categoria ?: 'N/A') . " - Comisión: {$comision} - Ubicación: {$log_ubicacion} - Usuario: " . $_SESSION['username'] . " - IP: " . $_SERVER['REMOTE_ADDR']);
 
-    // ===== RESPUESTA EXITOSA (INCLUYE NUEVOS CAMPOS EN CHANGES) =====
+    // ===== RESPUESTA EXITOSA =====
     echo json_encode([
         'success' => true,
         'message' => 'Tienda actualizada correctamente',
@@ -337,7 +390,11 @@ if (!isset($_SESSION['rol']) || !in_array(strtolower($_SESSION['rol']), $roles_p
             'promotorio_ideal' => $tienda_actual['promotorio_ideal'] !== $promotorio_ideal,
             'tipo' => $tienda_actual['tipo'] !== (!empty($tipo) ? $tipo : null),
             'categoria' => $tienda_actual['categoria'] !== (!empty($categoria) ? $categoria : null),
-            'comision' => abs($tienda_actual['comision'] - $comision) > 0.001 // Comparación de decimales
+            'comision' => abs($tienda_actual['comision'] - $comision) > 0.001,
+            'direccion_completa' => $tienda_actual['direccion_completa'] !== (!empty($direccion_completa) ? $direccion_completa : null),
+            'referencia_ubicacion' => $tienda_actual['referencia_ubicacion'] !== (!empty($referencia_ubicacion) ? $referencia_ubicacion : null),
+            'latitud' => abs(($tienda_actual['latitud'] ?? 0) - ($latitud ?? 0)) > 0.00000001,
+            'longitud' => abs(($tienda_actual['longitud'] ?? 0) - ($longitud ?? 0)) > 0.00000001
         ]
     ]);
 

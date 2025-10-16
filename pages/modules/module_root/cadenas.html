@@ -1,4 +1,4 @@
-<!-- ===== MÓDULO CADENAS COMERCIALES - ACTUALIZADO ===== -->
+<!-- ===== MÓDULO CADENAS COMERCIALES CON GEOLOCALIZACIÓN - LAYOUT 2 COLUMNAS ===== -->
 <div class="cadenas-module">
     <!-- HEADER DEL MÓDULO -->
     <div class="module-header">
@@ -27,6 +27,7 @@
                 <option value="tipo">Tipo</option>
                 <option value="promotorio_ideal">Promotorio Ideal</option>
                 <option value="categoria">Categoría</option>
+                <option value="ubicacion">Ubicación</option>
             </select>
             <input type="text" id="search-value" placeholder="Valor a buscar..." class="search-input" disabled>
             <button id="btn-buscar" class="btn-search" disabled>
@@ -35,6 +36,10 @@
             <button id="btn-limpiar" class="btn-clear">
                 <i class="fas fa-times"></i>
             </button>
+        </div>
+        <div class="search-hint" id="search-hint" style="display: none;">
+            <i class="fas fa-info-circle"></i>
+            <span id="search-hint-text"></span>
         </div>
     </div>
 
@@ -55,6 +60,7 @@
                         <th>Promotorio Ideal</th>
                         <th>Categoría</th>
                         <th>Comisión</th>
+                        <th>Ubicación</th>
                         <th>Fecha Modificación</th>
                         <th>Acciones</th>
                     </tr>
@@ -96,9 +102,9 @@
     </div>
 </div>
 
-<!-- ===== MODAL CREAR/EDITAR TIENDA ===== -->
+<!-- ===== MODAL CREAR/EDITAR TIENDA CON MAPA - LAYOUT 2 COLUMNAS ===== -->
 <div class="modal-overlay" id="modal-tienda">
-    <div class="modal-container">
+    <div class="modal-container modal-extra-large">
         <div class="modal-header">
             <h2 id="modal-title">
                 <i class="fas fa-store"></i> Nueva Tienda
@@ -107,84 +113,164 @@
                 <i class="fas fa-times"></i>
             </button>
         </div>
-        
+
         <form class="modal-form" id="form-tienda">
             <input type="hidden" id="tienda-id">
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="tienda-region">Región *</label>
-                    <input type="number" id="tienda-region" min="1" required>
-                </div>
-                <div class="form-group">
-                    <label for="tienda-num">Número de Tienda *</label>
-                    <input type="number" id="tienda-num" min="1" required>
-                </div>
-            </div>
 
-            <div class="form-group">
-                <label for="tienda-cadena">Cadena Comercial *</label>
-                <input type="text" id="tienda-cadena" maxlength="100" required>
-            </div>
+            <!-- LAYOUT DE 2 COLUMNAS -->
+            <div class="two-column-layout">
+                <!-- COLUMNA IZQUIERDA: FORMULARIO -->
+                <div class="form-column">
+                    <h3 class="section-title">
+                        <i class="fas fa-info-circle"></i> Información de la Tienda
+                    </h3>
 
-            <div class="form-group">
-                <label for="tienda-nombre">Nombre de la Tienda *</label>
-                <input type="text" id="tienda-nombre" maxlength="100" required>
-            </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="tienda-region">Región *</label>
+                            <input type="number" id="tienda-region" min="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="tienda-num">Número de Tienda *</label>
+                            <input type="number" id="tienda-num" min="1" required>
+                        </div>
+                    </div>
 
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="tienda-ciudad">Ciudad *</label>
-                    <input type="text" id="tienda-ciudad" maxlength="100" required>
-                </div>
-                <div class="form-group">
-                    <label for="tienda-estado">Estado *</label>
-                    <input type="text" id="tienda-estado" maxlength="100" required>
-                </div>
-            </div>
+                    <div class="form-group">
+                        <label for="tienda-cadena">Cadena Comercial *</label>
+                        <input type="text" id="tienda-cadena" maxlength="100" required>
+                    </div>
 
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="tienda-tipo">Tipo</label>
-                    <input type="text" id="tienda-tipo" maxlength="100" placeholder="Ej: Supermercado, Mini súper, etc.">
-                </div>
-                <div class="form-group">
-                    <label for="tienda-promotorio">Promotorio Ideal</label>
-                    <input type="number" id="tienda-promotorio" min="1" max="20" placeholder="Número ideal de promotores">
-                </div>
-            </div>
+                    <div class="form-group">
+                        <label for="tienda-nombre">Nombre de la Tienda *</label>
+                        <input type="text" id="tienda-nombre" maxlength="100" required>
+                    </div>
 
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="tienda-categoria">Categoría</label>
-                    <select id="tienda-categoria">
-                        <option value="">Seleccionar categoría...</option>
-                        <option value="A_1">A_1</option>
-                        <option value="A_2">A_2</option>
-                        <option value="A_3">A_3</option>
-                        <option value="A_4">A_4</option>
-                        <option value="A_5">A_5</option>
-                        <option value="B_1">B_1</option>
-                        <option value="B_2">B_2</option>
-                        <option value="B_3">B_3</option>
-                        <option value="B_4">B_4</option>
-                        <option value="B_5">B_5</option>
-                        <option value="C_1">C_1</option>
-                        <option value="C_2">C_2</option>
-                        <option value="C_3">C_3</option>
-                        <option value="C_4">C_4</option>
-                        <option value="C_5">C_5</option>
-                        <option value="D_1">D_1</option>
-                        <option value="D_2">D_2</option>
-                        <option value="D_3">D_3</option>
-                        <option value="D_4">D_4</option>
-                        <option value="D_5">D_5</option>
-                    </select>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="tienda-ciudad">Ciudad *</label>
+                            <input type="text" id="tienda-ciudad" maxlength="100" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="tienda-estado">Estado *</label>
+                            <input type="text" id="tienda-estado" maxlength="100" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="tienda-tipo">Tipo</label>
+                            <input type="text" id="tienda-tipo" maxlength="100"
+                                placeholder="Ej: Supermercado, Mini súper, etc.">
+                        </div>
+                        <div class="form-group">
+                            <label for="tienda-promotorio">Promotorio Ideal</label>
+                            <input type="number" id="tienda-promotorio" min="1" max="20"
+                                placeholder="Número ideal de promotores">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="tienda-categoria">Categoría</label>
+                            <select id="tienda-categoria">
+                                <option value="">Seleccionar categoría...</option>
+                                <option value="A_1">A_1</option>
+                                <option value="A_2">A_2</option>
+                                <option value="A_3">A_3</option>
+                                <option value="A_4">A_4</option>
+                                <option value="A_5">A_5</option>
+                                <option value="B_1">B_1</option>
+                                <option value="B_2">B_2</option>
+                                <option value="B_3">B_3</option>
+                                <option value="B_4">B_4</option>
+                                <option value="B_5">B_5</option>
+                                <option value="C_1">C_1</option>
+                                <option value="C_2">C_2</option>
+                                <option value="C_3">C_3</option>
+                                <option value="C_4">C_4</option>
+                                <option value="C_5">C_5</option>
+                                <option value="D_1">D_1</option>
+                                <option value="D_2">D_2</option>
+                                <option value="D_3">D_3</option>
+                                <option value="D_4">D_4</option>
+                                <option value="D_5">D_5</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="tienda-comision">Comisión</label>
+                            <input type="number" id="tienda-comision" step="0.01" min="0" placeholder="0.00"
+                                value="0.00">
+                            <small class="form-helper">Formato decimal, ej: 0.25</small>
+                        </div>
+                    </div>
+
+                    <!-- CAMPOS DE UBICACIÓN ADICIONALES -->
+                    <h3 class="section-title" style="margin-top: 1.5rem;">
+                        <i class="fas fa-map-marked-alt"></i> Detalles de Ubicación
+                    </h3>
+
+                    <div class="form-group">
+                        <label for="tienda-direccion">Dirección Completa</label>
+                        <textarea id="tienda-direccion" rows="2" placeholder="Calle, número, colonia, CP..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="tienda-referencia">Referencias</label>
+                        <input type="text" id="tienda-referencia" placeholder="Puntos de referencia cercanos...">
+                    </div>
+
+                    <!-- COORDENADAS EDITABLES MANUALMENTE O DESDE MAPA -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="tienda-latitud">
+                                <i class="fas fa-map-pin"></i> Latitud
+                            </label>
+                            <input type="number" id="tienda-latitud" step="0.00000001" min="-90" max="90"
+                                placeholder="Ej: 19.43260589">
+                            <small class="form-helper">Rango: -90 a 90. Escribe o selecciona en el mapa.</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="tienda-longitud">
+                                <i class="fas fa-map-pin"></i> Longitud
+                            </label>
+                            <input type="number" id="tienda-longitud" step="0.00000001" min="-180" max="180"
+                                placeholder="Ej: -99.13320799">
+                            <small class="form-helper">Rango: -180 a 180. Escribe o selecciona en el mapa.</small>
+                        </div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="tienda-comision">Comisión</label>
-                    <input type="number" id="tienda-comision" step="0.01" min="0" placeholder="0.00" value="0.00">
-                    <small class="form-helper">Formato decimal, ej: 0.25</small>
+
+                <!-- COLUMNA DERECHA: MAPA -->
+                <div class="map-column">
+                    <h3 class="section-title">
+                        <i class="fas fa-map-marker-alt"></i> Ubicación en Mapa
+                    </h3>
+
+                    <!-- Buscador de direcciones -->
+                    <div class="map-search-container">
+                        <div class="search-input-group">
+                            <input type="text" id="map-search-input" placeholder="Buscar dirección..."
+                                class="map-search-input">
+                            <button type="button" id="btn-search-map" class="btn-map-search">
+                                <i class="fas fa-search"></i>
+                            </button>
+                            <button type="button" id="btn-my-location" class="btn-my-location"
+                                title="Usar mi ubicación">
+                                <i class="fas fa-crosshairs"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Contenedor del mapa -->
+                    <div class="map-container">
+                        <div class="map-instructions">
+                            <i class="fas fa-info-circle"></i>
+                            <span>Haz clic en el mapa para seleccionar la ubicación</span>
+                        </div>
+                        <br>
+                        <div id="map-preview" class="map-preview"></div>
+                    </div>
                 </div>
             </div>
 
@@ -205,11 +291,11 @@
     <div class="modal-container modal-small">
         <div class="modal-header">
             <h2>
-                <i class="fas fa-exclamation-triangle text-warning"></i> 
+                <i class="fas fa-exclamation-triangle text-warning"></i>
                 Confirmar Eliminación
             </h2>
         </div>
-        
+
         <div class="modal-body">
             <p>¿Estás seguro que deseas eliminar esta tienda?</p>
             <div class="delete-details" id="delete-details"></div>
@@ -232,906 +318,1477 @@
 <!-- ===== SISTEMA DE NOTIFICACIONES ===== -->
 <div class="notifications-container" id="notifications-container"></div>
 
+<!-- LEAFLET CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
 <style>
-/* ===== ESTILOS CADENAS MODULE ===== */
-.cadenas-module {
-    padding: 0;
-    max-width: 100%;
-}
-
-/* ===== HEADER DEL MÓDULO ===== */
-.module-header {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(20px);
-    border-radius: 16px;
-    padding: 2rem;
-    margin-bottom: 2rem;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-}
-
-.header-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 1rem;
-}
-
-.header-title {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
-.header-icon {
-    width: 50px;
-    height: 50px;
-    background: #7c3aed; /* Color morado sólido */
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 1.5rem;
-}
-
-.header-title h1 {
-    margin: 0;
-    font-size: 2rem;
-    font-weight: 700;
-    color: #333;
-}
-
-/* ===== CONTROLES DE BÚSQUEDA ===== */
-.search-controls {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(20px);
-    border-radius: 16px;
-    padding: 1.5rem;
-    margin-bottom: 2rem;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-}
-
-.search-box {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    flex-wrap: wrap;
-}
-
-.search-select {
-    min-width: 200px;
-    padding: 12px 15px;
-    border: 2px solid #e0e6ed;
-    border-radius: 8px;
-    background: white;
-    font-size: 0.95rem;
-    transition: all 0.3s ease;
-}
-
-.search-select:focus {
-    border-color: #7c3aed; /* Color morado sólido */
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
-}
-
-.search-input {
-    flex: 1;
-    min-width: 250px;
-    padding: 12px 15px;
-    border: 2px solid #e0e6ed;
-    border-radius: 8px;
-    font-size: 0.95rem;
-    transition: all 0.3s ease;
-}
-
-.search-input:focus {
-    border-color: #7c3aed; /* Color morado sólido */
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
-}
-
-.search-input:disabled {
-    background: #f8f9fa;
-    color: #666;
-    cursor: not-allowed;
-}
-
-/* ===== BOTONES ===== */
-.btn-primary, .btn-secondary, .btn-danger, .btn-search, .btn-clear, .btn-action, .btn-pagination {
-    border: none;
-    border-radius: 8px;
-    padding: 12px 20px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    text-decoration: none;
-    font-size: 0.9rem;
-}
-
-.btn-primary {
-    background: #7c3aed; /* Color morado sólido */
-    color: white;
-}
-
-.btn-primary:hover:not(:disabled) {
-    background: #6d28d9; /* Morado más oscuro en hover */
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(124, 58, 237, 0.3);
-}
-
-.btn-secondary {
-    background: #6c757d;
-    color: white;
-}
-
-.btn-secondary:hover:not(:disabled) {
-    background: #5a6268;
-    transform: translateY(-2px);
-}
-
-.btn-danger {
-    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
-    color: white;
-}
-
-.btn-danger:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(231, 76, 60, 0.3);
-}
-
-.btn-search {
-    background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
-    color: white;
-    padding: 12px 16px;
-}
-
-.btn-search:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(39, 174, 96, 0.3);
-}
-
-.btn-clear {
-    background: #6c757d;
-    color: white;
-    padding: 12px 16px;
-}
-
-.btn-clear:hover {
-    background: #5a6268;
-    transform: translateY(-2px);
-}
-
-.btn-action {
-    padding: 8px 12px;
-    font-size: 0.8rem;
-    margin: 0 2px;
-}
-
-.btn-action.edit {
-    background: linear-gradient(135deg, #f39c12 0%, #d68910 100%);
-    color: white;
-}
-
-.btn-action.delete {
-    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
-    color: white;
-}
-
-.btn-pagination {
-    background: rgba(255, 255, 255, 0.9);
-    color: #333;
-    border: 2px solid #e0e6ed;
-}
-
-.btn-pagination:hover:not(:disabled) {
-    background: #7c3aed; /* Color morado sólido */
-    color: white;
-    border-color: #7c3aed; /* Color morado sólido */
-    transform: translateY(-2px);
-}
-
-.btn-pagination:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-/* ===== TABLA ===== */
-.table-container {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(20px);
-    border-radius: 16px;
-    padding: 1.5rem;
-    margin-bottom: 2rem;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    position: relative;
-    overflow: hidden;
-}
-
-.table-wrapper {
-    overflow-x: auto;
-}
-
-.tiendas-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 0;
-}
-
-.tiendas-table th {
-    background: #7c3aed; /* Color morado sólido */
-    color: white;
-    padding: 15px 12px;
-    text-align: left;
-    font-weight: 600;
-    font-size: 0.9rem;
-    white-space: nowrap;
-}
-
-.tiendas-table th:first-child {
-    border-radius: 8px 0 0 0;
-}
-
-.tiendas-table th:last-child {
-    border-radius: 0 8px 0 0;
-}
-
-.tiendas-table td {
-    padding: 15px 12px;
-    border-bottom: 1px solid #e0e6ed;
-    font-size: 0.9rem;
-    vertical-align: middle;
-}
-
-.tiendas-table tbody tr {
-    transition: all 0.3s ease;
-}
-
-.tiendas-table tbody tr:hover {
-    background: rgba(124, 58, 237, 0.05); /* Hover morado sólido con transparencia */
-}
-
-.tiendas-table tbody tr:last-child td {
-    border-bottom: none;
-}
-
-/* ===== COLUMNAS ESPECÍFICAS ===== */
-.comision-cell {
-    font-family: 'Courier New', monospace;
-    font-weight: 600;
-    color: #27ae60;
-}
-
-.categoria-cell {
-    font-weight: 600;
-    color: #7c3aed;
-}
-
-/* ===== LOADING Y EMPTY STATES ===== */
-.table-loading, .empty-state {
-    text-align: center;
-    padding: 60px 20px;
-    color: #666;
-}
-
-.loading-spinner {
-    width: 40px;
-    height: 40px;
-    border: 4px solid rgba(124, 58, 237, 0.1);
-    border-radius: 50%;
-    border-top-color: #7c3aed; /* Color morado sólido */
-    animation: spin 1s linear infinite;
-    margin: 0 auto 20px;
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
-.empty-state i {
-    font-size: 4rem;
-    color: #dee2e6;
-    margin-bottom: 1rem;
-}
-
-.empty-state h3 {
-    margin: 0 0 0.5rem 0;
-    color: #495057;
-}
-
-/* ===== PAGINACIÓN ===== */
-.pagination-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(20px);
-    border-radius: 16px;
-    padding: 1rem 1.5rem;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    flex-wrap: wrap;
-    gap: 1rem;
-}
-
-.pagination-info {
-    color: #666;
-    font-size: 0.9rem;
-}
-
-.pagination-controls {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
-.pagination-pages {
-    color: #333;
-    font-weight: 600;
-    font-size: 0.9rem;
-}
-
-/* ===== MODALES ===== */
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(10px);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 2000;
-    padding: 20px;
-}
-
-.modal-overlay.active {
-    display: flex;
-}
-
-.modal-container {
-    background: white;
-    border-radius: 16px;
-    width: 100%;
-    max-width: 600px;
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-    animation: modalSlideIn 0.3s ease;
-}
-
-.modal-container.modal-small {
-    max-width: 400px;
-}
-
-@keyframes modalSlideIn {
-    from {
-        transform: translateY(-50px);
-        opacity: 0;
+    /* ===== ESTILOS CADENAS MODULE ===== */
+    .cadenas-module {
+        padding: 0;
+        max-width: 100%;
     }
-    to {
-        transform: translateY(0);
-        opacity: 1;
+
+    /* ===== HEADER DEL MÓDULO ===== */
+    .module-header {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     }
-}
 
-.modal-header {
-    padding: 1.5rem 2rem;
-    border-bottom: 1px solid #e0e6ed;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.modal-header h2 {
-    margin: 0;
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: #333;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.modal-close {
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    color: #666;
-    cursor: pointer;
-    padding: 5px;
-    border-radius: 50%;
-    transition: all 0.3s ease;
-}
-
-.modal-close:hover {
-    background: #f8f9fa;
-    color: #333;
-}
-
-.modal-body {
-    padding: 2rem;
-}
-
-.modal-form {
-    padding: 2rem;
-}
-
-.form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    margin-bottom: 1rem;
-}
-
-.form-group {
-    margin-bottom: 1rem;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: 600;
-    color: #333;
-}
-
-.form-group input, .form-group select, .form-group textarea {
-    width: 100%;
-    padding: 12px 15px;
-    border: 2px solid #e0e6ed;
-    border-radius: 8px;
-    font-size: 0.95rem;
-    transition: all 0.3s ease;
-    box-sizing: border-box;
-}
-
-.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
-    border-color: #7c3aed; /* Color morado sólido */
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
-}
-
-.form-helper {
-    display: block;
-    margin-top: 0.25rem;
-    font-size: 0.8rem;
-    color: #666;
-}
-
-.modal-actions {
-    padding: 1.5rem 2rem;
-    border-top: 1px solid #e0e6ed;
-    display: flex;
-    justify-content: flex-end;
-    gap: 1rem;
-}
-
-.delete-details {
-    background: #f8f9fa;
-    border-radius: 8px;
-    padding: 1rem;
-    margin: 1rem 0;
-    border-left: 4px solid #f39c12;
-}
-
-.text-warning {
-    color: #f39c12;
-}
-
-/* ===== NOTIFICACIONES ===== */
-.notifications-container {
-    position: fixed;
-    top: 100px;
-    right: 20px;
-    z-index: 3000;
-    max-width: 400px;
-}
-
-.notification {
-    background: white;
-    border-radius: 12px;
-    padding: 1rem 1.5rem;
-    margin-bottom: 10px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-    border-left: 4px solid;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    animation: notificationSlideIn 0.3s ease;
-    position: relative;
-    overflow: hidden;
-}
-
-.notification.success {
-    border-left-color: #27ae60;
-}
-
-.notification.error {
-    border-left-color: #e74c3c;
-}
-
-.notification.warning {
-    border-left-color: #f39c12;
-}
-
-.notification.info {
-    border-left-color: #3498db;
-}
-
-@keyframes notificationSlideIn {
-    from {
-        transform: translateX(100%);
-        opacity: 0;
-    }
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
-}
-
-.notification-icon {
-    font-size: 1.2rem;
-}
-
-.notification.success .notification-icon {
-    color: #27ae60;
-}
-
-.notification.error .notification-icon {
-    color: #e74c3c;
-}
-
-.notification.warning .notification-icon {
-    color: #f39c12;
-}
-
-.notification.info .notification-icon {
-    color: #3498db;
-}
-
-.notification-content h4 {
-    margin: 0 0 5px 0;
-    font-size: 0.95rem;
-    font-weight: 600;
-}
-
-.notification-content p {
-    margin: 0;
-    font-size: 0.85rem;
-    color: #666;
-}
-
-.notification-close {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: none;
-    border: none;
-    font-size: 1rem;
-    color: #999;
-    cursor: pointer;
-    padding: 2px;
-}
-
-.notification-close:hover {
-    color: #333;
-}
-
-/* ===== RESPONSIVE ===== */
-@media (max-width: 768px) {
     .header-content {
-        flex-direction: column;
-        text-align: center;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .header-title {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .header-icon {
+        width: 50px;
+        height: 50px;
+        background: #7c3aed;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+    }
+
+    .header-title h1 {
+        margin: 0;
+        font-size: 2rem;
+        font-weight: 700;
+        color: #333;
+    }
+
+    /* ===== CONTROLES DE BÚSQUEDA ===== */
+    .search-controls {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     }
 
     .search-box {
-        flex-direction: column;
-        align-items: stretch;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
     }
 
-    .search-select, .search-input {
-        min-width: auto;
-        width: 100%;
+    .search-hint {
+        margin-top: 10px;
+        padding: 10px 15px;
+        background: #e3f2fd;
+        border-left: 4px solid #2196f3;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.9rem;
+        color: #1565c0;
     }
 
-    .form-row {
-        grid-template-columns: 1fr;
+    .search-hint i {
+        font-size: 1.1rem;
     }
 
-    .modal-container {
-        margin: 10px;
-        max-width: calc(100% - 20px);
+    .search-select {
+        min-width: 200px;
+        padding: 12px 15px;
+        border: 2px solid #e0e6ed;
+        border-radius: 8px;
+        background: white;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
     }
 
-    .pagination-container {
-        flex-direction: column;
-        text-align: center;
+    .search-select:focus {
+        border-color: #7c3aed;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+    }
+
+    .search-input {
+        flex: 1;
+        min-width: 250px;
+        padding: 12px 15px;
+        border: 2px solid #e0e6ed;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+    }
+
+    .search-input:focus {
+        border-color: #7c3aed;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+    }
+
+    .search-input:disabled {
+        background: #f8f9fa;
+        color: #666;
+        cursor: not-allowed;
+    }
+
+    /* ===== BOTONES ===== */
+    .btn-primary,
+    .btn-secondary,
+    .btn-danger,
+    .btn-search,
+    .btn-clear,
+    .btn-action,
+    .btn-pagination,
+    .btn-map-search,
+    .btn-my-location {
+        border: none;
+        border-radius: 8px;
+        padding: 12px 20px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+        font-size: 0.9rem;
+    }
+
+    .btn-primary {
+        background: #7c3aed;
+        color: white;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+        background: #6d28d9;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(124, 58, 237, 0.3);
+    }
+
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+        background: #5a6268;
+        transform: translateY(-2px);
+    }
+
+    .btn-danger {
+        background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        color: white;
+    }
+
+    .btn-danger:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(231, 76, 60, 0.3);
+    }
+
+    .btn-search {
+        background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+        color: white;
+        padding: 12px 16px;
+    }
+
+    .btn-search:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(39, 174, 96, 0.3);
+    }
+
+    .btn-clear {
+        background: #6c757d;
+        color: white;
+        padding: 12px 16px;
+    }
+
+    .btn-clear:hover {
+        background: #5a6268;
+        transform: translateY(-2px);
+    }
+
+    .btn-action {
+        padding: 8px 12px;
+        font-size: 0.8rem;
+        margin: 0 2px;
+    }
+
+    .btn-action.edit {
+        background: linear-gradient(135deg, #f39c12 0%, #d68910 100%);
+        color: white;
+    }
+
+    .btn-action.delete {
+        background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        color: white;
+    }
+
+    .btn-pagination {
+        background: rgba(255, 255, 255, 0.9);
+        color: #333;
+        border: 2px solid #e0e6ed;
+    }
+
+    .btn-pagination:hover:not(:disabled) {
+        background: #7c3aed;
+        color: white;
+        border-color: #7c3aed;
+        transform: translateY(-2px);
+    }
+
+    .btn-pagination:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    /* ===== BOTONES DEL MAPA ===== */
+    .btn-map-search {
+        background: #3498db;
+        color: white;
+        padding: 10px 16px;
+    }
+
+    .btn-map-search:hover {
+        background: #2980b9;
+        transform: translateY(-2px);
+    }
+
+    .btn-my-location {
+        background: #27ae60;
+        color: white;
+        padding: 10px 16px;
+    }
+
+    .btn-my-location:hover {
+        background: #229954;
+        transform: translateY(-2px);
+    }
+
+    /* ===== TABLA ===== */
+    .table-container {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        position: relative;
+        overflow: hidden;
     }
 
     .table-wrapper {
+        overflow-x: auto;
+    }
+
+    .tiendas-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 0;
+    }
+
+    .tiendas-table th {
+        background: #7c3aed;
+        color: white;
+        padding: 15px 12px;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.9rem;
+        white-space: nowrap;
+    }
+
+    .tiendas-table th:first-child {
+        border-radius: 8px 0 0 0;
+    }
+
+    .tiendas-table th:last-child {
+        border-radius: 0 8px 0 0;
+    }
+
+    .tiendas-table td {
+        padding: 15px 12px;
+        border-bottom: 1px solid #e0e6ed;
+        font-size: 0.9rem;
+        vertical-align: middle;
+    }
+
+    .tiendas-table tbody tr {
+        transition: all 0.3s ease;
+    }
+
+    .tiendas-table tbody tr:hover {
+        background: rgba(124, 58, 237, 0.05);
+    }
+
+    .tiendas-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    /* ===== COLUMNAS ESPECÍFICAS ===== */
+    .comision-cell {
+        font-family: 'Courier New', monospace;
+        font-weight: 600;
+        color: #27ae60;
+    }
+
+    .categoria-cell {
+        font-weight: 600;
+        color: #7c3aed;
+    }
+
+    .ubicacion-cell {
+        text-align: center;
+    }
+
+    .ubicacion-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 5px 10px;
+        border-radius: 6px;
         font-size: 0.8rem;
+        font-weight: 600;
     }
 
-    .tiendas-table th, .tiendas-table td {
-        padding: 10px 8px;
+    .ubicacion-badge.si {
+        background: #d4edda;
+        color: #155724;
     }
-}
 
-@media (max-width: 480px) {
-    .modal-form, .modal-body {
-        padding: 1rem;
+    .ubicacion-badge.no {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    /* ===== LOADING Y EMPTY STATES ===== */
+    .table-loading,
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #666;
+    }
+
+    .loading-spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid rgba(124, 58, 237, 0.1);
+        border-radius: 50%;
+        border-top-color: #7c3aed;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 20px;
+    }
+
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        color: #dee2e6;
+        margin-bottom: 1rem;
+    }
+
+    .empty-state h3 {
+        margin: 0 0 0.5rem 0;
+        color: #495057;
+    }
+
+    /* ===== PAGINACIÓN ===== */
+    .pagination-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 16px;
+        padding: 1rem 1.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .pagination-info {
+        color: #666;
+        font-size: 0.9rem;
+    }
+
+    .pagination-controls {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .pagination-pages {
+        color: #333;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    /* ===== MODALES ===== */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(10px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+        padding: 20px;
+    }
+
+    .modal-overlay.active {
+        display: flex;
+    }
+
+    .modal-container {
+        background: white;
+        border-radius: 16px;
+        width: 100%;
+        max-width: 600px;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        animation: modalSlideIn 0.3s ease;
+    }
+
+    .modal-container.modal-small {
+        max-width: 400px;
+    }
+
+    .modal-container.modal-extra-large {
+        max-width: 1400px;
+        max-height: 95vh;
+    }
+
+    @keyframes modalSlideIn {
+        from {
+            transform: translateY(-50px);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
     }
 
     .modal-header {
-        padding: 1rem;
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid #e0e6ed;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal-header h2 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #333;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .modal-close {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        color: #666;
+        cursor: pointer;
+        padding: 5px;
+        border-radius: 50%;
+        transition: all 0.3s ease;
+    }
+
+    .modal-close:hover {
+        background: #f8f9fa;
+        color: #333;
+    }
+
+    .modal-body {
+        padding: 2rem;
+    }
+
+    .modal-form {
+        padding: 2rem;
+    }
+
+    /* ===== LAYOUT DE 2 COLUMNAS ===== */
+    .two-column-layout {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin-bottom: 1rem;
+    }
+
+    .form-column {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .map-column {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .section-title {
+        margin: 0 0 1.5rem 0;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #333;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid #e0e6ed;
+    }
+
+    .section-title i {
+        color: #7c3aed;
+    }
+
+    /* ===== FORMULARIOS ===== */
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: #333;
+        font-size: 0.9rem;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 10px 12px;
+        border: 2px solid #e0e6ed;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        box-sizing: border-box;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        border-color: #7c3aed;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+    }
+
+    .form-group input[readonly] {
+        background: #f8f9fa;
+        color: #666;
+    }
+
+    .form-helper {
+        display: block;
+        margin-top: 0.25rem;
+        font-size: 0.75rem;
+        color: #666;
     }
 
     .modal-actions {
+        padding: 1.5rem 2rem;
+        border-top: 1px solid #e0e6ed;
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+    }
+
+    .delete-details {
+        background: #f8f9fa;
+        border-radius: 8px;
         padding: 1rem;
+        margin: 1rem 0;
+        border-left: 4px solid #f39c12;
+    }
+
+    .text-warning {
+        color: #f39c12;
+    }
+
+    /* ===== SECCIÓN DE MAPA ===== */
+    .map-search-container {
+        margin-bottom: 1rem;
+    }
+
+    .search-input-group {
+        display: flex;
+        gap: 8px;
+        align-items: stretch;
+    }
+
+    .map-search-input {
+        flex: 1;
+        padding: 10px 12px;
+        border: 2px solid #e0e6ed;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+
+    .map-search-input:focus {
+        border-color: #3498db;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    }
+
+    .map-container {
+        flex: 1;
+        display: flex;
         flex-direction: column;
     }
-}
+
+    .map-preview {
+        width: 100%;
+        height: 900px;
+        border-radius: 12px;
+        border: 2px solid #e0e6ed;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .map-instructions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        background: #e8f4f8;
+        border-radius: 8px;
+        margin-top: 10px;
+        font-size: 0.85rem;
+        color: #2c5f7f;
+    }
+
+    .map-instructions i {
+        color: #3498db;
+        font-size: 1rem;
+    }
+
+    /* ===== NOTIFICACIONES ===== */
+    .notifications-container {
+        position: fixed;
+        top: 100px;
+        right: 20px;
+        z-index: 3000;
+        max-width: 400px;
+    }
+
+    .notification {
+        background: white;
+        border-radius: 12px;
+        padding: 1rem 1.5rem;
+        margin-bottom: 10px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        border-left: 4px solid;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        animation: notificationSlideIn 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .notification.success {
+        border-left-color: #27ae60;
+    }
+
+    .notification.error {
+        border-left-color: #e74c3c;
+    }
+
+    .notification.warning {
+        border-left-color: #f39c12;
+    }
+
+    .notification.info {
+        border-left-color: #3498db;
+    }
+
+    @keyframes notificationSlideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    .notification-icon {
+        font-size: 1.2rem;
+    }
+
+    .notification.success .notification-icon {
+        color: #27ae60;
+    }
+
+    .notification.error .notification-icon {
+        color: #e74c3c;
+    }
+
+    .notification.warning .notification-icon {
+        color: #f39c12;
+    }
+
+    .notification.info .notification-icon {
+        color: #3498db;
+    }
+
+    .notification-content h4 {
+        margin: 0 0 5px 0;
+        font-size: 0.95rem;
+        font-weight: 600;
+    }
+
+    .notification-content p {
+        margin: 0;
+        font-size: 0.85rem;
+        color: #666;
+    }
+
+    .notification-close {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: none;
+        border: none;
+        font-size: 1rem;
+        color: #999;
+        cursor: pointer;
+        padding: 2px;
+    }
+
+    .notification-close:hover {
+        color: #333;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 1200px) {
+        .two-column-layout {
+            grid-template-columns: 1fr;
+        }
+
+        .modal-container.modal-extra-large {
+            max-width: 95%;
+        }
+
+        .map-preview {
+            height: 400px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .header-content {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .search-box {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .search-select,
+        .search-input {
+            min-width: auto;
+            width: 100%;
+        }
+
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+
+        .modal-container {
+            margin: 10px;
+            max-width: calc(100% - 20px);
+        }
+
+        .modal-container.modal-extra-large {
+            max-width: calc(100% - 20px);
+        }
+
+        .pagination-container {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .table-wrapper {
+            font-size: 0.8rem;
+        }
+
+        .tiendas-table th,
+        .tiendas-table td {
+            padding: 10px 8px;
+        }
+
+        .map-preview {
+            height: 300px;
+        }
+
+        .search-input-group {
+            flex-direction: column;
+        }
+    }
+
+    @media (max-width: 480px) {
+
+        .modal-form,
+        .modal-body {
+            padding: 1rem;
+        }
+
+        .modal-header {
+            padding: 1rem;
+        }
+
+        .modal-actions {
+            padding: 1rem;
+            flex-direction: column;
+        }
+
+        .two-column-layout {
+            gap: 1rem;
+        }
+    }
 </style>
 
+<!-- LEAFLET JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <script>
-// ===== VARIABLES GLOBALES =====
-let currentPage = 1;
-let totalPages = 1;
-let currentSearch = { field: '', value: '' };
-let isEditing = false;
-let editingId = null;
-let allTiendas = [];
-let filteredTiendas = [];
+    // ===== VARIABLES GLOBALES =====
+    let currentPage = 1;
+    let totalPages = 1;
+    let currentSearch = { field: '', value: '' };
+    let isEditing = false;
+    let editingId = null;
+    let allTiendas = [];
+    let filteredTiendas = [];
 
-// ===== ELEMENTOS DOM =====
-const loadingElement = document.getElementById('table-loading');
-const errorElement = document.getElementById('error-element'); // Lo crearemos si no existe
-const tableContainer = document.getElementById('tiendas-table');
-const emptyState = document.getElementById('empty-state');
-const searchField = document.getElementById('search-field');
-const searchValue = document.getElementById('search-value');
-const btnBuscar = document.getElementById('btn-buscar');
-const btnLimpiar = document.getElementById('btn-limpiar');
-const btnNuevaTienda = document.getElementById('btn-nueva-tienda');
-const tiendasTbody = document.getElementById('tiendas-tbody');
-const paginationContainer = document.getElementById('pagination-container');
-const paginationInfo = document.getElementById('pagination-info');
-const paginationPages = document.getElementById('pagination-pages');
-const btnPrev = document.getElementById('btn-prev');
-const btnNext = document.getElementById('btn-next');
+    // Variables del mapa
+    let map = null;
+    let marker = null;
+    let currentLat = null;
+    let currentLng = null;
 
-// Modales
-const modalTienda = document.getElementById('modal-tienda');
-const modalConfirmar = document.getElementById('modal-confirmar');
-const modalTitle = document.getElementById('modal-title');
-const formTienda = document.getElementById('form-tienda');
-const btnGuardar = document.getElementById('btn-guardar');
+    // ===== ELEMENTOS DOM =====
+    const loadingElement = document.getElementById('table-loading');
+    const tableContainer = document.getElementById('tiendas-table');
+    const emptyState = document.getElementById('empty-state');
+    const searchField = document.getElementById('search-field');
+    const searchValue = document.getElementById('search-value');
+    const searchHint = document.getElementById('search-hint');
+    const searchHintText = document.getElementById('search-hint-text');
+    const btnBuscar = document.getElementById('btn-buscar');
+    const btnLimpiar = document.getElementById('btn-limpiar');
+    const btnNuevaTienda = document.getElementById('btn-nueva-tienda');
+    const tiendasTbody = document.getElementById('tiendas-tbody');
+    const paginationContainer = document.getElementById('pagination-container');
+    const paginationInfo = document.getElementById('pagination-info');
+    const paginationPages = document.getElementById('pagination-pages');
+    const btnPrev = document.getElementById('btn-prev');
+    const btnNext = document.getElementById('btn-next');
 
-// ===== FUNCIONES DE ESTADO DE UI =====
-function showLoading() {
-    console.log('🔄 Mostrando loader...');
-    loadingElement.style.display = 'block';
-    tableContainer.style.display = 'none';
-    emptyState.style.display = 'none';
-    paginationContainer.style.display = 'none';
-}
-
-function showContent() {
-    console.log('📊 Mostrando contenido...');
-    loadingElement.style.display = 'none';
-    tableContainer.style.display = 'table';
-    emptyState.style.display = 'none';
-    paginationContainer.style.display = 'flex';
-}
-
-function showEmptyState(message = 'No se encontraron tiendas') {
-    console.log('📭 Mostrando estado vacío...');
-    loadingElement.style.display = 'none';
-    tableContainer.style.display = 'none';
-    emptyState.style.display = 'block';
-    paginationContainer.style.display = 'none';
-    
-    const emptyTitle = emptyState.querySelector('h3');
-    if (emptyTitle) emptyTitle.textContent = message;
-}
-
-function showError(message) {
-    console.log('❌ Mostrando error:', message);
-    loadingElement.style.display = 'none';
-    tableContainer.style.display = 'none';
-    emptyState.style.display = 'none';
-    paginationContainer.style.display = 'none';
-    
-    mostrarNotificacion('Error: ' + message, 'error');
-}
-
-// ===== INICIALIZACIÓN =====
-function init() {
-    console.log('🚀 Inicializando módulo cadenas...');
-    configurarEventListeners();
-}
-
-// ===== EVENT LISTENERS =====
-function configurarEventListeners() {
-    // Búsqueda
-    searchField.addEventListener('change', handleSearchFieldChange);
-    searchValue.addEventListener('keypress', handleSearchKeypress);
-    btnBuscar.addEventListener('click', realizarBusqueda);
-    btnLimpiar.addEventListener('click', limpiarBusqueda);
-    
-    // Botones principales
-    btnNuevaTienda.addEventListener('click', abrirModalNueva);
-    
-    // Paginación
-    btnPrev.addEventListener('click', () => cambiarPagina(currentPage - 1));
-    btnNext.addEventListener('click', () => cambiarPagina(currentPage + 1));
-    
     // Modales
-    document.getElementById('modal-close').addEventListener('click', cerrarModalTienda);
-    document.getElementById('btn-cancelar').addEventListener('click', cerrarModalTienda);
-    document.getElementById('btn-cancelar-delete').addEventListener('click', cerrarModalConfirmar);
-    document.getElementById('btn-confirmar-delete').addEventListener('click', confirmarEliminacion);
-    
-    // Formulario
-    formTienda.addEventListener('submit', guardarTienda);
-    
-    // Cerrar modales con ESC
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-            cerrarModalTienda();
-            cerrarModalConfirmar();
-        }
-    });
-    
-    // Cerrar modales clicking fuera
-    modalTienda.addEventListener('click', (e) => {
-        if (e.target === modalTienda) cerrarModalTienda();
-    });
-    
-    modalConfirmar.addEventListener('click', (e) => {
-        if (e.target === modalConfirmar) cerrarModalConfirmar();
-    });
-}
+    const modalTienda = document.getElementById('modal-tienda');
+    const modalConfirmar = document.getElementById('modal-confirmar');
+    const modalTitle = document.getElementById('modal-title');
+    const formTienda = document.getElementById('form-tienda');
+    const btnGuardar = document.getElementById('btn-guardar');
 
-// ===== CARGA DE DATOS =====
-async function cargarTiendas() {
-    console.log('🔄 Iniciando carga de tiendas...');
-    
-    try {
-        showLoading();
-        
-        const params = new URLSearchParams({
-            page: currentPage,
-            limit: 10
-        });
-        
-        if (currentSearch.field && currentSearch.value) {
-            params.append('search_field', currentSearch.field);
-            params.append('search_value', currentSearch.value);
+    // ===== FUNCIONES DE ESTADO DE UI =====
+    function showLoading() {
+        console.log('🔄 Mostrando loader...');
+        loadingElement.style.display = 'block';
+        tableContainer.style.display = 'none';
+        emptyState.style.display = 'none';
+        paginationContainer.style.display = 'none';
+    }
+
+    function showContent() {
+        console.log('📊 Mostrando contenido...');
+        loadingElement.style.display = 'none';
+        tableContainer.style.display = 'table';
+        emptyState.style.display = 'none';
+        paginationContainer.style.display = 'flex';
+    }
+
+    function showEmptyState(message = 'No se encontraron tiendas') {
+        console.log('📭 Mostrando estado vacío...');
+        loadingElement.style.display = 'none';
+        tableContainer.style.display = 'none';
+        emptyState.style.display = 'block';
+        paginationContainer.style.display = 'none';
+
+        const emptyTitle = emptyState.querySelector('h3');
+        if (emptyTitle) emptyTitle.textContent = message;
+    }
+
+    function showError(message) {
+        console.log('❌ Mostrando error:', message);
+        loadingElement.style.display = 'none';
+        tableContainer.style.display = 'none';
+        emptyState.style.display = 'none';
+        paginationContainer.style.display = 'none';
+
+        mostrarNotificacion('Error: ' + message, 'error');
+    }
+
+    // ===== INICIALIZACIÓN DEL MAPA =====
+    function initMap() {
+        if (map) {
+            map.remove();
+            map = null;
         }
-        
-        const apiUrl = `../../api/get_tiendas.php?${params}`;
-        console.log('📡 Llamando API:', apiUrl);
-        
-        const response = await fetch(apiUrl, {
-            method: 'GET',
-            cache: 'no-cache',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
+
+        // Centro por defecto (México)
+        const defaultLat = 19.4326;
+        const defaultLng = -99.1332;
+
+        // Crear mapa con configuración completa
+        map = L.map('map-preview', {
+            center: [defaultLat, defaultLng],
+            zoom: 13,
+            zoomControl: true,
+            scrollWheelZoom: true,
+            doubleClickZoom: true,
+            dragging: true
+        });
+
+        // Capa de tiles - OpenStreetMap
+        const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 19,
+            minZoom: 3,
+            tileSize: 256,
+            zoomOffset: 0,
+            detectRetina: true
+        });
+
+        // Agregar capa de mapa
+        osmLayer.addTo(map);
+
+        // Click en el mapa para colocar marcador
+        map.on('click', function (e) {
+            setMarker(e.latlng.lat, e.latlng.lng);
+        });
+
+        // Eventos para asegurar que el mapa se redimensiona correctamente
+        map.on('load', function () {
+            console.log('🗺️ Mapa cargado');
+            setTimeout(() => map.invalidateSize(), 100);
+        });
+
+        // Forzar recálculo múltiple para asegurar carga correcta
+        setTimeout(() => {
+            if (map) {
+                map.invalidateSize(true);
+                map.setView([defaultLat, defaultLng], 13);
+                console.log('🗺️ Mapa redimensionado (100ms)');
+            }
+        }, 100);
+
+        setTimeout(() => {
+            if (map) {
+                map.invalidateSize(true);
+                console.log('🗺️ Mapa redimensionado (300ms)');
+            }
+        }, 300);
+
+        setTimeout(() => {
+            if (map) {
+                map.invalidateSize(true);
+                console.log('🗺️ Mapa redimensionado (500ms)');
+            }
+        }, 500);
+
+        console.log('🗺️ Mapa inicializado correctamente');
+    }
+
+    function setMarker(lat, lng) {
+        // Remover marcador anterior
+        if (marker) {
+            map.removeLayer(marker);
+        }
+
+        // Crear nuevo marcador
+        marker = L.marker([lat, lng], {
+            draggable: true
+        }).addTo(map);
+
+        // Permitir arrastrar el marcador
+        marker.on('dragend', function (e) {
+            const position = marker.getLatLng();
+            updateCoordinates(position.lat, position.lng);
+        });
+
+        // Actualizar coordenadas
+        updateCoordinates(lat, lng);
+
+        // Centrar mapa en el marcador
+        map.setView([lat, lng], 16);
+    }
+
+    function updateCoordinates(lat, lng) {
+        currentLat = lat;
+        currentLng = lng;
+
+        const latFixed = lat.toFixed(8);
+        const lngFixed = lng.toFixed(8);
+
+        document.getElementById('tienda-latitud').value = latFixed;
+        document.getElementById('tienda-longitud').value = lngFixed;
+
+        console.log(`📍 Coordenadas actualizadas desde mapa: ${latFixed}, ${lngFixed}`);
+    }
+
+    // Sincronizar inputs manuales con el mapa
+    function setupManualCoordinates() {
+        const latInput = document.getElementById('tienda-latitud');
+        const lngInput = document.getElementById('tienda-longitud');
+
+        latInput.addEventListener('change', () => {
+            const lat = parseFloat(latInput.value);
+            const lng = parseFloat(lngInput.value);
+
+            if (!isNaN(lat) && !isNaN(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+                if (map) {
+                    setMarker(lat, lng);
+                    console.log('📍 Coordenadas actualizadas manualmente (latitud)');
+                }
             }
         });
-        
-        console.log('📥 Respuesta recibida - Status:', response.status);
-        
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error('❌ Error HTTP:', response.status, errorText);
-            throw new Error(`Error HTTP ${response.status}: ${errorText}`);
-        }
-        
-        const responseText = await response.text();
-        console.log('📄 Respuesta en texto (primeros 200 chars):', responseText.substring(0, 200));
-        
-        let data;
+
+        lngInput.addEventListener('change', () => {
+            const lat = parseFloat(latInput.value);
+            const lng = parseFloat(lngInput.value);
+
+            if (!isNaN(lat) && !isNaN(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+                if (map) {
+                    setMarker(lat, lng);
+                    console.log('📍 Coordenadas actualizadas manualmente (longitud)');
+                }
+            }
+        });
+
+        console.log('✅ Listeners de coordenadas manuales configurados');
+    }
+
+    // ===== BÚSQUEDA EN MAPA =====
+    function setupMapSearch() {
+        const searchInput = document.getElementById('map-search-input');
+        const btnSearchMap = document.getElementById('btn-search-map');
+        const btnMyLocation = document.getElementById('btn-my-location');
+
+        btnSearchMap.addEventListener('click', () => {
+            const query = searchInput.value.trim();
+            if (query) {
+                searchLocation(query);
+            } else {
+                mostrarNotificacion('Escribe una dirección para buscar', 'warning');
+            }
+        });
+
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                btnSearchMap.click();
+            }
+        });
+
+        btnMyLocation.addEventListener('click', () => {
+            getMyLocation();
+        });
+    }
+
+    async function searchLocation(query) {
         try {
-            data = JSON.parse(responseText);
-        } catch (jsonError) {
-            console.error('❌ Error parsing JSON:', jsonError);
-            console.error('❌ Respuesta completa:', responseText);
-            throw new Error('Respuesta inválida del servidor. Verifique que la API esté funcionando correctamente.');
+            mostrarNotificacion('Buscando ubicación...', 'info');
+
+            const response = await fetch(
+                `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`
+            );
+
+            if (!response.ok) {
+                throw new Error('Error al buscar la ubicación');
+            }
+
+            const data = await response.json();
+
+            if (data && data.length > 0) {
+                const result = data[0];
+                const lat = parseFloat(result.lat);
+                const lng = parseFloat(result.lon);
+
+                setMarker(lat, lng);
+                mostrarNotificacion('Ubicación encontrada', 'success');
+            } else {
+                mostrarNotificacion('No se encontró la ubicación. Intenta con otra dirección.', 'warning');
+            }
+        } catch (error) {
+            console.error('Error buscando ubicación:', error);
+            mostrarNotificacion('Error al buscar la ubicación', 'error');
         }
-        
-        console.log('✅ Datos parseados exitosamente:', data);
-        
-        if (!data.success) {
-            console.error('❌ API reporta error:', data.message);
-            throw new Error(data.message || 'Error al cargar tiendas');
+    }
+
+    async function getMyLocation() {
+        if (!navigator.geolocation) {
+            await getLocationByIP();
+            return;
         }
-        
-        console.log(`📊 ${data.data ? data.data.length : 0} tiendas recibidas`);
-        
-        allTiendas = data.data || [];
-        
-        renderizarTiendas(allTiendas);
-        actualizarPaginacion(data.pagination);
-        
-        if (allTiendas.length === 0) {
-            showEmptyState('No se encontraron tiendas');
+
+        mostrarNotificacion('Obteniendo tu ubicación...', 'info');
+
+        const options = {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
+        };
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                const accuracy = position.coords.accuracy;
+
+                console.log(`📍 Ubicación GPS obtenida: ${lat}, ${lng}`);
+                console.log(`🎯 Precisión: ${accuracy.toFixed(0)} metros`);
+
+                const estaDentroMexico = validarUbicacionMexico(lat, lng);
+
+                if (!estaDentroMexico) {
+                    console.warn('⚠️ GPS dio ubicación fuera de México, intentando con IP...');
+                    getLocationByIP();
+                    return;
+                }
+
+                setMarker(lat, lng);
+
+                if (accuracy < 50) {
+                    mostrarNotificacion(`Ubicación GPS obtenida (±${accuracy.toFixed(0)}m)`, 'success');
+                } else if (accuracy < 500) {
+                    mostrarNotificacion(`Ubicación GPS obtenida (±${accuracy.toFixed(0)}m)`, 'success');
+                } else {
+                    mostrarNotificacion(`Ubicación GPS obtenida con baja precisión (±${accuracy.toFixed(0)}m)`, 'warning');
+                }
+            },
+            async (error) => {
+                console.error('❌ Error de geolocalización GPS:', error);
+                console.log('🔄 Intentando obtener ubicación por IP...');
+                await getLocationByIP();
+            },
+            options
+        );
+    }
+
+    async function getLocationByIP() {
+        try {
+            console.log('🌐 Consultando ubicación por IP...');
+            mostrarNotificacion('Detectando ubicación por IP...', 'info');
+
+            const response = await fetch('https://ipapi.co/json/');
+
+            if (!response.ok) {
+                throw new Error('Error al consultar servicio de geolocalización');
+            }
+
+            const data = await response.json();
+
+            console.log('📡 Datos de IP recibidos:', data);
+            console.log(`🌍 País detectado: ${data.country_name} (${data.country_code})`);
+            console.log(`📍 Ciudad detectada: ${data.city}, ${data.region}`);
+            console.log(`🗺️ Coordenadas: ${data.latitude}, ${data.longitude}`);
+
+            if (data.country_code !== 'MX') {
+                console.warn(`⚠️ IP no es de México, es de: ${data.country_name}`);
+                mostrarNotificacion(
+                    `Tu IP está registrada en ${data.country_name}. ` +
+                    `Por favor, usa el buscador de direcciones para encontrar tu ubicación en México.`,
+                    'warning'
+                );
+                return;
+            }
+
+            const lat = parseFloat(data.latitude);
+            const lng = parseFloat(data.longitude);
+
+            if (!validarUbicacionMexico(lat, lng)) {
+                console.warn('⚠️ Coordenadas de IP fuera de rango de México');
+                mostrarNotificacion(
+                    'No se pudo determinar tu ubicación exacta. ' +
+                    'Por favor, usa el buscador de direcciones.',
+                    'warning'
+                );
+                return;
+            }
+
+            setMarker(lat, lng);
+
+            mostrarNotificacion(
+                `Ubicación detectada: ${data.city}, ${data.region}, México. ` +
+                `Ajusta la posición exacta en el mapa si es necesario.`,
+                'success'
+            );
+
+        } catch (error) {
+            console.error('❌ Error obteniendo ubicación por IP:', error);
+            mostrarNotificacion(
+                'No se pudo obtener tu ubicación automáticamente. ' +
+                'Por favor, usa el buscador de direcciones para encontrar tu ubicación.',
+                'error'
+            );
+        }
+    }
+
+    function validarUbicacionMexico(lat, lng) {
+        const MEXICO_BOUNDS = {
+            latMin: 14.5,
+            latMax: 32.7,
+            lngMin: -118.4,
+            lngMax: -86.7
+        };
+
+        const dentroLatitud = lat >= MEXICO_BOUNDS.latMin && lat <= MEXICO_BOUNDS.latMax;
+        const dentroLongitud = lng >= MEXICO_BOUNDS.lngMin && lng <= MEXICO_BOUNDS.lngMax;
+
+        return dentroLatitud && dentroLongitud;
+    }
+
+    // ===== INICIALIZACIÓN =====
+    function init() {
+        console.log('🚀 Inicializando módulo cadenas...');
+        configurarEventListeners();
+        setupMapSearch();
+        setupManualCoordinates();
+    }
+
+    // ===== EVENT LISTENERS =====
+    function configurarEventListeners() {
+        // Búsqueda
+        searchField.addEventListener('change', handleSearchFieldChange);
+        searchValue.addEventListener('keypress', handleSearchKeypress);
+        btnBuscar.addEventListener('click', realizarBusqueda);
+        btnLimpiar.addEventListener('click', limpiarBusqueda);
+
+        // Botones principales
+        btnNuevaTienda.addEventListener('click', abrirModalNueva);
+
+        // Paginación
+        btnPrev.addEventListener('click', () => cambiarPagina(currentPage - 1));
+        btnNext.addEventListener('click', () => cambiarPagina(currentPage + 1));
+
+        // Modales
+        document.getElementById('modal-close').addEventListener('click', cerrarModalTienda);
+        document.getElementById('btn-cancelar').addEventListener('click', cerrarModalTienda);
+        document.getElementById('btn-cancelar-delete').addEventListener('click', cerrarModalConfirmar);
+        document.getElementById('btn-confirmar-delete').addEventListener('click', confirmarEliminacion);
+
+        // Formulario
+        formTienda.addEventListener('submit', guardarTienda);
+
+        // Cerrar modales con ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                cerrarModalTienda();
+                cerrarModalConfirmar();
+            }
+        });
+
+        // Cerrar modales clicking fuera
+        modalTienda.addEventListener('click', (e) => {
+            if (e.target === modalTienda) cerrarModalTienda();
+        });
+
+        modalConfirmar.addEventListener('click', (e) => {
+            if (e.target === modalConfirmar) cerrarModalConfirmar();
+        });
+    }
+
+    // ===== CARGA DE DATOS =====
+    async function cargarTiendas() {
+        console.log('🔄 Iniciando carga de tiendas...');
+
+        try {
+            showLoading();
+
+            const params = new URLSearchParams({
+                page: currentPage,
+                limit: 10
+            });
+
+            if (currentSearch.field && currentSearch.value) {
+                params.append('search_field', currentSearch.field);
+                params.append('search_value', currentSearch.value);
+            }
+
+            const apiUrl = `../../api/get_tiendas.php?${params}`;
+            console.log('📡 Llamando API:', apiUrl);
+
+            const response = await fetch(apiUrl, {
+                method: 'GET',
+                cache: 'no-cache',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            console.log('📥 Respuesta recibida - Status:', response.status);
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('❌ Error HTTP:', response.status, errorText);
+                throw new Error(`Error HTTP ${response.status}: ${errorText}`);
+            }
+
+            const responseText = await response.text();
+            console.log('📄 Respuesta en texto (primeros 200 chars):', responseText.substring(0, 200));
+
+            let data;
+            try {
+                data = JSON.parse(responseText);
+            } catch (jsonError) {
+                console.error('❌ Error parsing JSON:', jsonError);
+                console.error('❌ Respuesta completa:', responseText);
+                throw new Error('Respuesta inválida del servidor. Verifique que la API esté funcionando correctamente.');
+            }
+
+            console.log('✅ Datos parseados exitosamente:', data);
+
+            if (!data.success) {
+                console.error('❌ API reporta error:', data.message);
+                throw new Error(data.message || 'Error al cargar tiendas');
+            }
+
+            console.log(`📊 ${data.data ? data.data.length : 0} tiendas recibidas`);
+
+            allTiendas = data.data || [];
+
+            renderizarTiendas(allTiendas);
+            actualizarPaginacion(data.pagination);
+
+            if (allTiendas.length === 0) {
+                showEmptyState('No se encontraron tiendas');
+            } else {
+                showContent();
+            }
+
+        } catch (error) {
+            console.error('❌ Error completo cargando tiendas:', error);
+            showError(error.message);
+        }
+    }
+
+    // ===== BÚSQUEDA =====
+    function handleSearchFieldChange() {
+        const hasField = searchField.value !== '';
+        searchValue.disabled = !hasField;
+        btnBuscar.disabled = !hasField;
+
+        if (!hasField) {
+            searchValue.value = '';
+            searchHint.style.display = 'none';
         } else {
-            showContent();
+            searchValue.focus();
+            
+            // Mostrar hint para el campo de ubicación
+            if (searchField.value === 'ubicacion') {
+                searchHintText.textContent = 'Escribe "si" o "sí" para tiendas CON ubicación, o "no" para tiendas SIN ubicación';
+                searchHint.style.display = 'flex';
+            } else {
+                searchHint.style.display = 'none';
+            }
         }
-        
-    } catch (error) {
-        console.error('❌ Error completo cargando tiendas:', error);
-        showError(error.message);
     }
-}
 
-// ===== BÚSQUEDA =====
-function handleSearchFieldChange() {
-    const hasField = searchField.value !== '';
-    searchValue.disabled = !hasField;
-    btnBuscar.disabled = !hasField;
-    
-    if (!hasField) {
+    function handleSearchKeypress(e) {
+        if (e.key === 'Enter' && !btnBuscar.disabled) {
+            realizarBusqueda();
+        }
+    }
+
+    function realizarBusqueda() {
+        const field = searchField.value;
+        const value = searchValue.value.trim();
+
+        if (!field || !value) {
+            mostrarNotificacion('Selecciona un campo y escribe un valor para buscar', 'warning');
+            return;
+        }
+
+        currentSearch = { field, value };
+        currentPage = 1;
+        cargarTiendas();
+    }
+
+    function limpiarBusqueda() {
+        searchField.value = '';
         searchValue.value = '';
-    } else {
-        searchValue.focus();
+        searchValue.disabled = true;
+        btnBuscar.disabled = true;
+        searchHint.style.display = 'none';
+        currentSearch = { field: '', value: '' };
+        currentPage = 1;
+        cargarTiendas();
     }
-}
 
-function handleSearchKeypress(e) {
-    if (e.key === 'Enter' && !btnBuscar.disabled) {
-        realizarBusqueda();
-    }
-}
+    // ===== RENDERIZADO =====
+    function renderizarTiendas(tiendas) {
+        console.log('🎨 Renderizando', tiendas.length, 'tiendas');
+        tiendasTbody.innerHTML = '';
 
-function realizarBusqueda() {
-    const field = searchField.value;
-    const value = searchValue.value.trim();
-    
-    if (!field || !value) {
-        mostrarNotificacion('Selecciona un campo y escribe un valor para buscar', 'warning');
-        return;
-    }
-    
-    currentSearch = { field, value };
-    currentPage = 1;
-    cargarTiendas();
-}
+        if (tiendas.length === 0) {
+            showEmptyState('No se encontraron tiendas con los criterios de búsqueda');
+            return;
+        }
 
-function limpiarBusqueda() {
-    searchField.value = '';
-    searchValue.value = '';
-    searchValue.disabled = true;
-    btnBuscar.disabled = true;
-    currentSearch = { field: '', value: '' };
-    currentPage = 1;
-    cargarTiendas();
-}
+        tiendas.forEach(tienda => {
+            const tieneUbicacion = tienda.latitud && tienda.longitud;
+            const ubicacionBadge = tieneUbicacion
+                ? '<span class="ubicacion-badge si"><i class="fas fa-check"></i> Sí</span>'
+                : '<span class="ubicacion-badge no"><i class="fas fa-times"></i> No</span>';
 
-// ===== RENDERIZADO =====
-function renderizarTiendas(tiendas) {
-    console.log('🎨 Renderizando', tiendas.length, 'tiendas');
-    tiendasTbody.innerHTML = '';
-    
-    if (tiendas.length === 0) {
-        showEmptyState('No se encontraron tiendas con los criterios de búsqueda');
-        return;
-    }
-    
-    tiendas.forEach(tienda => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
+            const row = document.createElement('tr');
+            row.innerHTML = `
             <td>${tienda.id_tienda}</td>
             <td>${tienda.region}</td>
             <td>${tienda.cadena}</td>
@@ -1143,6 +1800,7 @@ function renderizarTiendas(tiendas) {
             <td>${tienda.promotorio_ideal || 'N/A'}</td>
             <td class="categoria-cell">${tienda.categoria || 'N/A'}</td>
             <td class="comision-cell">${tienda.comision_formatted || tienda.comision || '0.00'}</td>
+            <td class="ubicacion-cell">${ubicacionBadge}</td>
             <td>${tienda.fecha_modificacion_formatted || 'N/A'}</td>
             <td>
                 <button class="btn-action edit" onclick="editarTienda(${tienda.id_tienda})">
@@ -1153,257 +1811,312 @@ function renderizarTiendas(tiendas) {
                 </button>
             </td>
         `;
-        tiendasTbody.appendChild(row);
-    });
-}
-
-function actualizarPaginacion(pagination) {
-    if (!pagination) {
-        console.warn('⚠️ Sin datos de paginación');
-        return;
-    }
-    
-    currentPage = pagination.current_page || 1;
-    totalPages = pagination.total_pages || 1;
-    
-    paginationInfo.textContent = `Mostrando ${pagination.per_page || 0} de ${pagination.total_records || 0} registros`;
-    paginationPages.textContent = `Página ${currentPage} de ${totalPages}`;
-    
-    btnPrev.disabled = !pagination.has_prev;
-    btnNext.disabled = !pagination.has_next;
-}
-
-function cambiarPagina(page) {
-    if (page < 1 || page > totalPages) return;
-    currentPage = page;
-    cargarTiendas();
-}
-
-// ===== MODAL NUEVA/EDITAR =====
-function abrirModalNueva() {
-    isEditing = false;
-    editingId = null;
-    modalTitle.innerHTML = '<i class="fas fa-store"></i> Nueva Tienda';
-    btnGuardar.innerHTML = '<i class="fas fa-save"></i> Crear';
-    limpiarFormulario();
-    abrirModal(modalTienda);
-}
-
-async function editarTienda(id) {
-    console.log('✏️ Editando tienda ID:', id);
-    
-    try {
-        const tiendaData = allTiendas.find(t => t.id_tienda == id);
-        
-        if (!tiendaData) {
-            throw new Error('No se encontraron los datos de la tienda');
-        }
-        
-        isEditing = true;
-        editingId = id;
-        modalTitle.innerHTML = '<i class="fas fa-edit"></i> Editar Tienda';
-        btnGuardar.innerHTML = '<i class="fas fa-save"></i> Actualizar';
-        
-        // Llenar formulario incluyendo todos los campos
-        document.getElementById('tienda-id').value = tiendaData.id_tienda;
-        document.getElementById('tienda-region').value = tiendaData.region;
-        document.getElementById('tienda-cadena').value = tiendaData.cadena;
-        document.getElementById('tienda-num').value = tiendaData.num_tienda;
-        document.getElementById('tienda-nombre').value = tiendaData.nombre_tienda;
-        document.getElementById('tienda-ciudad').value = tiendaData.ciudad;
-        document.getElementById('tienda-estado').value = tiendaData.estado;
-        document.getElementById('tienda-tipo').value = tiendaData.tipo || '';
-        document.getElementById('tienda-promotorio').value = tiendaData.promotorio_ideal || '';
-        document.getElementById('tienda-categoria').value = tiendaData.categoria || '';
-        document.getElementById('tienda-comision').value = tiendaData.comision || '0.00';
-        
-        abrirModal(modalTienda);
-        
-    } catch (error) {
-        console.error('❌ Error preparando edición:', error);
-        mostrarNotificacion('Error al cargar datos para edición: ' + error.message, 'error');
-    }
-}
-
-function limpiarFormulario() {
-    formTienda.reset();
-    document.getElementById('tienda-id').value = '';
-    // Establecer valores por defecto
-    document.getElementById('tienda-comision').value = '0.00';
-}
-
-function abrirModal(modal) {
-    modal.classList.add('active');
-    document.body.style.overflow = 'hidden';
-}
-
-function cerrarModalTienda() {
-    modalTienda.classList.remove('active');
-    document.body.style.overflow = 'auto';
-    limpiarFormulario();
-}
-
-// ===== GUARDAR TIENDA =====
-async function guardarTienda(e) {
-    e.preventDefault();
-    
-    const formData = {
-        region: parseInt(document.getElementById('tienda-region').value),
-        cadena: document.getElementById('tienda-cadena').value.trim(),
-        num_tienda: parseInt(document.getElementById('tienda-num').value),
-        nombre_tienda: document.getElementById('tienda-nombre').value.trim(),
-        ciudad: document.getElementById('tienda-ciudad').value.trim(),
-        estado: document.getElementById('tienda-estado').value.trim(),
-        tipo: document.getElementById('tienda-tipo').value.trim() || null,
-        promotorio_ideal: document.getElementById('tienda-promotorio').value ? parseInt(document.getElementById('tienda-promotorio').value) : null,
-        categoria: document.getElementById('tienda-categoria').value.trim() || null,
-        comision: parseFloat(document.getElementById('tienda-comision').value) || 0.00
-    };
-    
-    if (isEditing) {
-        formData.id_tienda = editingId;
-    }
-    
-    // Validaciones básicas
-    if (!formData.region || !formData.num_tienda || !formData.cadena || !formData.nombre_tienda || !formData.ciudad || !formData.estado) {
-        mostrarNotificacion('Los campos marcados con * son requeridos', 'warning');
-        return;
-    }
-    
-    // Validación de comisión
-    if (formData.comision < 0) {
-        mostrarNotificacion('La comisión no puede ser negativa', 'warning');
-        return;
-    }
-    
-    btnGuardar.disabled = true;
-    btnGuardar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
-    
-    try {
-        const url = isEditing ? '../../api/update_tienda.php' : '../../api/create_tienda.php';
-        
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(formData)
+            tiendasTbody.appendChild(row);
         });
-        
-        const responseText = await response.text();
-        console.log('Respuesta guardar:', responseText);
-        
-        let data;
-        try {
-            data = JSON.parse(responseText);
-        } catch (jsonError) {
-            throw new Error('Respuesta inválida del servidor');
-        }
-        
-        if (!data.success) {
-            throw new Error(data.message || 'Error al guardar tienda');
-        }
-        
-        const accion = isEditing ? 'actualizada' : 'creada';
-        mostrarNotificacion(`Tienda ${accion} correctamente`, 'success');
-        
-        cerrarModalTienda();
-        cargarTiendas();
-        
-    } catch (error) {
-        console.error(`❌ Error ${isEditing ? 'actualizando' : 'creando'} tienda:`, error);
-        mostrarNotificacion(`Error al ${isEditing ? 'actualizar' : 'crear'} tienda: ` + error.message, 'error');
-    } finally {
-        btnGuardar.disabled = false;
-        btnGuardar.innerHTML = isEditing ? '<i class="fas fa-save"></i> Actualizar' : '<i class="fas fa-save"></i> Crear';
     }
-}
 
-// ===== ELIMINAR TIENDA =====
-let tiendaAEliminar = null;
+    function actualizarPaginacion(pagination) {
+        if (!pagination) {
+            console.warn('⚠️ Sin datos de paginación');
+            return;
+        }
 
-function eliminarTienda(id, nombre, cadena) {
-    tiendaAEliminar = { id, nombre, cadena };
-    
-    document.getElementById('delete-details').innerHTML = `
+        currentPage = pagination.current_page || 1;
+        totalPages = pagination.total_pages || 1;
+
+        paginationInfo.textContent = `Mostrando ${pagination.per_page || 0} de ${pagination.total_records || 0} registros`;
+        paginationPages.textContent = `Página ${currentPage} de ${totalPages}`;
+
+        btnPrev.disabled = !pagination.has_prev;
+        btnNext.disabled = !pagination.has_next;
+    }
+
+    function cambiarPagina(page) {
+        if (page < 1 || page > totalPages) return;
+        currentPage = page;
+        cargarTiendas();
+    }
+
+    // ===== MODAL NUEVA/EDITAR =====
+    function abrirModalNueva() {
+        isEditing = false;
+        editingId = null;
+        modalTitle.innerHTML = '<i class="fas fa-store"></i> Nueva Tienda';
+        btnGuardar.innerHTML = '<i class="fas fa-save"></i> Crear';
+        limpiarFormulario();
+
+        abrirModal(modalTienda);
+
+        setTimeout(() => {
+            if (!map) {
+                initMap();
+            } else {
+                map.invalidateSize(true);
+                map.eachLayer(function (layer) {
+                    if (layer._url) {
+                        layer.redraw();
+                    }
+                });
+                setTimeout(() => {
+                    map.invalidateSize(true);
+                }, 200);
+            }
+        }, 300);
+    }
+
+    async function editarTienda(id) {
+        console.log('✏️ Editando tienda ID:', id);
+
+        try {
+            const tiendaData = allTiendas.find(t => t.id_tienda == id);
+
+            if (!tiendaData) {
+                throw new Error('No se encontraron los datos de la tienda');
+            }
+
+            isEditing = true;
+            editingId = id;
+            modalTitle.innerHTML = '<i class="fas fa-edit"></i> Editar Tienda';
+            btnGuardar.innerHTML = '<i class="fas fa-save"></i> Actualizar';
+
+            document.getElementById('tienda-id').value = tiendaData.id_tienda;
+            document.getElementById('tienda-region').value = tiendaData.region;
+            document.getElementById('tienda-cadena').value = tiendaData.cadena;
+            document.getElementById('tienda-num').value = tiendaData.num_tienda;
+            document.getElementById('tienda-nombre').value = tiendaData.nombre_tienda;
+            document.getElementById('tienda-ciudad').value = tiendaData.ciudad;
+            document.getElementById('tienda-estado').value = tiendaData.estado;
+            document.getElementById('tienda-tipo').value = tiendaData.tipo || '';
+            document.getElementById('tienda-promotorio').value = tiendaData.promotorio_ideal || '';
+            document.getElementById('tienda-categoria').value = tiendaData.categoria || '';
+            document.getElementById('tienda-comision').value = tiendaData.comision || '0.00';
+            document.getElementById('tienda-direccion').value = tiendaData.direccion_completa || '';
+            document.getElementById('tienda-referencia').value = tiendaData.referencia_ubicacion || '';
+            document.getElementById('tienda-latitud').value = tiendaData.latitud || '';
+            document.getElementById('tienda-longitud').value = tiendaData.longitud || '';
+
+            abrirModal(modalTienda);
+
+            setTimeout(() => {
+                if (!map) {
+                    initMap();
+                } else {
+                    map.invalidateSize(true);
+                    map.eachLayer(function (layer) {
+                        if (layer._url) {
+                            layer.redraw();
+                        }
+                    });
+                    setTimeout(() => {
+                        map.invalidateSize(true);
+                    }, 200);
+                }
+
+                if (tiendaData.latitud && tiendaData.longitud) {
+                    setTimeout(() => {
+                        setMarker(parseFloat(tiendaData.latitud), parseFloat(tiendaData.longitud));
+                    }, 400);
+                }
+            }, 300);
+
+        } catch (error) {
+            console.error('❌ Error preparando edición:', error);
+            mostrarNotificacion('Error al cargar datos para edición: ' + error.message, 'error');
+        }
+    }
+
+    function limpiarFormulario() {
+        formTienda.reset();
+        document.getElementById('tienda-id').value = '';
+        document.getElementById('tienda-comision').value = '0.00';
+        document.getElementById('tienda-latitud').value = '';
+        document.getElementById('tienda-longitud').value = '';
+
+        if (marker) {
+            map.removeLayer(marker);
+            marker = null;
+        }
+        currentLat = null;
+        currentLng = null;
+    }
+
+    function abrirModal(modal) {
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function cerrarModalTienda() {
+        modalTienda.classList.remove('active');
+        document.body.style.overflow = 'auto';
+        limpiarFormulario();
+    }
+
+    // ===== GUARDAR TIENDA =====
+    async function guardarTienda(e) {
+        e.preventDefault();
+
+        const formData = {
+            region: parseInt(document.getElementById('tienda-region').value),
+            cadena: document.getElementById('tienda-cadena').value.trim(),
+            num_tienda: parseInt(document.getElementById('tienda-num').value),
+            nombre_tienda: document.getElementById('tienda-nombre').value.trim(),
+            ciudad: document.getElementById('tienda-ciudad').value.trim(),
+            estado: document.getElementById('tienda-estado').value.trim(),
+            tipo: document.getElementById('tienda-tipo').value.trim() || null,
+            promotorio_ideal: document.getElementById('tienda-promotorio').value ? parseInt(document.getElementById('tienda-promotorio').value) : null,
+            categoria: document.getElementById('tienda-categoria').value.trim() || null,
+            comision: parseFloat(document.getElementById('tienda-comision').value) || 0.00,
+            direccion_completa: document.getElementById('tienda-direccion').value.trim() || null,
+            referencia_ubicacion: document.getElementById('tienda-referencia').value.trim() || null,
+            latitud: currentLat,
+            longitud: currentLng,
+            coordenadas: (currentLat && currentLng) ? `${currentLat},${currentLng}` : null
+        };
+
+        if (isEditing) {
+            formData.id_tienda = editingId;
+        }
+
+        if (!formData.region || !formData.num_tienda || !formData.cadena || !formData.nombre_tienda || !formData.ciudad || !formData.estado) {
+            mostrarNotificacion('Los campos marcados con * son requeridos', 'warning');
+            return;
+        }
+
+        if (formData.comision < 0) {
+            mostrarNotificacion('La comisión no puede ser negativa', 'warning');
+            return;
+        }
+
+        btnGuardar.disabled = true;
+        btnGuardar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+
+        try {
+            const url = isEditing ? '../../api/update_tienda.php' : '../../api/create_tienda.php';
+
+            console.log('📤 Enviando datos:', formData);
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            });
+
+            const responseText = await response.text();
+            console.log('📥 Respuesta guardar:', responseText);
+
+            let data;
+            try {
+                data = JSON.parse(responseText);
+            } catch (jsonError) {
+                throw new Error('Respuesta inválida del servidor');
+            }
+
+            if (!data.success) {
+                throw new Error(data.message || 'Error al guardar tienda');
+            }
+
+            const accion = isEditing ? 'actualizada' : 'creada';
+            mostrarNotificacion(`Tienda ${accion} correctamente`, 'success');
+
+            cerrarModalTienda();
+            cargarTiendas();
+
+        } catch (error) {
+            console.error(`❌ Error ${isEditing ? 'actualizando' : 'creando'} tienda:`, error);
+            mostrarNotificacion(`Error al ${isEditing ? 'actualizar' : 'crear'} tienda: ` + error.message, 'error');
+        } finally {
+            btnGuardar.disabled = false;
+            btnGuardar.innerHTML = isEditing ? '<i class="fas fa-save"></i> Actualizar' : '<i class="fas fa-save"></i> Crear';
+        }
+    }
+
+    // ===== ELIMINAR TIENDA =====
+    let tiendaAEliminar = null;
+
+    function eliminarTienda(id, nombre, cadena) {
+        tiendaAEliminar = { id, nombre, cadena };
+
+        document.getElementById('delete-details').innerHTML = `
         <strong>ID:</strong> ${id}<br>
         <strong>Nombre:</strong> ${nombre}<br>
         <strong>Cadena:</strong> ${cadena}
     `;
-    
-    abrirModal(modalConfirmar);
-}
 
-function cerrarModalConfirmar() {
-    modalConfirmar.classList.remove('active');
-    document.body.style.overflow = 'auto';
-    tiendaAEliminar = null;
-}
-
-async function confirmarEliminacion() {
-    if (!tiendaAEliminar) return;
-    
-    const btnConfirmar = document.getElementById('btn-confirmar-delete');
-    btnConfirmar.disabled = true;
-    btnConfirmar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Eliminando...';
-    
-    try {
-        const response = await fetch('../../api/delete_tienda.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                id_tienda: tiendaAEliminar.id
-            })
-        });
-        
-        const responseText = await response.text();
-        let data;
-        try {
-            data = JSON.parse(responseText);
-        } catch (jsonError) {
-            throw new Error('Respuesta inválida del servidor');
-        }
-        
-        if (!data.success) {
-            throw new Error(data.message || 'Error al eliminar tienda');
-        }
-        
-        mostrarNotificacion('Tienda eliminada correctamente', 'success');
-        
-        cerrarModalConfirmar();
-        cargarTiendas();
-        
-    } catch (error) {
-        console.error('❌ Error eliminando tienda:', error);
-        mostrarNotificacion('Error al eliminar tienda: ' + error.message, 'error');
-    } finally {
-        btnConfirmar.disabled = false;
-        btnConfirmar.innerHTML = '<i class="fas fa-trash"></i> Eliminar';
+        abrirModal(modalConfirmar);
     }
-}
 
-// ===== NOTIFICACIONES =====
-function mostrarNotificacion(mensaje, tipo = 'info') {
-    const notificacion = document.createElement('div');
-    notificacion.className = `notification ${tipo}`;
-    
-    const iconos = {
-        success: 'fas fa-check-circle',
-        error: 'fas fa-exclamation-circle',
-        warning: 'fas fa-exclamation-triangle',
-        info: 'fas fa-info-circle'
-    };
-    
-    const titulos = {
-        success: 'Éxito',
-        error: 'Error',
-        warning: 'Advertencia',
-        info: 'Información'
-    };
-    
-    notificacion.innerHTML = `
+    function cerrarModalConfirmar() {
+        modalConfirmar.classList.remove('active');
+        document.body.style.overflow = 'auto';
+        tiendaAEliminar = null;
+    }
+
+    async function confirmarEliminacion() {
+        if (!tiendaAEliminar) return;
+
+        const btnConfirmar = document.getElementById('btn-confirmar-delete');
+        btnConfirmar.disabled = true;
+        btnConfirmar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Eliminando...';
+
+        try {
+            const response = await fetch('../../api/delete_tienda.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    id_tienda: tiendaAEliminar.id
+                })
+            });
+
+            const responseText = await response.text();
+            let data;
+            try {
+                data = JSON.parse(responseText);
+            } catch (jsonError) {
+                throw new Error('Respuesta inválida del servidor');
+            }
+
+            if (!data.success) {
+                throw new Error(data.message || 'Error al eliminar tienda');
+            }
+
+            mostrarNotificacion('Tienda eliminada correctamente', 'success');
+
+            cerrarModalConfirmar();
+            cargarTiendas();
+
+        } catch (error) {
+            console.error('❌ Error eliminando tienda:', error);
+            mostrarNotificacion('Error al eliminar tienda: ' + error.message, 'error');
+        } finally {
+            btnConfirmar.disabled = false;
+            btnConfirmar.innerHTML = '<i class="fas fa-trash"></i> Eliminar';
+        }
+    }
+
+    // ===== NOTIFICACIONES ===== 
+    function mostrarNotificacion(mensaje, tipo = 'info') {
+        const notificacion = document.createElement('div');
+        notificacion.className = `notification ${tipo}`;
+
+        const iconos = {
+            success: 'fas fa-check-circle',
+            error: 'fas fa-exclamation-circle',
+            warning: 'fas fa-exclamation-triangle',
+            info: 'fas fa-info-circle'
+        };
+
+        const titulos = {
+            success: 'Éxito',
+            error: 'Error',
+            warning: 'Advertencia',
+            info: 'Información'
+        };
+
+        notificacion.innerHTML = `
         <i class="${iconos[tipo]} notification-icon"></i>
         <div class="notification-content">
             <h4>${titulos[tipo]}</h4>
@@ -1413,32 +2126,32 @@ function mostrarNotificacion(mensaje, tipo = 'info') {
             <i class="fas fa-times"></i>
         </button>
     `;
-    
-    notificacion.querySelector('.notification-close').addEventListener('click', () => {
-        notificacion.remove();
-    });
-    
-    setTimeout(() => {
-        if (notificacion.parentNode) {
+
+        notificacion.querySelector('.notification-close').addEventListener('click', () => {
             notificacion.remove();
-        }
-    }, 5000);
-    
-    document.getElementById('notifications-container').appendChild(notificacion);
-}
+        });
 
-// ===== EXPONER FUNCIONES GLOBALES =====
-window.editarTienda = editarTienda;
-window.eliminarTienda = eliminarTienda;
+        setTimeout(() => {
+            if (notificacion.parentNode) {
+                notificacion.remove();
+            }
+        }, 5000);
 
-// ===== INICIALIZACIÓN =====
-console.log('🏪 Iniciando módulo Cadenas Comerciales...');
-init();
+        document.getElementById('notifications-container').appendChild(notificacion);
+    }
 
-setTimeout(() => {
-    console.log('⏰ Iniciando carga de datos...');
-    cargarTiendas();
-}, 100);
+    // ===== EXPONER FUNCIONES GLOBALES =====
+    window.editarTienda = editarTienda;
+    window.eliminarTienda = eliminarTienda;
 
-console.log('✅ Módulo cadenas inicializado correctamente');
+    // ===== INICIALIZACIÓN =====
+    console.log('🏪 Iniciando módulo Cadenas Comerciales con Geolocalización...');
+    init();
+
+    setTimeout(() => {
+        console.log('⏰ Iniciando carga de datos...');
+        cargarTiendas();
+    }, 100);
+
+    console.log('✅ Módulo cadenas con geolocalización inicializado correctamente');
 </script>

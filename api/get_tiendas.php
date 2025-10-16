@@ -49,20 +49,18 @@ try {
         exit;
     }
 
-
-   // ===== VERIFICAR ROL =====
-// ===== VERIFICAR ROL (ROOT y SUPERVISOR pueden VER) =====
-$roles_permitidos = ['root', 'supervisor'];
-if (!isset($_SESSION['rol']) || !in_array(strtolower($_SESSION['rol']), $roles_permitidos)) {
-    error_log('GET_TIENDAS: Acceso denegado - Rol: ' . ($_SESSION['rol'] ?? 'NO_SET'));
-    http_response_code(403);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Acceso denegado. Se requiere rol ROOT o SUPERVISOR.',
-        'error' => 'insufficient_permissions'
-    ]);
-    exit;
-}
+    // ===== VERIFICAR ROL (ROOT y SUPERVISOR pueden VER) =====
+    $roles_permitidos = ['root', 'supervisor'];
+    if (!isset($_SESSION['rol']) || !in_array(strtolower($_SESSION['rol']), $roles_permitidos)) {
+        error_log('GET_TIENDAS: Acceso denegado - Rol: ' . ($_SESSION['rol'] ?? 'NO_SET'));
+        http_response_code(403);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Acceso denegado. Se requiere rol ROOT o SUPERVISOR.',
+            'error' => 'insufficient_permissions'
+        ]);
+        exit;
+    }
 
     error_log('GET_TIENDAS: Sesión válida - Usuario: ' . ($_SESSION['username'] ?? 'NO_USERNAME') . ', Rol: ' . $_SESSION['rol']);
 
@@ -89,7 +87,7 @@ if (!isset($_SESSION['rol']) || !in_array(strtolower($_SESSION['rol']), $roles_p
 
     error_log('GET_TIENDAS: Parámetros - page: ' . $page . ', limit: ' . $limit . ', search: ' . $search_field . '=' . $search_value);
 
-    // ===== CAMPOS VÁLIDOS PARA BÚSQUEDA (INCLUYE CATEGORIA, NO COMISION) =====
+    // ===== CAMPOS VÁLIDOS PARA BÚSQUEDA =====
     $valid_search_fields = [
         'region',
         'cadena', 
@@ -99,8 +97,8 @@ if (!isset($_SESSION['rol']) || !in_array(strtolower($_SESSION['rol']), $roles_p
         'estado',
         'tipo',
         'promotorio_ideal',
-        'categoria'  // NUEVO: incluir categoria en búsquedas
-        // NO incluir comision en búsquedas
+        'categoria',
+        'ubicacion'  // 🆕 NUEVO CAMPO
     ];
 
     // ===== VERIFICAR CONEXIÓN DB =====
@@ -149,19 +147,41 @@ if (!isset($_SESSION['rol']) || !in_array(strtolower($_SESSION['rol']), $roles_p
     // ===== APLICAR FILTRO DE BÚSQUEDA =====
     if (!empty($search_field) && !empty($search_value)) {
         $search_field = Database::sanitize($search_field);
-        $search_value = Database::sanitize($search_value);
+        $search_value_clean = Database::sanitize($search_value);
         
         if (in_array($search_field, $valid_search_fields)) {
-            if ($search_field === 'num_tienda' || $search_field === 'region' || $search_field === 'promotorio_ideal') {
-                // Búsqueda exacta para campos numéricos
-                $sql_base .= " AND t.{$search_field} = :search_value";
-                $params[':search_value'] = intval($search_value);
-            } else {
-                // Búsqueda LIKE para campos de texto (incluye categoria)
-                $sql_base .= " AND t.{$search_field} LIKE :search_value";
-                $params[':search_value'] = '%' . $search_value . '%';
+            // 🆕 MANEJO ESPECIAL PARA EL CAMPO "UBICACION"
+            if ($search_field === 'ubicacion') {
+                // Normalizar el valor de búsqueda
+                $search_value_lower = strtolower($search_value_clean);
+                
+                // Buscar variaciones de "sí" o "si" para tiendas CON ubicación
+                if (in_array($search_value_lower, ['si', 'sí', 's', 'yes', 'y', '1'])) {
+                    $sql_base .= " AND t.latitud IS NOT NULL AND t.longitud IS NOT NULL";
+                    error_log('GET_TIENDAS: Filtro aplicado - ubicacion = CON coordenadas');
+                }
+                // Buscar "no" para tiendas SIN ubicación
+                else if (in_array($search_value_lower, ['no', 'n', 'not', '0'])) {
+                    $sql_base .= " AND (t.latitud IS NULL OR t.longitud IS NULL)";
+                    error_log('GET_TIENDAS: Filtro aplicado - ubicacion = SIN coordenadas');
+                }
+                else {
+                    // Si no es un valor reconocido, no aplicar filtro pero notificar
+                    error_log('GET_TIENDAS: Valor de ubicación no reconocido: ' . $search_value_clean);
+                }
             }
-            error_log('GET_TIENDAS: Filtro aplicado - ' . $search_field . ' = ' . $search_value);
+            // Campos numéricos
+            else if ($search_field === 'num_tienda' || $search_field === 'region' || $search_field === 'promotorio_ideal') {
+                $sql_base .= " AND t.{$search_field} = :search_value";
+                $params[':search_value'] = intval($search_value_clean);
+                error_log('GET_TIENDAS: Filtro numérico aplicado - ' . $search_field . ' = ' . intval($search_value_clean));
+            }
+            // Campos de texto
+            else {
+                $sql_base .= " AND t.{$search_field} LIKE :search_value";
+                $params[':search_value'] = '%' . $search_value_clean . '%';
+                error_log('GET_TIENDAS: Filtro texto aplicado - ' . $search_field . ' LIKE %' . $search_value_clean . '%');
+            }
         } else {
             error_log('GET_TIENDAS: Campo de búsqueda inválido - ' . $search_field);
         }
@@ -182,7 +202,7 @@ if (!isset($_SESSION['rol']) || !in_array(strtolower($_SESSION['rol']), $roles_p
         throw new Exception('Error contando registros: ' . $count_error->getMessage());
     }
 
-    // ===== OBTENER REGISTROS CON PAGINACIÓN (INCLUYE NUEVOS CAMPOS) =====
+    // ===== OBTENER REGISTROS CON PAGINACIÓN (CON GEOLOCALIZACIÓN) =====
     $offset = ($page - 1) * $limit;
     
     $sql_data = "SELECT 
@@ -197,6 +217,11 @@ if (!isset($_SESSION['rol']) || !in_array(strtolower($_SESSION['rol']), $roles_p
                     t.tipo,
                     t.categoria,
                     t.comision,
+                    t.direccion_completa,
+                    t.referencia_ubicacion,
+                    t.latitud,
+                    t.longitud,
+                    t.coordenadas,
                     t.fecha_alta,
                     t.fecha_modificacion
                  " . $sql_base . "
@@ -230,6 +255,14 @@ if (!isset($_SESSION['rol']) || !in_array(strtolower($_SESSION['rol']), $roles_p
         if ($tienda['comision'] !== null) {
             $tienda['comision_formatted'] = number_format($tienda['comision'], 2);
         }
+        
+        // 🆕 Formatear coordenadas para lectura
+        if ($tienda['latitud'] !== null) {
+            $tienda['latitud_formatted'] = number_format($tienda['latitud'], 8);
+        }
+        if ($tienda['longitud'] !== null) {
+            $tienda['longitud_formatted'] = number_format($tienda['longitud'], 8);
+        }
     }
 
     error_log('GET_TIENDAS: Formateo exitoso - Preparando respuesta');
@@ -251,7 +284,7 @@ if (!isset($_SESSION['rol']) || !in_array(strtolower($_SESSION['rol']), $roles_p
             'value' => $search_value,
             'applied' => !empty($search_field) && !empty($search_value)
         ],
-        'user_rol' => $rol  // 🆕 Incluir rol del usuario en respuesta
+        'user_rol' => $rol
     ];
 
     error_log('GET_TIENDAS: Respuesta preparada - Enviando JSON');

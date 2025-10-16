@@ -1,11 +1,12 @@
 <?php
-session_start();
-
 // 🔑 DEFINIR CONSTANTE ANTES DE INCLUIR DB_CONNECT
 define('APP_ACCESS', true);
 
 // Incluir la API de base de datos
 require_once __DIR__ . '/db_connect.php';
+
+// ⚠️ Iniciar sesión ANTES de cualquier salida
+session_start();
 
 // Verificar que sea POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -73,7 +74,7 @@ try {
         exit;
     }
     
-    // LOGIN EXITOSO
+    // ✅ LOGIN EXITOSO
     
     // Regenerar ID de sesión por seguridad
     session_regenerate_id(true);
@@ -87,6 +88,7 @@ try {
     $_SESSION['rol'] = $usuario['rol'];
     $_SESSION['login_time'] = time();
     $_SESSION['last_activity'] = time();
+    $_SESSION['logged_in'] = true;
     
     // Actualizar último acceso en la BD
     Database::execute(
@@ -95,9 +97,9 @@ try {
     );
     
     // Log de login exitoso
-    error_log("Login exitoso - Usuario: {$usuario['username']} - Rol: {$usuario['rol']} - IP: " . $_SERVER['REMOTE_ADDR']);
+    error_log("Login exitoso - Usuario: {$usuario['username']} - Rol: {$usuario['rol']} - SessionID: " . session_id() . " - IP: " . $_SERVER['REMOTE_ADDR']);
     
-    // 🚀 REDIRIGIR SEGÚN EL ROL DEL USUARIO
+    // 🚀 REDIRIGIR SEGÚN EL ROL
     switch($usuario['rol']) {
         case 'root':
             header('Location: ../pages/root/dashboard.html');

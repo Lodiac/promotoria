@@ -1,6 +1,7 @@
 <?php
 /**
  * Helper para manejo de sesiones
+ * Sistema de sesión estándar de PHP
  */
 
 // Definir constante de acceso
@@ -9,8 +10,17 @@ define('APP_ACCESS', true);
 // Incluir la API de base de datos
 require_once __DIR__ . '/db_connect.php';
 
-// Iniciar sesión si no está iniciada
+// ===== CONFIGURACIÓN DE SESIÓN ESTÁNDAR =====
 if (session_status() == PHP_SESSION_NONE) {
+    
+    // Configuraciones de seguridad
+    ini_set('session.cookie_httponly', 1);
+    ini_set('session.use_only_cookies', 1);
+    ini_set('session.cookie_secure', 0); // Cambiar a 1 si usas HTTPS
+    ini_set('session.cookie_samesite', 'Lax');
+    ini_set('session.gc_maxlifetime', 3600); // 1 hora
+    
+    // Iniciar sesión estándar
     session_start();
 }
 
@@ -18,7 +28,9 @@ if (session_status() == PHP_SESSION_NONE) {
  * Verificar si el usuario está logueado
  */
 function isLoggedIn() {
-    return isset($_SESSION['user_id']) && !empty($_SESSION['user_id']);
+    return isset($_SESSION['user_id']) && 
+           isset($_SESSION['logged_in']) && 
+           $_SESSION['logged_in'] === true;
 }
 
 /**
@@ -64,15 +76,26 @@ function hasRole($rol_requerido) {
  */
 function requireLogin() {
     if (!isLoggedIn()) {
-        // CORREGIDO: redirigir a index.html, no login.html
-        header('Location: ../index.html');
+        header('Content-Type: application/json');
+        http_response_code(403);
+        echo json_encode([
+            'success' => false,
+            'message' => 'No hay sesión activa',
+            'error' => 'no_session'
+        ]);
         exit;
     }
     
     // Verificar timeout de sesión (1 hora)
     if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity'] > 3600)) {
         logout();
-        header('Location: ../index.html?error=timeout');
+        header('Content-Type: application/json');
+        http_response_code(403);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Sesión expirada',
+            'error' => 'session_timeout'
+        ]);
         exit;
     }
     
@@ -87,8 +110,13 @@ function requireRole($rol_requerido) {
     requireLogin();
     
     if (!hasRole($rol_requerido)) {
-        // CORREGIDO: Redirigir a index.html con error de permisos
-        header('Location: ../index.html?error=sin_permisos');
+        header('Content-Type: application/json');
+        http_response_code(403);
+        echo json_encode([
+            'success' => false,
+            'message' => 'No tienes permisos suficientes',
+            'error' => 'insufficient_permissions'
+        ]);
         exit;
     }
 }
@@ -99,7 +127,7 @@ function requireRole($rol_requerido) {
 function logout() {
     if (isLoggedIn()) {
         // Log del logout
-        error_log("Logout - Usuario: {$_SESSION['username']} - IP: " . $_SERVER['REMOTE_ADDR']);
+        error_log("Logout - Usuario: {$_SESSION['username']} - SessionID: " . session_id() . " - IP: " . $_SERVER['REMOTE_ADDR']);
     }
     
     // Limpiar todas las variables de sesión
@@ -226,7 +254,14 @@ function checkPagePermissions($pagina, $rol_minimo = 'usuario') {
     $rol_requerido = $permisos_paginas[$pagina] ?? $rol_minimo;
     
     if (!hasRole($rol_requerido)) {
-        header('Location: ../index.html?error=sin_permisos&pagina=' . urlencode($pagina));
+        header('Content-Type: application/json');
+        http_response_code(403);
+        echo json_encode([
+            'success' => false,
+            'message' => 'No tienes permisos para acceder a esta página',
+            'error' => 'insufficient_permissions',
+            'pagina' => $pagina
+        ]);
         exit;
     }
     
