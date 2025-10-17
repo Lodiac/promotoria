@@ -508,8 +508,10 @@
 <style>
     /* ===== ESTILOS PROMOTORES MODULE CON SISTEMA DE MÚLTIPLES CLAVES FILTRADAS POR MÚLTIPLES TIENDAS ===== */
     .promotores-module {
-        padding: 0;
+        width: 100%;
         max-width: 100%;
+        overflow-x: hidden;
+        padding: 15px;
     }
 
     /* ===== VARIABLES CSS - TEMA VERDE ===== */
@@ -1783,6 +1785,22 @@
         }
     }
 
+    /* ===== TABLET (481px - 768px) ===== */
+    @media (min-width: 481px) and (max-width: 768px) {
+        .stats-grid-small {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .claves-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .modal-container {
+            max-width: 90%;
+        }
+    }
+
+    /* ===== MÓVILES PEQUEÑOS (max-width: 480px) ===== */
     @media (max-width: 480px) {
 
         .modal-form,
@@ -1824,6 +1842,85 @@
 
         .claves-selector-container {
             padding: 1rem;
+        }
+
+        .table-wrapper {
+            font-size: 0.75rem;
+        }
+
+        .promotores-table th,
+        .promotores-table td {
+            padding: 8px 5px;
+        }
+    }
+
+    /* ===== MÓVILES MUY PEQUEÑOS (max-width: 360px) ===== */
+    @media (max-width: 360px) {
+        .modal-container {
+            margin: 5px;
+            max-width: calc(100% - 10px);
+        }
+
+        .modal-form,
+        .modal-body,
+        .modal-content,
+        .modal-header,
+        .modal-actions,
+        .form-section,
+        .info-section {
+            padding: 0.75rem;
+        }
+
+        .table-wrapper {
+            font-size: 0.7rem;
+        }
+
+        .promotores-table th,
+        .promotores-table td {
+            padding: 6px 4px;
+        }
+
+        .stats-grid-small {
+            grid-template-columns: 1fr;
+            gap: 0.5rem;
+        }
+    }
+
+    /* ===== PANTALLAS GRANDES (min-width: 1200px) ===== */
+    @media (min-width: 1200px) {
+        .modal-container {
+            max-width: 1000px;
+        }
+
+        .info-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .stats-grid-small {
+            grid-template-columns: repeat(4, 1fr);
+        }
+
+        .claves-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    /* ===== PANTALLAS EXTRA GRANDES (min-width: 1600px) ===== */
+    @media (min-width: 1600px) {
+        .modal-container {
+            max-width: 1200px;
+        }
+
+        .info-grid {
+            grid-template-columns: repeat(4, 1fr);
+        }
+
+        .stats-grid-small {
+            grid-template-columns: repeat(5, 1fr);
+        }
+
+        .claves-grid {
+            grid-template-columns: repeat(4, 1fr);
         }
     }
 
@@ -1947,6 +2044,9 @@
         text-transform: uppercase;
         letter-spacing: 0.5px;
     }
+
+    
+
 </style>
 
 <script>
@@ -3783,4 +3883,5 @@
     });
 
     console.log('✅ Módulo promotores con día de descanso inicializado correctamente');
+
 </script>

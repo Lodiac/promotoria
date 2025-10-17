@@ -1417,7 +1417,8 @@
     function setupMapSearch() {
         const searchInput = document.getElementById('map-search-input');
         const btnSearchMap = document.getElementById('btn-search-map');
-        const btnMyLocation = document.getElementById('btn-my-location');
+        const btnMyLocation = document.getElementById('btn-my-location'); 
+        
 
         btnSearchMap.addEventListener('click', () => {
             const query = searchInput.value.trim();
@@ -1970,9 +1971,9 @@
             referencia_ubicacion: document.getElementById('tienda-referencia').value.trim() || null,
             latitud: currentLat,
             longitud: currentLng,
-            coordenadas: (currentLat && currentLng) ? `${currentLat},${currentLng}` : null
+            coordenadas: (currentLat && currentLng) ? `${currentLat},${currentLng}` : null 
         };
-
+    
         if (isEditing) {
             formData.id_tienda = editingId;
         }

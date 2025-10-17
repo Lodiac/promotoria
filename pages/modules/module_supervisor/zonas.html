@@ -434,83 +434,79 @@
             transform: scale(1.2);
         }
 
-        /* ===== AUTOCOMPLETE PARA TIENDAS ===== */
+        /* ===== 🆕 AUTOCOMPLETE MEJORADO (FLECHA DENTRO) ===== */
         .autocomplete-container {
             position: relative;
             flex: 1;
             min-width: 250px;
         }
 
-        /* 🆕 WRAPPER PARA INPUT + BOTÓN */
-        .autocomplete-wrapper {
-            position: relative;
-            display: flex;
-            gap: 0;
-        }
-
-        .autocomplete-wrapper .autocomplete-input {
-            border-radius: 8px 0 0 8px;
-            border-right: none;
-            flex: 1;
-        }
-
+        /* 🆕 INPUT CON ESPACIO PARA LA FLECHA */
+        .autocomplete-container .form-input,
         .autocomplete-input {
             width: 100%;
-            padding: 10px 15px;
+            padding: 10px 45px 10px 15px;
             border: 2px solid var(--border-color);
             border-radius: 8px;
             font-size: 0.9rem;
             transition: all 0.3s ease;
+            background: white;
+            color: var(--text-primary);
+            box-sizing: border-box;
         }
 
+        .autocomplete-container .form-input:focus,
         .autocomplete-input:focus {
             border-color: var(--zone-primary);
             outline: none;
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
+        .autocomplete-container .form-input::placeholder,
         .autocomplete-input::placeholder {
             color: #999;
         }
 
-        /* 🆕 BOTÓN DESPLEGABLE */
+        /* 🆕 BOTÓN DE FLECHA DENTRO DEL INPUT */
         .autocomplete-dropdown-btn {
-            background: white;
-            border: 2px solid var(--border-color);
-            border-left: none;
-            border-radius: 0 8px 8px 0;
-            padding: 10px 15px;
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 40px;
+            background: transparent;
+            border: none;
             cursor: pointer;
-            transition: all 0.3s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            min-width: 45px;
+            color: var(--text-secondary);
+            transition: all 0.3s ease;
+            z-index: 1;
+            border-radius: 0 8px 8px 0;
         }
 
         .autocomplete-dropdown-btn:hover {
-            background: var(--zone-light);
-            border-color: var(--zone-primary);
+            color: var(--zone-primary);
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .autocomplete-dropdown-btn:active {
+            background: rgba(102, 126, 234, 0.1);
         }
 
         .autocomplete-dropdown-btn:focus {
             outline: none;
-            border-color: var(--zone-primary);
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
-        .autocomplete-wrapper .autocomplete-input:focus {
-            border-color: var(--zone-primary);
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .autocomplete-wrapper .autocomplete-input:focus+.autocomplete-dropdown-btn {
-            border-color: var(--zone-primary);
+        .autocomplete-dropdown-btn.active {
+            color: var(--zone-primary);
+            background: rgba(102, 126, 234, 0.08);
         }
 
         .autocomplete-dropdown-btn i {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
+            font-size: 14px;
+            pointer-events: none;
             transition: transform 0.3s ease;
         }
 
@@ -518,27 +514,40 @@
             transform: rotate(180deg);
         }
 
+        /* 🆕 DROPDOWN DE SUGERENCIAS */
         .autocomplete-suggestions {
             position: absolute;
-            top: 100%;
+            top: calc(100% + 4px);
             left: 0;
             right: 0;
             background: white;
             border: 2px solid var(--zone-primary);
-            border-top: none;
-            border-radius: 0 0 8px 8px;
-            max-height: 300px;
+            border-radius: 8px;
+            max-height: 400px;
             overflow-y: auto;
             z-index: 1000;
             display: none;
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-            margin-top: -2px;
+            animation: slideDown 0.2s ease;
         }
 
         .autocomplete-suggestions.active {
             display: block;
         }
 
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 🆕 CADA SUGERENCIA */
         .autocomplete-suggestion {
             padding: 12px 15px;
             cursor: pointer;
@@ -551,6 +560,11 @@
 
         .autocomplete-suggestion:last-child {
             border-bottom: none;
+            border-radius: 0 0 8px 8px;
+        }
+
+        .autocomplete-suggestion:first-child {
+            border-radius: 8px 8px 0 0;
         }
 
         .autocomplete-suggestion:hover,
@@ -558,12 +572,27 @@
             background: var(--zone-light);
         }
 
+        .autocomplete-suggestion:active {
+            background: rgba(102, 126, 234, 0.15);
+        }
+
+        /* 🆕 NOMBRE DEL ITEM */
         .autocomplete-suggestion-name {
             font-weight: 600;
             color: var(--text-primary);
             font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
+        .autocomplete-suggestion-name i {
+            color: var(--zone-primary);
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        /* 🆕 DETALLES ADICIONALES */
         .autocomplete-suggestion-details {
             font-size: 0.8rem;
             color: var(--text-secondary);
@@ -572,6 +601,18 @@
             flex-wrap: wrap;
         }
 
+        .autocomplete-suggestion-details span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .autocomplete-suggestion-details i {
+            font-size: 12px;
+            color: #999;
+        }
+
+        /* 🆕 BADGES EN SUGERENCIAS */
         .autocomplete-suggestion-badge {
             background: #e0e7ff;
             color: var(--zone-primary);
@@ -581,17 +622,60 @@
             font-weight: 600;
         }
 
+        /* 🆕 MENSAJE SIN RESULTADOS */
         .autocomplete-no-results {
             padding: 20px;
             text-align: center;
             color: var(--text-secondary);
             font-style: italic;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .autocomplete-no-results i {
+            font-size: 16px;
         }
 
         .autocomplete-loading {
             padding: 12px 15px;
             text-align: center;
             color: var(--text-secondary);
+        }
+
+        /* 🆕 SCROLLBAR PERSONALIZADO PARA DROPDOWN */
+        .autocomplete-suggestions::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .autocomplete-suggestions::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .autocomplete-suggestions::-webkit-scrollbar-thumb {
+            background: var(--zone-primary);
+            border-radius: 4px;
+        }
+
+        .autocomplete-suggestions::-webkit-scrollbar-thumb:hover {
+            background: var(--zone-primary-hover);
+        }
+
+        /* 🆕 ESTADOS ESPECIALES */
+        .autocomplete-container .form-input:disabled {
+            background: #f5f5f5;
+            cursor: not-allowed;
+            color: #999;
+        }
+
+        .autocomplete-container .form-input.error {
+            border-color: var(--danger-color);
+        }
+
+        .autocomplete-container .form-input.success {
+            border-color: var(--success-color);
         }
 
         /* ===== LOADING Y EMPTY STATES ===== */
@@ -1030,128 +1114,6 @@
             color: #333;
         }
 
-        /* ===== RESPONSIVE ===== */
-        @media (max-width: 768px) {
-            .header-content {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .header-title {
-                flex-direction: column;
-            }
-
-            .search-box {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .search-select,
-            .search-input {
-                min-width: auto;
-                width: 100%;
-            }
-
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-
-            .info-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .modal-container {
-                margin: 10px;
-                max-width: calc(100% - 20px);
-            }
-
-            .pagination-container {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .asignacion-container {
-                flex-direction: column;
-            }
-
-            .modal-actions {
-                flex-direction: column;
-            }
-
-            .modal-actions button {
-                width: 100%;
-            }
-
-            .notifications-container {
-                left: 20px;
-                right: 20px;
-                max-width: none;
-            }
-
-            .table-wrapper {
-                overflow-x: scroll;
-            }
-
-            .zonas-table {
-                min-width: 800px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            body {
-                padding: 10px;
-            }
-
-            .module-header {
-                padding: 1rem;
-            }
-
-            .header-title h1 {
-                font-size: 1.5rem;
-            }
-
-            .modal-form {
-                padding: 1rem;
-            }
-
-            .modal-header {
-                padding: 1rem;
-            }
-
-            .modal-header h2 {
-                font-size: 1.2rem;
-            }
-
-            .modal-actions {
-                padding: 1rem;
-            }
-
-            .info-section,
-            .form-section {
-                padding: 1rem;
-            }
-        }
-
-        /* ===== SCROLLBAR PERSONALIZADO ===== */
-        ::-webkit-scrollbar {
-            width: 10px;
-            height: 10px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--zone-primary);
-            border-radius: 10px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--zone-primary-hover);
-        }
-
         /* ===== PROMOTORES EN TIENDAS ===== */
         .tienda-badge-wrapper {
             position: relative;
@@ -1255,40 +1217,502 @@
             font-size: 0.8rem;
         }
 
+        /* ===== 🆕 ESTILOS PARA RESTAURACIÓN DE ZONAS ===== */
+        .restore-suggestion {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid var(--info-color);
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
 
-        /* ===== BANNER INFORMATIVO PARA SUPERVISOR ===== */
-        .info-banner {
+        .restore-suggestion.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .restore-suggestion-header {
+            background: linear-gradient(135deg, var(--info-color) 0%, #2563eb 100%);
+            color: white;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .restore-suggestion-header i {
+            font-size: 1rem;
+        }
+
+        .restore-suggestion-content {
+            padding: 16px;
+        }
+
+        .restore-suggestion-name {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .restore-suggestion-name strong {
+            font-size: 1.1rem;
+            color: var(--text-primary);
+        }
+
+        .restore-badge {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 8px rgba(251, 191, 36, 0.3);
+        }
+
+        .restore-suggestion-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 12px;
+            padding: 12px;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+
+        .restore-suggestion-details div {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .restore-suggestion-details i {
+            color: var(--info-color);
+            font-size: 0.9rem;
+        }
+
+        .restore-suggestion-date {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-style: italic;
+            padding: 8px 12px;
+            background: #fef3c7;
+            border-left: 3px solid var(--warning-color);
+            border-radius: 4px;
+        }
+
+        .restore-suggestion-date i {
+            color: var(--warning-color);
+        }
+
+        .restore-suggestion-actions {
+            padding: 12px 16px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            background: #f8fafc;
+        }
+
+        .btn-restore-ignore,
+        .btn-restore-apply {
+            border: none;
+            border-radius: 8px;
+            padding: 10px 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+        }
+
+        .btn-restore-ignore {
+            background: #e5e7eb;
+            color: var(--text-secondary);
+        }
+
+        .btn-restore-ignore:hover {
+            background: #d1d5db;
+            transform: translateY(-2px);
+        }
+
+        .btn-restore-apply {
+            background: linear-gradient(135deg, var(--info-color) 0%, #2563eb 100%);
+            color: white;
+        }
+
+        .btn-restore-apply:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-restore-ignore i,
+        .btn-restore-apply i {
+            font-size: 0.9rem;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .header-title {
+                flex-direction: column;
+            }
+
+            .search-box {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-select,
+            .search-input {
+                min-width: auto;
+                width: 100%;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-container {
+                margin: 10px;
+                max-width: calc(100% - 20px);
+            }
+
+            .pagination-container {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .asignacion-container {
+                flex-direction: column;
+            }
+
+            .modal-actions {
+                flex-direction: column;
+            }
+
+            .modal-actions button {
+                width: 100%;
+            }
+
+            .notifications-container {
+                left: 20px;
+                right: 20px;
+                max-width: none;
+            }
+
+            .table-wrapper {
+                overflow-x: scroll;
+            }
+
+            .zonas-table {
+                min-width: 800px;
+            }
+
+            .autocomplete-container {
+                min-width: auto;
+            }
+
+            .restore-suggestion-details {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .restore-suggestion-actions {
+                flex-direction: column;
+            }
+
+            .btn-restore-ignore,
+            .btn-restore-apply {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+
+            .module-header {
+                padding: 1rem;
+            }
+
+            .header-title h1 {
+                font-size: 1.5rem;
+            }
+
+            .modal-form {
+                padding: 1rem;
+            }
+
+            .modal-header {
+                padding: 1rem;
+            }
+
+            .modal-header h2 {
+                font-size: 1.2rem;
+            }
+
+            .modal-actions {
+                padding: 1rem;
+            }
+
+            .info-section,
+            .form-section {
+                padding: 1rem;
+            }
+        }
+
+        /* ===== SCROLLBAR PERSONALIZADO ===== */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--zone-primary);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--zone-primary-hover);
+        }
+    
+
+        /* ===== ESTILOS BASE DEL MODAL ===== */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+            overflow-y: auto;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            animation: slideDown 0.3s ease;
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 2px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 10;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+            padding: 0.5rem;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background: #f0f0f0;
+            color: var(--text-primary);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .modal-actions {
+            padding: 1rem 1.5rem;
+            border-top: 2px solid var(--border-color);
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            position: sticky;
+            bottom: 0;
+            background: white;
+            z-index: 10;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ===== ESTILOS MODAL INCIDENCIAS ===== */
+
+        .btn-incidencia {
             background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
             color: white;
-            padding: 1rem 1.5rem;
-            border-radius: 12px;
-            margin-bottom: 1.5rem;
-            display: none;
-            /* Oculto por defecto */
-            align-items: center;
-            gap: 1rem;
+        }
+        .btn-incidencia:hover:not(:disabled) {
+            transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(245, 158, 11, 0.3);
         }
-
-        .info-banner.active {
+        .header-actions {
             display: flex;
-            /* Se muestra cuando tiene clase active */
+            gap: 10px;
+            flex-wrap: wrap;
         }
-
-        .info-banner i {
-            font-size: 1.5rem;
+        .modal-incidencia-content {
+            max-width: 900px;
         }
-
-        .info-banner-content h3 {
-            margin: 0 0 0.25rem 0;
+        .form-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .form-section h3 {
+            margin: 0 0 1rem 0;
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: var(--zone-primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        .form-helper {
+            display: block;
+            margin-top: 0.25rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+        .info-calculada {
+            background: linear-gradient(135deg, var(--zone-light) 0%, #f3f4f6 100%);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .info-calculada .info-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-primary);
+        }
+        .info-calculada .info-item i {
+            color: var(--zone-primary);
+            font-size: 1.2rem;
+        }
+        .info-calculada .info-item strong {
+            color: var(--zone-primary);
             font-size: 1.1rem;
         }
 
-        .info-banner-content p {
-            margin: 0;
-            opacity: 0.9;
-            font-size: 0.9rem;
-        }
     </style>
 </head>
 
@@ -1300,17 +1724,14 @@
                     <i class="fas fa-map-marked-alt header-icon"></i>
                     <h1>Gestión de Zonas y Regiones</h1>
                 </div>
-                <button class="btn-primary" id="btn-nueva-zona">
-                    <i class="fas fa-plus"></i> Nueva Zona
-                </button>
-            </div>
-        </div>
-        <!-- 🆕 BANNER INFORMATIVO PARA SUPERVISORES -->
-        <div class="info-banner" id="supervisor-banner">
-            <i class="fas fa-user-shield"></i>
-            <div class="info-banner-content">
-                <h3>Modo Supervisor</h3>
-                <p>Estás viendo solo las zonas asignadas a tu cargo</p>
+                <div class="header-actions">
+                    <button class="btn-primary" id="btn-nueva-zona">
+                        <i class="fas fa-plus"></i> Nueva Zona
+                    </button>
+                    <button class="btn-incidencia" id="btn-reportar-incidencia">
+                        <i class="fas fa-exclamation-triangle"></i> Reportar Incidencia
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -1319,7 +1740,7 @@
                 <select id="search-field" class="search-select">
                     <option value="">Seleccionar campo...</option>
                     <option value="nombre_zona">Nombre Zona</option>
-                    <option value="region_numero">Número de Región</option>
+                    <option value="numero_region">Número de Región</option>
                     <option value="supervisor">Supervisor Asignado</option>
                     <option value="tienda">Tienda Asignada</option>
                 </select>
@@ -1347,6 +1768,7 @@
                             <th>Estado</th>
                             <th>Fecha Creación</th>
                             <th>Acciones</th>
+                            
                         </tr>
                     </thead>
                     <tbody id="zonas-tbody">
@@ -1477,39 +1899,38 @@
                     <div class="form-section">
                         <h3><i class="fas fa-user-tie"></i> Asignar Supervisores</h3>
 
-                        <div class="asignacion-container">
-                            <div class="form-group">
-                                <label for="supervisor-select">Seleccionar Supervisor</label>
-                                <select id="supervisor-select" class="select-asignacion">
-                                    <option value="">Seleccionar supervisor...</option>
-                                </select>
+                        <div class="form-group">
+                            <label class="form-label">Seleccionar Supervisor</label>
+
+                            <div class="autocomplete-container">
+                                <input type="text" class="form-input" id="supervisor-input"
+                                    placeholder="Escribe el nombre o haz clic en la flecha para ver todos..."
+                                    autocomplete="off">
+                                <button type="button" class="autocomplete-dropdown-btn" id="supervisor-dropdown-btn"
+                                    title="Ver todos los supervisores">
+                                    <i class="fas fa-chevron-down"></i>
+                                </button>
+                                <div class="autocomplete-suggestions" id="supervisor-suggestions"></div>
                             </div>
-                            <button type="button" id="btn-agregar-supervisor" class="btn-secondary">
-                                <i class="fas fa-plus"></i> Asignar Supervisor
-                            </button>
                         </div>
 
-                        <div class="lista-asignados" id="supervisores-asignados-list">
+                        <div id="supervisores-asignados-list" class="asignados-list empty">
+                            <p class="empty-message">No hay supervisores asignados</p>
                         </div>
-                        <input type="hidden" id="supervisores-asignados-json">
                     </div>
 
-                    <!-- 🆕 SECCIÓN DE TIENDAS CON SISTEMA HÍBRIDO -->
                     <div class="form-section">
                         <h3><i class="fas fa-store"></i> Asignar Tiendas</h3>
 
                         <div class="form-group">
                             <label for="tienda-input">Buscar o Seleccionar Tienda</label>
                             <div class="autocomplete-container">
-                                <!-- 🆕 WRAPPER CON INPUT Y BOTÓN FLECHA -->
-                                <div class="autocomplete-wrapper">
-                                    <input type="text" id="tienda-input" class="autocomplete-input"
-                                        placeholder="Escribe el nombre o haz clic en la flecha..." autocomplete="off">
-                                    <button type="button" id="tienda-dropdown-btn" class="autocomplete-dropdown-btn"
-                                        title="Ver todas las tiendas disponibles">
-                                        <i class="fas fa-chevron-down"></i>
-                                    </button>
-                                </div>
+                                <input type="text" id="tienda-input" class="form-input"
+                                    placeholder="Escribe el nombre o haz clic en la flecha..." autocomplete="off">
+                                <button type="button" id="tienda-dropdown-btn" class="autocomplete-dropdown-btn"
+                                    title="Ver todas las tiendas disponibles">
+                                    <i class="fas fa-chevron-down"></i>
+                                </button>
                                 <div id="tienda-suggestions" class="autocomplete-suggestions"></div>
                             </div>
                             <small class="form-helper">Escribe para buscar o haz clic en la flecha para ver
@@ -1578,1149 +1999,1920 @@
         console.log('========================================');
     </script>
 
-   <script>
-class ZonasModule {
-    constructor() {
-        console.log('🏗️ Inicializando módulo de zonas...');
+    <script>
+        class ZonasModule {
+            constructor() {
+                console.log('🏗️ Inicializando módulo de zonas...');
 
-        this.currentPage = 1;
-        this.itemsPerPage = 10;
-        this.totalItems = 0;
-        this.totalPages = 0;
-        this.searchField = '';
-        this.searchValue = '';
-        this.editMode = false;
-        this.isNewZona = false;
-        this.supervisoresAsignados = [];
-        this.tiendasAsignadas = [];
-        this.currentZona = null;
-        this.supervisoresData = [];
-        this.tiendasData = [];
-        this.regionesData = [];
-        this.selectedRegionId = null;
-        this.promotoresPorTienda = {};
-        this.userRol = null; // 🆕 Rol del usuario
-
-        this.init();
-    }
-
-    init() {
-        console.log('📌 Vinculando eventos...');
-        this.bindEvents();
-        console.log('📊 Cargando datos iniciales...');
-        this.loadInitialData();
-    }
-
-    bindEvents() {
-        const btnNuevaZona = document.getElementById('btn-nueva-zona');
-
-        if (!btnNuevaZona) {
-            console.error('❌ ERROR: No se encontró el botón #btn-nueva-zona');
-            return;
-        }
-
-        document.getElementById('search-field').addEventListener('change', () => this.handleSearchFieldChange());
-        document.getElementById('search-value').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') this.handleSearch();
-        });
-        document.getElementById('btn-buscar').addEventListener('click', () => this.handleSearch());
-        document.getElementById('btn-limpiar').addEventListener('click', () => this.handleClearSearch());
-        document.getElementById('btn-prev').addEventListener('click', () => this.changePage(this.currentPage - 1));
-        document.getElementById('btn-next').addEventListener('click', () => this.changePage(this.currentPage + 1));
-
-        btnNuevaZona.addEventListener('click', () => {
-            console.log('🆕 Clic en botón Nueva Zona');
-            this.openNewZonaModal();
-        });
-
-        document.getElementById('modal-close').addEventListener('click', () => this.closeModal());
-        document.getElementById('btn-cerrar-vista').addEventListener('click', () => this.closeModal());
-        document.getElementById('btn-editar-zona').addEventListener('click', () => this.enableEditMode());
-        document.getElementById('btn-cancelar-edicion').addEventListener('click', () => this.cancelEdit());
-        document.getElementById('btn-cancelar-nuevo').addEventListener('click', () => this.closeModal());
-        document.getElementById('form-zona').addEventListener('submit', (e) => this.handleSubmit(e));
-        document.getElementById('btn-agregar-supervisor').addEventListener('click', () => this.addSupervisor());
-        document.getElementById('zona-region').addEventListener('change', (e) => this.handleRegionChange(e));
-
-        const tiendaInput = document.getElementById('tienda-input');
-        const tiendaSuggestions = document.getElementById('tienda-suggestions');
-        const tiendaDropdownBtn = document.getElementById('tienda-dropdown-btn');
-
-        tiendaInput.addEventListener('input', (e) => this.handleTiendaSearch(e.target.value));
-        tiendaInput.addEventListener('focus', (e) => {
-            if (e.target.value && e.target.value.length >= 2) {
-                this.handleTiendaSearch(e.target.value);
-            }
-        });
-
-        tiendaDropdownBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            this.toggleTiendasDropdown();
-        });
-
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.autocomplete-container')) {
-                tiendaSuggestions.classList.remove('active');
-                tiendaDropdownBtn.classList.remove('active');
-            }
-        });
-
-        tiendaInput.addEventListener('keydown', (e) => this.handleTiendaKeyboard(e));
-
-        document.getElementById('modal-zona').addEventListener('click', (e) => {
-            if (e.target.id === 'modal-zona') this.closeModal();
-        });
-
-        console.log('✅ Todos los eventos vinculados correctamente');
-    }
-
-    handleRegionChange(e) {
-        const regionId = parseInt(e.target.value);
-        console.log('🗺️ Región seleccionada:', regionId);
-        this.selectedRegionId = regionId;
-
-        const tiendaInput = document.getElementById('tienda-input');
-        if (tiendaInput) {
-            tiendaInput.value = '';
-            document.getElementById('tienda-suggestions').classList.remove('active');
-            document.getElementById('tienda-dropdown-btn').classList.remove('active');
-        }
-    }
-
-    async loadInitialData() {
-        console.log('📥 Cargando datos iniciales...');
-        await this.loadZonas();
-    }
-
-    async apiRequest(endpoint, options = {}) {
-        const fullUrl = window.API_CONFIG.baseURL + endpoint;
-        console.log('🌐 API Request:', fullUrl);
-
-        try {
-            const response = await fetch(fullUrl, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...options.headers
-                },
-                ...options
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.message || 'Error en la solicitud');
-            }
-
-            return data;
-        } catch (error) {
-            console.error('❌ Error en API request:', error);
-            throw error;
-        }
-    }
-
-    async loadZonas() {
-        console.log('📋 === INICIO loadZonas() ===');
-        this.showTableLoading();
-
-        try {
-            const params = new URLSearchParams({
-                page: this.currentPage,
-                limit: this.itemsPerPage
-            });
-
-            if (this.searchField && this.searchValue) {
-                params.append('search_field', this.searchField);
-                params.append('search_value', this.searchValue);
-            }
-
-            const fullUrl = API_CONFIG.baseURL + '?' + params.toString();
-
-            const response = await fetch(fullUrl, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                credentials: 'same-origin'
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                // 🆕 Guardar el rol del usuario
-                this.userRol = data.user_rol || 'usuario';
-                console.log('👤 Rol del usuario:', this.userRol);
+                this.currentPage = 1;
+                this.itemsPerPage = 10;
+                this.totalItems = 0;
+                this.totalPages = 0;
+                this.searchField = '';
+                this.searchValue = '';
+                this.editMode = false;
+                this.isNewZona = false;
+                this.supervisoresAsignados = [];
+                this.tiendasAsignadas = [];
+                this.currentZona = null;
+                this.supervisoresData = [];
+                this.tiendasData = [];
+                this.regionesData = [];
+                this.selectedRegionId = null;
+                this.promotoresPorTienda = {};
                 
-                // 🆕 Adaptar la interfaz según el rol
-                this.adaptInterfaceByRole();
-                
-                this.totalItems = data.pagination.total;
-                this.totalPages = data.pagination.total_pages;
+                // 🆕 SISTEMA DE RESTAURACIÓN
+                this.zonasEliminadas = this.loadZonasEliminadas();
+                this.justRestoredZona = false; // Flag para evitar que reaparezca el modal
 
-                this.hideTableLoading();
+                this.init();
+            }
 
-                if (data.data.length === 0) {
-                    this.showEmptyState();
-                } else {
-                    this.renderTable(data.data);
+            init() {
+                console.log('📌 Vinculando eventos...');
+                this.bindEvents();
+                console.log('📊 Cargando datos iniciales...');
+                this.loadInitialData();
+            }
+
+            bindEvents() {
+                const btnNuevaZona = document.getElementById('btn-nueva-zona');
+
+                if (!btnNuevaZona) {
+                    console.error('❌ ERROR: No se encontró el botón #btn-nueva-zona');
+                    return;
                 }
 
-                this.updatePagination();
-            } else {
-                this.hideTableLoading();
-                this.showNotification('error', 'Error', data.message || 'Error al cargar zonas');
+                document.getElementById('search-field').addEventListener('change', () => this.handleSearchFieldChange());
+                document.getElementById('search-value').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.handleSearch();
+                });
+                document.getElementById('btn-buscar').addEventListener('click', () => this.handleSearch());
+                document.getElementById('btn-limpiar').addEventListener('click', () => this.handleClearSearch());
+                document.getElementById('btn-prev').addEventListener('click', () => this.changePage(this.currentPage - 1));
+                document.getElementById('btn-next').addEventListener('click', () => this.changePage(this.currentPage + 1));
+
+                btnNuevaZona.addEventListener('click', () => {
+                    console.log('🆕 Clic en botón Nueva Zona');
+                    this.openNewZonaModal();
+                });
+
+                const btnReportarIncidencia = document.getElementById('btn-reportar-incidencia');
+                if (btnReportarIncidencia) {
+                    btnReportarIncidencia.addEventListener('click', () => {
+                        console.log('📝 Clic en Reportar Incidencia');
+                        this.reportarIncidencia();
+                    });
+                }
+
+                document.getElementById('modal-close').addEventListener('click', () => this.closeModal());
+                document.getElementById('btn-cerrar-vista').addEventListener('click', () => this.closeModal());
+                document.getElementById('btn-editar-zona').addEventListener('click', () => this.enableEditMode());
+                document.getElementById('btn-cancelar-edicion').addEventListener('click', () => this.cancelEdit());
+                document.getElementById('btn-cancelar-nuevo').addEventListener('click', () => this.closeModal());
+                document.getElementById('form-zona').addEventListener('submit', (e) => this.handleSubmit(e));
+                document.getElementById('zona-region').addEventListener('change', (e) => this.handleRegionChange(e));
+
+                // 🆕 Event listener para nombre de zona (con sugerencias de restauración)
+                const nombreZonaInput = document.getElementById('zona-nombre');
+                if (nombreZonaInput) {
+                    nombreZonaInput.addEventListener('input', (e) => this.handleNombreZonaInput(e));
+                    nombreZonaInput.addEventListener('focus', (e) => this.handleNombreZonaInput(e));
+                }
+
+                // Event listeners para autocomplete de TIENDAS
+                const tiendaInput = document.getElementById('tienda-input');
+                const tiendaSuggestions = document.getElementById('tienda-suggestions');
+                const tiendaDropdownBtn = document.getElementById('tienda-dropdown-btn');
+
+                tiendaInput.addEventListener('input', (e) => this.handleTiendaSearch(e.target.value));
+                tiendaInput.addEventListener('focus', (e) => {
+                    if (e.target.value && e.target.value.length >= 2) {
+                        this.handleTiendaSearch(e.target.value);
+                    }
+                });
+                tiendaDropdownBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.toggleTiendasDropdown();
+                });
+                tiendaInput.addEventListener('keydown', (e) => this.handleTiendaKeyboard(e));
+
+                // Event listeners para autocomplete de SUPERVISORES
+                const supervisorInput = document.getElementById('supervisor-input');
+                const supervisorSuggestions = document.getElementById('supervisor-suggestions');
+                const supervisorDropdownBtn = document.getElementById('supervisor-dropdown-btn');
+
+                supervisorInput.addEventListener('input', (e) => this.handleSupervisorSearch(e.target.value));
+                supervisorInput.addEventListener('focus', (e) => {
+                    if (e.target.value && e.target.value.length >= 2) {
+                        this.handleSupervisorSearch(e.target.value);
+                    }
+                });
+                supervisorDropdownBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.toggleSupervisoresDropdown();
+                });
+                supervisorInput.addEventListener('keydown', (e) => this.handleSupervisorKeyboard(e));
+
+                // Cerrar sugerencias al hacer click fuera
+                document.addEventListener('click', (e) => {
+                    if (!e.target.closest('.autocomplete-container')) {
+                        tiendaSuggestions.classList.remove('active');
+                        tiendaDropdownBtn.classList.remove('active');
+                        supervisorSuggestions.classList.remove('active');
+                        supervisorDropdownBtn.classList.remove('active');
+                    }
+                });
+
+                document.getElementById('modal-zona').addEventListener('click', (e) => {
+                    if (e.target.id === 'modal-zona') this.closeModal();
+                });
+
+                console.log('✅ Todos los eventos vinculados correctamente');
             }
-        } catch (error) {
-            console.error('❌ Error:', error);
-            this.hideTableLoading();
-            this.showNotification('error', 'Error de Conexión',
-                'No se pudieron cargar las zonas. Detalles: ' + error.message);
-        }
-    }
 
-    // 🆕 NUEVA FUNCIÓN: Adaptar interfaz según el rol
-    adaptInterfaceByRole() {
-        console.log('🎨 Adaptando interfaz para rol:', this.userRol);
-        
-        const btnNuevaZona = document.getElementById('btn-nueva-zona');
-        const supervisorBanner = document.getElementById('supervisor-banner');
-        const moduleTitle = document.getElementById('module-title');
-        
-        if (this.userRol === 'supervisor') {
-            // Modo Supervisor
-            if (btnNuevaZona) btnNuevaZona.style.display = 'none';
-            if (supervisorBanner) supervisorBanner.classList.add('active');
-            if (moduleTitle) moduleTitle.textContent = 'Mis Zonas Asignadas';
-            console.log('✅ Interfaz adaptada para SUPERVISOR');
-        } else {
-            // Modo Root/Admin
-            if (btnNuevaZona) btnNuevaZona.style.display = 'inline-flex';
-            if (supervisorBanner) supervisorBanner.classList.remove('active');
-            if (moduleTitle) moduleTitle.textContent = 'Gestión de Zonas y Regiones';
-            console.log('✅ Interfaz adaptada para ROOT');
-        }
-    }
+            handleRegionChange(e) {
+                const regionId = parseInt(e.target.value);
+                console.log('🗺️ Región seleccionada:', regionId);
 
-    renderTable(data) {
-        const tbody = document.getElementById('zonas-tbody');
+                this.selectedRegionId = regionId;
 
-        if (!tbody) {
-            console.error('❌ No se encontró el elemento #zonas-tbody');
-            return;
-        }
-
-        tbody.innerHTML = '';
-
-        if (data.length === 0) {
-            this.showEmptyState();
-            return;
-        }
-
-        data.forEach((zona) => {
-            const row = document.createElement('tr');
-            
-            // 🆕 Botones según el rol
-            let actionButtons = '';
-            
-            if (this.userRol === 'root') {
-                // Root: Ver, Editar y Eliminar
-                actionButtons = `
-                    <button class="btn-action view" onclick="zonasModule.viewZona(${zona.id_zona})">
-                        <i class="fas fa-eye"></i>
-                    </button>
-                    <button class="btn-action edit" onclick="zonasModule.editZona(${zona.id_zona})">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="btn-action delete" onclick="zonasModule.deleteZona(${zona.id_zona})">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                `;
-            } else {
-                // Supervisor: Solo Ver
-                actionButtons = `
-                    <button class="btn-action view" onclick="zonasModule.viewZona(${zona.id_zona})">
-                        <i class="fas fa-eye"></i> Ver
-                    </button>
-                `;
+                // Limpiar input de búsqueda de tiendas
+                const tiendaInput = document.getElementById('tienda-input');
+                if (tiendaInput) {
+                    tiendaInput.value = '';
+                    document.getElementById('tienda-suggestions').classList.remove('active');
+                    document.getElementById('tienda-dropdown-btn').classList.remove('active');
+                }
             }
-            
-            row.innerHTML = `
-                <td>${zona.id_zona}</td>
-                <td><strong>${zona.nombre_zona}</strong></td>
-                <td>Región ${zona.numero_region} - ${zona.nombre_region}</td>
-                <td>${zona.descripcion || '-'}</td>
-                <td><span class="count-badge">${zona.total_supervisores || 0}</span></td>
-                <td><span class="count-badge">${zona.total_tiendas || 0}</span></td>
-                <td>
-                    <span class="status-badge ${zona.activa ? 'activo' : 'inactivo'}">
-                        ${zona.activa ? 'Activo' : 'Inactivo'}
-                    </span>
-                </td>
-                <td>${zona.fecha_creacion_formatted || '-'}</td>
-                <td>${actionButtons}</td>
-            `;
-            tbody.appendChild(row);
-        });
-    }
 
-    async loadPromotoresDeTiendas() {
-        if (this.tiendasAsignadas.length === 0) {
-            this.promotoresPorTienda = {};
-            return;
-        }
+            async loadInitialData() {
+                console.log('📥 Cargando datos iniciales...');
+                await this.loadZonas();
+            }
 
-        try {
-            const tiendasIds = this.tiendasAsignadas.map(t => t.id_tienda);
-            console.log('👥 Cargando promotores para tiendas:', tiendasIds);
+            async apiRequest(endpoint, options = {}) {
+                const fullUrl = window.API_CONFIG.baseURL + endpoint;
+                console.log('🌐 API Request:', fullUrl);
 
-            const response = await this.apiRequest(
-                `?action=get_promotores_tiendas&tiendas=${encodeURIComponent(JSON.stringify(tiendasIds))}`
-            );
+                try {
+                    const response = await fetch(fullUrl, {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            ...options.headers
+                        },
+                        ...options
+                    });
 
-            if (response.success) {
-                this.promotoresPorTienda = response.data;
-                console.log('✅ Promotores cargados:', this.promotoresPorTienda);
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(data.message || 'Error en la solicitud');
+                    }
+
+                    return data;
+                } catch (error) {
+                    console.error('❌ Error en API request:', error);
+                    throw error;
+                }
+            }
+
+            async loadZonas() {
+                console.log('📋 === INICIO loadZonas() ===');
+                this.showTableLoading();
+
+                try {
+                    const params = new URLSearchParams({
+                        page: this.currentPage,
+                        limit: this.itemsPerPage
+                    });
+
+                    if (this.searchField && this.searchValue) {
+                        params.append('search_field', this.searchField);
+                        params.append('search_value', this.searchValue);
+                    }
+
+                    const fullUrl = API_CONFIG.baseURL + '?' + params.toString();
+
+                    const response = await fetch(fullUrl, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        credentials: 'same-origin'
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        this.totalItems = data.pagination.total;
+                        this.totalPages = data.pagination.total_pages;
+
+                        this.hideTableLoading();
+
+                        if (data.data.length === 0) {
+                            this.showEmptyState();
+                        } else {
+                            this.renderTable(data.data);
+                        }
+
+                        this.updatePagination();
+                    } else {
+                        this.hideTableLoading();
+                        this.showNotification('error', 'Error', data.message || 'Error al cargar zonas');
+                    }
+                } catch (error) {
+                    console.error('❌ Error:', error);
+                    this.hideTableLoading();
+                    this.showNotification('error', 'Error de Conexión',
+                        'No se pudieron cargar las zonas. Detalles: ' + error.message);
+                }
+            }
+
+            renderTable(data) {
+                const tbody = document.getElementById('zonas-tbody');
+
+                if (!tbody) {
+                    console.error('❌ No se encontró el elemento #zonas-tbody');
+                    return;
+                }
+
+                tbody.innerHTML = '';
+
+                if (data.length === 0) {
+                    this.showEmptyState();
+                    return;
+                }
+
+                data.forEach((zona) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                    <td>${zona.id_zona}</td>
+                    <td><strong>${zona.nombre_zona}</strong></td>
+                    <td>Región ${zona.numero_region} </td>
+                    <td>${zona.descripcion || '-'}</td>
+                    <td><span class="count-badge">${zona.total_supervisores || 0}</span></td>
+                    <td><span class="count-badge">${zona.total_tiendas || 0}</span></td>
+                    <td>
+                        <span class="status-badge ${zona.activa ? 'activo' : 'inactivo'}">
+                            ${zona.activa ? 'Activo' : 'Inactivo'}
+                        </span>
+                    </td>
+                    <td>${zona.fecha_creacion_formatted || '-'}</td>
+                    <td>
+                        <button class="btn-action view" onclick="zonasModule.viewZona(${zona.id_zona})">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn-action edit" onclick="zonasModule.editZona(${zona.id_zona})">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn-action delete" onclick="zonasModule.deleteZona(${zona.id_zona})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                    tbody.appendChild(row);
+                });
+            }
+
+            async loadPromotoresDeTiendas() {
+                if (this.tiendasAsignadas.length === 0) {
+                    this.promotoresPorTienda = {};
+                    return;
+                }
+
+                try {
+                    const tiendasIds = this.tiendasAsignadas.map(t => t.id_tienda);
+                    console.log('👥 Cargando promotores para tiendas:', tiendasIds);
+
+                    const response = await this.apiRequest(
+                        `?action=get_promotores_tiendas&tiendas=${encodeURIComponent(JSON.stringify(tiendasIds))}`
+                    );
+
+                    if (response.success) {
+                        this.promotoresPorTienda = response.data;
+                        console.log('✅ Promotores cargados:', this.promotoresPorTienda);
+
+                        this.renderTiendasAsignadas();
+                    }
+                } catch (error) {
+                    console.error('❌ Error al cargar promotores:', error);
+                    this.promotoresPorTienda = {};
+                }
+            }
+
+            async viewZona(id) {
+                console.log('👁️ Viendo zona:', id);
+                try {
+                    const response = await this.apiRequest(`?action=get_one&id=${id}`);
+
+                    if (response.success) {
+                        this.currentZona = response.data;
+                        this.isNewZona = false;
+                        this.editMode = false;
+
+                        this.tiendasAsignadas = this.currentZona.tiendas || [];
+
+                        await this.loadPromotoresDeTiendas();
+
+                        this.showViewMode();
+                        this.populateViewMode(this.currentZona);
+                        this.openModal();
+                    }
+                } catch (error) {
+                    console.error('❌ Error al ver zona:', error);
+                    this.showNotification('error', 'Error', 'No se pudo cargar la zona');
+                }
+            }
+
+            async editZona(id) {
+                console.log('✏️ Editando zona:', id);
+                try {
+                    const response = await this.apiRequest(`?action=get_one&id=${id}`);
+
+                    if (response.success) {
+                        this.currentZona = response.data;
+                        this.isNewZona = false;
+                        this.editMode = true;
+                        this.showEditMode();
+                        await this.loadCatalogos();
+                        await this.populateEditMode(this.currentZona);
+                        this.openModal();
+                    }
+                } catch (error) {
+                    console.error('❌ Error al editar zona:', error);
+                    this.showNotification('error', 'Error', 'No se pudo cargar la zona');
+                }
+            }
+
+            // 🆕 FUNCIÓN MODIFICADA - Guardar info antes de eliminar
+            async deleteZona(id) {
+                console.log('🗑️ Eliminando zona:', id);
+                if (!confirm('¿Está seguro de que desea eliminar esta zona?')) {
+                    return;
+                }
+
+                try {
+                    // 🆕 PRIMERO obtener la info completa de la zona antes de eliminarla
+                    const zonaResponse = await this.apiRequest(`?action=get_one&id=${id}`);
+                    
+                    if (zonaResponse.success) {
+                        const zonaCompleta = zonaResponse.data;
+                        
+                        // 🆕 Guardar en historial de eliminadas
+                        this.zonasEliminadas.unshift({
+                            ...zonaCompleta,
+                            fecha_eliminacion: new Date().toISOString(),
+                            id_original: zonaCompleta.id_zona
+                        });
+                        
+                        this.saveZonasEliminadas();
+                        console.log('💾 Zona guardada en historial de eliminadas');
+                    }
+
+                    // LUEGO eliminar la zona
+                    const response = await this.apiRequest(``, {
+                        method: 'DELETE',
+                        body: JSON.stringify({ id: id, action: 'delete' })
+                    });
+
+                    if (response.success) {
+                        this.showNotification('success', 'Éxito', 'Zona eliminada. Puedes restaurarla al crear una nueva zona.');
+                        this.loadZonas();
+                    }
+                } catch (error) {
+                    console.error('❌ Error al eliminar zona:', error);
+                    this.showNotification('error', 'Error', 'No se pudo eliminar la zona');
+                }
+            }
+
+            async openNewZonaModal() {
+                console.log('🆕 Abriendo modal Nueva Zona');
+
+                try {
+                    this.currentZona = null;
+                    this.isNewZona = true;
+                    this.editMode = true;
+                    this.supervisoresAsignados = [];
+                    this.tiendasAsignadas = [];
+                    this.selectedRegionId = null;
+
+                    // 🆕 Limpiar sugerencias y resetear flag
+                    this.hideRestoreSuggestion();
+                    this.justRestoredZona = false;
+
+                    document.getElementById('modal-title').innerHTML = '<i class="fas fa-plus"></i> Nueva Zona';
+                    document.getElementById('form-zona').reset();
+
+                    this.showEditMode();
+
+                    console.log('📚 Cargando catálogos...');
+                    await this.loadCatalogos();
+
+                    this.renderSupervisoresAsignados();
+                    this.renderTiendasAsignadas();
+
+                    document.getElementById('view-actions').style.display = 'none';
+                    document.getElementById('edit-actions').style.display = 'none';
+                    document.getElementById('new-actions').style.display = 'flex';
+
+                    this.openModal();
+
+                } catch (error) {
+                    console.error('❌ Error al abrir modal:', error);
+                    this.showNotification('error', 'Error', 'No se pudo abrir el formulario: ' + error.message);
+                }
+            }
+
+            async loadCatalogos() {
+                console.log('📚 Cargando catálogos...');
+                try {
+                    console.log('🗺️ Cargando regiones...');
+                    const regionesResponse = await this.apiRequest('?action=get_regiones');
+                    if (regionesResponse.success) {
+                        this.regionesData = regionesResponse.data;
+                        console.log('✅ Regiones cargadas:', this.regionesData.length);
+                        this.loadRegionesSelect();
+                    }
+
+                    console.log('👥 Cargando supervisores...');
+                    const supervisoresResponse = await this.apiRequest('?action=get_supervisores');
+                    if (supervisoresResponse.success) {
+                        this.supervisoresData = supervisoresResponse.data;
+                        console.log('✅ Supervisores cargados:', this.supervisoresData.length);
+                    }
+
+                    console.log('🏪 Cargando tiendas...');
+                    const tiendasResponse = await this.apiRequest('?action=get_tiendas');
+                    if (tiendasResponse.success) {
+                        this.tiendasData = tiendasResponse.data;
+                        console.log('✅ Tiendas cargadas:', this.tiendasData.length);
+                    }
+                } catch (error) {
+                    console.error('❌ Error al cargar catálogos:', error);
+                    this.showNotification('error', 'Error', 'No se pudieron cargar los catálogos: ' + error.message);
+                    throw error;
+                }
+            }
+
+            loadRegionesSelect() {
+                const regionSelect = document.getElementById('zona-region');
+                regionSelect.innerHTML = '<option value="">Seleccionar región...</option>';
+
+                this.regionesData.forEach(region => {
+                    const option = document.createElement('option');
+                    option.value = region.id_region;
+                    option.textContent = `${region.nombre_region}`;
+                    regionSelect.appendChild(option);
+                });
+
+                console.log('✅ Select de regiones poblado');
+            }
+
+            // ===== FUNCIONES PARA AUTOCOMPLETADO DE TIENDAS =====
+
+            toggleTiendasDropdown() {
+                const suggestionsContainer = document.getElementById('tienda-suggestions');
+                const dropdownBtn = document.getElementById('tienda-dropdown-btn');
+                const tiendaInput = document.getElementById('tienda-input');
+
+                console.log('🔽 Toggle dropdown de tiendas');
+
+                if (suggestionsContainer.classList.contains('active')) {
+                    suggestionsContainer.classList.remove('active');
+                    dropdownBtn.classList.remove('active');
+                    return;
+                }
+
+                let tiendasDisponibles = this.tiendasData;
+
+                if (this.selectedRegionId) {
+                    const regionSeleccionada = this.regionesData.find(r => r.id_region === this.selectedRegionId);
+                    if (regionSeleccionada) {
+                        const numeroRegion = regionSeleccionada.numero_region;
+                        tiendasDisponibles = tiendasDisponibles.filter(tienda => tienda.region == numeroRegion);
+                        console.log(`🗺️ Filtrando por región ${numeroRegion}:`, tiendasDisponibles.length, 'tiendas');
+                    }
+                }
+
+                tiendasDisponibles = tiendasDisponibles.filter(tienda =>
+                    !this.tiendasAsignadas.find(t => t.id_tienda === tienda.id_tienda)
+                );
+
+                console.log('✅ Tiendas disponibles para dropdown:', tiendasDisponibles.length);
+
+                if (!tiendaInput.value || tiendaInput.value.length === 0) {
+                    this.renderTiendaSuggestions(tiendasDisponibles, true);
+                    dropdownBtn.classList.add('active');
+                } else {
+                    this.handleTiendaSearch(tiendaInput.value);
+                }
+
+                tiendaInput.focus();
+            }
+
+            handleTiendaSearch(searchTerm) {
+                console.log('🔍 Buscando tiendas:', searchTerm);
+
+                const suggestionsContainer = document.getElementById('tienda-suggestions');
+
+                if (!searchTerm || searchTerm.length < 2) {
+                    suggestionsContainer.classList.remove('active');
+                    return;
+                }
+
+                let tiendasFiltradas = this.tiendasData;
+
+                if (this.selectedRegionId) {
+                    const regionSeleccionada = this.regionesData.find(r => r.id_region === this.selectedRegionId);
+                    if (regionSeleccionada) {
+                        const numeroRegion = regionSeleccionada.numero_region;
+                        tiendasFiltradas = tiendasFiltradas.filter(tienda => tienda.region == numeroRegion);
+                    }
+                }
+
+                tiendasFiltradas = tiendasFiltradas.filter(tienda =>
+                    !this.tiendasAsignadas.find(t => t.id_tienda === tienda.id_tienda)
+                );
+
+                const searchLower = searchTerm.toLowerCase();
+                tiendasFiltradas = tiendasFiltradas.filter(tienda => {
+                    return tienda.nombre_tienda.toLowerCase().includes(searchLower) ||
+                        (tienda.cadena && tienda.cadena.toLowerCase().includes(searchLower)) ||
+                        (tienda.ciudad && tienda.ciudad.toLowerCase().includes(searchLower)) ||
+                        (tienda.num_tienda && tienda.num_tienda.toString().includes(searchLower));
+                });
+
+                console.log('✅ Tiendas encontradas:', tiendasFiltradas.length);
+
+                this.renderTiendaSuggestions(tiendasFiltradas, false);
+            }
+
+            renderTiendaSuggestions(tiendas, showAll = false) {
+                const suggestionsContainer = document.getElementById('tienda-suggestions');
+
+                if (tiendas.length === 0) {
+                    suggestionsContainer.innerHTML = '<div class="autocomplete-no-results">No se encontraron tiendas disponibles</div>';
+                    suggestionsContainer.classList.add('active');
+                    return;
+                }
+
+                suggestionsContainer.innerHTML = '';
+
+                const limite = showAll ? 50 : 10;
+                const tiendasToShow = tiendas.slice(0, limite);
+
+                console.log(`📋 Mostrando ${tiendasToShow.length} de ${tiendas.length} tiendas`);
+
+                tiendasToShow.forEach((tienda, index) => {
+                    const suggestion = document.createElement('div');
+                    suggestion.className = 'autocomplete-suggestion';
+                    suggestion.dataset.index = index;
+                    suggestion.dataset.tiendaId = tienda.id_tienda;
+
+                    suggestion.innerHTML = `
+                        <div class="autocomplete-suggestion-name">${tienda.nombre_tienda}</div>
+                        <div class="autocomplete-suggestion-details">
+                            <span class="autocomplete-suggestion-badge">${tienda.cadena || 'Sin cadena'}</span>
+                            <span>${tienda.ciudad || 'Sin ciudad'}</span>
+                            ${tienda.num_tienda ? `<span>#${tienda.num_tienda}</span>` : ''}
+                            ${tienda.region ? `<span>Región ${tienda.region}</span>` : ''}
+                        </div>
+                    `;
+
+                    suggestion.addEventListener('click', () => {
+                        this.selectTiendaFromAutocomplete(tienda);
+                    });
+
+                    suggestionsContainer.appendChild(suggestion);
+                });
+
+                if (tiendas.length > limite) {
+                    const moreInfo = document.createElement('div');
+                    moreInfo.className = 'autocomplete-no-results';
+                    moreInfo.style.borderTop = '2px solid var(--border-color)';
+                    moreInfo.style.fontWeight = '600';
+                    moreInfo.innerHTML = `<i class="fas fa-info-circle"></i> Mostrando ${limite} de ${tiendas.length} tiendas. Escribe para filtrar más.`;
+                    suggestionsContainer.appendChild(moreInfo);
+                }
+
+                suggestionsContainer.classList.add('active');
+            }
+
+            async selectTiendaFromAutocomplete(tienda) {
+                console.log('✅ Tienda seleccionada:', tienda.nombre_tienda);
+
+                if (this.selectedRegionId) {
+                    const regionSeleccionada = this.regionesData.find(r => r.id_region === this.selectedRegionId);
+                    if (regionSeleccionada && tienda.region != regionSeleccionada.numero_region) {
+                        this.showNotification('warning', 'Atención', 'La tienda no pertenece a la región seleccionada');
+                        return;
+                    }
+                }
+
+                if (this.tiendasAsignadas.find(t => t.id_tienda === tienda.id_tienda)) {
+                    this.showNotification('warning', 'Atención', 'Esta tienda ya está asignada');
+                    return;
+                }
+
+                this.tiendasAsignadas.push(tienda);
+
+                await this.loadPromotoresDeTiendas();
+                this.renderTiendasAsignadas();
+
+                document.getElementById('tienda-input').value = '';
+                document.getElementById('tienda-suggestions').classList.remove('active');
+                document.getElementById('tienda-dropdown-btn').classList.remove('active');
+                document.getElementById('tienda-input').focus();
+
+                this.showNotification('success', 'Éxito', `Tienda "${tienda.nombre_tienda}" asignada`);
+            }
+
+            async removeTienda(id) {
+                this.tiendasAsignadas = this.tiendasAsignadas.filter(t => t.id_tienda !== id);
+                await this.loadPromotoresDeTiendas();
                 this.renderTiendasAsignadas();
             }
-        } catch (error) {
-            console.error('❌ Error al cargar promotores:', error);
-            this.promotoresPorTienda = {};
-        }
-    }
 
-    async viewZona(id) {
-        console.log('👁️ Viendo zona:', id);
-        try {
-            const response = await this.apiRequest(`?action=get_one&id=${id}`);
+            handleTiendaKeyboard(e) {
+                const suggestionsContainer = document.getElementById('tienda-suggestions');
+                const suggestions = suggestionsContainer.querySelectorAll('.autocomplete-suggestion');
 
-            if (response.success) {
-                this.currentZona = response.data;
-                this.isNewZona = false;
-                this.editMode = false;
-                this.tiendasAsignadas = this.currentZona.tiendas || [];
-                await this.loadPromotoresDeTiendas();
-                this.showViewMode();
-                this.populateViewMode(this.currentZona);
-                this.openModal();
+                if (suggestions.length === 0) return;
+
+                const currentSelected = suggestionsContainer.querySelector('.autocomplete-suggestion.selected');
+                let currentIndex = currentSelected ? parseInt(currentSelected.dataset.index) : -1;
+
+                switch (e.key) {
+                    case 'ArrowDown':
+                        e.preventDefault();
+                        currentIndex = Math.min(currentIndex + 1, suggestions.length - 1);
+                        break;
+                    case 'ArrowUp':
+                        e.preventDefault();
+                        currentIndex = Math.max(currentIndex - 1, 0);
+                        break;
+                    case 'Enter':
+                        e.preventDefault();
+                        if (currentIndex >= 0) {
+                            const tiendaId = parseInt(suggestions[currentIndex].dataset.tiendaId);
+                            const tienda = this.tiendasData.find(t => t.id_tienda === tiendaId);
+                            if (tienda) this.selectTiendaFromAutocomplete(tienda);
+                        }
+                        return;
+                    case 'Escape':
+                        suggestionsContainer.classList.remove('active');
+                        document.getElementById('tienda-dropdown-btn').classList.remove('active');
+                        return;
+                    default:
+                        return;
+                }
+
+                suggestions.forEach((s, i) => {
+                    if (i === currentIndex) {
+                        s.classList.add('selected');
+                        s.scrollIntoView({ block: 'nearest' });
+                    } else {
+                        s.classList.remove('selected');
+                    }
+                });
             }
-        } catch (error) {
-            console.error('❌ Error al ver zona:', error);
-            this.showNotification('error', 'Error', 'No se pudo cargar la zona');
-        }
-    }
 
-    async editZona(id) {
-        console.log('✏️ Editando zona:', id);
-        try {
-            const response = await this.apiRequest(`?action=get_one&id=${id}`);
+            // ===== FUNCIONES PARA AUTOCOMPLETADO DE SUPERVISORES =====
 
-            if (response.success) {
-                this.currentZona = response.data;
-                this.isNewZona = false;
+            toggleSupervisoresDropdown() {
+                const suggestionsContainer = document.getElementById('supervisor-suggestions');
+                const dropdownBtn = document.getElementById('supervisor-dropdown-btn');
+                const supervisorInput = document.getElementById('supervisor-input');
+
+                console.log('🔽 Toggle dropdown de supervisores');
+
+                if (suggestionsContainer.classList.contains('active')) {
+                    suggestionsContainer.classList.remove('active');
+                    dropdownBtn.classList.remove('active');
+                    return;
+                }
+
+                const supervisoresDisponibles = this.supervisoresData.filter(sup =>
+                    !this.supervisoresAsignados.find(s => s.id === sup.id)
+                );
+
+                console.log('✅ Supervisores disponibles para dropdown:', supervisoresDisponibles.length);
+
+                if (!supervisorInput.value || supervisorInput.value.length === 0) {
+                    this.renderSupervisorSuggestions(supervisoresDisponibles, true);
+                    dropdownBtn.classList.add('active');
+                } else {
+                    this.handleSupervisorSearch(supervisorInput.value);
+                }
+
+                supervisorInput.focus();
+            }
+
+            handleSupervisorSearch(searchTerm) {
+                console.log('🔍 Buscando supervisores:', searchTerm);
+
+                const suggestionsContainer = document.getElementById('supervisor-suggestions');
+
+                if (!searchTerm || searchTerm.length < 2) {
+                    suggestionsContainer.classList.remove('active');
+                    return;
+                }
+
+                let supervisoresFiltrados = this.supervisoresData.filter(sup =>
+                    !this.supervisoresAsignados.find(s => s.id === sup.id)
+                );
+
+                const searchLower = searchTerm.toLowerCase();
+                supervisoresFiltrados = supervisoresFiltrados.filter(sup => {
+                    const nombreCompleto = `${sup.nombre} ${sup.apellido}`.toLowerCase();
+                    const email = (sup.email || '').toLowerCase();
+
+                    return nombreCompleto.includes(searchLower) || email.includes(searchLower);
+                });
+
+                console.log('✅ Supervisores encontrados:', supervisoresFiltrados.length);
+
+                this.renderSupervisorSuggestions(supervisoresFiltrados, false);
+            }
+
+            renderSupervisorSuggestions(supervisores, showAll = false) {
+                const suggestionsContainer = document.getElementById('supervisor-suggestions');
+
+                if (supervisores.length === 0) {
+                    suggestionsContainer.innerHTML = '<div class="autocomplete-no-results">No se encontraron supervisores disponibles</div>';
+                    suggestionsContainer.classList.add('active');
+                    return;
+                }
+
+                suggestionsContainer.innerHTML = '';
+
+                const limite = showAll ? 50 : 10;
+                const supervisoresToShow = supervisores.slice(0, limite);
+
+                console.log(`📋 Mostrando ${supervisoresToShow.length} de ${supervisores.length} supervisores`);
+
+                supervisoresToShow.forEach((supervisor, index) => {
+                    const suggestion = document.createElement('div');
+                    suggestion.className = 'autocomplete-suggestion';
+                    suggestion.dataset.index = index;
+                    suggestion.dataset.supervisorId = supervisor.id;
+
+                    const nombreCompleto = supervisor.nombre_completo || `${supervisor.nombre} ${supervisor.apellido}`;
+
+                    suggestion.innerHTML = `
+                        <div class="autocomplete-suggestion-name">
+                            <i class="fas fa-user-tie"></i> ${nombreCompleto}
+                        </div>
+                        ${supervisor.email ? `
+                            <div class="autocomplete-suggestion-details">
+                                <span><i class="fas fa-envelope"></i> ${supervisor.email}</span>
+                            </div>
+                        ` : ''}
+                    `;
+
+                    suggestion.addEventListener('click', () => {
+                        this.selectSupervisorFromAutocomplete(supervisor);
+                    });
+
+                    suggestionsContainer.appendChild(suggestion);
+                });
+
+                if (supervisores.length > limite) {
+                    const moreInfo = document.createElement('div');
+                    moreInfo.className = 'autocomplete-no-results';
+                    moreInfo.style.borderTop = '2px solid var(--border-color)';
+                    moreInfo.style.fontWeight = '600';
+                    moreInfo.innerHTML = `<i class="fas fa-info-circle"></i> Mostrando ${limite} de ${supervisores.length} supervisores. Escribe para filtrar más.`;
+                    suggestionsContainer.appendChild(moreInfo);
+                }
+
+                suggestionsContainer.classList.add('active');
+            }
+
+            selectSupervisorFromAutocomplete(supervisor) {
+                console.log('✅ Supervisor seleccionado:', supervisor.nombre_completo || `${supervisor.nombre} ${supervisor.apellido}`);
+
+                if (this.supervisoresAsignados.find(s => s.id === supervisor.id)) {
+                    this.showNotification('warning', 'Atención', 'Este supervisor ya está asignado');
+                    return;
+                }
+
+                this.supervisoresAsignados.push({
+                    id: supervisor.id,
+                    nombre: supervisor.nombre,
+                    apellido: supervisor.apellido,
+                    nombre_completo: supervisor.nombre_completo || `${supervisor.nombre} ${supervisor.apellido}`
+                });
+
+                this.renderSupervisoresAsignados();
+
+                document.getElementById('supervisor-input').value = '';
+                document.getElementById('supervisor-suggestions').classList.remove('active');
+                document.getElementById('supervisor-dropdown-btn').classList.remove('active');
+                document.getElementById('supervisor-input').focus();
+
+                this.showNotification('success', 'Éxito', `Supervisor "${supervisor.nombre_completo || `${supervisor.nombre} ${supervisor.apellido}`}" asignado`);
+            }
+
+            handleSupervisorKeyboard(e) {
+                const suggestionsContainer = document.getElementById('supervisor-suggestions');
+                const suggestions = suggestionsContainer.querySelectorAll('.autocomplete-suggestion');
+
+                if (suggestions.length === 0) return;
+
+                const currentSelected = suggestionsContainer.querySelector('.autocomplete-suggestion.selected');
+                let currentIndex = currentSelected ? parseInt(currentSelected.dataset.index) : -1;
+
+                switch (e.key) {
+                    case 'ArrowDown':
+                        e.preventDefault();
+                        currentIndex = Math.min(currentIndex + 1, suggestions.length - 1);
+                        break;
+                    case 'ArrowUp':
+                        e.preventDefault();
+                        currentIndex = Math.max(currentIndex - 1, 0);
+                        break;
+                    case 'Enter':
+                        e.preventDefault();
+                        if (currentIndex >= 0) {
+                            const supervisorId = parseInt(suggestions[currentIndex].dataset.supervisorId);
+                            const supervisor = this.supervisoresData.find(s => s.id === supervisorId);
+                            if (supervisor) this.selectSupervisorFromAutocomplete(supervisor);
+                        }
+                        return;
+                    case 'Escape':
+                        suggestionsContainer.classList.remove('active');
+                        document.getElementById('supervisor-dropdown-btn').classList.remove('active');
+                        return;
+                    default:
+                        return;
+                }
+
+                suggestions.forEach((s, i) => {
+                    if (i === currentIndex) {
+                        s.classList.add('selected');
+                        s.scrollIntoView({ block: 'nearest' });
+                    } else {
+                        s.classList.remove('selected');
+                    }
+                });
+            }
+
+            // 🆕 ===== FUNCIONES PARA RESTAURACIÓN DE ZONAS =====
+
+            loadZonasEliminadas() {
+                try {
+                    const stored = localStorage.getItem('zonas_eliminadas');
+                    return stored ? JSON.parse(stored) : [];
+                } catch (error) {
+                    console.error('Error al cargar zonas eliminadas:', error);
+                    return [];
+                }
+            }
+
+            saveZonasEliminadas() {
+                try {
+                    const toSave = this.zonasEliminadas.slice(0, 10);
+                    localStorage.setItem('zonas_eliminadas', JSON.stringify(toSave));
+                } catch (error) {
+                    console.error('Error al guardar zonas eliminadas:', error);
+                }
+            }
+
+            handleNombreZonaInput(e) {
+                const input = e.target;
+                const value = input.value.trim().toLowerCase();
+                
+                // 🆕 Si acabamos de restaurar, no mostrar sugerencias
+                if (this.justRestoredZona) {
+                    return;
+                }
+                
+                if (value.length < 2) {
+                    this.hideRestoreSuggestion();
+                    return;
+                }
+                
+                const coincidencias = this.zonasEliminadas.filter(zona => 
+                    zona.nombre_zona.toLowerCase().includes(value)
+                );
+                
+                if (coincidencias.length > 0) {
+                    this.showRestoreSuggestion(input, coincidencias[0]);
+                } else {
+                    this.hideRestoreSuggestion();
+                }
+            }
+
+            showRestoreSuggestion(input, zona) {
+                this.hideRestoreSuggestion();
+                
+                const suggestion = document.createElement('div');
+                suggestion.id = 'restore-suggestion';
+                suggestion.className = 'restore-suggestion';
+                
+                const fechaEliminacion = new Date(zona.fecha_eliminacion);
+                const fechaFormateada = fechaEliminacion.toLocaleDateString('es-MX', {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                suggestion.innerHTML = `
+                    <div class="restore-suggestion-header">
+                        <i class="fas fa-history"></i>
+                        <span>Restaurar zona eliminada</span>
+                    </div>
+                    <div class="restore-suggestion-content">
+                        <div class="restore-suggestion-name">
+                            <strong>${zona.nombre_zona}</strong>
+                            <span class="restore-badge">Último uso</span>
+                        </div>
+                        <div class="restore-suggestion-details">
+                            <div><i class="fas fa-map-marker-alt"></i> Región ${zona.numero_region} - ${zona.nombre_region}</div>
+                            <div><i class="fas fa-user-tie"></i> ${zona.supervisores?.length || 0} supervisor(es)</div>
+                            <div><i class="fas fa-store"></i> ${zona.tiendas?.length || 0} tienda(s)</div>
+                        </div>
+                        <div class="restore-suggestion-date">
+                            <i class="fas fa-clock"></i> Eliminada: ${fechaFormateada}
+                        </div>
+                    </div>
+                    <div class="restore-suggestion-actions">
+                        <button type="button" class="btn-restore-ignore">
+                            <i class="fas fa-times"></i> Ignorar
+                        </button>
+                        <button type="button" class="btn-restore-apply">
+                            <i class="fas fa-undo"></i> Restaurar
+                        </button>
+                    </div>
+                `;
+                
+                input.parentElement.style.position = 'relative';
+                input.parentElement.appendChild(suggestion);
+                
+                setTimeout(() => suggestion.classList.add('active'), 10);
+                
+                suggestion.querySelector('.btn-restore-ignore').addEventListener('click', () => {
+                    this.hideRestoreSuggestion();
+                });
+                
+                suggestion.querySelector('.btn-restore-apply').addEventListener('click', () => {
+                    this.restoreZona(zona);
+                    this.hideRestoreSuggestion();
+                });
+            }
+
+            hideRestoreSuggestion() {
+                const existing = document.getElementById('restore-suggestion');
+                if (existing) {
+                    existing.classList.remove('active');
+                    setTimeout(() => {
+                        if (existing.parentNode) {
+                            existing.remove();
+                        }
+                    }, 200);
+                }
+            }
+
+            async restoreZona(zona) {
+                console.log('🔄 Restaurando zona:', zona.nombre_zona);
+                
+                try {
+                    // 🆕 PRIMERO: Cerrar el modal de sugerencia inmediatamente
+                    this.hideRestoreSuggestion();
+                    
+                    // 🆕 SEGUNDO: Activar flag para evitar que reaparezca
+                    this.justRestoredZona = true;
+                    
+                    // TERCERO: Autocompletar todos los campos
+                    document.getElementById('zona-nombre').value = zona.nombre_zona;
+                    document.getElementById('zona-descripcion').value = zona.descripcion || '';
+                    document.getElementById('zona-estado').value = zona.activa ? '1' : '0';
+                    
+                    if (zona.id_region) {
+                        document.getElementById('zona-region').value = zona.id_region;
+                        this.selectedRegionId = zona.id_region;
+                    }
+                    
+                    if (zona.supervisores && zona.supervisores.length > 0) {
+                        this.supervisoresAsignados = zona.supervisores.map(sup => ({
+                            id: sup.id,
+                            nombre: sup.nombre,
+                            apellido: sup.apellido,
+                            nombre_completo: `${sup.nombre} ${sup.apellido}`
+                        }));
+                        this.renderSupervisoresAsignados();
+                    }
+                    
+                    if (zona.tiendas && zona.tiendas.length > 0) {
+                        this.tiendasAsignadas = [...zona.tiendas];
+                        await this.loadPromotoresDeTiendas();
+                    }
+                    
+                    this.showNotification('success', 'Restaurado', `Zona "${zona.nombre_zona}" restaurada con todos sus datos`);
+                    
+                    // 🆕 CUARTO: Después de 500ms, desactivar el flag para que pueda volver a funcionar en el futuro
+                    setTimeout(() => {
+                        this.justRestoredZona = false;
+                    }, 500);
+                    
+                    // Enfocar el siguiente campo (descripción) en lugar del nombre
+                    document.getElementById('zona-descripcion').focus();
+                    
+                } catch (error) {
+                    console.error('❌ Error al restaurar zona:', error);
+                    this.showNotification('error', 'Error', 'No se pudo restaurar la zona completamente');
+                    this.justRestoredZona = false; // 🆕 Desactivar flag en caso de error
+                }
+            }
+
+            // ===== FIN FUNCIONES DE RESTAURACIÓN =====
+
+            populateViewMode(zona) {
+                document.getElementById('modal-title').innerHTML = '<i class="fas fa-map-marked-alt"></i> Información de Zona';
+                document.getElementById('view-nombre-zona').textContent = zona.nombre_zona;
+                document.getElementById('view-region').textContent = `Región ${zona.numero_region} - ${zona.nombre_region}`;
+                document.getElementById('view-descripcion').textContent = zona.descripcion || 'Sin descripción';
+
+                const estadoBadge = document.getElementById('view-estado-badge');
+                estadoBadge.textContent = zona.activa ? 'Activo' : 'Inactivo';
+                estadoBadge.className = 'status-badge ' + (zona.activa ? 'activo' : 'inactivo');
+
+                document.getElementById('view-fecha-creacion').textContent = zona.fecha_creacion_formatted || '-';
+
+                const supervisoresList = document.getElementById('view-supervisores-list');
+                supervisoresList.innerHTML = '';
+                if (zona.supervisores && zona.supervisores.length > 0) {
+                    zona.supervisores.forEach(sup => {
+                        const badge = document.createElement('span');
+                        badge.className = 'asignado-badge';
+                        badge.innerHTML = `<i class="fas fa-user-tie"></i> ${sup.nombre} ${sup.apellido}`;
+                        supervisoresList.appendChild(badge);
+                    });
+                    supervisoresList.classList.remove('empty');
+                } else {
+                    supervisoresList.classList.add('empty');
+                }
+
+                const tiendasList = document.getElementById('view-tiendas-list');
+                tiendasList.innerHTML = '';
+                if (zona.tiendas && zona.tiendas.length > 0) {
+                    zona.tiendas.forEach(tienda => {
+                        const promotores = this.promotoresPorTienda[tienda.id_tienda] || [];
+                        const hasPromotores = promotores.length > 0;
+
+                        const wrapper = document.createElement('div');
+                        wrapper.className = 'tienda-badge-wrapper';
+
+                        const badge = document.createElement('span');
+                        badge.className = `asignado-badge ${hasPromotores ? 'tienda-badge-with-promotores' : ''}`;
+
+                        badge.innerHTML = `
+                            <i class="fas fa-store"></i> 
+                            ${tienda.nombre_tienda}
+                            ${hasPromotores ? `<span class="promotor-count" title="${promotores.length} promotor(es)">${promotores.length}</span>` : ''}
+                        `;
+
+                        if (hasPromotores) {
+                            const tooltip = document.createElement('div');
+                            tooltip.className = 'promotores-tooltip';
+                            tooltip.innerHTML = `
+                                <h5><i class="fas fa-users"></i> Promotores en esta tienda</h5>
+                                <ul class="promotores-list">
+                                    ${promotores.map(p => `
+                                        <li><i class="fas fa-user"></i> ${p.nombre_completo}</li>
+                                    `).join('')}
+                                </ul>
+                            `;
+                            wrapper.appendChild(badge);
+                            wrapper.appendChild(tooltip);
+                        } else {
+                            wrapper.appendChild(badge);
+                        }
+
+                        tiendasList.appendChild(wrapper);
+                    });
+                    tiendasList.classList.remove('empty');
+                } else {
+                    tiendasList.classList.add('empty');
+                }
+            }
+
+            async populateEditMode(zona) {
+                document.getElementById('modal-title').innerHTML = '<i class="fas fa-edit"></i> Editar Zona';
+                document.getElementById('zona-id').value = zona.id_zona;
+                document.getElementById('zona-nombre').value = zona.nombre_zona;
+                document.getElementById('zona-region').value = zona.id_region;
+                document.getElementById('zona-estado').value = zona.activa ? '1' : '0';
+                document.getElementById('zona-descripcion').value = zona.descripcion || '';
+
+                this.selectedRegionId = zona.id_region;
+
+                this.supervisoresAsignados = (zona.supervisores || []).map(sup => ({
+                    id: sup.id,
+                    nombre: sup.nombre,
+                    apellido: sup.apellido,
+                    nombre_completo: `${sup.nombre} ${sup.apellido}`
+                }));
+
+                this.tiendasAsignadas = zona.tiendas || [];
+
+                this.renderSupervisoresAsignados();
+
+                await this.loadPromotoresDeTiendas();
+            }
+
+            removeSupervisor(id) {
+                this.supervisoresAsignados = this.supervisoresAsignados.filter(s => s.id !== id);
+                this.renderSupervisoresAsignados();
+            }
+
+            renderSupervisoresAsignados() {
+                const list = document.getElementById('supervisores-asignados-list');
+                list.innerHTML = '';
+
+                if (this.supervisoresAsignados.length > 0) {
+                    this.supervisoresAsignados.forEach(sup => {
+                        const badge = document.createElement('span');
+                        badge.className = 'asignado-badge';
+                        badge.innerHTML = `
+                            <i class="fas fa-user-tie"></i>
+                            ${sup.nombre_completo || `${sup.nombre} ${sup.apellido}`}
+                            <button type="button" class="asignado-remove" onclick="zonasModule.removeSupervisor(${sup.id})">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        `;
+                        list.appendChild(badge);
+                    });
+                    list.classList.remove('empty');
+                } else {
+                    list.classList.add('empty');
+                }
+            }
+
+            renderTiendasAsignadas() {
+                const list = document.getElementById('tiendas-asignadas-list');
+                list.innerHTML = '';
+
+                if (this.tiendasAsignadas.length > 0) {
+                    this.tiendasAsignadas.forEach(tienda => {
+                        const promotores = this.promotoresPorTienda[tienda.id_tienda] || [];
+                        const hasPromotores = promotores.length > 0;
+
+                        const wrapper = document.createElement('div');
+                        wrapper.className = 'tienda-badge-wrapper';
+
+                        const badge = document.createElement('span');
+                        badge.className = `asignado-badge ${hasPromotores ? 'tienda-badge-with-promotores' : ''}`;
+                        badge.innerHTML = `
+                            <i class="fas fa-store"></i>
+                            ${tienda.nombre_tienda}
+                            ${hasPromotores ? `<span class="promotor-count" title="${promotores.length} promotor(es)">${promotores.length}</span>` : ''}
+                            <button type="button" class="asignado-remove" onclick="zonasModule.removeTienda(${tienda.id_tienda})">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        `;
+
+                        if (hasPromotores) {
+                            const tooltip = document.createElement('div');
+                            tooltip.className = 'promotores-tooltip';
+                            tooltip.innerHTML = `
+                                <h5><i class="fas fa-users"></i> Promotores en esta tienda</h5>
+                                <ul class="promotores-list">
+                                    ${promotores.map(p => `
+                                        <li><i class="fas fa-user"></i> ${p.nombre_completo}</li>
+                                    `).join('')}
+                                </ul>
+                            `;
+                            wrapper.appendChild(badge);
+                            wrapper.appendChild(tooltip);
+                        } else {
+                            wrapper.appendChild(badge);
+                        }
+
+                        list.appendChild(wrapper);
+                    });
+                    list.classList.remove('empty');
+                } else {
+                    list.classList.add('empty');
+                }
+            }
+
+            async handleSubmit(e) {
+                e.preventDefault();
+                console.log('💾 Guardando zona...');
+
+                const formData = {
+                    nombre_zona: document.getElementById('zona-nombre').value.trim(),
+                    id_region: parseInt(document.getElementById('zona-region').value),
+                    activa: parseInt(document.getElementById('zona-estado').value),
+                    descripcion: document.getElementById('zona-descripcion').value.trim(),
+                    supervisores: this.supervisoresAsignados.map(s => s.id),
+                    tiendas: this.tiendasAsignadas.map(t => t.id_tienda)
+                };
+
+                try {
+                    if (this.isNewZona) {
+                        const response = await this.apiRequest('', {
+                            method: 'POST',
+                            body: JSON.stringify({ ...formData, action: 'create' })
+                        });
+
+                        if (response.success) {
+                            this.showNotification('success', 'Éxito', 'Zona creada correctamente');
+                            this.closeModal();
+                            this.loadZonas();
+                        }
+                    } else {
+                        formData.id_zona = parseInt(document.getElementById('zona-id').value);
+
+                        const response = await this.apiRequest('', {
+                            method: 'PUT',
+                            body: JSON.stringify({ ...formData, action: 'update' })
+                        });
+
+                        if (response.success) {
+                            this.showNotification('success', 'Éxito', 'Zona actualizada correctamente');
+                            this.closeModal();
+                            this.loadZonas();
+                        }
+                    }
+                } catch (error) {
+                    console.error('❌ Error al guardar zona:', error);
+                    this.showNotification('error', 'Error', error.message || 'No se pudo guardar la zona');
+                }
+            }
+
+            handleSearchFieldChange() {
+                const searchField = document.getElementById('search-field').value;
+                const searchInput = document.getElementById('search-value');
+                const btnBuscar = document.getElementById('btn-buscar');
+
+                if (searchField) {
+                    searchInput.disabled = false;
+                    btnBuscar.disabled = false;
+                    searchInput.focus();
+                } else {
+                    searchInput.disabled = true;
+                    btnBuscar.disabled = true;
+                    searchInput.value = '';
+                }
+            }
+
+            handleSearch() {
+                this.searchField = document.getElementById('search-field').value;
+                this.searchValue = document.getElementById('search-value').value.trim();
+
+                if (!this.searchField || !this.searchValue) {
+                    this.showNotification('warning', 'Atención', 'Seleccione un campo y valor de búsqueda');
+                    return;
+                }
+
+                this.currentPage = 1;
+                this.loadZonas();
+            }
+
+            handleClearSearch() {
+                document.getElementById('search-field').value = '';
+                document.getElementById('search-value').value = '';
+                document.getElementById('search-value').disabled = true;
+                document.getElementById('btn-buscar').disabled = true;
+
+                this.searchField = '';
+                this.searchValue = '';
+                this.currentPage = 1;
+                this.loadZonas();
+            }
+
+            changePage(page) {
+                if (page < 1 || page > this.totalPages) return;
+
+                this.currentPage = page;
+                this.loadZonas();
+            }
+
+            updatePagination() {
+                const startItem = (this.currentPage - 1) * this.itemsPerPage + 1;
+                const endItem = Math.min(this.currentPage * this.itemsPerPage, this.totalItems);
+
+                document.getElementById('pagination-info').textContent =
+                    `Mostrando ${startItem} - ${endItem} de ${this.totalItems} zonas`;
+
+                document.getElementById('pagination-pages').textContent =
+                    `Página ${this.currentPage} de ${this.totalPages || 1}`;
+
+                document.getElementById('btn-prev').disabled = this.currentPage === 1;
+                document.getElementById('btn-next').disabled = this.currentPage === this.totalPages || this.totalPages === 0;
+            }
+
+            openModal() {
+                document.getElementById('modal-zona').classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+
+            closeModal() {
+                document.getElementById('modal-zona').classList.remove('active');
+                document.body.style.overflow = '';
+                document.getElementById('form-zona').reset();
+                this.supervisoresAsignados = [];
+                this.tiendasAsignadas = [];
+                this.selectedRegionId = null;
+                this.hideRestoreSuggestion();
+                this.justRestoredZona = false; // 🆕 Resetear flag
+            }
+
+            showViewMode() {
+                document.getElementById('view-mode').style.display = 'block';
+                document.getElementById('edit-mode').style.display = 'none';
+                document.getElementById('view-actions').style.display = 'flex';
+                document.getElementById('edit-actions').style.display = 'none';
+                document.getElementById('new-actions').style.display = 'none';
+            }
+
+            showEditMode() {
+                document.getElementById('view-mode').style.display = 'none';
+                document.getElementById('edit-mode').style.display = 'block';
+
+                if (this.isNewZona) {
+                    document.getElementById('view-actions').style.display = 'none';
+                    document.getElementById('edit-actions').style.display = 'none';
+                    document.getElementById('new-actions').style.display = 'flex';
+                } else {
+                    document.getElementById('view-actions').style.display = 'none';
+                    document.getElementById('edit-actions').style.display = 'flex';
+                    document.getElementById('new-actions').style.display = 'none';
+                }
+            }
+
+            async enableEditMode() {
                 this.editMode = true;
                 this.showEditMode();
                 await this.loadCatalogos();
                 await this.populateEditMode(this.currentZona);
-                this.openModal();
-            }
-        } catch (error) {
-            console.error('❌ Error al editar zona:', error);
-            this.showNotification('error', 'Error', 'No se pudo cargar la zona');
-        }
-    }
-
-    async deleteZona(id) {
-        console.log('🗑️ Eliminando zona:', id);
-        if (!confirm('¿Está seguro de que desea eliminar esta zona?')) {
-            return;
-        }
-
-        try {
-            const response = await this.apiRequest(``, {
-                method: 'DELETE',
-                body: JSON.stringify({ id: id, action: 'delete' })
-            });
-
-            if (response.success) {
-                this.showNotification('success', 'Éxito', 'Zona eliminada correctamente');
-                this.loadZonas();
-            }
-        } catch (error) {
-            console.error('❌ Error al eliminar zona:', error);
-            this.showNotification('error', 'Error', 'No se pudo eliminar la zona');
-        }
-    }
-
-    async openNewZonaModal() {
-        console.log('🆕 Abriendo modal Nueva Zona');
-
-        try {
-            this.currentZona = null;
-            this.isNewZona = true;
-            this.editMode = true;
-            this.supervisoresAsignados = [];
-            this.tiendasAsignadas = [];
-            this.selectedRegionId = null;
-
-            document.getElementById('modal-title').innerHTML = '<i class="fas fa-plus"></i> Nueva Zona';
-            document.getElementById('form-zona').reset();
-
-            this.showEditMode();
-
-            console.log('📚 Cargando catálogos...');
-            await this.loadCatalogos();
-
-            this.renderSupervisoresAsignados();
-            this.renderTiendasAsignadas();
-
-            document.getElementById('view-actions').style.display = 'none';
-            document.getElementById('edit-actions').style.display = 'none';
-            document.getElementById('new-actions').style.display = 'flex';
-
-            this.openModal();
-
-        } catch (error) {
-            console.error('❌ Error al abrir modal:', error);
-            this.showNotification('error', 'Error', 'No se pudo abrir el formulario: ' + error.message);
-        }
-    }
-
-    async loadCatalogos() {
-        console.log('📚 Cargando catálogos...');
-        try {
-            console.log('🗺️ Cargando regiones...');
-            const regionesResponse = await this.apiRequest('?action=get_regiones');
-            if (regionesResponse.success) {
-                this.regionesData = regionesResponse.data;
-                console.log('✅ Regiones cargadas:', this.regionesData.length);
-                this.loadRegionesSelect();
             }
 
-            console.log('👥 Cargando supervisores...');
-            const supervisoresResponse = await this.apiRequest('?action=get_supervisores');
-            if (supervisoresResponse.success) {
-                this.supervisoresData = supervisoresResponse.data;
-                console.log('✅ Supervisores cargados:', this.supervisoresData.length);
-                this.loadSupervisoresSelect();
-            }
-
-            console.log('🏪 Cargando tiendas...');
-            const tiendasResponse = await this.apiRequest('?action=get_tiendas');
-            if (tiendasResponse.success) {
-                this.tiendasData = tiendasResponse.data;
-                console.log('✅ Tiendas cargadas:', this.tiendasData.length);
-            }
-        } catch (error) {
-            console.error('❌ Error al cargar catálogos:', error);
-            this.showNotification('error', 'Error', 'No se pudieron cargar los catálogos: ' + error.message);
-            throw error;
-        }
-    }
-
-    loadRegionesSelect() {
-        const regionSelect = document.getElementById('zona-region');
-        regionSelect.innerHTML = '<option value="">Seleccionar región...</option>';
-
-        this.regionesData.forEach(region => {
-            const option = document.createElement('option');
-            option.value = region.id_region;
-            option.textContent = `Región ${region.numero_region} - ${region.nombre_region}`;
-            regionSelect.appendChild(option);
-        });
-
-        console.log('✅ Select de regiones poblado');
-    }
-
-    loadSupervisoresSelect() {
-        const supervisorSelect = document.getElementById('supervisor-select');
-        supervisorSelect.innerHTML = '<option value="">Seleccionar supervisor...</option>';
-
-        this.supervisoresData
-            .filter(sup => !this.supervisoresAsignados.find(s => s.id === sup.id))
-            .forEach(sup => {
-                const option = document.createElement('option');
-                option.value = sup.id;
-                option.textContent = sup.nombre_completo || `${sup.nombre} ${sup.apellido}`;
-                supervisorSelect.appendChild(option);
-            });
-
-        console.log('✅ Select de supervisores poblado');
-    }
-
-    toggleTiendasDropdown() {
-        const suggestionsContainer = document.getElementById('tienda-suggestions');
-        const dropdownBtn = document.getElementById('tienda-dropdown-btn');
-        const tiendaInput = document.getElementById('tienda-input');
-
-        console.log('🔽 Toggle dropdown de tiendas');
-
-        if (suggestionsContainer.classList.contains('active')) {
-            suggestionsContainer.classList.remove('active');
-            dropdownBtn.classList.remove('active');
-            return;
-        }
-
-        let tiendasDisponibles = this.tiendasData;
-
-        if (this.selectedRegionId) {
-            const regionSeleccionada = this.regionesData.find(r => r.id_region === this.selectedRegionId);
-            if (regionSeleccionada) {
-                const numeroRegion = regionSeleccionada.numero_region;
-                tiendasDisponibles = tiendasDisponibles.filter(tienda => tienda.region == numeroRegion);
-                console.log(`🗺️ Filtrando por región ${numeroRegion}:`, tiendasDisponibles.length, 'tiendas');
-            }
-        }
-
-        tiendasDisponibles = tiendasDisponibles.filter(tienda =>
-            !this.tiendasAsignadas.find(t => t.id_tienda === tienda.id_tienda)
-        );
-
-        console.log('✅ Tiendas disponibles para dropdown:', tiendasDisponibles.length);
-
-        if (!tiendaInput.value || tiendaInput.value.length === 0) {
-            this.renderTiendaSuggestions(tiendasDisponibles, true);
-            dropdownBtn.classList.add('active');
-        } else {
-            this.handleTiendaSearch(tiendaInput.value);
-        }
-
-        tiendaInput.focus();
-    }
-
-    handleTiendaSearch(searchTerm) {
-        console.log('🔍 Buscando tiendas:', searchTerm);
-
-        const suggestionsContainer = document.getElementById('tienda-suggestions');
-
-        if (!searchTerm || searchTerm.length < 2) {
-            suggestionsContainer.classList.remove('active');
-            return;
-        }
-
-        let tiendasFiltradas = this.tiendasData;
-
-        if (this.selectedRegionId) {
-            const regionSeleccionada = this.regionesData.find(r => r.id_region === this.selectedRegionId);
-            if (regionSeleccionada) {
-                const numeroRegion = regionSeleccionada.numero_region;
-                tiendasFiltradas = tiendasFiltradas.filter(tienda => tienda.region == numeroRegion);
-            }
-        }
-
-        tiendasFiltradas = tiendasFiltradas.filter(tienda =>
-            !this.tiendasAsignadas.find(t => t.id_tienda === tienda.id_tienda)
-        );
-
-        const searchLower = searchTerm.toLowerCase();
-        tiendasFiltradas = tiendasFiltradas.filter(tienda => {
-            return tienda.nombre_tienda.toLowerCase().includes(searchLower) ||
-                (tienda.cadena && tienda.cadena.toLowerCase().includes(searchLower)) ||
-                (tienda.ciudad && tienda.ciudad.toLowerCase().includes(searchLower)) ||
-                (tienda.num_tienda && tienda.num_tienda.toString().includes(searchLower));
-        });
-
-        console.log('✅ Tiendas encontradas:', tiendasFiltradas.length);
-
-        this.renderTiendaSuggestions(tiendasFiltradas, false);
-    }
-
-    renderTiendaSuggestions(tiendas, showAll = false) {
-        const suggestionsContainer = document.getElementById('tienda-suggestions');
-
-        if (tiendas.length === 0) {
-            suggestionsContainer.innerHTML = '<div class="autocomplete-no-results">No se encontraron tiendas disponibles</div>';
-            suggestionsContainer.classList.add('active');
-            return;
-        }
-
-        suggestionsContainer.innerHTML = '';
-
-        const limite = showAll ? 50 : 10;
-        const tiendasToShow = tiendas.slice(0, limite);
-
-        console.log(`📋 Mostrando ${tiendasToShow.length} de ${tiendas.length} tiendas`);
-
-        tiendasToShow.forEach((tienda, index) => {
-            const suggestion = document.createElement('div');
-            suggestion.className = 'autocomplete-suggestion';
-            suggestion.dataset.index = index;
-            suggestion.dataset.tiendaId = tienda.id_tienda;
-
-            suggestion.innerHTML = `
-                <div class="autocomplete-suggestion-name">${tienda.nombre_tienda}</div>
-                <div class="autocomplete-suggestion-details">
-                    <span class="autocomplete-suggestion-badge">${tienda.cadena || 'Sin cadena'}</span>
-                    <span>${tienda.ciudad || 'Sin ciudad'}</span>
-                    ${tienda.num_tienda ? `<span>#${tienda.num_tienda}</span>` : ''}
-                    ${tienda.region ? `<span>Región ${tienda.region}</span>` : ''}
-                </div>
-            `;
-
-            suggestion.addEventListener('click', () => {
-                this.selectTiendaFromAutocomplete(tienda);
-            });
-
-            suggestionsContainer.appendChild(suggestion);
-        });
-
-        if (tiendas.length > limite) {
-            const moreInfo = document.createElement('div');
-            moreInfo.className = 'autocomplete-no-results';
-            moreInfo.style.borderTop = '2px solid var(--border-color)';
-            moreInfo.style.fontWeight = '600';
-            moreInfo.innerHTML = `<i class="fas fa-info-circle"></i> Mostrando ${limite} de ${tiendas.length} tiendas. Escribe para filtrar más.`;
-            suggestionsContainer.appendChild(moreInfo);
-        }
-
-        suggestionsContainer.classList.add('active');
-    }
-
-    async selectTiendaFromAutocomplete(tienda) {
-        console.log('✅ Tienda seleccionada:', tienda.nombre_tienda);
-
-        if (this.selectedRegionId) {
-            const regionSeleccionada = this.regionesData.find(r => r.id_region === this.selectedRegionId);
-            if (regionSeleccionada && tienda.region != regionSeleccionada.numero_region) {
-                this.showNotification('warning', 'Atención', 'La tienda no pertenece a la región seleccionada');
-                return;
-            }
-        }
-
-        if (this.tiendasAsignadas.find(t => t.id_tienda === tienda.id_tienda)) {
-            this.showNotification('warning', 'Atención', 'Esta tienda ya está asignada');
-            return;
-        }
-
-        this.tiendasAsignadas.push(tienda);
-
-        await this.loadPromotoresDeTiendas();
-        this.renderTiendasAsignadas();
-
-        document.getElementById('tienda-input').value = '';
-        document.getElementById('tienda-suggestions').classList.remove('active');
-        document.getElementById('tienda-dropdown-btn').classList.remove('active');
-        document.getElementById('tienda-input').focus();
-
-        this.showNotification('success', 'Éxito', `Tienda "${tienda.nombre_tienda}" asignada`);
-    }
-
-    async removeTienda(id) {
-        this.tiendasAsignadas = this.tiendasAsignadas.filter(t => t.id_tienda !== id);
-        await this.loadPromotoresDeTiendas();
-        this.renderTiendasAsignadas();
-    }
-
-    async populateEditMode(zona) {
-        document.getElementById('modal-title').innerHTML = '<i class="fas fa-edit"></i> Editar Zona';
-        document.getElementById('zona-id').value = zona.id_zona;
-        document.getElementById('zona-nombre').value = zona.nombre_zona;
-        document.getElementById('zona-region').value = zona.id_region;
-        document.getElementById('zona-estado').value = zona.activa ? '1' : '0';
-        document.getElementById('zona-descripcion').value = zona.descripcion || '';
-
-        this.selectedRegionId = zona.id_region;
-
-        this.supervisoresAsignados = (zona.supervisores || []).map(sup => ({
-            id: sup.id,
-            nombre: sup.nombre,
-            apellido: sup.apellido,
-            nombre_completo: `${sup.nombre} ${sup.apellido}`
-        }));
-
-        this.tiendasAsignadas = zona.tiendas || [];
-
-        this.renderSupervisoresAsignados();
-        this.loadSupervisoresSelect();
-
-        await this.loadPromotoresDeTiendas();
-    }
-
-    handleTiendaKeyboard(e) {
-        const suggestionsContainer = document.getElementById('tienda-suggestions');
-        const suggestions = suggestionsContainer.querySelectorAll('.autocomplete-suggestion');
-
-        if (suggestions.length === 0) return;
-
-        const currentSelected = suggestionsContainer.querySelector('.autocomplete-suggestion.selected');
-        let currentIndex = currentSelected ? parseInt(currentSelected.dataset.index) : -1;
-
-        switch (e.key) {
-            case 'ArrowDown':
-                e.preventDefault();
-                currentIndex = Math.min(currentIndex + 1, suggestions.length - 1);
-                break;
-            case 'ArrowUp':
-                e.preventDefault();
-                currentIndex = Math.max(currentIndex - 1, 0);
-                break;
-            case 'Enter':
-                e.preventDefault();
-                if (currentIndex >= 0) {
-                    const tiendaId = parseInt(suggestions[currentIndex].dataset.tiendaId);
-                    const tienda = this.tiendasData.find(t => t.id_tienda === tiendaId);
-                    if (tienda) this.selectTiendaFromAutocomplete(tienda);
+            cancelEdit() {
+                if (this.currentZona) {
+                    this.editMode = false;
+                    this.showViewMode();
+                    this.populateViewMode(this.currentZona);
                 }
-                return;
-            case 'Escape':
-                suggestionsContainer.classList.remove('active');
-                document.getElementById('tienda-dropdown-btn').classList.remove('active');
-                return;
-            default:
-                return;
-        }
-
-        suggestions.forEach((s, i) => {
-            if (i === currentIndex) {
-                s.classList.add('selected');
-                s.scrollIntoView({ block: 'nearest' });
-            } else {
-                s.classList.remove('selected');
             }
-        });
-    }
 
-    populateViewMode(zona) {
-        document.getElementById('modal-title').innerHTML = '<i class="fas fa-map-marked-alt"></i> Información de Zona';
-        document.getElementById('view-nombre-zona').textContent = zona.nombre_zona;
-        document.getElementById('view-region').textContent = `Región ${zona.numero_region} - ${zona.nombre_region}`;
-        document.getElementById('view-descripcion').textContent = zona.descripcion || 'Sin descripción';
+            showTableLoading() {
+                document.getElementById('table-loading').style.display = 'block';
+                document.querySelector('.table-wrapper').style.display = 'none';
+                document.getElementById('empty-state').style.display = 'none';
+            }
 
-        const estadoBadge = document.getElementById('view-estado-badge');
-        estadoBadge.textContent = zona.activa ? 'Activo' : 'Inactivo';
-        estadoBadge.className = 'status-badge ' + (zona.activa ? 'activo' : 'inactivo');
+            hideTableLoading() {
+                document.getElementById('table-loading').style.display = 'none';
+                document.querySelector('.table-wrapper').style.display = 'block';
+            }
 
-        document.getElementById('view-fecha-creacion').textContent = zona.fecha_creacion_formatted || '-';
+            showEmptyState() {
+                document.querySelector('.table-wrapper').style.display = 'none';
+                document.getElementById('empty-state').style.display = 'block';
+            }
 
-        const supervisoresList = document.getElementById('view-supervisores-list');
-        supervisoresList.innerHTML = '';
-        if (zona.supervisores && zona.supervisores.length > 0) {
-            zona.supervisores.forEach(sup => {
-                const badge = document.createElement('span');
-                badge.className = 'asignado-badge';
-                badge.innerHTML = `<i class="fas fa-user-tie"></i> ${sup.nombre} ${sup.apellido}`;
-                supervisoresList.appendChild(badge);
-            });
-            supervisoresList.classList.remove('empty');
-        } else {
-            supervisoresList.classList.add('empty');
-        }
+            showNotification(type, title, message) {
+                const container = document.getElementById('notifications-container');
+                const notification = document.createElement('div');
+                notification.className = `notification ${type}`;
 
-        const tiendasList = document.getElementById('view-tiendas-list');
-        tiendasList.innerHTML = '';
-        if (zona.tiendas && zona.tiendas.length > 0) {
-            zona.tiendas.forEach(tienda => {
-                const promotores = this.promotoresPorTienda[tienda.id_tienda] || [];
-                const hasPromotores = promotores.length > 0;
+                const icon = this.getNotificationIcon(type);
 
-                const wrapper = document.createElement('div');
-                wrapper.className = 'tienda-badge-wrapper';
-
-                const badge = document.createElement('span');
-                badge.className = `asignado-badge ${hasPromotores ? 'tienda-badge-with-promotores' : ''}`;
-
-                badge.innerHTML = `
-                    <i class="fas fa-store"></i> 
-                    ${tienda.nombre_tienda}
-                    ${hasPromotores ? `<span class="promotor-count" title="${promotores.length} promotor(es)">${promotores.length}</span>` : ''}
-                `;
-
-                if (hasPromotores) {
-                    const tooltip = document.createElement('div');
-                    tooltip.className = 'promotores-tooltip';
-                    tooltip.innerHTML = `
-                        <h5><i class="fas fa-users"></i> Promotores en esta tienda</h5>
-                        <ul class="promotores-list">
-                            ${promotores.map(p => `
-                                <li><i class="fas fa-user"></i> ${p.nombre_completo}</li>
-                            `).join('')}
-                        </ul>
-                    `;
-                    wrapper.appendChild(badge);
-                    wrapper.appendChild(tooltip);
-                } else {
-                    wrapper.appendChild(badge);
-                }
-
-                tiendasList.appendChild(wrapper);
-            });
-            tiendasList.classList.remove('empty');
-        } else {
-            tiendasList.classList.add('empty');
-        }
-    }
-
-    addSupervisor() {
-        const supervisorSelect = document.getElementById('supervisor-select');
-        const supervisorId = parseInt(supervisorSelect.value);
-
-        if (!supervisorId) {
-            this.showNotification('warning', 'Atención', 'Seleccione un supervisor');
-            return;
-        }
-
-        const supervisor = this.supervisoresData.find(s => s.id === supervisorId);
-
-        if (supervisor && !this.supervisoresAsignados.find(s => s.id === supervisorId)) {
-            this.supervisoresAsignados.push({
-                id: supervisor.id,
-                nombre: supervisor.nombre,
-                apellido: supervisor.apellido,
-                nombre_completo: supervisor.nombre_completo || `${supervisor.nombre} ${supervisor.apellido}`
-            });
-            this.renderSupervisoresAsignados();
-            this.loadSupervisoresSelect();
-        }
-    }
-
-    removeSupervisor(id) {
-        this.supervisoresAsignados = this.supervisoresAsignados.filter(s => s.id !== id);
-        this.renderSupervisoresAsignados();
-        this.loadSupervisoresSelect();
-    }
-
-    renderSupervisoresAsignados() {
-        const list = document.getElementById('supervisores-asignados-list');
-        list.innerHTML = '';
-
-        if (this.supervisoresAsignados.length > 0) {
-            this.supervisoresAsignados.forEach(sup => {
-                const badge = document.createElement('span');
-                badge.className = 'asignado-badge';
-                badge.innerHTML = `
-                    <i class="fas fa-user-tie"></i>
-                    ${sup.nombre_completo || `${sup.nombre} ${sup.apellido}`}
-                    <button type="button" class="asignado-remove" onclick="zonasModule.removeSupervisor(${sup.id})">
-                        <i class="fas fa-times"></i>
-                    </button>
-                `;
-                list.appendChild(badge);
-            });
-            list.classList.remove('empty');
-        } else {
-            list.classList.add('empty');
-        }
-    }
-
-    renderTiendasAsignadas() {
-        const list = document.getElementById('tiendas-asignadas-list');
-        list.innerHTML = '';
-
-        if (this.tiendasAsignadas.length > 0) {
-            this.tiendasAsignadas.forEach(tienda => {
-                const promotores = this.promotoresPorTienda[tienda.id_tienda] || [];
-                const hasPromotores = promotores.length > 0;
-
-                const wrapper = document.createElement('div');
-                wrapper.className = 'tienda-badge-wrapper';
-
-                const badge = document.createElement('span');
-                badge.className = `asignado-badge ${hasPromotores ? 'tienda-badge-with-promotores' : ''}`;
-                badge.innerHTML = `
-                    <i class="fas fa-store"></i>
-                    ${tienda.nombre_tienda}
-                    ${hasPromotores ? `<span class="promotor-count" title="${promotores.length} promotor(es)">${promotores.length}</span>` : ''}
-                    <button type="button" class="asignado-remove" onclick="zonasModule.removeTienda(${tienda.id_tienda})">
+                notification.innerHTML = `
+                    <i class="fas ${icon} notification-icon"></i>
+                    <div class="notification-content">
+                        <h4>${title}</h4>
+                        <p>${message}</p>
+                    </div>
+                    <button class="notification-close">
                         <i class="fas fa-times"></i>
                     </button>
                 `;
 
-                if (hasPromotores) {
-                    const tooltip = document.createElement('div');
-                    tooltip.className = 'promotores-tooltip';
-                    tooltip.innerHTML = `
-                        <h5><i class="fas fa-users"></i> Promotores en esta tienda</h5>
-                        <ul class="promotores-list">
-                            ${promotores.map(p => `
-                                <li><i class="fas fa-user"></i> ${p.nombre_completo}</li>
-                            `).join('')}
-                        </ul>
-                    `;
-                    wrapper.appendChild(badge);
-                    wrapper.appendChild(tooltip);
-                } else {
-                    wrapper.appendChild(badge);
-                }
+                container.appendChild(notification);
 
-                list.appendChild(wrapper);
-            });
-            list.classList.remove('empty');
-        } else {
-            list.classList.add('empty');
-        }
-    }
+                setTimeout(() => {
+                    notification.style.animation = 'notificationSlideIn 0.3s ease reverse';
+                    setTimeout(() => notification.remove(), 300);
+                }, 5000);
 
-    async handleSubmit(e) {
-        e.preventDefault();
-        console.log('💾 Guardando zona...');
-
-        const formData = {
-            nombre_zona: document.getElementById('zona-nombre').value.trim(),
-            id_region: parseInt(document.getElementById('zona-region').value),
-            activa: parseInt(document.getElementById('zona-estado').value),
-            descripcion: document.getElementById('zona-descripcion').value.trim(),
-            supervisores: this.supervisoresAsignados.map(s => s.id),
-            tiendas: this.tiendasAsignadas.map(t => t.id_tienda)
-        };
-
-        try {
-            if (this.isNewZona) {
-                const response = await this.apiRequest('', {
-                    method: 'POST',
-                    body: JSON.stringify({ ...formData, action: 'create' })
+                notification.querySelector('.notification-close').addEventListener('click', () => {
+                    notification.style.animation = 'notificationSlideIn 0.3s ease reverse';
+                    setTimeout(() => notification.remove(), 300);
                 });
+            }
 
-                if (response.success) {
-                    this.showNotification('success', 'Éxito', 'Zona creada correctamente');
-                    this.closeModal();
-                    this.loadZonas();
-                }
-            } else {
-                formData.id_zona = parseInt(document.getElementById('zona-id').value);
+            getNotificationIcon(type) {
+                const icons = {
+                    success: 'fa-check-circle',
+                    error: 'fa-times-circle',
+                    warning: 'fa-exclamation-triangle',
+                    info: 'fa-info-circle'
+                };
+                return icons[type] || icons.info;
+            }
 
-                const response = await this.apiRequest('', {
-                    method: 'PUT',
-                    body: JSON.stringify({ ...formData, action: 'update' })
-                });
+            // ===== FUNCIONES DE INCIDENCIAS =====
+            reportarIncidencia() {
+                console.log('📝 Abriendo modal de incidencias...');
+                document.getElementById('form-incidencia').reset();
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('incidencia-fecha-inicio').value = today;
+                this.loadPromotoresForIncidencia();
+                this.loadTiendasForIncidencia();
+                this.setupIncidenciaListeners();
+                document.getElementById('modal-incidencia').classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
 
-                if (response.success) {
-                    this.showNotification('success', 'Éxito', 'Zona actualizada correctamente');
-                    this.closeModal();
-                    this.loadZonas();
+            closeIncidenciaModal() {
+                document.getElementById('modal-incidencia').classList.remove('active');
+                document.body.style.overflow = '';
+                document.getElementById('form-incidencia').reset();
+                document.getElementById('incidencia-info-calculada').style.display = 'none';
+            }
+
+            setupIncidenciaListeners() {
+                const fechaInicio = document.getElementById('incidencia-fecha-inicio');
+                const fechaFin = document.getElementById('incidencia-fecha-fin');
+                const calcularDias = () => {
+                    if (fechaInicio.value && fechaFin.value) {
+                        const inicio = new Date(fechaInicio.value);
+                        const fin = new Date(fechaFin.value);
+                        if (fin >= inicio) {
+                            const diff = Math.floor((fin - inicio) / (1000 * 60 * 60 * 24)) + 1;
+                            document.getElementById('incidencia-dias-totales').textContent = diff;
+                            document.getElementById('incidencia-info-calculada').style.display = 'flex';
+                        } else {
+                            document.getElementById('incidencia-info-calculada').style.display = 'none';
+                            this.showNotification('warning', 'Atención', 'La fecha de fin debe ser posterior');
+                        }
+                    } else {
+                        document.getElementById('incidencia-info-calculada').style.display = 'none';
+                    }
+                };
+                fechaInicio.removeEventListener('change', calcularDias);
+                fechaFin.removeEventListener('change', calcularDias);
+                fechaInicio.addEventListener('change', calcularDias);
+                fechaFin.addEventListener('change', calcularDias);
+            }
+
+            async loadPromotoresForIncidencia() {
+                try {
+                    console.log('📋 Cargando promotores desde la base de datos...');
+                    
+                    // Usar el mismo endpoint del API de zonas que ya funciona
+                    // Este endpoint debe devolver la lista de promotores desde la tabla 'promotores'
+                    const response = await fetch(API_CONFIG.baseURL + '?action=obtener_promotores_todos');
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    console.log('📊 Respuesta del servidor:', data);
+                    
+                    const select = document.getElementById('incidencia-promotor');
+                    
+                    if (!select) {
+                        console.error('❌ No se encontró el elemento select');
+                        return;
+                    }
+                    
+                    select.innerHTML = '<option value="">Seleccionar promotor...</option>';
+                    
+                    // El API puede devolver los datos en diferentes formatos
+                    let promotores = [];
+                    
+                    if (data.success && Array.isArray(data.data)) {
+                        promotores = data.data;
+                    } else if (data.success && data.promotores && Array.isArray(data.promotores)) {
+                        promotores = data.promotores;
+                    } else if (Array.isArray(data)) {
+                        promotores = data;
+                    }
+                    
+                    if (promotores.length === 0) {
+                        console.warn('⚠️ No hay promotores disponibles en la base de datos');
+                        select.innerHTML = '<option value="">No hay promotores disponibles</option>';
+                        return;
+                    }
+                    
+                    console.log(`✅ Procesando ${promotores.length} promotores`);
+                    
+                    // Ordenar alfabéticamente por nombre
+                    promotores.sort((a, b) => {
+                        const nombreA = (a.nombre || '').toLowerCase();
+                        const nombreB = (b.nombre || '').toLowerCase();
+                        return nombreA.localeCompare(nombreB);
+                    });
+                    
+                    // Agregar cada promotor al select
+                    promotores.forEach(promotor => {
+                        // Solo agregar promotores activos
+                        if (promotor.estatus === 'BAJA' || promotor.estado === 0) {
+                            return; // Saltar promotores inactivos
+                        }
+                        
+                        const option = document.createElement('option');
+                        option.value = promotor.id_promotor;
+                        
+                        // Construir nombre completo
+                        const nombre = promotor.nombre || '';
+                        const apellido = promotor.apellido || '';
+                        const nombreCompleto = `${nombre} ${apellido}`.trim();
+                        
+                        option.textContent = nombreCompleto || `Promotor #${promotor.id_promotor}`;
+                        
+                        // Agregar datos adicionales como atributos
+                        if (promotor.telefono) option.setAttribute('data-telefono', promotor.telefono);
+                        if (promotor.region) option.setAttribute('data-region', promotor.region);
+                        
+                        select.appendChild(option);
+                    });
+                    
+                    console.log('✅ Promotores cargados correctamente en el select');
+                    
+                } catch (error) {
+                    console.error('❌ Error al cargar promotores:', error);
+                    const select = document.getElementById('incidencia-promotor');
+                    if (select) {
+                        select.innerHTML = '<option value="">Error al cargar promotores</option>';
+                    }
+                    this.showNotification('error', 'Error', 'No se pudieron cargar los promotores. Por favor recarga la página.');
                 }
             }
-        } catch (error) {
-            console.error('❌ Error al guardar zona:', error);
-            this.showNotification('error', 'Error', error.message || 'No se pudo guardar la zona');
+
+            async loadTiendasForIncidencia() {
+                try {
+                    console.log('🏪 Cargando tiendas desde la base de datos...');
+                    
+                    // Usar el mismo endpoint del API de zonas
+                    const response = await fetch(API_CONFIG.baseURL + '?action=obtener_tiendas_todas');
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    console.log('📊 Respuesta tiendas:', data);
+                    
+                    const select = document.getElementById('incidencia-tienda');
+                    
+                    if (!select) {
+                        console.error('❌ No se encontró el elemento select de tiendas');
+                        return;
+                    }
+                    
+                    select.innerHTML = '<option value="">Seleccionar tienda...</option>';
+                    
+                    // Procesar respuesta
+                    let tiendas = [];
+                    
+                    if (data.success && Array.isArray(data.data)) {
+                        tiendas = data.data;
+                    } else if (data.success && data.tiendas && Array.isArray(data.tiendas)) {
+                        tiendas = data.tiendas;
+                    } else if (Array.isArray(data)) {
+                        tiendas = data;
+                    }
+                    
+                    if (tiendas.length === 0) {
+                        console.warn('⚠️ No hay tiendas disponibles');
+                        select.innerHTML = '<option value="">Sin tiendas (usa el campo de texto libre)</option>';
+                        return;
+                    }
+                    
+                    console.log(`✅ Procesando ${tiendas.length} tiendas`);
+                    
+                    // Ordenar por cadena y número de tienda
+                    tiendas.sort((a, b) => {
+                        const cadenaCompare = (a.cadena || '').localeCompare(b.cadena || '');
+                        if (cadenaCompare !== 0) return cadenaCompare;
+                        return (a.num_tienda || 0) - (b.num_tienda || 0);
+                    });
+                    
+                    // Agregar tiendas al select
+                    tiendas.forEach(tienda => {
+                        // Solo tiendas activas
+                        if (tienda.estado_reg === 0) {
+                            return;
+                        }
+                        
+                        const option = document.createElement('option');
+                        option.value = tienda.id_tienda;
+                        
+                        // Formato: "Cadena #NumTienda - Nombre"
+                        let texto = '';
+                        if (tienda.cadena) texto += tienda.cadena + ' ';
+                        if (tienda.num_tienda) texto += '#' + tienda.num_tienda + ' ';
+                        if (tienda.nombre_tienda) texto += '- ' + tienda.nombre_tienda;
+                        
+                        option.textContent = texto.trim() || `Tienda #${tienda.id_tienda}`;
+                        
+                        // Datos adicionales
+                        if (tienda.ciudad) option.setAttribute('data-ciudad', tienda.ciudad);
+                        if (tienda.estado) option.setAttribute('data-estado', tienda.estado);
+                        
+                        select.appendChild(option);
+                    });
+                    
+                    console.log('✅ Tiendas cargadas correctamente');
+                    
+                } catch (error) {
+                    console.error('❌ Error al cargar tiendas:', error);
+                    const select = document.getElementById('incidencia-tienda');
+                    if (select) {
+                        select.innerHTML = '<option value="">Error al cargar (usa texto libre)</option>';
+                    }
+                }
+            }
+
+            async saveIncidencia() {
+                try {
+                    const promotor = document.getElementById('incidencia-promotor').value;
+                    const tipo = document.getElementById('incidencia-tipo').value;
+                    const prioridad = document.getElementById('incidencia-prioridad').value;
+                    const fechaInicio = document.getElementById('incidencia-fecha-inicio').value;
+                    const descripcion = document.getElementById('incidencia-descripcion').value;
+                    
+                    // Validar campos uno por uno con mensajes específicos
+                    if (!promotor) {
+                        this.showNotification('warning', 'Campo Requerido', 'Debe seleccionar un promotor');
+                        document.getElementById('incidencia-promotor').focus();
+                        return;
+                    }
+                    
+                    if (!tipo) {
+                        this.showNotification('warning', 'Campo Requerido', 'Debe seleccionar el tipo de incidencia');
+                        document.getElementById('incidencia-tipo').focus();
+                        return;
+                    }
+                    
+                    if (!prioridad) {
+                        this.showNotification('warning', 'Campo Requerido', 'Debe seleccionar la prioridad');
+                        document.getElementById('incidencia-prioridad').focus();
+                        return;
+                    }
+                    
+                    if (!fechaInicio) {
+                        this.showNotification('warning', 'Campo Requerido', 'Debe ingresar la fecha de inicio');
+                        document.getElementById('incidencia-fecha-inicio').focus();
+                        return;
+                    }
+                    
+                    if (!descripcion || descripcion.trim() === '') {
+                        this.showNotification('warning', 'Campo Requerido', 'Debe ingresar una descripción detallada');
+                        document.getElementById('incidencia-descripcion').focus();
+                        return;
+                    }
+                    
+                    const formData = {
+                        action: 'crear',
+                        id_promotor: parseInt(promotor),
+                        tipo_incidencia: tipo,
+                        prioridad: prioridad,
+                        fecha_incidencia: fechaInicio,
+                        fecha_fin: document.getElementById('incidencia-fecha-fin').value || null,
+                        descripcion: descripcion,
+                        notas: document.getElementById('incidencia-notas').value || null,
+                        estatus: 'pendiente',
+                        usuario_registro: 'Sistema'
+                    };
+                    
+                    const tiendaSelect = document.getElementById('incidencia-tienda').value;
+                    const tiendaNombre = document.getElementById('incidencia-tienda-nombre').value;
+                    if (tiendaSelect) formData.id_tienda = parseInt(tiendaSelect);
+                    if (tiendaNombre) formData.tienda_nombre = tiendaNombre;
+                    
+                    const response = await fetch(API_CONFIG.baseURL + '?action=guardar_incidencia', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(formData)
+                    });
+                    
+                    const data = await response.json();
+                    if (data.success) {
+                        this.showNotification('success', '✅ Incidencia Reportada', 'Incidencia reportada exitosamente');
+                        this.closeIncidenciaModal();
+                    } else {
+                        this.showNotification('error', 'Error', data.message || 'No se pudo guardar');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    this.showNotification('error', 'Error', 'Ocurrió un error al guardar');
+                }
+            }
         }
-    }
 
-    handleSearchFieldChange() {
-        const searchField = document.getElementById('search-field').value;
-        const searchInput = document.getElementById('search-value');
-        const btnBuscar = document.getElementById('btn-buscar');
+        (function () {
+            console.log('📦 Script del módulo zonas cargado');
 
-        if (searchField) {
-            searchInput.disabled = false;
-            btnBuscar.disabled = false;
-            searchInput.focus();
-        } else {
-            searchInput.disabled = true;
-            btnBuscar.disabled = true;
-            searchInput.value = '';
-        }
-    }
+            let zonasModuleInstance = null;
 
-    handleSearch() {
-        this.searchField = document.getElementById('search-field').value;
-        this.searchValue = document.getElementById('search-value').value.trim();
+            function initZonasModule() {
+                console.log('🔄 initZonasModule() llamado');
 
-        if (!this.searchField || !this.searchValue) {
-            this.showNotification('warning', 'Atención', 'Seleccione un campo y valor de búsqueda');
-            return;
-        }
+                if (zonasModuleInstance) {
+                    console.log('⚠️ Módulo ya inicializado');
+                    return zonasModuleInstance;
+                }
 
-        this.currentPage = 1;
-        this.loadZonas();
-    }
+                const tabla = document.getElementById('zonas-table');
+                const btnNueva = document.getElementById('btn-nueva-zona');
 
-    handleClearSearch() {
-        document.getElementById('search-field').value = '';
-        document.getElementById('search-value').value = '';
-        document.getElementById('search-value').disabled = true;
-        document.getElementById('btn-buscar').disabled = true;
+                if (!tabla || !btnNueva) {
+                    console.error('❌ Elementos del módulo no encontrados');
+                    setTimeout(initZonasModule, 100);
+                    return null;
+                }
 
-        this.searchField = '';
-        this.searchValue = '';
-        this.currentPage = 1;
-        this.loadZonas();
-    }
+                console.log('✅ Elementos encontrados, inicializando...');
 
-    changePage(page) {
-        if (page < 1 || page > this.totalPages) return;
+                try {
+                    zonasModuleInstance = new ZonasModule();
+                    window.zonasModule = zonasModuleInstance;
+                    return zonasModuleInstance;
+                } catch (error) {
+                    console.error('❌ Error al inicializar:', error);
+                    return null;
+                }
+            }
 
-        this.currentPage = page;
-        this.loadZonas();
-    }
+            window.initZonasModule = initZonasModule;
 
-    updatePagination() {
-        const startItem = (this.currentPage - 1) * this.itemsPerPage + 1;
-        const endItem = Math.min(this.currentPage * this.itemsPerPage, this.totalItems);
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initZonasModule);
+            } else {
+                initZonasModule();
+            }
 
-        document.getElementById('pagination-info').textContent =
-            `Mostrando ${startItem} - ${endItem} de ${this.totalItems} zonas`;
+            setTimeout(() => {
+                if (!zonasModuleInstance) {
+                    initZonasModule();
+                }
+            }, 100);
+        })();
+    </script>
 
-        document.getElementById('pagination-pages').textContent =
-            `Página ${this.currentPage} de ${this.totalPages || 1}`;
 
-        document.getElementById('btn-prev').disabled = this.currentPage === 1;
-        document.getElementById('btn-next').disabled = this.currentPage === this.totalPages || this.totalPages === 0;
-    }
+<!-- ============================================================ -->
+<!-- MODAL DE INCIDENCIAS -->
+<!-- AGREGAR ANTES DEL CIERRE DE </body> -->
+<!-- ============================================================ -->
 
-    openModal() {
-        document.getElementById('modal-zona').classList.add('active');
-        document.body.style.overflow = 'hidden';
-    }
-
-    closeModal() {
-        document.getElementById('modal-zona').classList.remove('active');
-        document.body.style.overflow = '';
-        document.getElementById('form-zona').reset();
-        this.supervisoresAsignados = [];
-        this.tiendasAsignadas = [];
-        this.selectedRegionId = null;
-    }
-
-    showViewMode() {
-        document.getElementById('view-mode').style.display = 'block';
-        document.getElementById('edit-mode').style.display = 'none';
-        
-        // 🆕 Si es supervisor, ocultar botón de editar
-        const btnEditarZona = document.getElementById('btn-editar-zona');
-        if (this.userRol === 'supervisor') {
-            if (btnEditarZona) btnEditarZona.style.display = 'none';
-        } else {
-            if (btnEditarZona) btnEditarZona.style.display = 'inline-flex';
-        }
-        
-        document.getElementById('view-actions').style.display = 'flex';
-        document.getElementById('edit-actions').style.display = 'none';
-        document.getElementById('new-actions').style.display = 'none';
-    }
-
-    showEditMode() {
-        document.getElementById('view-mode').style.display = 'none';
-        document.getElementById('edit-mode').style.display = 'block';
-
-        if (this.isNewZona) {
-            document.getElementById('view-actions').style.display = 'none';
-            document.getElementById('edit-actions').style.display = 'none';
-            document.getElementById('new-actions').style.display = 'flex';
-        } else {
-            document.getElementById('view-actions').style.display = 'none';
-            document.getElementById('edit-actions').style.display = 'flex';
-            document.getElementById('new-actions').style.display = 'none';
-        }
-    }
-
-    async enableEditMode() {
-        this.editMode = true;
-        this.showEditMode();
-        await this.loadCatalogos();
-        await this.populateEditMode(this.currentZona);
-    }
-
-    cancelEdit() {
-        if (this.currentZona) {
-            this.editMode = false;
-            this.showViewMode();
-            this.populateViewMode(this.currentZona);
-        }
-    }
-
-    showTableLoading() {
-        document.getElementById('table-loading').style.display = 'block';
-        document.querySelector('.table-wrapper').style.display = 'none';
-        document.getElementById('empty-state').style.display = 'none';
-    }
-
-    hideTableLoading() {
-        document.getElementById('table-loading').style.display = 'none';
-        document.querySelector('.table-wrapper').style.display = 'block';
-    }
-
-    showEmptyState() {
-        document.querySelector('.table-wrapper').style.display = 'none';
-        document.getElementById('empty-state').style.display = 'block';
-    }
-
-    showNotification(type, title, message) {
-        const container = document.getElementById('notifications-container');
-        const notification = document.createElement('div');
-        notification.className = `notification ${type}`;
-
-        const icon = this.getNotificationIcon(type);
-
-        notification.innerHTML = `
-            <i class="fas ${icon} notification-icon"></i>
-            <div class="notification-content">
-                <h4>${title}</h4>
-                <p>${message}</p>
-            </div>
-            <button class="notification-close">
+<div id="modal-incidencia" class="modal">
+    <div class="modal-content modal-incidencia-content">
+        <div class="modal-header">
+            <h2 id="modal-incidencia-title">
+                <i class="fas fa-exclamation-triangle"></i>
+                Reportar Incidencia
+            </h2>
+            <button class="modal-close" onclick="zonasModule.closeIncidenciaModal()">
                 <i class="fas fa-times"></i>
             </button>
-        `;
+        </div>
 
-        container.appendChild(notification);
+        <div class="modal-body">
+            <form id="form-incidencia" onsubmit="event.preventDefault(); zonasModule.saveIncidencia(); return false;" novalidate>
+                <input type="hidden" id="incidencia-id">
 
-        setTimeout(() => {
-            notification.style.animation = 'notificationSlideIn 0.3s ease reverse';
-            setTimeout(() => notification.remove(), 300);
-        }, 5000);
+                <!-- Información del Promotor -->
+                <div class="form-section">
+                    <h3><i class="fas fa-user"></i> Información del Promotor</h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="incidencia-promotor">Promotor *</label>
+                            <select id="incidencia-promotor">
+                                <option value="">Seleccionar promotor...</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="incidencia-tienda">Tienda</label>
+                            <select id="incidencia-tienda">
+                                <option value="">Seleccionar tienda...</option>
+                            </select>
+                            <small class="form-helper">Opcional - Si no está en la lista, escribe el nombre abajo</small>
+                        </div>
+                    </div>
 
-        notification.querySelector('.notification-close').addEventListener('click', () => {
-            notification.style.animation = 'notificationSlideIn 0.3s ease reverse';
-            setTimeout(() => notification.remove(), 300);
-        });
-    }
+                    <div class="form-group">
+                        <label for="incidencia-tienda-nombre">Nombre de Tienda (Texto libre)</label>
+                        <input type="text" id="incidencia-tienda-nombre" maxlength="200"
+                               placeholder="Ej: Walmart Av. Principal Centro">
+                        <small class="form-helper">Usa este campo si la tienda no está en el listado</small>
+                    </div>
+                </div>
 
-    getNotificationIcon(type) {
-        const icons = {
-            success: 'fa-check-circle',
-            error: 'fa-times-circle',
-            warning: 'fa-exclamation-triangle',
-            info: 'fa-info-circle'
-        };
-        return icons[type] || icons.info;
-    }
-}
+                <!-- Detalles de la Incidencia -->
+                <div class="form-section">
+                    <h3><i class="fas fa-clipboard-list"></i> Detalles de la Incidencia</h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="incidencia-tipo">Tipo de Incidencia *</label>
+                            <select id="incidencia-tipo">
+                                <option value="">Seleccionar tipo...</option>
+                                <option value="falta">❌ Falta Injustificada</option>
+                                <option value="vacaciones">🏖️ Vacaciones</option>
+                                <option value="abandono">🚪 Abandono de Puesto</option>
+                                <option value="salud">🏥 Problemas de Salud</option>
+                                <option value="imprevisto">⚡ Imprevisto Personal</option>
+                                <option value="otro">📋 Otro</option>
+                            </select>
+                        </div>
 
-// Inicialización
-(function () {
-    console.log('📦 Script del módulo zonas cargado');
+                        <div class="form-group">
+                            <label for="incidencia-prioridad">Prioridad *</label>
+                            <select id="incidencia-prioridad">
+                                <option value="media" selected>🟡 Media (Normal)</option>
+                                <option value="baja">🟢 Baja</option>
+                                <option value="alta">🔴 Alta (Urgente)</option>
+                            </select>
+                        </div>
+                    </div>
 
-    let zonasModuleInstance = null;
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="incidencia-fecha-inicio">Fecha de Inicio *</label>
+                            <input type="date" id="incidencia-fecha-inicio">
+                        </div>
 
-    function initZonasModule() {
-        console.log('🔄 initZonasModule() llamado');
+                        <div class="form-group">
+                            <label for="incidencia-fecha-fin">Fecha de Fin</label>
+                            <input type="date" id="incidencia-fecha-fin">
+                            <small class="form-helper">Opcional - Si la incidencia tiene duración específica</small>
+                        </div>
+                    </div>
 
-        if (zonasModuleInstance) {
-            console.log('⚠️ Módulo ya inicializado');
-            return zonasModuleInstance;
-        }
+                    <!-- Días calculados -->
+                    <div id="incidencia-info-calculada" class="info-calculada" style="display: none;">
+                        <div class="info-item">
+                            <i class="fas fa-calendar-days"></i>
+                            <span>Días totales: <strong id="incidencia-dias-totales">0</strong></span>
+                        </div>
+                    </div>
 
-        const tabla = document.getElementById('zonas-table');
-        const btnNueva = document.getElementById('btn-nueva-zona');
+                    <div class="form-group">
+                        <label for="incidencia-descripcion">Descripción Detallada *</label>
+                        <textarea id="incidencia-descripcion" rows="4" required
+                                  placeholder="Describe la incidencia con el mayor detalle posible. Incluye:
+- ¿Qué sucedió?
+- ¿Cuándo ocurrió?
+- ¿Hubo algún aviso previo?
+- Cualquier información relevante..."></textarea>
+                    </div>
 
-        if (!tabla || !btnNueva) {
-            console.error('❌ Elementos del módulo no encontrados');
-            setTimeout(initZonasModule, 100);
-            return null;
-        }
+                    <div class="form-group">
+                        <label for="incidencia-notas">Notas Adicionales / Seguimiento</label>
+                        <textarea id="incidencia-notas" rows="3"
+                                  placeholder="Cualquier información adicional que pueda ser útil para el seguimiento..."></textarea>
+                    </div>
+                </div>
 
-        console.log('✅ Elementos encontrados, inicializando...');
+                <!-- Información importante -->
+                <div class="form-section" style="background: #fff3cd; border-left: 4px solid #ffc107;">
+                    <div style="display: flex; align-items: flex-start; gap: 1rem;">
+                        <i class="fas fa-info-circle" style="color: #ffc107; font-size: 1.5rem; margin-top: 0.25rem;"></i>
+                        <div>
+                            <h4 style="margin: 0 0 0.5rem 0; color: #856404;">Información Importante</h4>
+                            <ul style="margin: 0; padding-left: 1.5rem; color: #856404; font-size: 0.9rem;">
+                                <li>Esta incidencia será enviada al administrador para su revisión</li>
+                                <li>Recibirás notificación cuando sea procesada</li>
+                                <li>Los campos marcados con * son obligatorios</li>
+                                <li>Asegúrate de proporcionar información detallada y precisa</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
 
-        try {
-            zonasModuleInstance = new ZonasModule();
-            window.zonasModule = zonasModuleInstance;
-            return zonasModuleInstance;
-        } catch (error) {
-            console.error('❌ Error al inicializar:', error);
-            return null;
-        }
-    }
+            </form>
+        </div>
 
-    window.initZonasModule = initZonasModule;
+        <!-- Acciones del Modal -->
+        <div class="modal-actions">
+            <button type="button" class="btn-primary" onclick="zonasModule.saveIncidencia()">
+                <i class="fas fa-paper-plane"></i>
+                Reportar Incidencia
+            </button>
+            <button type="button" class="btn-secondary" onclick="zonasModule.closeIncidenciaModal()">
+                <i class="fas fa-times"></i>
+                Cancelar
+            </button>
+        </div>
+    </div>
+</div>
 
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initZonasModule);
-    } else {
-        initZonasModule();
-    }
 
-    setTimeout(() => {
-        if (!zonasModuleInstance) {
-            initZonasModule();
-        }
-    }, 100);
-})();
-</script>
+</body>
+
+</html>

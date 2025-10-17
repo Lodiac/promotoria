@@ -3209,11 +3209,7 @@
                 </button>
             </td>
         `;
-            // ===== BOTÓN ELIMINAR COMENTADO =====
-            // <button class="btn-action delete" onclick="eliminarPromotor(${promotor.id_promotor}, '${promotor.nombre_completo}', '${promotor.correo}')" title="Eliminar">
-            //     <i class="fas fa-trash"></i>
-            // </button>
-            
+          
             promotoresTbody.appendChild(row);
         });
     }
@@ -3423,73 +3419,6 @@
             btnGuardar.innerHTML = originalText;
         }
     }
-
-    // ===== FUNCIONES COMENTADAS - ELIMINAR PROMOTOR =====
-    /*
-    let promotorAEliminar = null;
-
-    function eliminarPromotor(id, nombre, correo) {
-        promotorAEliminar = { id, nombre, correo };
-
-        document.getElementById('delete-details').innerHTML = `
-            <strong>ID:</strong> ${id}<br>
-            <strong>Nombre:</strong> ${nombre}<br>
-            <strong>Correo:</strong> ${correo}
-        `;
-
-        abrirModal(modalConfirmar);
-    }
-
-    function cerrarModalConfirmar() {
-        modalConfirmar.classList.remove('active');
-        document.body.style.overflow = 'auto';
-        promotorAEliminar = null;
-    }
-
-    async function confirmarEliminacion() {
-        if (!promotorAEliminar) return;
-
-        const btnConfirmar = document.getElementById('btn-confirmar-delete');
-        btnConfirmar.disabled = true;
-        btnConfirmar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Eliminando...';
-
-        try {
-            const response = await fetch('../../api/delete_promotor.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    id_promotor: promotorAEliminar.id
-                })
-            });
-
-            const responseText = await response.text();
-            let data;
-            try {
-                data = JSON.parse(responseText);
-            } catch (jsonError) {
-                throw new Error('Respuesta inválida del servidor');
-            }
-
-            if (!data.success) {
-                throw new Error(data.message || 'Error al eliminar promotor');
-            }
-
-            mostrarNotificacion('Promotor eliminado correctamente', 'success');
-
-            cerrarModalConfirmar();
-            cargarPromotores();
-
-        } catch (error) {
-            console.error('❌ Error eliminando promotor:', error);
-            mostrarNotificacion('Error al eliminar promotor: ' + error.message, 'error');
-        } finally {
-            btnConfirmar.disabled = false;
-            btnConfirmar.innerHTML = '<i class="fas fa-trash"></i> Eliminar';
-        }
-    }
-    */
 
     // ===== VER HISTORIAL PROMOTOR =====
     async function verHistorialPromotor(idPromotor) {

@@ -97,7 +97,13 @@ try {
                 // Recibir IDs de tiendas como array
                 $tiendas_ids = isset($input['tiendas']) ? json_decode($input['tiendas'], true) : [];
                 getPromotoresPorTiendas($tiendas_ids); 
-            }else {
+            } elseif ($action === 'obtener_promotores_todos') {
+                // 🆕 Obtener todos los promotores activos para incidencias
+                obtenerPromotoresTodos();
+            } elseif ($action === 'obtener_tiendas_todas') {
+                // 🆕 Obtener todas las tiendas activas para incidencias
+                obtenerTiendasTodas();
+            } else {
                 // Por defecto, listar zonas
                 getZonas($input);
             }
@@ -106,6 +112,9 @@ try {
         case 'POST':
             if ($action === 'create') {
                 createZona($input);
+            } elseif ($action === 'guardar_incidencia') {
+                // 🆕 Guardar incidencia de promotor
+                guardarIncidencia($input);
             } else {
                 http_response_code(400);
                 echo json_encode([
@@ -1119,4 +1128,245 @@ function getPromotoresPorTiendas($tiendas_ids) {
         ], JSON_UNESCAPED_UNICODE);
     }
 }
+
+// ============================================================================
+// 🆕 FUNCIONES PARA GESTIÓN DE INCIDENCIAS
+// ============================================================================
+
+/**
+ * Obtener todos los promotores activos para formulario de incidencias
+ */
+function obtenerPromotoresTodos() {
+    try {
+        error_log("📋 Obteniendo todos los promotores activos para incidencias");
+        
+        $sql = "SELECT 
+                    id_promotor,
+                    nombre,
+                    apellido,
+                    telefono,
+                    correo,
+                    rfc,
+                    region,
+                    estatus,
+                    estado,
+                    tipo_trabajo
+                FROM promotores 
+                WHERE estado = 1 
+                AND estatus = 'ACTIVO'
+                ORDER BY nombre ASC, apellido ASC";
+        
+        $promotores = Database::select($sql);
+        
+        error_log("✅ Se obtuvieron " . count($promotores) . " promotores activos");
+        
+        http_response_code(200);
+        echo json_encode([
+            'success' => true,
+            'data' => $promotores,
+            'total' => count($promotores),
+            'message' => 'Promotores obtenidos correctamente'
+        ], JSON_UNESCAPED_UNICODE);
+        
+    } catch (Exception $e) {
+        error_log("❌ ERROR en obtenerPromotoresTodos: " . $e->getMessage());
+        error_log("File: " . $e->getFile() . " Line: " . $e->getLine());
+        
+        http_response_code(500);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Error al obtener promotores: ' . $e->getMessage(),
+            'data' => null,
+            'debug' => [
+                'file' => basename($e->getFile()),
+                'line' => $e->getLine()
+            ]
+        ], JSON_UNESCAPED_UNICODE);
+    }
+}
+
+/**
+ * Obtener todas las tiendas activas para formulario de incidencias
+ */
+function obtenerTiendasTodas() {
+    try {
+        error_log("🏪 Obteniendo todas las tiendas activas para incidencias");
+        
+        $sql = "SELECT 
+                    id_tienda,
+                    cadena,
+                    num_tienda,
+                    nombre_tienda,
+                    ciudad,
+                    estado,
+                    region,
+                    id_zona,
+                    estado_reg
+                FROM tiendas 
+                WHERE estado_reg = 1
+                ORDER BY cadena ASC, num_tienda ASC";
+        
+        $tiendas = Database::select($sql);
+        
+        error_log("✅ Se obtuvieron " . count($tiendas) . " tiendas activas");
+        
+        http_response_code(200);
+        echo json_encode([
+            'success' => true,
+            'data' => $tiendas,
+            'total' => count($tiendas),
+            'message' => 'Tiendas obtenidas correctamente'
+        ], JSON_UNESCAPED_UNICODE);
+        
+    } catch (Exception $e) {
+        error_log("❌ ERROR en obtenerTiendasTodas: " . $e->getMessage());
+        error_log("File: " . $e->getFile() . " Line: " . $e->getLine());
+        
+        http_response_code(500);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Error al obtener tiendas: ' . $e->getMessage(),
+            'data' => null,
+            'debug' => [
+                'file' => basename($e->getFile()),
+                'line' => $e->getLine()
+            ]
+        ], JSON_UNESCAPED_UNICODE);
+    }
+}
+
+/**
+ * Guardar una nueva incidencia de promotor
+ */
+function guardarIncidencia($input) {
+    try {
+        error_log("💾 Guardando nueva incidencia de promotor");
+        error_log("Datos recibidos: " . print_r($input, true));
+        
+        // Validar campos requeridos
+        $required = ['id_promotor', 'tipo_incidencia', 'fecha_incidencia', 'descripcion', 'prioridad'];
+        foreach ($required as $field) {
+            if (empty($input[$field])) {
+                throw new Exception("El campo {$field} es requerido");
+            }
+        }
+        
+        // Calcular días totales si hay fecha_fin
+        $dias_totales = null;
+        if (!empty($input['fecha_fin']) && !empty($input['fecha_incidencia'])) {
+            $fecha_inicio = new DateTime($input['fecha_incidencia']);
+            $fecha_fin = new DateTime($input['fecha_fin']);
+            
+            if ($fecha_fin < $fecha_inicio) {
+                throw new Exception("La fecha de fin debe ser posterior a la fecha de inicio");
+            }
+            
+            $diferencia = $fecha_inicio->diff($fecha_fin);
+            $dias_totales = $diferencia->days + 1;
+            error_log("📅 Días calculados: {$dias_totales}");
+        }
+        
+        // Verificar que el promotor existe
+        $promotor = Database::selectOne(
+            "SELECT id_promotor, nombre, apellido FROM promotores WHERE id_promotor = :id_promotor",
+            ['id_promotor' => $input['id_promotor']]
+        );
+        
+        if (!$promotor) {
+            throw new Exception("El promotor especificado no existe");
+        }
+        
+        error_log("✅ Promotor encontrado: {$promotor['nombre']} {$promotor['apellido']}");
+        
+        // Preparar SQL de inserción
+        $sql = "INSERT INTO incidencias (
+                    fecha_incidencia,
+                    fecha_fin,
+                    dias_totales,
+                    id_promotor,
+                    id_tienda,
+                    tienda_nombre,
+                    tipo_incidencia,
+                    descripcion,
+                    estatus,
+                    prioridad,
+                    notas,
+                    usuario_registro,
+                    id_supervisor_reporta
+                ) VALUES (
+                    :fecha_incidencia,
+                    :fecha_fin,
+                    :dias_totales,
+                    :id_promotor,
+                    :id_tienda,
+                    :tienda_nombre,
+                    :tipo_incidencia,
+                    :descripcion,
+                    :estatus,
+                    :prioridad,
+                    :notas,
+                    :usuario_registro,
+                    :id_supervisor_reporta
+                )";
+        
+        $params = [
+            'fecha_incidencia' => $input['fecha_incidencia'],
+            'fecha_fin' => $input['fecha_fin'] ?? null,
+            'dias_totales' => $dias_totales,
+            'id_promotor' => $input['id_promotor'],
+            'id_tienda' => $input['id_tienda'] ?? null,
+            'tienda_nombre' => $input['tienda_nombre'] ?? null,
+            'tipo_incidencia' => $input['tipo_incidencia'],
+            'descripcion' => $input['descripcion'],
+            'estatus' => $input['estatus'] ?? 'pendiente',
+            'prioridad' => $input['prioridad'],
+            'notas' => $input['notas'] ?? null,
+            'usuario_registro' => $_SESSION['username'] ?? ($input['usuario_registro'] ?? 'Sistema'),
+            'id_supervisor_reporta' => $_SESSION['user_id'] ?? null
+        ];
+        
+        error_log("📝 Insertando incidencia en base de datos...");
+        $id_incidencia = Database::insert($sql, $params);
+        
+        // Actualizar flag de incidencias del promotor
+        Database::execute(
+            "UPDATE promotores SET incidencias = 1 WHERE id_promotor = :id_promotor",
+            ['id_promotor' => $input['id_promotor']]
+        );
+        
+        error_log("✅ Incidencia guardada exitosamente con ID: {$id_incidencia}");
+        
+        http_response_code(201);
+        echo json_encode([
+            'success' => true,
+            'message' => 'Incidencia registrada exitosamente',
+            'data' => [
+                'id_incidencia' => $id_incidencia,
+                'dias_totales' => $dias_totales,
+                'promotor' => $promotor['nombre'] . ' ' . $promotor['apellido']
+            ]
+        ], JSON_UNESCAPED_UNICODE);
+        
+    } catch (Exception $e) {
+        error_log("❌ ERROR en guardarIncidencia: " . $e->getMessage());
+        error_log("File: " . $e->getFile() . " Line: " . $e->getLine());
+        error_log("Trace: " . $e->getTraceAsString());
+        
+        http_response_code(500);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Error al guardar incidencia: ' . $e->getMessage(),
+            'data' => null,
+            'debug' => [
+                'file' => basename($e->getFile()),
+                'line' => $e->getLine()
+            ]
+        ], JSON_UNESCAPED_UNICODE);
+    }
+}
+
+// ============================================================================
+// FIN DE FUNCIONES PARA INCIDENCIAS
+// ============================================================================
+
 ?>
