@@ -103,6 +103,9 @@ try {
             } elseif ($action === 'obtener_tiendas_todas') {
                 // 🆕 Obtener todas las tiendas activas para incidencias
                 obtenerTiendasTodas();
+            } elseif ($action === 'get_notificaciones') {
+                // 🔔 Obtener notificaciones del usuario
+                getNotificaciones();
             } else {
                 // Por defecto, listar zonas
                 getZonas($input);
@@ -115,6 +118,12 @@ try {
             } elseif ($action === 'guardar_incidencia') {
                 // 🆕 Guardar incidencia de promotor
                 guardarIncidencia($input);
+            } elseif ($action === 'marcar_leida') {
+                // 🔔 Marcar notificación como leída
+                marcarNotificacionLeida($input);
+            } elseif ($action === 'marcar_todas_leidas') {
+                // 🔔 Marcar todas las notificaciones como leídas
+                marcarTodasLeidas();
             } else {
                 http_response_code(400);
                 echo json_encode([
@@ -1336,6 +1345,9 @@ function guardarIncidencia($input) {
         
         error_log("✅ Incidencia guardada exitosamente con ID: {$id_incidencia}");
         
+        // 🔔 Crear notificación para usuarios ROOT
+        crearNotificacionIncidencia($id_incidencia, $input);
+        
         http_response_code(201);
         echo json_encode([
             'success' => true,
@@ -1368,5 +1380,259 @@ function guardarIncidencia($input) {
 // ============================================================================
 // FIN DE FUNCIONES PARA INCIDENCIAS
 // ============================================================================
+
+
+// ============================================================================
+// 🔔 SISTEMA DE NOTIFICACIONES
+// ============================================================================
+
+/**
+ * Crear notificación para usuarios ROOT cuando se reporta una incidencia
+ */
+function crearNotificacionIncidencia($id_incidencia, $datos_incidencia) {
+    try {
+        error_log("📧 Creando notificación de incidencia ID: {$id_incidencia}");
+        
+        // 1. Obtener todos los usuarios ROOT activos
+        $usuarios_root = Database::select(
+            "SELECT id, username, email, nombre, apellido 
+             FROM usuarios 
+             WHERE rol = 'root' 
+             AND activo = 1"
+        );
+        
+        if (empty($usuarios_root)) {
+            error_log("⚠️ No hay usuarios ROOT activos para notificar");
+            return false;
+        }
+        
+        error_log("✅ Se encontraron " . count($usuarios_root) . " usuarios ROOT");
+        
+        // 2. Obtener datos del promotor
+        $promotor = Database::selectOne(
+            "SELECT nombre, apellido FROM promotores WHERE id_promotor = :id",
+            ['id' => $datos_incidencia['id_promotor']]
+        );
+        
+        $nombre_promotor = ($promotor['nombre'] ?? '') . ' ' . ($promotor['apellido'] ?? '');
+        
+        // 3. Determinar prioridad
+        $prioridad_map = [
+            'baja' => 'normal',
+            'media' => 'normal',
+            'alta' => 'alta'
+        ];
+        $prioridad = $prioridad_map[$datos_incidencia['prioridad']] ?? 'normal';
+        
+        // 4. Crear título y mensaje
+        $tipo_incidencia_texto = ucfirst($datos_incidencia['tipo_incidencia']);
+        $titulo = "Nueva Incidencia: {$tipo_incidencia_texto}";
+        
+        $mensaje = "El promotor {$nombre_promotor} tiene una nueva incidencia de tipo {$tipo_incidencia_texto}.\n\n";
+        $mensaje .= "Fecha: " . date('d/m/Y', strtotime($datos_incidencia['fecha_incidencia'])) . "\n";
+        $mensaje .= "Prioridad: " . strtoupper($datos_incidencia['prioridad']) . "\n";
+        $mensaje .= "Descripción: " . substr($datos_incidencia['descripcion'], 0, 100);
+        
+        // 5. Datos extra en JSON
+        $datos_extra = json_encode([
+            'id_incidencia' => $id_incidencia,
+            'id_promotor' => $datos_incidencia['id_promotor'],
+            'nombre_promotor' => $nombre_promotor,
+            'tipo_incidencia' => $datos_incidencia['tipo_incidencia'],
+            'fecha_incidencia' => $datos_incidencia['fecha_incidencia'],
+            'prioridad' => $datos_incidencia['prioridad']
+        ], JSON_UNESCAPED_UNICODE);
+        
+        // 6. Insertar notificación para cada usuario ROOT
+        $sql = "INSERT INTO notificaciones (
+                    id_usuario_destino,
+                    tipo,
+                    titulo,
+                    mensaje,
+                    datos_extra,
+                    url_accion,
+                    icono,
+                    prioridad,
+                    id_creador
+                ) VALUES (
+                    :id_usuario_destino,
+                    'incidencia',
+                    :titulo,
+                    :mensaje,
+                    :datos_extra,
+                    :url_accion,
+                    'alert-triangle',
+                    :prioridad,
+                    :id_creador
+                )";
+        
+        $notificaciones_creadas = 0;
+        
+        foreach ($usuarios_root as $usuario) {
+            try {
+                $params = [
+                    'id_usuario_destino' => $usuario['id'],
+                    'titulo' => $titulo,
+                    'mensaje' => $mensaje,
+                    'datos_extra' => $datos_extra,
+                    'url_accion' => "/incidencias/ver?id={$id_incidencia}",
+                    'prioridad' => $prioridad,
+                    'id_creador' => $_SESSION['user_id'] ?? null
+                ];
+                
+                $id_notificacion = Database::insert($sql, $params);
+                
+                if ($id_notificacion) {
+                    $notificaciones_creadas++;
+                    error_log("✅ Notificación #{$id_notificacion} creada para {$usuario['username']}");
+                }
+            } catch (Exception $e) {
+                error_log("⚠️ Error al crear notificación para {$usuario['username']}: " . $e->getMessage());
+            }
+        }
+        
+        error_log("✅ Total de notificaciones creadas: {$notificaciones_creadas}");
+        return $notificaciones_creadas > 0;
+        
+    } catch (Exception $e) {
+        error_log("❌ ERROR en crearNotificacionIncidencia: " . $e->getMessage());
+        return false;
+    }
+}
+
+/**
+ * Obtener notificaciones del usuario actual
+ */
+function getNotificaciones() {
+    try {
+        $id_usuario = $_SESSION['user_id'] ?? null;
+        
+        if (!$id_usuario) {
+            throw new Exception("Usuario no autenticado");
+        }
+        
+        $limite = $_GET['limite'] ?? 20;
+        $solo_no_leidas = isset($_GET['solo_no_leidas']) && $_GET['solo_no_leidas'] === 'true';
+        
+        $sql = "SELECT 
+                    id_notificacion,
+                    tipo,
+                    titulo,
+                    mensaje,
+                    datos_extra,
+                    url_accion,
+                    leida,
+                    fecha_lectura,
+                    fecha_creacion,
+                    icono,
+                    prioridad
+                FROM notificaciones 
+                WHERE id_usuario_destino = :id_usuario";
+        
+        if ($solo_no_leidas) {
+            $sql .= " AND leida = 0";
+        }
+        
+        $sql .= " ORDER BY fecha_creacion DESC LIMIT :limite";
+        
+        $notificaciones = Database::select($sql, [
+            'id_usuario' => $id_usuario,
+            'limite' => (int)$limite
+        ]);
+        
+        // Contar no leídas
+        $count_no_leidas = Database::selectOne(
+            "SELECT COUNT(*) as total FROM notificaciones 
+             WHERE id_usuario_destino = :id_usuario AND leida = 0",
+            ['id_usuario' => $id_usuario]
+        );
+        
+        http_response_code(200);
+        echo json_encode([
+            'success' => true,
+            'data' => $notificaciones,
+            'total' => count($notificaciones),
+            'no_leidas' => $count_no_leidas['total'] ?? 0
+        ], JSON_UNESCAPED_UNICODE);
+        
+    } catch (Exception $e) {
+        http_response_code(500);
+        echo json_encode([
+            'success' => false,
+            'message' => $e->getMessage()
+        ]);
+    }
+}
+
+/**
+ * Marcar notificación como leída
+ */
+function marcarNotificacionLeida($input) {
+    try {
+        $id_notificacion = $input['id_notificacion'] ?? null;
+        $id_usuario = $_SESSION['user_id'] ?? null;
+        
+        if (!$id_notificacion || !$id_usuario) {
+            throw new Exception("Datos incompletos");
+        }
+        
+        $sql = "UPDATE notificaciones 
+                SET leida = 1, fecha_lectura = NOW() 
+                WHERE id_notificacion = :id_notificacion 
+                AND id_usuario_destino = :id_usuario";
+        
+        Database::execute($sql, [
+            'id_notificacion' => $id_notificacion,
+            'id_usuario' => $id_usuario
+        ]);
+        
+        http_response_code(200);
+        echo json_encode([
+            'success' => true,
+            'message' => 'Notificación marcada como leída'
+        ]);
+        
+    } catch (Exception $e) {
+        http_response_code(500);
+        echo json_encode([
+            'success' => false,
+            'message' => $e->getMessage()
+        ]);
+    }
+}
+
+/**
+ * Marcar todas las notificaciones como leídas
+ */
+function marcarTodasLeidas() {
+    try {
+        $id_usuario = $_SESSION['user_id'] ?? null;
+        
+        if (!$id_usuario) {
+            throw new Exception("Usuario no autenticado");
+        }
+        
+        $sql = "UPDATE notificaciones 
+                SET leida = 1, fecha_lectura = NOW() 
+                WHERE id_usuario_destino = :id_usuario 
+                AND leida = 0";
+        
+        Database::execute($sql, ['id_usuario' => $id_usuario]);
+        
+        http_response_code(200);
+        echo json_encode([
+            'success' => true,
+            'message' => 'Todas las notificaciones marcadas como leídas'
+        ]);
+        
+    } catch (Exception $e) {
+        http_response_code(500);
+        echo json_encode([
+            'success' => false,
+            'message' => $e->getMessage()
+        ]);
+    }
+}
+
 
 ?>

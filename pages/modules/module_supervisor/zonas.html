@@ -1510,7 +1510,7 @@
         ::-webkit-scrollbar-thumb:hover {
             background: var(--zone-primary-hover);
         }
-    
+
 
         /* ===== ESTILOS BASE DEL MODAL ===== */
         .modal {
@@ -1603,8 +1603,13 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
 
         @keyframes slideDown {
@@ -1612,6 +1617,7 @@
                 opacity: 0;
                 transform: translateY(-50px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -1624,24 +1630,29 @@
             background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
             color: white;
         }
+
         .btn-incidencia:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(245, 158, 11, 0.3);
         }
+
         .header-actions {
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
         }
+
         .modal-incidencia-content {
             max-width: 900px;
         }
+
         .form-section {
             background: #f8f9fa;
             border-radius: 8px;
             padding: 1.5rem;
             margin-bottom: 1.5rem;
         }
+
         .form-section h3 {
             margin: 0 0 1rem 0;
             font-size: 1.1rem;
@@ -1652,20 +1663,24 @@
             padding-bottom: 0.75rem;
             border-bottom: 2px solid var(--border-color);
         }
+
         .form-row {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 1rem;
         }
+
         .form-group {
             margin-bottom: 1rem;
         }
+
         .form-group label {
             display: block;
             margin-bottom: 0.5rem;
             font-weight: 600;
             color: var(--text-primary);
         }
+
         .form-group input,
         .form-group select,
         .form-group textarea {
@@ -1676,6 +1691,7 @@
             font-size: 0.95rem;
             transition: all 0.3s ease;
         }
+
         .form-group input:focus,
         .form-group select:focus,
         .form-group textarea:focus {
@@ -1683,12 +1699,14 @@
             outline: none;
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
+
         .form-helper {
             display: block;
             margin-top: 0.25rem;
             font-size: 0.85rem;
             color: var(--text-secondary);
         }
+
         .info-calculada {
             background: linear-gradient(135deg, var(--zone-light) 0%, #f3f4f6 100%);
             border-radius: 8px;
@@ -1698,21 +1716,23 @@
             align-items: center;
             gap: 1rem;
         }
+
         .info-calculada .info-item {
             display: flex;
             align-items: center;
             gap: 0.5rem;
             color: var(--text-primary);
         }
+
         .info-calculada .info-item i {
             color: var(--zone-primary);
             font-size: 1.2rem;
         }
+
         .info-calculada .info-item strong {
             color: var(--zone-primary);
             font-size: 1.1rem;
         }
-
     </style>
 </head>
 
@@ -1768,7 +1788,7 @@
                             <th>Estado</th>
                             <th>Fecha Creación</th>
                             <th>Acciones</th>
-                            
+
                         </tr>
                     </thead>
                     <tbody id="zonas-tbody">
@@ -2020,7 +2040,7 @@
                 this.regionesData = [];
                 this.selectedRegionId = null;
                 this.promotoresPorTienda = {};
-                
+
                 // 🆕 SISTEMA DE RESTAURACIÓN
                 this.zonasEliminadas = this.loadZonasEliminadas();
                 this.justRestoredZona = false; // Flag para evitar que reaparezca el modal
@@ -2260,13 +2280,13 @@
                     </td>
                     <td>${zona.fecha_creacion_formatted || '-'}</td>
                     <td>
-                        <button class="btn-action view" onclick="zonasModule.viewZona(${zona.id_zona})">
+                        <button class="btn-action view" onclick="window.zonasModule && window.zonasModule.viewZona(${zona.id_zona})">
                             <i class="fas fa-eye"></i>
                         </button>
-                        <button class="btn-action edit" onclick="zonasModule.editZona(${zona.id_zona})">
+                        <button class="btn-action edit" onclick="window.zonasModule && window.zonasModule.editZona(${zona.id_zona})">
                             <i class="fas fa-edit"></i>
                         </button>
-                        <button class="btn-action delete" onclick="zonasModule.deleteZona(${zona.id_zona})">
+                        <button class="btn-action delete" onclick="window.zonasModule && window.zonasModule.deleteZona(${zona.id_zona})">
                             <i class="fas fa-trash"></i>
                         </button>
                     </td>
@@ -2355,17 +2375,17 @@
                 try {
                     // 🆕 PRIMERO obtener la info completa de la zona antes de eliminarla
                     const zonaResponse = await this.apiRequest(`?action=get_one&id=${id}`);
-                    
+
                     if (zonaResponse.success) {
                         const zonaCompleta = zonaResponse.data;
-                        
+
                         // 🆕 Guardar en historial de eliminadas
                         this.zonasEliminadas.unshift({
                             ...zonaCompleta,
                             fecha_eliminacion: new Date().toISOString(),
                             id_original: zonaCompleta.id_zona
                         });
-                        
+
                         this.saveZonasEliminadas();
                         console.log('💾 Zona guardada en historial de eliminadas');
                     }
@@ -2859,8 +2879,6 @@
                 });
             }
 
-            // 🆕 ===== FUNCIONES PARA RESTAURACIÓN DE ZONAS =====
-
             loadZonasEliminadas() {
                 try {
                     const stored = localStorage.getItem('zonas_eliminadas');
@@ -2883,21 +2901,21 @@
             handleNombreZonaInput(e) {
                 const input = e.target;
                 const value = input.value.trim().toLowerCase();
-                
+
                 // 🆕 Si acabamos de restaurar, no mostrar sugerencias
                 if (this.justRestoredZona) {
                     return;
                 }
-                
+
                 if (value.length < 2) {
                     this.hideRestoreSuggestion();
                     return;
                 }
-                
-                const coincidencias = this.zonasEliminadas.filter(zona => 
+
+                const coincidencias = this.zonasEliminadas.filter(zona =>
                     zona.nombre_zona.toLowerCase().includes(value)
                 );
-                
+
                 if (coincidencias.length > 0) {
                     this.showRestoreSuggestion(input, coincidencias[0]);
                 } else {
@@ -2907,11 +2925,11 @@
 
             showRestoreSuggestion(input, zona) {
                 this.hideRestoreSuggestion();
-                
+
                 const suggestion = document.createElement('div');
                 suggestion.id = 'restore-suggestion';
                 suggestion.className = 'restore-suggestion';
-                
+
                 const fechaEliminacion = new Date(zona.fecha_eliminacion);
                 const fechaFormateada = fechaEliminacion.toLocaleDateString('es-MX', {
                     day: '2-digit',
@@ -2920,7 +2938,7 @@
                     hour: '2-digit',
                     minute: '2-digit'
                 });
-                
+
                 suggestion.innerHTML = `
                     <div class="restore-suggestion-header">
                         <i class="fas fa-history"></i>
@@ -2949,16 +2967,16 @@
                         </button>
                     </div>
                 `;
-                
+
                 input.parentElement.style.position = 'relative';
                 input.parentElement.appendChild(suggestion);
-                
+
                 setTimeout(() => suggestion.classList.add('active'), 10);
-                
+
                 suggestion.querySelector('.btn-restore-ignore').addEventListener('click', () => {
                     this.hideRestoreSuggestion();
                 });
-                
+
                 suggestion.querySelector('.btn-restore-apply').addEventListener('click', () => {
                     this.restoreZona(zona);
                     this.hideRestoreSuggestion();
@@ -2979,24 +2997,24 @@
 
             async restoreZona(zona) {
                 console.log('🔄 Restaurando zona:', zona.nombre_zona);
-                
+
                 try {
                     // 🆕 PRIMERO: Cerrar el modal de sugerencia inmediatamente
                     this.hideRestoreSuggestion();
-                    
+
                     // 🆕 SEGUNDO: Activar flag para evitar que reaparezca
                     this.justRestoredZona = true;
-                    
+
                     // TERCERO: Autocompletar todos los campos
                     document.getElementById('zona-nombre').value = zona.nombre_zona;
                     document.getElementById('zona-descripcion').value = zona.descripcion || '';
                     document.getElementById('zona-estado').value = zona.activa ? '1' : '0';
-                    
+
                     if (zona.id_region) {
                         document.getElementById('zona-region').value = zona.id_region;
                         this.selectedRegionId = zona.id_region;
                     }
-                    
+
                     if (zona.supervisores && zona.supervisores.length > 0) {
                         this.supervisoresAsignados = zona.supervisores.map(sup => ({
                             id: sup.id,
@@ -3006,30 +3024,28 @@
                         }));
                         this.renderSupervisoresAsignados();
                     }
-                    
+
                     if (zona.tiendas && zona.tiendas.length > 0) {
                         this.tiendasAsignadas = [...zona.tiendas];
                         await this.loadPromotoresDeTiendas();
                     }
-                    
+
                     this.showNotification('success', 'Restaurado', `Zona "${zona.nombre_zona}" restaurada con todos sus datos`);
-                    
+
                     // 🆕 CUARTO: Después de 500ms, desactivar el flag para que pueda volver a funcionar en el futuro
                     setTimeout(() => {
                         this.justRestoredZona = false;
                     }, 500);
-                    
+
                     // Enfocar el siguiente campo (descripción) en lugar del nombre
                     document.getElementById('zona-descripcion').focus();
-                    
+
                 } catch (error) {
                     console.error('❌ Error al restaurar zona:', error);
                     this.showNotification('error', 'Error', 'No se pudo restaurar la zona completamente');
                     this.justRestoredZona = false; // 🆕 Desactivar flag en caso de error
                 }
             }
-
-            // ===== FIN FUNCIONES DE RESTAURACIÓN =====
 
             populateViewMode(zona) {
                 document.getElementById('modal-title').innerHTML = '<i class="fas fa-map-marked-alt"></i> Información de Zona';
@@ -3141,7 +3157,7 @@
                         badge.innerHTML = `
                             <i class="fas fa-user-tie"></i>
                             ${sup.nombre_completo || `${sup.nombre} ${sup.apellido}`}
-                            <button type="button" class="asignado-remove" onclick="zonasModule.removeSupervisor(${sup.id})">
+                            <button type="button" class="asignado-remove" onclick="window.zonasModule && window.zonasModule.removeSupervisor(${sup.id})">
                                 <i class="fas fa-times"></i>
                             </button>
                         `;
@@ -3171,7 +3187,7 @@
                             <i class="fas fa-store"></i>
                             ${tienda.nombre_tienda}
                             ${hasPromotores ? `<span class="promotor-count" title="${promotores.length} promotor(es)">${promotores.length}</span>` : ''}
-                            <button type="button" class="asignado-remove" onclick="zonasModule.removeTienda(${tienda.id_tienda})">
+                            <button type="button" class="asignado-remove" onclick="window.zonasModule && window.zonasModule.removeTienda(${tienda.id_tienda})">
                                 <i class="fas fa-times"></i>
                             </button>
                         `;
@@ -3467,30 +3483,30 @@
             async loadPromotoresForIncidencia() {
                 try {
                     console.log('📋 Cargando promotores desde la base de datos...');
-                    
+
                     // Usar el mismo endpoint del API de zonas que ya funciona
                     // Este endpoint debe devolver la lista de promotores desde la tabla 'promotores'
                     const response = await fetch(API_CONFIG.baseURL + '?action=obtener_promotores_todos');
-                    
+
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);
                     }
-                    
+
                     const data = await response.json();
                     console.log('📊 Respuesta del servidor:', data);
-                    
+
                     const select = document.getElementById('incidencia-promotor');
-                    
+
                     if (!select) {
                         console.error('❌ No se encontró el elemento select');
                         return;
                     }
-                    
+
                     select.innerHTML = '<option value="">Seleccionar promotor...</option>';
-                    
+
                     // El API puede devolver los datos en diferentes formatos
                     let promotores = [];
-                    
+
                     if (data.success && Array.isArray(data.data)) {
                         promotores = data.data;
                     } else if (data.success && data.promotores && Array.isArray(data.promotores)) {
@@ -3498,48 +3514,48 @@
                     } else if (Array.isArray(data)) {
                         promotores = data;
                     }
-                    
+
                     if (promotores.length === 0) {
                         console.warn('⚠️ No hay promotores disponibles en la base de datos');
                         select.innerHTML = '<option value="">No hay promotores disponibles</option>';
                         return;
                     }
-                    
+
                     console.log(`✅ Procesando ${promotores.length} promotores`);
-                    
+
                     // Ordenar alfabéticamente por nombre
                     promotores.sort((a, b) => {
                         const nombreA = (a.nombre || '').toLowerCase();
                         const nombreB = (b.nombre || '').toLowerCase();
                         return nombreA.localeCompare(nombreB);
                     });
-                    
+
                     // Agregar cada promotor al select
                     promotores.forEach(promotor => {
                         // Solo agregar promotores activos
                         if (promotor.estatus === 'BAJA' || promotor.estado === 0) {
                             return; // Saltar promotores inactivos
                         }
-                        
+
                         const option = document.createElement('option');
                         option.value = promotor.id_promotor;
-                        
+
                         // Construir nombre completo
                         const nombre = promotor.nombre || '';
                         const apellido = promotor.apellido || '';
                         const nombreCompleto = `${nombre} ${apellido}`.trim();
-                        
+
                         option.textContent = nombreCompleto || `Promotor #${promotor.id_promotor}`;
-                        
+
                         // Agregar datos adicionales como atributos
                         if (promotor.telefono) option.setAttribute('data-telefono', promotor.telefono);
                         if (promotor.region) option.setAttribute('data-region', promotor.region);
-                        
+
                         select.appendChild(option);
                     });
-                    
+
                     console.log('✅ Promotores cargados correctamente en el select');
-                    
+
                 } catch (error) {
                     console.error('❌ Error al cargar promotores:', error);
                     const select = document.getElementById('incidencia-promotor');
@@ -3553,29 +3569,29 @@
             async loadTiendasForIncidencia() {
                 try {
                     console.log('🏪 Cargando tiendas desde la base de datos...');
-                    
+
                     // Usar el mismo endpoint del API de zonas
                     const response = await fetch(API_CONFIG.baseURL + '?action=obtener_tiendas_todas');
-                    
+
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);
                     }
-                    
+
                     const data = await response.json();
                     console.log('📊 Respuesta tiendas:', data);
-                    
+
                     const select = document.getElementById('incidencia-tienda');
-                    
+
                     if (!select) {
                         console.error('❌ No se encontró el elemento select de tiendas');
                         return;
                     }
-                    
+
                     select.innerHTML = '<option value="">Seleccionar tienda...</option>';
-                    
+
                     // Procesar respuesta
                     let tiendas = [];
-                    
+
                     if (data.success && Array.isArray(data.data)) {
                         tiendas = data.data;
                     } else if (data.success && data.tiendas && Array.isArray(data.tiendas)) {
@@ -3583,49 +3599,49 @@
                     } else if (Array.isArray(data)) {
                         tiendas = data;
                     }
-                    
+
                     if (tiendas.length === 0) {
                         console.warn('⚠️ No hay tiendas disponibles');
                         select.innerHTML = '<option value="">Sin tiendas (usa el campo de texto libre)</option>';
                         return;
                     }
-                    
+
                     console.log(`✅ Procesando ${tiendas.length} tiendas`);
-                    
+
                     // Ordenar por cadena y número de tienda
                     tiendas.sort((a, b) => {
                         const cadenaCompare = (a.cadena || '').localeCompare(b.cadena || '');
                         if (cadenaCompare !== 0) return cadenaCompare;
                         return (a.num_tienda || 0) - (b.num_tienda || 0);
                     });
-                    
+
                     // Agregar tiendas al select
                     tiendas.forEach(tienda => {
                         // Solo tiendas activas
                         if (tienda.estado_reg === 0) {
                             return;
                         }
-                        
+
                         const option = document.createElement('option');
                         option.value = tienda.id_tienda;
-                        
+
                         // Formato: "Cadena #NumTienda - Nombre"
                         let texto = '';
                         if (tienda.cadena) texto += tienda.cadena + ' ';
                         if (tienda.num_tienda) texto += '#' + tienda.num_tienda + ' ';
                         if (tienda.nombre_tienda) texto += '- ' + tienda.nombre_tienda;
-                        
+
                         option.textContent = texto.trim() || `Tienda #${tienda.id_tienda}`;
-                        
+
                         // Datos adicionales
                         if (tienda.ciudad) option.setAttribute('data-ciudad', tienda.ciudad);
                         if (tienda.estado) option.setAttribute('data-estado', tienda.estado);
-                        
+
                         select.appendChild(option);
                     });
-                    
+
                     console.log('✅ Tiendas cargadas correctamente');
-                    
+
                 } catch (error) {
                     console.error('❌ Error al cargar tiendas:', error);
                     const select = document.getElementById('incidencia-tienda');
@@ -3642,38 +3658,38 @@
                     const prioridad = document.getElementById('incidencia-prioridad').value;
                     const fechaInicio = document.getElementById('incidencia-fecha-inicio').value;
                     const descripcion = document.getElementById('incidencia-descripcion').value;
-                    
+
                     // Validar campos uno por uno con mensajes específicos
                     if (!promotor) {
                         this.showNotification('warning', 'Campo Requerido', 'Debe seleccionar un promotor');
                         document.getElementById('incidencia-promotor').focus();
                         return;
                     }
-                    
+
                     if (!tipo) {
                         this.showNotification('warning', 'Campo Requerido', 'Debe seleccionar el tipo de incidencia');
                         document.getElementById('incidencia-tipo').focus();
                         return;
                     }
-                    
+
                     if (!prioridad) {
                         this.showNotification('warning', 'Campo Requerido', 'Debe seleccionar la prioridad');
                         document.getElementById('incidencia-prioridad').focus();
                         return;
                     }
-                    
+
                     if (!fechaInicio) {
                         this.showNotification('warning', 'Campo Requerido', 'Debe ingresar la fecha de inicio');
                         document.getElementById('incidencia-fecha-inicio').focus();
                         return;
                     }
-                    
+
                     if (!descripcion || descripcion.trim() === '') {
                         this.showNotification('warning', 'Campo Requerido', 'Debe ingresar una descripción detallada');
                         document.getElementById('incidencia-descripcion').focus();
                         return;
                     }
-                    
+
                     const formData = {
                         action: 'crear',
                         id_promotor: parseInt(promotor),
@@ -3686,18 +3702,18 @@
                         estatus: 'pendiente',
                         usuario_registro: 'Sistema'
                     };
-                    
+
                     const tiendaSelect = document.getElementById('incidencia-tienda').value;
                     const tiendaNombre = document.getElementById('incidencia-tienda-nombre').value;
                     if (tiendaSelect) formData.id_tienda = parseInt(tiendaSelect);
                     if (tiendaNombre) formData.tienda_nombre = tiendaNombre;
-                    
+
                     const response = await fetch(API_CONFIG.baseURL + '?action=guardar_incidencia', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(formData)
                     });
-                    
+
                     const data = await response.json();
                     if (data.success) {
                         this.showNotification('success', '✅ Incidencia Reportada', 'Incidencia reportada exitosamente');
@@ -3762,156 +3778,153 @@
         })();
     </script>
 
+    <div id="modal-incidencia" class="modal">
+        <div class="modal-content modal-incidencia-content">
+            <div class="modal-header">
+                <h2 id="modal-incidencia-title">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Reportar Incidencia
+                </h2>
+                <button class="modal-close" onclick="window.zonasModule && window.zonasModule.closeIncidenciaModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
 
-<!-- ============================================================ -->
-<!-- MODAL DE INCIDENCIAS -->
-<!-- AGREGAR ANTES DEL CIERRE DE </body> -->
-<!-- ============================================================ -->
+            <div class="modal-body">
+                <form id="form-incidencia"
+                    onsubmit="event.preventDefault(); zonasModule.saveIncidencia(); return false;" novalidate>
+                    <input type="hidden" id="incidencia-id">
 
-<div id="modal-incidencia" class="modal">
-    <div class="modal-content modal-incidencia-content">
-        <div class="modal-header">
-            <h2 id="modal-incidencia-title">
-                <i class="fas fa-exclamation-triangle"></i>
-                Reportar Incidencia
-            </h2>
-            <button class="modal-close" onclick="zonasModule.closeIncidenciaModal()">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
+                    <!-- Información del Promotor -->
+                    <div class="form-section">
+                        <h3><i class="fas fa-user"></i> Información del Promotor</h3>
 
-        <div class="modal-body">
-            <form id="form-incidencia" onsubmit="event.preventDefault(); zonasModule.saveIncidencia(); return false;" novalidate>
-                <input type="hidden" id="incidencia-id">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="incidencia-promotor">Promotor *</label>
+                                <select id="incidencia-promotor">
+                                    <option value="">Seleccionar promotor...</option>
+                                </select>
+                            </div>
 
-                <!-- Información del Promotor -->
-                <div class="form-section">
-                    <h3><i class="fas fa-user"></i> Información del Promotor</h3>
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="incidencia-promotor">Promotor *</label>
-                            <select id="incidencia-promotor">
-                                <option value="">Seleccionar promotor...</option>
-                            </select>
+                            <div class="form-group">
+                                <label for="incidencia-tienda">Tienda</label>
+                                <select id="incidencia-tienda">
+                                    <option value="">Seleccionar tienda...</option>
+                                </select>
+                                <small class="form-helper">Opcional - Si no está en la lista, escribe el nombre
+                                    abajo</small>
+                            </div>
                         </div>
-                        
+
                         <div class="form-group">
-                            <label for="incidencia-tienda">Tienda</label>
-                            <select id="incidencia-tienda">
-                                <option value="">Seleccionar tienda...</option>
-                            </select>
-                            <small class="form-helper">Opcional - Si no está en la lista, escribe el nombre abajo</small>
+                            <label for="incidencia-tienda-nombre">Nombre de Tienda (Texto libre)</label>
+                            <input type="text" id="incidencia-tienda-nombre" maxlength="200"
+                                placeholder="Ej: Walmart Av. Principal Centro">
+                            <small class="form-helper">Usa este campo si la tienda no está en el listado</small>
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label for="incidencia-tienda-nombre">Nombre de Tienda (Texto libre)</label>
-                        <input type="text" id="incidencia-tienda-nombre" maxlength="200"
-                               placeholder="Ej: Walmart Av. Principal Centro">
-                        <small class="form-helper">Usa este campo si la tienda no está en el listado</small>
-                    </div>
-                </div>
+                    <!-- Detalles de la Incidencia -->
+                    <div class="form-section">
+                        <h3><i class="fas fa-clipboard-list"></i> Detalles de la Incidencia</h3>
 
-                <!-- Detalles de la Incidencia -->
-                <div class="form-section">
-                    <h3><i class="fas fa-clipboard-list"></i> Detalles de la Incidencia</h3>
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="incidencia-tipo">Tipo de Incidencia *</label>
-                            <select id="incidencia-tipo">
-                                <option value="">Seleccionar tipo...</option>
-                                <option value="falta">❌ Falta Injustificada</option>
-                                <option value="vacaciones">🏖️ Vacaciones</option>
-                                <option value="abandono">🚪 Abandono de Puesto</option>
-                                <option value="salud">🏥 Problemas de Salud</option>
-                                <option value="imprevisto">⚡ Imprevisto Personal</option>
-                                <option value="otro">📋 Otro</option>
-                            </select>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="incidencia-tipo">Tipo de Incidencia *</label>
+                                <select id="incidencia-tipo">
+                                    <option value="">Seleccionar tipo...</option>
+                                    <option value="falta">❌ Falta Injustificada</option>
+                                    <option value="vacaciones">🏖️ Vacaciones</option>
+                                    <option value="abandono">🚪 Abandono de Puesto</option>
+                                    <option value="salud">🏥 Problemas de Salud</option>
+                                    <option value="imprevisto">⚡ Imprevisto Personal</option>
+                                    <option value="otro">📋 Otro</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="incidencia-prioridad">Prioridad *</label>
+                                <select id="incidencia-prioridad">
+                                    <option value="media" selected>🟡 Media (Normal)</option>
+                                    <option value="baja">🟢 Baja</option>
+                                    <option value="alta">🔴 Alta (Urgente)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="incidencia-fecha-inicio">Fecha de Inicio *</label>
+                                <input type="date" id="incidencia-fecha-inicio">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="incidencia-fecha-fin">Fecha de Fin</label>
+                                <input type="date" id="incidencia-fecha-fin">
+                                <small class="form-helper">Opcional - Si la incidencia tiene duración específica</small>
+                            </div>
+                        </div>
+
+                        <!-- Días calculados -->
+                        <div id="incidencia-info-calculada" class="info-calculada" style="display: none;">
+                            <div class="info-item">
+                                <i class="fas fa-calendar-days"></i>
+                                <span>Días totales: <strong id="incidencia-dias-totales">0</strong></span>
+                            </div>
                         </div>
 
                         <div class="form-group">
-                            <label for="incidencia-prioridad">Prioridad *</label>
-                            <select id="incidencia-prioridad">
-                                <option value="media" selected>🟡 Media (Normal)</option>
-                                <option value="baja">🟢 Baja</option>
-                                <option value="alta">🔴 Alta (Urgente)</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="incidencia-fecha-inicio">Fecha de Inicio *</label>
-                            <input type="date" id="incidencia-fecha-inicio">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="incidencia-fecha-fin">Fecha de Fin</label>
-                            <input type="date" id="incidencia-fecha-fin">
-                            <small class="form-helper">Opcional - Si la incidencia tiene duración específica</small>
-                        </div>
-                    </div>
-
-                    <!-- Días calculados -->
-                    <div id="incidencia-info-calculada" class="info-calculada" style="display: none;">
-                        <div class="info-item">
-                            <i class="fas fa-calendar-days"></i>
-                            <span>Días totales: <strong id="incidencia-dias-totales">0</strong></span>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="incidencia-descripcion">Descripción Detallada *</label>
-                        <textarea id="incidencia-descripcion" rows="4" required
-                                  placeholder="Describe la incidencia con el mayor detalle posible. Incluye:
+                            <label for="incidencia-descripcion">Descripción Detallada *</label>
+                            <textarea id="incidencia-descripcion" rows="4" required placeholder="Describe la incidencia con el mayor detalle posible. Incluye:
 - ¿Qué sucedió?
 - ¿Cuándo ocurrió?
 - ¿Hubo algún aviso previo?
 - Cualquier información relevante..."></textarea>
-                    </div>
+                        </div>
 
-                    <div class="form-group">
-                        <label for="incidencia-notas">Notas Adicionales / Seguimiento</label>
-                        <textarea id="incidencia-notas" rows="3"
-                                  placeholder="Cualquier información adicional que pueda ser útil para el seguimiento..."></textarea>
-                    </div>
-                </div>
-
-                <!-- Información importante -->
-                <div class="form-section" style="background: #fff3cd; border-left: 4px solid #ffc107;">
-                    <div style="display: flex; align-items: flex-start; gap: 1rem;">
-                        <i class="fas fa-info-circle" style="color: #ffc107; font-size: 1.5rem; margin-top: 0.25rem;"></i>
-                        <div>
-                            <h4 style="margin: 0 0 0.5rem 0; color: #856404;">Información Importante</h4>
-                            <ul style="margin: 0; padding-left: 1.5rem; color: #856404; font-size: 0.9rem;">
-                                <li>Esta incidencia será enviada al administrador para su revisión</li>
-                                <li>Recibirás notificación cuando sea procesada</li>
-                                <li>Los campos marcados con * son obligatorios</li>
-                                <li>Asegúrate de proporcionar información detallada y precisa</li>
-                            </ul>
+                        <div class="form-group">
+                            <label for="incidencia-notas">Notas Adicionales / Seguimiento</label>
+                            <textarea id="incidencia-notas" rows="3"
+                                placeholder="Cualquier información adicional que pueda ser útil para el seguimiento..."></textarea>
                         </div>
                     </div>
-                </div>
 
-            </form>
-        </div>
+                    <!-- Información importante -->
+                    <div class="form-section" style="background: #fff3cd; border-left: 4px solid #ffc107;">
+                        <div style="display: flex; align-items: flex-start; gap: 1rem;">
+                            <i class="fas fa-info-circle"
+                                style="color: #ffc107; font-size: 1.5rem; margin-top: 0.25rem;"></i>
+                            <div>
+                                <h4 style="margin: 0 0 0.5rem 0; color: #856404;">Información Importante</h4>
+                                <ul style="margin: 0; padding-left: 1.5rem; color: #856404; font-size: 0.9rem;">
+                                    <li>Esta incidencia será enviada al administrador para su revisión</li>
+                                    <li>Recibirás notificación cuando sea procesada</li>
+                                    <li>Los campos marcados con * son obligatorios</li>
+                                    <li>Asegúrate de proporcionar información detallada y precisa</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
 
-        <!-- Acciones del Modal -->
-        <div class="modal-actions">
-            <button type="button" class="btn-primary" onclick="zonasModule.saveIncidencia()">
-                <i class="fas fa-paper-plane"></i>
-                Reportar Incidencia
-            </button>
-            <button type="button" class="btn-secondary" onclick="zonasModule.closeIncidenciaModal()">
-                <i class="fas fa-times"></i>
-                Cancelar
-            </button>
+                </form>
+            </div>
+
+            <!-- Acciones del Modal -->
+            <div class="modal-actions">
+                <button type="button" class="btn-primary"
+                    onclick="window.zonasModule && window.zonasModule.saveIncidencia()">
+                    <i class="fas fa-paper-plane"></i>
+                    Reportar Incidencia
+                </button>
+                <button type="button" class="btn-secondary"
+                    onclick="window.zonasModule && window.zonasModule.closeIncidenciaModal()">
+                    <i class="fas fa-times"></i>
+                    Cancelar
+                </button>
+            </div>
         </div>
     </div>
-</div>
-
 
 </body>
 
