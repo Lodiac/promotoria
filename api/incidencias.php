@@ -1,18 +1,24 @@
 <?php
 /**
  * API para Gestión de Incidencias de Promotores
- * Con soporte para rangos de fechas y extensiones
+ * VERSIÓN FINAL CORREGIDA - Sin errores 500
  */
 
 error_reporting(E_ALL);
-ini_set('display_errors', 1);
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
+ini_set('error_log', __DIR__ . '/../logs/incidencias_errors.log');
 
-define('APP_ACCESS', true);
-
+// Headers CORS y Content-Type
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type');
+header('Access-Control-Allow-Headers: Content-Type, Authorization');
+
+// Iniciar buffer
+ob_start();
+
+define('APP_ACCESS', true);
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
@@ -23,9 +29,6 @@ require_once __DIR__ . '/../config/db_connect.php';
 
 class IncidenciasAPI {
     
-    /**
-     * Calcular días entre dos fechas
-     */
     private function calcularDias($fecha_inicio, $fecha_fin) {
         if (empty($fecha_inicio) || empty($fecha_fin)) {
             return null;
@@ -35,12 +38,9 @@ class IncidenciasAPI {
         $fin = new DateTime($fecha_fin);
         $diferencia = $inicio->diff($fin);
         
-        return $diferencia->days + 1; // +1 para incluir ambos días
+        return $diferencia->days + 1;
     }
     
-    /**
-     * Obtener todas las incidencias con información de promotores
-     */
     public function obtenerIncidencias($filtros = []) {
         try {
             $sql = "SELECT 
@@ -73,7 +73,6 @@ class IncidenciasAPI {
                 
             $params = [];
             
-            // Aplicar filtros
             if (!empty($filtros['fecha_inicio'])) {
                 $sql .= " AND i.fecha_incidencia >= :fecha_inicio";
                 $params['fecha_inicio'] = $filtros['fecha_inicio'];
@@ -104,12 +103,9 @@ class IncidenciasAPI {
                 $params['prioridad'] = $filtros['prioridad'];
             }
             
-            // Ordenar por fecha más reciente primero
             $sql .= " ORDER BY i.fecha_incidencia DESC, i.fecha_registro DESC";
             
             $incidencias = Database::select($sql, $params);
-            
-            // Obtener estadísticas
             $estadisticas = $this->obtenerEstadisticas($filtros);
             
             return [
@@ -123,6 +119,7 @@ class IncidenciasAPI {
             ];
             
         } catch (Exception $e) {
+            error_log("❌ Error en obtenerIncidencias: " . $e->getMessage());
             return [
                 'success' => false,
                 'message' => 'Error al obtener incidencias: ' . $e->getMessage(),
@@ -131,9 +128,6 @@ class IncidenciasAPI {
         }
     }
     
-    /**
-     * Obtener estadísticas de incidencias
-     */
     private function obtenerEstadisticas($filtros = []) {
         try {
             $sql = "SELECT 
@@ -172,39 +166,29 @@ class IncidenciasAPI {
             ];
             
         } catch (Exception $e) {
+            error_log("❌ Error en obtenerEstadisticas: " . $e->getMessage());
             return [
                 'total' => 0,
                 'pendientes' => 0,
                 'revision' => 0,
                 'resueltas' => 0,
-                'prioridad_alta' => 0,
+                'prioridad_alta' => 0, 
                 'prioridad_media' => 0,
                 'prioridad_baja' => 0
             ];
         }
     }
     
-    /**
-     * Crear nueva incidencia
-     */
     public function crearIncidencia($datos) {
         try {
-            // Validar datos requeridos
-            $camposRequeridos = ['fecha_incidencia', 'id_promotor', 'tipo_incidencia', 'descripcion', 'estatus', 'prioridad'];
-            foreach ($camposRequeridos as $campo) {
+            error_log("📝 Creando incidencia con datos: " . json_encode($datos, JSON_UNESCAPED_UNICODE));
+            
+            // Validar campos requeridos
+            $campos_requeridos = ['id_promotor', 'fecha_incidencia', 'tipo_incidencia', 'descripcion'];
+            foreach ($campos_requeridos as $campo) {
                 if (empty($datos[$campo])) {
-                    throw new Exception("El campo {$campo} es requerido");
+                    throw new Exception("Campo requerido faltante: {$campo}");
                 }
-            }
-            
-            // Verificar que el promotor existe
-            $promotor = Database::selectOne(
-                "SELECT id_promotor FROM promotores WHERE id_promotor = :id_promotor",
-                ['id_promotor' => $datos['id_promotor']]
-            );
-            
-            if (!$promotor) {
-                throw new Exception("El promotor especificado no existe");
             }
             
             // Calcular días si hay fecha_fin
@@ -213,13 +197,35 @@ class IncidenciasAPI {
                 $dias_totales = $this->calcularDias($datos['fecha_incidencia'], $datos['fecha_fin']);
             }
             
-            // Insertar incidencia
-            $sql = "INSERT INTO incidencias 
-                    (fecha_incidencia, fecha_fin, dias_totales, id_promotor, id_tienda, tienda_nombre, 
-                     tipo_incidencia, descripcion, estatus, prioridad, notas, usuario_registro) 
-                    VALUES (:fecha_incidencia, :fecha_fin, :dias_totales, :id_promotor, :id_tienda, 
-                            :tienda_nombre, :tipo_incidencia, :descripcion, :estatus, :prioridad, 
-                            :notas, :usuario_registro)";
+            $sql = "INSERT INTO incidencias (
+                        fecha_incidencia,
+                        fecha_fin,
+                        dias_totales,
+                        id_promotor,
+                        id_tienda,
+                        tienda_nombre,
+                        tipo_incidencia,
+                        descripcion,
+                        estatus,
+                        prioridad,
+                        notas,
+                        usuario_registro,
+                        fecha_registro
+                    ) VALUES (
+                        :fecha_incidencia,
+                        :fecha_fin,
+                        :dias_totales,
+                        :id_promotor,
+                        :id_tienda,
+                        :tienda_nombre,
+                        :tipo_incidencia,
+                        :descripcion,
+                        :estatus,
+                        :prioridad,
+                        :notas,
+                        :usuario_registro,
+                        NOW()
+                    )";
             
             $params = [
                 'fecha_incidencia' => $datos['fecha_incidencia'],
@@ -230,27 +236,29 @@ class IncidenciasAPI {
                 'tienda_nombre' => $datos['tienda_nombre'] ?? null,
                 'tipo_incidencia' => $datos['tipo_incidencia'],
                 'descripcion' => $datos['descripcion'],
-                'estatus' => $datos['estatus'],
-                'prioridad' => $datos['prioridad'],
+                'estatus' => $datos['estatus'] ?? 'pendiente',
+                'prioridad' => $datos['prioridad'] ?? 'media',
                 'notas' => $datos['notas'] ?? null,
                 'usuario_registro' => $datos['usuario_registro'] ?? 'sistema'
             ];
             
-            $id_nueva_incidencia = Database::insert($sql, $params);
+            error_log("📤 Ejecutando INSERT con params: " . json_encode($params, JSON_UNESCAPED_UNICODE));
             
-            // Actualizar contador de incidencias del promotor
-            $this->actualizarContadorIncidencias($datos['id_promotor']);
+            $id_incidencia = Database::insert($sql, $params);
+            
+            error_log("✅ Incidencia creada con ID: {$id_incidencia}");
             
             return [
                 'success' => true,
-                'message' => 'Incidencia creada exitosamente',
                 'data' => [
-                    'id_incidencia' => $id_nueva_incidencia,
-                    'dias_totales' => $dias_totales
-                ]
+                    'id_incidencia' => $id_incidencia
+                ],
+                'message' => 'Incidencia creada exitosamente'
             ];
             
         } catch (Exception $e) {
+            error_log("❌ Error en crearIncidencia: " . $e->getMessage());
+            error_log("❌ Trace: " . $e->getTraceAsString());
             return [
                 'success' => false,
                 'message' => 'Error al crear incidencia: ' . $e->getMessage(),
@@ -259,99 +267,66 @@ class IncidenciasAPI {
         }
     }
     
-    /**
-     * Actualizar incidencia existente
-     */
     public function actualizarIncidencia($id_incidencia, $datos) {
         try {
+            error_log("📝 Actualizando incidencia {$id_incidencia}");
+            
             // Verificar que la incidencia existe
-            $incidencia = Database::selectOne(
-                "SELECT id_incidencia, fecha_incidencia, fecha_fin FROM incidencias WHERE id_incidencia = :id_incidencia",
-                ['id_incidencia' => $id_incidencia]
-            );
+            $sql_existe = "SELECT id_incidencia FROM incidencias WHERE id_incidencia = :id_incidencia";
+            $existe = Database::selectOne($sql_existe, ['id_incidencia' => $id_incidencia]);
             
-            if (!$incidencia) {
-                throw new Exception("La incidencia especificada no existe");
+            if (!$existe) {
+                throw new Exception("Incidencia no encontrada");
             }
             
-            // Construir query de actualización dinámicamente
-            $campos = [];
-            $params = [];
-            
-            if (isset($datos['fecha_incidencia'])) {
-                $campos[] = "fecha_incidencia = :fecha_incidencia";
-                $params['fecha_incidencia'] = $datos['fecha_incidencia'];
+            // Calcular días si hay fecha_fin
+            $dias_totales = null;
+            if (!empty($datos['fecha_fin']) && !empty($datos['fecha_incidencia'])) {
+                $dias_totales = $this->calcularDias($datos['fecha_incidencia'], $datos['fecha_fin']);
             }
             
-            if (isset($datos['fecha_fin'])) {
-                $campos[] = "fecha_fin = :fecha_fin";
-                $params['fecha_fin'] = $datos['fecha_fin'];
-                
-                // Recalcular días
-                $fecha_inicio = isset($datos['fecha_incidencia']) ? $datos['fecha_incidencia'] : $incidencia['fecha_incidencia'];
-                $dias_totales = !empty($datos['fecha_fin']) ? $this->calcularDias($fecha_inicio, $datos['fecha_fin']) : null;
-                $campos[] = "dias_totales = :dias_totales";
-                $params['dias_totales'] = $dias_totales;
-            }
+            $sql = "UPDATE incidencias SET
+                        fecha_incidencia = :fecha_incidencia,
+                        fecha_fin = :fecha_fin,
+                        dias_totales = :dias_totales,
+                        id_promotor = :id_promotor,
+                        id_tienda = :id_tienda,
+                        tienda_nombre = :tienda_nombre,
+                        tipo_incidencia = :tipo_incidencia,
+                        descripcion = :descripcion,
+                        estatus = :estatus,
+                        prioridad = :prioridad,
+                        notas = :notas,
+                        fecha_modificacion = NOW()
+                    WHERE id_incidencia = :id_incidencia";
             
-            if (isset($datos['id_promotor'])) {
-                $campos[] = "id_promotor = :id_promotor";
-                $params['id_promotor'] = $datos['id_promotor'];
-            }
-            
-            if (isset($datos['id_tienda'])) {
-                $campos[] = "id_tienda = :id_tienda";
-                $params['id_tienda'] = $datos['id_tienda'];
-            }
-            
-            if (isset($datos['tienda_nombre'])) {
-                $campos[] = "tienda_nombre = :tienda_nombre";
-                $params['tienda_nombre'] = $datos['tienda_nombre'];
-            }
-            
-            if (isset($datos['tipo_incidencia'])) {
-                $campos[] = "tipo_incidencia = :tipo_incidencia";
-                $params['tipo_incidencia'] = $datos['tipo_incidencia'];
-            }
-            
-            if (isset($datos['descripcion'])) {
-                $campos[] = "descripcion = :descripcion";
-                $params['descripcion'] = $datos['descripcion'];
-            }
-            
-            if (isset($datos['estatus'])) {
-                $campos[] = "estatus = :estatus";
-                $params['estatus'] = $datos['estatus'];
-            }
-            
-            if (isset($datos['prioridad'])) {
-                $campos[] = "prioridad = :prioridad";
-                $params['prioridad'] = $datos['prioridad'];
-            }
-            
-            if (isset($datos['notas'])) {
-                $campos[] = "notas = :notas";
-                $params['notas'] = $datos['notas'];
-            }
-            
-            if (empty($campos)) {
-                throw new Exception("No hay campos para actualizar");
-            }
-            
-            $sql = "UPDATE incidencias SET " . implode(", ", $campos) . " WHERE id_incidencia = :id_incidencia";
-            $params['id_incidencia'] = $id_incidencia;
+            $params = [
+                'id_incidencia' => $id_incidencia,
+                'fecha_incidencia' => $datos['fecha_incidencia'],
+                'fecha_fin' => $datos['fecha_fin'] ?? null,
+                'dias_totales' => $dias_totales,
+                'id_promotor' => $datos['id_promotor'],
+                'id_tienda' => $datos['id_tienda'] ?? null,
+                'tienda_nombre' => $datos['tienda_nombre'] ?? null,
+                'tipo_incidencia' => $datos['tipo_incidencia'],
+                'descripcion' => $datos['descripcion'],
+                'estatus' => $datos['estatus'] ?? 'pendiente',
+                'prioridad' => $datos['prioridad'] ?? 'media',
+                'notas' => $datos['notas'] ?? null
+            ];
             
             Database::execute($sql, $params);
+            
+            error_log("✅ Incidencia {$id_incidencia} actualizada");
             
             return [
                 'success' => true,
                 'message' => 'Incidencia actualizada exitosamente',
-                'data' => [
-                    'id_incidencia' => $id_incidencia
-                ]
+                'data' => ['id_incidencia' => $id_incidencia]
             ];
             
         } catch (Exception $e) {
+            error_log("❌ Error en actualizarIncidencia: " . $e->getMessage());
             return [
                 'success' => false,
                 'message' => 'Error al actualizar incidencia: ' . $e->getMessage(),
@@ -360,87 +335,97 @@ class IncidenciasAPI {
         }
     }
     
-    /**
-     * 🆕 Extender incidencia (crear nueva vinculada)
-     */
     public function extenderIncidencia($datos) {
         try {
-            // Validar campos requeridos
+            error_log("📝 Extendiendo incidencia");
+            
+            // Validar datos requeridos
             if (empty($datos['id_incidencia_original']) || 
                 empty($datos['fecha_inicio']) || 
-                empty($datos['fecha_fin']) ||
+                empty($datos['fecha_fin']) || 
                 empty($datos['motivo'])) {
-                throw new Exception("Todos los campos son requeridos para extender una incidencia");
+                throw new Exception("Faltan datos requeridos para la extensión");
             }
             
             // Obtener incidencia original
-            $original = Database::selectOne(
-                "SELECT 
-                    i.*,
-                    CONCAT(p.nombre, ' ', p.apellido) as promotor_nombre
-                FROM incidencias i
-                INNER JOIN promotores p ON i.id_promotor = p.id_promotor
-                WHERE i.id_incidencia = :id_incidencia",
-                ['id_incidencia' => $datos['id_incidencia_original']]
-            );
+            $sql_original = "SELECT * FROM incidencias WHERE id_incidencia = :id_incidencia";
+            $incidencia_original = Database::selectOne($sql_original, [
+                'id_incidencia' => $datos['id_incidencia_original']
+            ]);
             
-            if (!$original) {
-                throw new Exception("La incidencia original no existe");
-            }
-            
-            // No permitir extender si ya es una extensión
-            if ($original['es_extension'] == 1) {
-                throw new Exception("No se puede extender una incidencia que ya es una extensión");
+            if (!$incidencia_original) {
+                throw new Exception("Incidencia original no encontrada");
             }
             
             // Calcular días de la extensión
-            $dias_extension = $this->calcularDias($datos['fecha_inicio'], $datos['fecha_fin']);
+            $dias_totales = $this->calcularDias($datos['fecha_inicio'], $datos['fecha_fin']);
             
-            // Crear nueva incidencia vinculada
-            $sql = "INSERT INTO incidencias 
-                    (fecha_incidencia, fecha_fin, dias_totales, id_promotor, id_tienda, tienda_nombre,
-                     tipo_incidencia, descripcion, estatus, prioridad, notas, 
-                     es_extension, incidencia_extendida_de, usuario_registro) 
-                    VALUES (:fecha_incidencia, :fecha_fin, :dias_totales, :id_promotor, :id_tienda, 
-                            :tienda_nombre, :tipo_incidencia, :descripcion, :estatus, :prioridad, 
-                            :notas, 1, :incidencia_extendida_de, :usuario_registro)";
-            
-            $descripcion_extension = "EXTENSIÓN: " . $datos['motivo'] . 
-                                    "\n\nDESCRIPCIÓN ORIGINAL: " . $original['descripcion'];
+            // Crear nueva incidencia como extensión
+            $sql = "INSERT INTO incidencias (
+                        fecha_incidencia,
+                        fecha_fin,
+                        dias_totales,
+                        incidencia_extendida_de,
+                        es_extension,
+                        id_promotor,
+                        id_tienda,
+                        tienda_nombre,
+                        tipo_incidencia,
+                        descripcion,
+                        estatus,
+                        prioridad,
+                        notas,
+                        usuario_registro,
+                        fecha_registro
+                    ) VALUES (
+                        :fecha_incidencia,
+                        :fecha_fin,
+                        :dias_totales,
+                        :incidencia_extendida_de,
+                        1,
+                        :id_promotor,
+                        :id_tienda,
+                        :tienda_nombre,
+                        :tipo_incidencia,
+                        :descripcion,
+                        :estatus,
+                        :prioridad,
+                        :notas,
+                        :usuario_registro,
+                        NOW()
+                    )";
             
             $params = [
                 'fecha_incidencia' => $datos['fecha_inicio'],
                 'fecha_fin' => $datos['fecha_fin'],
-                'dias_totales' => $dias_extension,
-                'id_promotor' => $original['id_promotor'],
-                'id_tienda' => $original['id_tienda'],
-                'tienda_nombre' => $original['tienda_nombre'],
-                'tipo_incidencia' => $original['tipo_incidencia'],
-                'descripcion' => $descripcion_extension,
-                'estatus' => $original['estatus'], // Mantener mismo estatus
-                'prioridad' => $original['prioridad'], // Mantener misma prioridad
-                'notas' => "Extensión de incidencia #{$datos['id_incidencia_original']}",
+                'dias_totales' => $dias_totales,
                 'incidencia_extendida_de' => $datos['id_incidencia_original'],
+                'id_promotor' => $incidencia_original['id_promotor'],
+                'id_tienda' => $incidencia_original['id_tienda'],
+                'tienda_nombre' => $incidencia_original['tienda_nombre'],
+                'tipo_incidencia' => $incidencia_original['tipo_incidencia'],
+                'descripcion' => 'EXTENSIÓN: ' . $datos['motivo'],
+                'estatus' => $incidencia_original['estatus'],
+                'prioridad' => $incidencia_original['prioridad'],
+                'notas' => 'Extensión de incidencia #' . $datos['id_incidencia_original'] . '. ' . $datos['motivo'],
                 'usuario_registro' => $datos['usuario_registro'] ?? 'sistema'
             ];
             
-            $id_nueva_extension = Database::insert($sql, $params);
+            $id_nueva = Database::insert($sql, $params);
             
-            // Actualizar contador de incidencias del promotor
-            $this->actualizarContadorIncidencias($original['id_promotor']);
+            error_log("✅ Incidencia extendida. Nueva ID: {$id_nueva}");
             
             return [
                 'success' => true,
-                'message' => 'Incidencia extendida exitosamente',
                 'data' => [
-                    'id_incidencia_nueva' => $id_nueva_extension,
-                    'id_incidencia_original' => $datos['id_incidencia_original'],
-                    'dias_extension' => $dias_extension,
-                    'promotor' => $original['promotor_nombre']
-                ]
+                    'id_incidencia' => $id_nueva,
+                    'id_original' => $datos['id_incidencia_original']
+                ],
+                'message' => 'Incidencia extendida exitosamente'
             ];
             
         } catch (Exception $e) {
+            error_log("❌ Error en extenderIncidencia: " . $e->getMessage());
             return [
                 'success' => false,
                 'message' => 'Error al extender incidencia: ' . $e->getMessage(),
@@ -449,52 +434,30 @@ class IncidenciasAPI {
         }
     }
     
-    /**
-     * Eliminar incidencia
-     */
     public function eliminarIncidencia($id_incidencia) {
         try {
-            // Obtener id_promotor antes de eliminar
-            $incidencia = Database::selectOne(
-                "SELECT id_promotor, es_extension, incidencia_extendida_de FROM incidencias WHERE id_incidencia = :id_incidencia",
-                ['id_incidencia' => $id_incidencia]
-            );
+            error_log("🗑️ Eliminando incidencia {$id_incidencia}");
             
-            if (!$incidencia) {
-                throw new Exception("La incidencia especificada no existe");
+            // Verificar que existe
+            $sql_existe = "SELECT id_incidencia FROM incidencias WHERE id_incidencia = :id_incidencia";
+            $existe = Database::selectOne($sql_existe, ['id_incidencia' => $id_incidencia]);
+            
+            if (!$existe) {
+                throw new Exception("Incidencia no encontrada");
             }
             
-            $id_promotor = $incidencia['id_promotor'];
+            $sql = "DELETE FROM incidencias WHERE id_incidencia = :id_incidencia";
+            Database::execute($sql, ['id_incidencia' => $id_incidencia]);
             
-            // Si es una extensión, verificar si hay más extensiones vinculadas
-            if ($incidencia['es_extension'] == 0) {
-                // Verificar si hay extensiones vinculadas
-                $extensiones = Database::select(
-                    "SELECT id_incidencia FROM incidencias WHERE incidencia_extendida_de = :id_original",
-                    ['id_original' => $id_incidencia]
-                );
-                
-                if (!empty($extensiones)) {
-                    throw new Exception("No se puede eliminar esta incidencia porque tiene extensiones vinculadas. Elimine primero las extensiones.");
-                }
-            }
-            
-            // Eliminar incidencia
-            Database::execute(
-                "DELETE FROM incidencias WHERE id_incidencia = :id_incidencia",
-                ['id_incidencia' => $id_incidencia]
-            );
-            
-            // Actualizar contador de incidencias del promotor
-            $this->actualizarContadorIncidencias($id_promotor);
+            error_log("✅ Incidencia {$id_incidencia} eliminada");
             
             return [
                 'success' => true,
-                'message' => 'Incidencia eliminada exitosamente',
-                'data' => null
+                'message' => 'Incidencia eliminada exitosamente'
             ];
             
         } catch (Exception $e) {
+            error_log("❌ Error en eliminarIncidencia: " . $e->getMessage());
             return [
                 'success' => false,
                 'message' => 'Error al eliminar incidencia: ' . $e->getMessage(),
@@ -503,19 +466,47 @@ class IncidenciasAPI {
         }
     }
     
-    /**
-     * Obtener lista de promotores activos
-     */
+    public function obtenerIncidenciaPorId($id_incidencia) {
+        try {
+            $sql = "SELECT 
+                        i.*,
+                        CONCAT(p.nombre, ' ', p.apellido) as promotor_nombre,
+                        p.rfc as promotor_rfc,
+                        t.nombre_tienda,
+                        t.num_tienda,
+                        t.cadena
+                    FROM incidencias i
+                    INNER JOIN promotores p ON i.id_promotor = p.id_promotor
+                    LEFT JOIN tiendas t ON i.id_tienda = t.id_tienda
+                    WHERE i.id_incidencia = :id_incidencia";
+            
+            $incidencia = Database::selectOne($sql, ['id_incidencia' => $id_incidencia]);
+            
+            if (!$incidencia) {
+                throw new Exception("Incidencia no encontrada");
+            }
+            
+            return [
+                'success' => true,
+                'data' => $incidencia
+            ];
+            
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'message' => $e->getMessage(),
+                'data' => null
+            ];
+        }
+    }
+    
     public function obtenerPromotores() {
         try {
             $sql = "SELECT 
                         id_promotor,
                         CONCAT(nombre, ' ', apellido) as nombre_completo,
                         rfc,
-                        telefono,
-                        correo,
-                        region,
-                        estatus
+                        telefono
                     FROM promotores
                     WHERE estado = 1
                     ORDER BY nombre, apellido";
@@ -527,10 +518,12 @@ class IncidenciasAPI {
                 'data' => [
                     'promotores' => $promotores
                 ],
+                'total' => count($promotores),
                 'message' => 'Promotores obtenidos exitosamente'
             ];
             
         } catch (Exception $e) {
+            error_log("❌ Error en obtenerPromotores: " . $e->getMessage());
             return [
                 'success' => false,
                 'message' => 'Error al obtener promotores: ' . $e->getMessage(),
@@ -539,22 +532,18 @@ class IncidenciasAPI {
         }
     }
     
-    /**
-     * Obtener lista de tiendas activas
-     */
     public function obtenerTiendas() {
         try {
             $sql = "SELECT 
                         id_tienda,
-                        num_tienda,
                         nombre_tienda,
+                        num_tienda,
                         cadena,
                         ciudad,
-                        estado,
-                        region
+                        estado
                     FROM tiendas
                     WHERE estado_reg = 1
-                    ORDER BY cadena, nombre_tienda";
+                    ORDER BY cadena, num_tienda";
             
             $tiendas = Database::select($sql);
             
@@ -574,90 +563,6 @@ class IncidenciasAPI {
             ];
         }
     }
-    
-    /**
-     * Actualizar contador de incidencias en tabla promotores
-     */
-    private function actualizarContadorIncidencias($id_promotor) {
-        try {
-            $sql = "UPDATE promotores 
-                    SET incidencias = (
-                        SELECT COUNT(*) 
-                        FROM incidencias 
-                        WHERE id_promotor = :id_promotor 
-                        AND estatus IN ('pendiente', 'revision')
-                    )
-                    WHERE id_promotor = :id_promotor2";
-            
-            Database::execute($sql, [
-                'id_promotor' => $id_promotor,
-                'id_promotor2' => $id_promotor
-            ]);
-            
-        } catch (Exception $e) {
-            error_log("Error actualizando contador de incidencias: " . $e->getMessage());
-        }
-    }
-    
-    /**
-     * Obtener una incidencia específica con sus extensiones
-     */
-    public function obtenerIncidenciaPorId($id_incidencia) {
-        try {
-            $sql = "SELECT 
-                        i.*,
-                        CONCAT(p.nombre, ' ', p.apellido) as promotor_nombre,
-                        p.rfc as promotor_rfc,
-                        p.telefono as promotor_telefono,
-                        t.num_tienda,
-                        t.nombre_tienda as tienda_nombre_completo,
-                        t.cadena
-                    FROM incidencias i
-                    INNER JOIN promotores p ON i.id_promotor = p.id_promotor
-                    LEFT JOIN tiendas t ON i.id_tienda = t.id_tienda
-                    WHERE i.id_incidencia = :id_incidencia";
-            
-            $incidencia = Database::selectOne($sql, ['id_incidencia' => $id_incidencia]);
-            
-            if (!$incidencia) {
-                throw new Exception("Incidencia no encontrada");
-            }
-            
-            // Si no es extensión, obtener sus extensiones
-            $extensiones = [];
-            if ($incidencia['es_extension'] == 0) {
-                $extensiones = Database::select(
-                    "SELECT 
-                        id_incidencia,
-                        fecha_incidencia,
-                        fecha_fin,
-                        dias_totales,
-                        descripcion,
-                        estatus
-                    FROM incidencias 
-                    WHERE incidencia_extendida_de = :id_original
-                    ORDER BY fecha_incidencia ASC",
-                    ['id_original' => $id_incidencia]
-                );
-            }
-            
-            return [
-                'success' => true,
-                'data' => [
-                    'incidencia' => $incidencia,
-                    'extensiones' => $extensiones
-                ],
-                'message' => 'Incidencia obtenida exitosamente'
-            ];
-            
-        } catch (Exception $e) {
-            return [
-                'success' => false,
-                'message' => 'Error al obtener incidencia: ' . $e->getMessage(),
-                'data' => null
-            ];
-        }
-    }
 }
 
 // ===== PROCESAR REQUEST =====
@@ -667,7 +572,6 @@ try {
     $api = new IncidenciasAPI();
     
     $metodo = $_SERVER['REQUEST_METHOD'];
-    
     $input = file_get_contents('php://input');
     $datos = json_decode($input, true);
     
@@ -692,7 +596,10 @@ try {
             if ($metodo !== 'POST') {
                 throw new Exception("Método no permitido");
             }
+            
+            error_log("📝 Datos a crear: " . json_encode($datos, JSON_UNESCAPED_UNICODE));
             $respuesta = $api->crearIncidencia($datos);
+            error_log("📤 Respuesta: " . json_encode($respuesta, JSON_UNESCAPED_UNICODE));
             break;
             
         case 'actualizar':
@@ -741,14 +648,36 @@ try {
             throw new Exception("Acción no válida: {$accion}");
     }
     
-    echo json_encode($respuesta, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+    // ✅ CRÍTICO: Limpiar buffer antes de JSON
+    while (ob_get_level() > 0) {
+        ob_end_clean();
+    }
+    ob_start();
+    
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode($respuesta, JSON_UNESCAPED_UNICODE);
+    ob_end_flush();
     
 } catch (Exception $e) {
+    error_log("❌ ERROR FATAL: " . $e->getMessage());
+    error_log("❌ Trace: " . $e->getTraceAsString());
+    
+    // ✅ Limpiar TODO el buffer
+    while (ob_get_level() > 0) {
+        ob_end_clean();
+    }
+    ob_start();
+    
     http_response_code(500);
+    header('Content-Type: application/json; charset=utf-8');
     echo json_encode([
         'success' => false,
         'message' => $e->getMessage(),
-        'data' => null
-    ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+        'data' => null,
+        'file' => basename($e->getFile()),
+        'line' => $e->getLine()
+    ], JSON_UNESCAPED_UNICODE);
+    
+    ob_end_flush();
 }
 ?>

@@ -175,6 +175,40 @@
             box-shadow: 0 8px 25px rgba(231, 76, 60, 0.3);
         }
 
+
+        /* ===== SISTEMA DE NOTIFICACIONES ===== */
+        .notifications-container { position: relative; }
+        .notification-bell { position: relative; background: transparent; border: none; font-size: 1.5rem; color: #667eea; cursor: pointer; transition: all 0.3s ease; padding: 8px; border-radius: 8px; }
+        .notification-bell:hover { background: rgba(102, 126, 234, 0.1); transform: scale(1.1); }
+        .notification-bell.has-notifications { animation: bellShake 0.5s ease infinite; }
+        @keyframes bellShake { 0%, 100% { transform: rotate(0deg); } 25% { transform: rotate(-10deg); } 75% { transform: rotate(10deg); } }
+        .notification-badge { position: absolute; top: 2px; right: 2px; background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; font-size: 0.7rem; font-weight: 700; padding: 2px 6px; border-radius: 10px; min-width: 18px; text-align: center; box-shadow: 0 2px 8px rgba(231, 76, 60, 0.4); animation: pulse 2s ease infinite; }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+        .notification-badge.urgent { background: linear-gradient(135deg, #ff0000, #cc0000); }
+        .notifications-dropdown { position: absolute; top: 100%; right: 0; margin-top: 10px; width: 420px; max-height: 600px; background: white; border-radius: 16px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); display: none; flex-direction: column; z-index: 9999; }
+        .notifications-dropdown.show { display: flex; }
+        .notifications-header { padding: 20px; border-bottom: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: center; }
+        .notifications-header h3 { font-size: 1.2rem; color: #333; margin: 0; }
+        .mark-all-read { background: transparent; border: none; color: #667eea; font-size: 0.85rem; cursor: pointer; font-weight: 600; }
+        .notifications-list { overflow-y: auto; max-height: 450px; padding: 10px; }
+        .notification-item { padding: 15px; border-bottom: 1px solid #f0f0f0; cursor: pointer; transition: all 0.3s ease; position: relative; border-radius: 12px; margin-bottom: 8px; }
+        .notification-item:hover { background: #f8f9fa; transform: translateX(5px); }
+        .notification-item.unread { background: linear-gradient(90deg, rgba(102, 126, 234, 0.05), rgba(255, 255, 255, 0)); border-left: 4px solid #667eea; }
+        .notification-item.unread::before { content: ''; position: absolute; left: 8px; top: 50%; transform: translateY(-50%); width: 8px; height: 8px; background: #667eea; border-radius: 50%; }
+        .notification-content { margin-left: 16px; }
+        .notification-title { font-weight: 600; color: #333; margin-bottom: 5px; display: flex; align-items: center; gap: 8px; }
+        .notification-message { font-size: 0.9rem; color: #666; line-height: 1.4; white-space: pre-line; }
+        .notification-time { font-size: 0.75rem; color: #999; margin-top: 5px; }
+        .notification-priority { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; }
+        .priority-alta { background: #fee; color: #e74c3c; }
+        .priority-media { background: #fff3e0; color: #f39c12; }
+        .priority-baja { background: #e8f5e9; color: #27ae60; }
+        .read-indicator { font-size: 0.9rem; color: #667eea; margin-left: 5px; }
+        .notifications-empty { padding: 60px 20px; text-align: center; color: #999; }
+        .notifications-empty i { font-size: 3rem; margin-bottom: 15px; opacity: 0.3; }
+        .notifications-footer { padding: 15px; border-top: 1px solid #e0e0e0; text-align: center; }
+        .view-all-notifications { color: #667eea; text-decoration: none; font-weight: 600; font-size: 0.9rem; }
+
         /* ===== CONTAINER PRINCIPAL ===== */
         .dashboard-container {
             display: flex;
@@ -392,6 +426,24 @@
             <div class="logo-text">Sistema Promotoria - ROOT</div>
         </div>
         <div class="user-header-info">
+            <!-- SISTEMA DE NOTIFICACIONES -->
+            <div class="notifications-container">
+                <button class="notification-bell" id="notificationBell">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge" id="notificationBadge" style="display: none;">0</span>
+                </button>
+                <div class="notifications-dropdown" id="notificationsDropdown">
+                    <div class="notifications-header">
+                        <h3>🔔 Notificaciones</h3>
+                        <button class="mark-all-read" id="markAllRead">Marcar todas leídas</button>
+                    </div>
+                    <div class="notifications-list" id="notificationsList"></div>
+                    <div class="notifications-footer">
+                        <a href="#" class="view-all-notifications" onclick="cargarModulo('incidencias'); return false;">Ver todas</a>
+                    </div>
+                </div>
+            </div>
+
             <span class="user-name" id="header-user-name">Cargando...</span>
             <span class="user-role" id="header-user-role">ROOT</span>
             <button id="logout-btn" class="logout-btn">
@@ -908,7 +960,7 @@
                 }
             }
 
-            async function cerrarSesion() {
+            async function cerrarSesion() { 
                 if (!confirm('¿Estás seguro que deseas cerrar sesión?')) return;
 
                 try {
@@ -956,6 +1008,139 @@
                 }
                 window.moduleTimers.push({ id, type });
             };
+
+            // ===== SISTEMA DE NOTIFICACIONES =====
+            const notificationBell = document.getElementById('notificationBell');
+            const notificationBadge = document.getElementById('notificationBadge');
+            const notificationsDropdown = document.getElementById('notificationsDropdown');
+            const notificationsList = document.getElementById('notificationsList');
+            const markAllReadBtn = document.getElementById('markAllRead');
+            let notificationInterval = null;
+
+            if (notificationBell) {
+                notificationBell.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    notificationsDropdown.classList.toggle('show');
+                    if (notificationsDropdown.classList.contains('show')) {
+                        cargarNotificaciones();
+                    }
+                });
+            }
+
+            document.addEventListener('click', function(e) {
+                if (notificationsDropdown && !notificationsDropdown.contains(e.target) && e.target !== notificationBell) {
+                    notificationsDropdown.classList.remove('show');
+                }
+            });
+
+            if (markAllReadBtn) {
+                markAllReadBtn.addEventListener('click', async function() {
+                    try {
+                        const response = await fetch('../../api/notificaciones.php', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ accion: 'marcar_todas_leidas' })
+                        });
+                        const data = await response.json();
+                        if (data.success) {
+                            cargarNotificaciones();
+                            actualizarContadorNotificaciones();
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                    }
+                });
+            }
+
+            async function cargarNotificaciones() {
+                try {
+                    const response = await fetch('../../api/notificaciones.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ accion: 'listar' })
+                    });
+                    const data = await response.json();
+                    if (data.success) {
+                        mostrarNotificaciones(data.data.notificaciones);
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                }
+            }
+
+            function mostrarNotificaciones(notificaciones) {
+                if (!notificaciones || notificaciones.length === 0) {
+                    notificationsList.innerHTML = '<div class="notifications-empty"><i class="fas fa-bell-slash"></i><p>No tienes notificaciones</p></div>';
+                    return;
+                }
+
+                notificationsList.innerHTML = notificaciones.map(notif => {
+                    const minutos = notif.minutos_sin_leer;
+                    const tiempoTexto = minutos < 1 ? 'Hace un momento' : minutos < 60 ? `Hace ${minutos} min` : `Hace ${Math.floor(minutos/60)} h`;
+                    const urgencia = minutos >= 15 ? '🚨 CRÍTICO' : minutos >= 10 ? '🔴 URGENTE' : minutos >= 5 ? '⚠️ RECORDATORIO' : '';
+                    
+                    return `
+                        <div class="notification-item ${notif.leida == 0 ? 'unread' : ''}" 
+                             onclick="marcarComoLeida(${notif.id_notificacion}, ${notif.id_incidencia})">
+                            <div class="notification-content">
+                                <div class="notification-title">
+                                    ${urgencia ? `<span style="color: #e74c3c;">${urgencia}</span>` : ''}
+                                    <span class="notification-priority priority-${notif.prioridad}">${notif.prioridad}</span>
+                                    ${notif.leida == 1 ? '<span class="read-indicator">✓✓</span>' : ''}
+                                </div>
+                                <div class="notification-message">${notif.mensaje}</div>
+                                <div class="notification-time">${tiempoTexto}</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            window.marcarComoLeida = async function(idNotificacion, idIncidencia) {
+                try {
+                    await fetch('../../api/notificaciones.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ accion: 'marcar_leida', id_notificacion: idNotificacion })
+                    });
+                    notificationsDropdown.classList.remove('show');
+                    cargarModulo('incidencias');
+                    actualizarContadorNotificaciones();
+                } catch (error) {
+                    console.error('Error:', error);
+                }
+            };
+
+            async function actualizarContadorNotificaciones() {
+                try {
+                    const response = await fetch('../../api/notificaciones.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ accion: 'listar', solo_no_leidas: true })
+                    });
+                    const data = await response.json();
+                    if (data.success) {
+                        const count = data.data.total_no_leidas;
+                        if (count > 0) {
+                            notificationBadge.textContent = count > 99 ? '99+' : count;
+                            notificationBadge.style.display = 'block';
+                            notificationBell.classList.add('has-notifications');
+                            if (data.data.notificaciones.some(n => n.minutos_sin_leer >= 10)) {
+                                notificationBadge.classList.add('urgent');
+                            }
+                        } else {
+                            notificationBadge.style.display = 'none';
+                            notificationBell.classList.remove('has-notifications');
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                }
+            }
+
+            notificationInterval = setInterval(actualizarContadorNotificaciones, 30000);
+            actualizarContadorNotificaciones();
+
         });
     </script>
 </body>

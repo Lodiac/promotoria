@@ -19,7 +19,8 @@
                     <i class="fas fa-exclamation-triangle header-icon"></i>
                     <div>
                         <h1>Gestión de Incidencias</h1>
-                        <p class="header-subtitle">Sistema de registro y seguimiento de incidencias de promotores con rangos de fechas</p>
+                        <p class="header-subtitle">Sistema de registro y seguimiento de incidencias de promotores con
+                            rangos de fechas</p>
                     </div>
                 </div>
                 <div class="header-actions">
@@ -231,7 +232,7 @@
                                 <small class="text-muted">Fecha esperada de finalización (opcional)</small>
                             </div>
                         </div>
-                        
+
                         <!-- Mostrar días calculados -->
                         <div class="form-row">
                             <div class="form-group">
@@ -241,7 +242,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="form-row">
                             <div class="form-group">
                                 <label>Tipo de Incidencia *</label>
@@ -264,7 +265,8 @@
                             <label>Motivo/Descripción de la Incidencia *</label>
                             <textarea id="incidencia-descripcion" rows="4"
                                 placeholder="Describa detalladamente lo sucedido..." required></textarea>
-                            <small class="text-muted">Proporcione toda la información relevante sobre la incidencia</small>
+                            <small class="text-muted">Proporcione toda la información relevante sobre la
+                                incidencia</small>
                         </div>
                     </div>
 
@@ -326,7 +328,7 @@
             <div class="modal-content" id="detalle-content">
                 <!-- Se llenará dinámicamente -->
             </div>
-            
+
             <!-- Botón de extender (solo visible si la incidencia no es extensión) -->
             <div class="modal-actions" id="modal-detalle-actions" style="display: none;">
                 <button type="button" class="btn-primary" id="btn-extender-incidencia">
@@ -353,36 +355,37 @@
                     <i class="fas fa-info-circle"></i>
                     <div>
                         <strong>Información:</strong>
-                        <p>Se creará una nueva incidencia vinculada a la original, manteniendo el historial completo.</p>
+                        <p>Se creará una nueva incidencia vinculada a la original, manteniendo el historial completo.
+                        </p>
                     </div>
                 </div>
-                
+
                 <form id="form-extender">
                     <input type="hidden" id="extender-id-original">
-                    
+
                     <div class="form-group">
                         <label>Incidencia Original</label>
                         <input type="text" id="extender-info-original" readonly style="background: #f8fafc;">
                     </div>
-                    
+
                     <div class="form-group">
                         <label>Nueva Fecha de Inicio *</label>
                         <input type="date" id="extender-fecha-inicio" required>
                         <small class="text-muted">Fecha en que comienza la extensión</small>
                     </div>
-                    
+
                     <div class="form-group">
                         <label>Nueva Fecha de Fin *</label>
                         <input type="date" id="extender-fecha-fin" required>
                         <small class="text-muted">Nueva fecha esperada de finalización</small>
                     </div>
-                    
+
                     <div class="form-group">
                         <label>Motivo de la Extensión *</label>
                         <textarea id="extender-motivo" rows="3" required
                             placeholder="Explique por qué se extiende el plazo..."></textarea>
                     </div>
-                    
+
                     <div class="form-group">
                         <div class="info-box">
                             <i class="fas fa-info-circle"></i>
@@ -407,7 +410,7 @@
     <div class="notifications-container" id="notifications-container"></div>
 
     <style>
-        /* ===== ESTILOS (Incluir todos los estilos anteriores más estos nuevos) ===== */
+        /* ===== ESTILOS ===== */
         :root {
             --primary-color: #27ae60;
             --primary-hover: #229954;
@@ -506,7 +509,6 @@
             gap: 5px;
         }
 
-        /* Resto de estilos... (incluir todos los anteriores) */
         .module-header {
             background: var(--surface);
             backdrop-filter: blur(20px);
@@ -1252,7 +1254,7 @@
         // ===== VARIABLES GLOBALES =====
         let incidencias = [];
         let incidenciaEditando = null;
-        let incidenciaActual = null; // Para el modal de detalles
+        let incidenciaActual = null;
         let promotores = [];
         let tiendas = [];
 
@@ -1301,7 +1303,6 @@
             formIncidencia.addEventListener('submit', guardarIncidencia);
             formExtender.addEventListener('submit', guardarExtension);
 
-            // Evento para botón de extender
             document.getElementById('btn-extender-incidencia').addEventListener('click', abrirModalExtender);
 
             modalIncidencia.addEventListener('click', (e) => {
@@ -1380,72 +1381,104 @@
         // ===== CARGAR DATOS DESDE API =====
         async function cargarPromotores() {
             try {
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ accion: 'promotores' })
+                const response = await fetch(`${API_URL}?accion=promotores`, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
                 });
 
                 const resultado = await response.json();
+                console.log('📥 Respuesta promotores:', resultado);
 
-                if (resultado.success && resultado.data.promotores) {
-                    promotores = resultado.data.promotores;
+                if (resultado.success) {
+                    let listaPromotores = [];
 
-                    const selectPromotor = document.getElementById('incidencia-promotor');
-                    const filtroPromotor = document.getElementById('filtro-promotor');
+                    if (resultado.data && resultado.data.promotores) {
+                        listaPromotores = resultado.data.promotores;
+                    } else if (resultado.data && Array.isArray(resultado.data)) {
+                        listaPromotores = resultado.data;
+                    } else if (resultado.promotores) {
+                        listaPromotores = resultado.promotores;
+                    } else if (Array.isArray(resultado)) {
+                        listaPromotores = resultado;
+                    }
 
-                    promotores.forEach(promotor => {
-                        const option = document.createElement('option');
-                        option.value = promotor.id_promotor;
-                        option.textContent = `${promotor.nombre_completo} (${promotor.rfc})`;
+                    if (listaPromotores.length > 0) {
+                        promotores = listaPromotores;
 
-                        selectPromotor.appendChild(option.cloneNode(true));
-                        filtroPromotor.appendChild(option);
-                    });
+                        const selectPromotor = document.getElementById('incidencia-promotor');
+                        const filtroPromotor = document.getElementById('filtro-promotor');
 
-                    console.log(`✅ ${promotores.length} promotores cargados`);
+                        promotores.forEach(promotor => {
+                            const option = document.createElement('option');
+                            option.value = promotor.id_promotor;
+                            option.textContent = `${promotor.nombre_completo} (${promotor.rfc})`;
+
+                            selectPromotor.appendChild(option.cloneNode(true));
+                            filtroPromotor.appendChild(option);
+                        });
+
+                        console.log(`✅ ${promotores.length} promotores cargados`);
+                    } else {
+                        console.warn('⚠️ No se encontraron promotores en la respuesta');
+                    }
                 } else {
                     throw new Error(resultado.message || 'Error al cargar promotores');
                 }
             } catch (error) {
-                console.error('Error cargando promotores:', error);
-                mostrarNotificacion('Error al cargar promotores: ' + error.message, 'error');
+                console.error('❌ Error cargando promotores:', error);
+                mostrarNotificacion('Error al cargar promotores', 'error');
             }
         }
 
         async function cargarTiendas() {
             try {
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ accion: 'tiendas' })
+                const response = await fetch(`${API_URL}?accion=tiendas`, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
                 });
 
                 const resultado = await response.json();
+                console.log('📥 Respuesta tiendas:', resultado);
 
-                if (resultado.success && resultado.data.tiendas) {
-                    tiendas = resultado.data.tiendas;
+                if (resultado.success) {
+                    let listaTiendas = [];
 
-                    const selectTienda = document.getElementById('incidencia-tienda');
-                    selectTienda.innerHTML = '<option value="">Seleccione una tienda (opcional)</option>';
+                    if (resultado.data && resultado.data.tiendas) {
+                        listaTiendas = resultado.data.tiendas;
+                    } else if (resultado.data && Array.isArray(resultado.data)) {
+                        listaTiendas = resultado.data;
+                    } else if (resultado.tiendas) {
+                        listaTiendas = resultado.tiendas;
+                    } else if (Array.isArray(resultado)) {
+                        listaTiendas = resultado;
+                    }
 
-                    tiendas.forEach(tienda => {
-                        const option = document.createElement('option');
-                        option.value = tienda.id_tienda;
-                        option.textContent = `${tienda.cadena} - ${tienda.nombre_tienda} (${tienda.ciudad}, ${tienda.estado})`;
-                        option.setAttribute('data-nombre', tienda.nombre_tienda);
-                        option.setAttribute('data-cadena', tienda.cadena);
-                        option.setAttribute('data-num', tienda.num_tienda);
-                        selectTienda.appendChild(option);
-                    });
+                    if (listaTiendas.length > 0) {
+                        tiendas = listaTiendas;
 
-                    console.log(`✅ ${tiendas.length} tiendas cargadas`);
+                        const selectTienda = document.getElementById('incidencia-tienda');
+                        selectTienda.innerHTML = '<option value="">Seleccione una tienda (opcional)</option>';
+
+                        tiendas.forEach(tienda => {
+                            const option = document.createElement('option');
+                            option.value = tienda.id_tienda;
+                            option.textContent = `${tienda.cadena} - ${tienda.nombre_tienda} (${tienda.ciudad}, ${tienda.estado})`;
+                            option.setAttribute('data-nombre', tienda.nombre_tienda);
+                            option.setAttribute('data-cadena', tienda.cadena);
+                            option.setAttribute('data-num', tienda.num_tienda);
+                            selectTienda.appendChild(option);
+                        });
+
+                        console.log(`✅ ${tiendas.length} tiendas cargadas`);
+                    } else {
+                        console.warn('⚠️ No se encontraron tiendas en la respuesta');
+                    }
                 } else {
                     throw new Error(resultado.message || 'Error al cargar tiendas');
                 }
             } catch (error) {
-                console.error('Error cargando tiendas:', error);
-                mostrarNotificacion('Error al cargar tiendas: ' + error.message, 'error');
+                console.error('❌ Error cargando tiendas:', error);
+                mostrarNotificacion('Error al cargar tiendas', 'error');
             }
         }
 
@@ -1507,13 +1540,27 @@
                     datos.id_incidencia = incidenciaEditando.id_incidencia;
                 }
 
+                console.log('📤 Enviando datos:', datos);
+
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(datos)
                 });
 
+                // Verificar si la respuesta es JSON válida
+                const contentType = response.headers.get("content-type");
+                if (!contentType || !contentType.includes("application/json")) {
+                    const textoRespuesta = await response.text();
+                    console.error('❌ Respuesta NO es JSON:', textoRespuesta);
+
+                    // Mostrar los primeros 500 caracteres del error
+                    const errorPreview = textoRespuesta.substring(0, 500);
+                    throw new Error(`El servidor devolvió HTML en lugar de JSON. Error: ${errorPreview}`);
+                }
+
                 const resultado = await response.json();
+                console.log('📥 Respuesta del servidor:', resultado);
 
                 if (resultado.success) {
                     mostrarNotificacion(
@@ -1526,8 +1573,16 @@
                     throw new Error(resultado.message || 'Error al guardar incidencia');
                 }
             } catch (error) {
-                console.error('Error guardando incidencia:', error);
-                mostrarNotificacion('Error al guardar incidencia: ' + error.message, 'error');
+                console.error('❌ Error guardando incidencia:', error);
+
+                let mensajeError = error.message;
+
+                // Si el mensaje es muy largo, acortarlo
+                if (mensajeError.length > 200) {
+                    mensajeError = mensajeError.substring(0, 200) + '...';
+                }
+
+                mostrarNotificacion('Error al guardar incidencia: ' + mensajeError, 'error');
             }
         }
 
@@ -1810,7 +1865,6 @@
 
             document.getElementById('detalle-content').innerHTML = contenido;
 
-            // Mostrar botón de extender solo si no es extensión
             const modalDetalleActions = document.getElementById('modal-detalle-actions');
             if (!esExtension && incidencia.estatus !== 'resuelta') {
                 modalDetalleActions.style.display = 'flex';
@@ -1829,7 +1883,6 @@
             document.getElementById('extender-id-original').value = incidenciaActual.id_incidencia;
             document.getElementById('extender-info-original').value = `#${incidenciaActual.id_incidencia} - ${incidenciaActual.promotor_nombre} (${formatearFecha(incidenciaActual.fecha_incidencia)})`;
 
-            // Establecer fecha inicio como el día después de la fecha fin original (o fecha incidencia si no hay fin)
             const fechaBase = incidenciaActual.fecha_fin || incidenciaActual.fecha_incidencia;
             const fechaSiguiente = new Date(fechaBase);
             fechaSiguiente.setDate(fechaSiguiente.getDate() + 1);
@@ -1887,7 +1940,6 @@
             document.getElementById('incidencia-prioridad').value = incidencia.prioridad;
             document.getElementById('incidencia-notas').value = incidencia.notas || '';
 
-            // Mostrar días calculados si hay ambas fechas
             if (incidencia.fecha_incidencia && incidencia.fecha_fin) {
                 document.getElementById('dias-calculados').textContent = incidencia.dias_totales || '0';
                 document.getElementById('dias-calculados-box').style.display = 'block';
@@ -1940,7 +1992,6 @@
             document.body.style.overflow = 'auto';
             incidenciaActual = null;
         }
-
         // ===== EXPORTAR EXCEL =====
         async function descargarExcel() {
             if (incidencias.length === 0) {
@@ -1961,6 +2012,7 @@
                     'Es Extensión', 'ID Original', 'Fecha Registro'
                 ]);
 
+                // Estilo de encabezados
                 headerRow.eachCell((cell) => {
                     cell.fill = {
                         type: 'pattern',
@@ -1982,6 +2034,7 @@
                 });
                 headerRow.height = 25;
 
+                // Agregar filas
                 incidencias.forEach((incidencia) => {
                     let tiendaTexto = incidencia.tienda_nombre || 'N/A';
                     if (incidencia.tienda_nombre && incidencia.num_tienda) {
@@ -2006,6 +2059,7 @@
                         incidencia.fecha_registro
                     ]);
 
+                    // Bordes de celdas
                     row.eachCell((cell) => {
                         cell.border = {
                             top: { style: 'thin' },
@@ -2022,18 +2076,20 @@
                     { width: 12 }, { width: 40 }, { width: 12 }, { width: 12 }, { width: 20 }
                 ];
 
+                // ===== GENERAR Y DESCARGAR ARCHIVO =====
                 const buffer = await workbook.xlsx.writeBuffer();
                 const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-                const nombreArchivo = `incidencias-${new Date().toISOString().split('T')[0]}.xlsx`;
-                saveAs(blob, nombreArchivo);
 
-                mostrarNotificacion('Reporte Excel descargado exitosamente', 'success');
+                const fechaActual = new Date().toISOString().split('T')[0];
+                saveAs(blob, `Reporte_Incidencias_${fechaActual}.xlsx`);
 
+                mostrarNotificacion('Reporte Excel descargado correctamente', 'success');
             } catch (error) {
-                console.error('Error generando Excel:', error);
-                mostrarNotificacion('Error al generar Excel', 'error');
+                console.error('❌ Error generando Excel:', error);
+                mostrarNotificacion('Error al generar el archivo Excel: ' + error.message, 'error');
             }
         }
+
 
         // ===== UTILIDADES =====
         function formatearFecha(fecha) {

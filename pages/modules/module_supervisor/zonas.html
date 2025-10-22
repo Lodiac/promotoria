@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+<!-- ZONAS MODULO SUPERVISOR CON IMPLEMENTACION DE NOTIFICACIONES DE INCIDENCIAS DIRIGIENDOSE A ROOT -->
 
 <head>
     <meta charset="UTF-8">
@@ -1745,12 +1746,7 @@
                     <h1>Gestión de Zonas y Regiones</h1>
                 </div>
                 <div class="header-actions">
-                    <button class="btn-primary" id="btn-nueva-zona">
-                        <i class="fas fa-plus"></i> Nueva Zona
-                    </button>
-                    <button class="btn-incidencia" id="btn-reportar-incidencia">
-                        <i class="fas fa-exclamation-triangle"></i> Reportar Incidencia
-                    </button>
+
                 </div>
             </div>
         </div>
@@ -2040,6 +2036,7 @@
                 this.regionesData = [];
                 this.selectedRegionId = null;
                 this.promotoresPorTienda = {};
+                this.promotores = []; // ✅ INICIALIZAR ARRAY DE PROMOTORES
 
                 // 🆕 SISTEMA DE RESTAURACIÓN
                 this.zonasEliminadas = this.loadZonasEliminadas();
@@ -2056,13 +2053,14 @@
             }
 
             bindEvents() {
-                const btnNuevaZona = document.getElementById('btn-nueva-zona');
+                // Botón Nueva Zona eliminado - ya no es necesario
+                // const btnNuevaZona = document.getElementById('btn-nueva-zona');
+                // if (!btnNuevaZona) {
+                //     console.error('❌ ERROR: No se encontró el botón #btn-nueva-zona');
+                //     return;
+                // }
 
-                if (!btnNuevaZona) {
-                    console.error('❌ ERROR: No se encontró el botón #btn-nueva-zona');
-                    return;
-                }
-
+                // ✅ Event listeners de búsqueda y paginación (NECESARIOS)
                 document.getElementById('search-field').addEventListener('change', () => this.handleSearchFieldChange());
                 document.getElementById('search-value').addEventListener('keypress', (e) => {
                     if (e.key === 'Enter') this.handleSearch();
@@ -2072,19 +2070,22 @@
                 document.getElementById('btn-prev').addEventListener('click', () => this.changePage(this.currentPage - 1));
                 document.getElementById('btn-next').addEventListener('click', () => this.changePage(this.currentPage + 1));
 
-                btnNuevaZona.addEventListener('click', () => {
-                    console.log('🆕 Clic en botón Nueva Zona');
-                    this.openNewZonaModal();
-                });
+                // ❌ Botón Nueva Zona eliminado
+                // btnNuevaZona.addEventListener('click', () => {
+                //     console.log('🆕 Clic en botón Nueva Zona');
+                //     this.openNewZonaModal();
+                // });
 
-                const btnReportarIncidencia = document.getElementById('btn-reportar-incidencia');
-                if (btnReportarIncidencia) {
-                    btnReportarIncidencia.addEventListener('click', () => {
-                        console.log('📝 Clic en Reportar Incidencia');
-                        this.reportarIncidencia();
-                    });
-                }
+                // ❌ Botón Reportar Incidencia eliminado
+                // const btnReportarIncidencia = document.getElementById('btn-reportar-incidencia');
+                // if (btnReportarIncidencia) {
+                //     btnReportarIncidencia.addEventListener('click', () => {
+                //         console.log('📝 Clic en Reportar Incidencia');
+                //         this.reportarIncidencia();
+                //     });
+                // }
 
+                // ✅ Event listeners del modal (NECESARIOS)
                 document.getElementById('modal-close').addEventListener('click', () => this.closeModal());
                 document.getElementById('btn-cerrar-vista').addEventListener('click', () => this.closeModal());
                 document.getElementById('btn-editar-zona').addEventListener('click', () => this.enableEditMode());
@@ -3434,299 +3435,9 @@
                 };
                 return icons[type] || icons.info;
             }
-
-            // ===== FUNCIONES DE INCIDENCIAS =====
-            reportarIncidencia() {
-                console.log('📝 Abriendo modal de incidencias...');
-                document.getElementById('form-incidencia').reset();
-                const today = new Date().toISOString().split('T')[0];
-                document.getElementById('incidencia-fecha-inicio').value = today;
-                this.loadPromotoresForIncidencia();
-                this.loadTiendasForIncidencia();
-                this.setupIncidenciaListeners();
-                document.getElementById('modal-incidencia').classList.add('active');
-                document.body.style.overflow = 'hidden';
-            }
-
-            closeIncidenciaModal() {
-                document.getElementById('modal-incidencia').classList.remove('active');
-                document.body.style.overflow = '';
-                document.getElementById('form-incidencia').reset();
-                document.getElementById('incidencia-info-calculada').style.display = 'none';
-            }
-
-            setupIncidenciaListeners() {
-                const fechaInicio = document.getElementById('incidencia-fecha-inicio');
-                const fechaFin = document.getElementById('incidencia-fecha-fin');
-                const calcularDias = () => {
-                    if (fechaInicio.value && fechaFin.value) {
-                        const inicio = new Date(fechaInicio.value);
-                        const fin = new Date(fechaFin.value);
-                        if (fin >= inicio) {
-                            const diff = Math.floor((fin - inicio) / (1000 * 60 * 60 * 24)) + 1;
-                            document.getElementById('incidencia-dias-totales').textContent = diff;
-                            document.getElementById('incidencia-info-calculada').style.display = 'flex';
-                        } else {
-                            document.getElementById('incidencia-info-calculada').style.display = 'none';
-                            this.showNotification('warning', 'Atención', 'La fecha de fin debe ser posterior');
-                        }
-                    } else {
-                        document.getElementById('incidencia-info-calculada').style.display = 'none';
-                    }
-                };
-                fechaInicio.removeEventListener('change', calcularDias);
-                fechaFin.removeEventListener('change', calcularDias);
-                fechaInicio.addEventListener('change', calcularDias);
-                fechaFin.addEventListener('change', calcularDias);
-            }
-
-            async loadPromotoresForIncidencia() {
-                try {
-                    console.log('📋 Cargando promotores desde la base de datos...');
-
-                    // Usar el mismo endpoint del API de zonas que ya funciona
-                    // Este endpoint debe devolver la lista de promotores desde la tabla 'promotores'
-                    const response = await fetch(API_CONFIG.baseURL + '?action=obtener_promotores_todos');
-
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-
-                    const data = await response.json();
-                    console.log('📊 Respuesta del servidor:', data);
-
-                    const select = document.getElementById('incidencia-promotor');
-
-                    if (!select) {
-                        console.error('❌ No se encontró el elemento select');
-                        return;
-                    }
-
-                    select.innerHTML = '<option value="">Seleccionar promotor...</option>';
-
-                    // El API puede devolver los datos en diferentes formatos
-                    let promotores = [];
-
-                    if (data.success && Array.isArray(data.data)) {
-                        promotores = data.data;
-                    } else if (data.success && data.promotores && Array.isArray(data.promotores)) {
-                        promotores = data.promotores;
-                    } else if (Array.isArray(data)) {
-                        promotores = data;
-                    }
-
-                    if (promotores.length === 0) {
-                        console.warn('⚠️ No hay promotores disponibles en la base de datos');
-                        select.innerHTML = '<option value="">No hay promotores disponibles</option>';
-                        return;
-                    }
-
-                    console.log(`✅ Procesando ${promotores.length} promotores`);
-
-                    // Ordenar alfabéticamente por nombre
-                    promotores.sort((a, b) => {
-                        const nombreA = (a.nombre || '').toLowerCase();
-                        const nombreB = (b.nombre || '').toLowerCase();
-                        return nombreA.localeCompare(nombreB);
-                    });
-
-                    // Agregar cada promotor al select
-                    promotores.forEach(promotor => {
-                        // Solo agregar promotores activos
-                        if (promotor.estatus === 'BAJA' || promotor.estado === 0) {
-                            return; // Saltar promotores inactivos
-                        }
-
-                        const option = document.createElement('option');
-                        option.value = promotor.id_promotor;
-
-                        // Construir nombre completo
-                        const nombre = promotor.nombre || '';
-                        const apellido = promotor.apellido || '';
-                        const nombreCompleto = `${nombre} ${apellido}`.trim();
-
-                        option.textContent = nombreCompleto || `Promotor #${promotor.id_promotor}`;
-
-                        // Agregar datos adicionales como atributos
-                        if (promotor.telefono) option.setAttribute('data-telefono', promotor.telefono);
-                        if (promotor.region) option.setAttribute('data-region', promotor.region);
-
-                        select.appendChild(option);
-                    });
-
-                    console.log('✅ Promotores cargados correctamente en el select');
-
-                } catch (error) {
-                    console.error('❌ Error al cargar promotores:', error);
-                    const select = document.getElementById('incidencia-promotor');
-                    if (select) {
-                        select.innerHTML = '<option value="">Error al cargar promotores</option>';
-                    }
-                    this.showNotification('error', 'Error', 'No se pudieron cargar los promotores. Por favor recarga la página.');
-                }
-            }
-
-            async loadTiendasForIncidencia() {
-                try {
-                    console.log('🏪 Cargando tiendas desde la base de datos...');
-
-                    // Usar el mismo endpoint del API de zonas
-                    const response = await fetch(API_CONFIG.baseURL + '?action=obtener_tiendas_todas');
-
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-
-                    const data = await response.json();
-                    console.log('📊 Respuesta tiendas:', data);
-
-                    const select = document.getElementById('incidencia-tienda');
-
-                    if (!select) {
-                        console.error('❌ No se encontró el elemento select de tiendas');
-                        return;
-                    }
-
-                    select.innerHTML = '<option value="">Seleccionar tienda...</option>';
-
-                    // Procesar respuesta
-                    let tiendas = [];
-
-                    if (data.success && Array.isArray(data.data)) {
-                        tiendas = data.data;
-                    } else if (data.success && data.tiendas && Array.isArray(data.tiendas)) {
-                        tiendas = data.tiendas;
-                    } else if (Array.isArray(data)) {
-                        tiendas = data;
-                    }
-
-                    if (tiendas.length === 0) {
-                        console.warn('⚠️ No hay tiendas disponibles');
-                        select.innerHTML = '<option value="">Sin tiendas (usa el campo de texto libre)</option>';
-                        return;
-                    }
-
-                    console.log(`✅ Procesando ${tiendas.length} tiendas`);
-
-                    // Ordenar por cadena y número de tienda
-                    tiendas.sort((a, b) => {
-                        const cadenaCompare = (a.cadena || '').localeCompare(b.cadena || '');
-                        if (cadenaCompare !== 0) return cadenaCompare;
-                        return (a.num_tienda || 0) - (b.num_tienda || 0);
-                    });
-
-                    // Agregar tiendas al select
-                    tiendas.forEach(tienda => {
-                        // Solo tiendas activas
-                        if (tienda.estado_reg === 0) {
-                            return;
-                        }
-
-                        const option = document.createElement('option');
-                        option.value = tienda.id_tienda;
-
-                        // Formato: "Cadena #NumTienda - Nombre"
-                        let texto = '';
-                        if (tienda.cadena) texto += tienda.cadena + ' ';
-                        if (tienda.num_tienda) texto += '#' + tienda.num_tienda + ' ';
-                        if (tienda.nombre_tienda) texto += '- ' + tienda.nombre_tienda;
-
-                        option.textContent = texto.trim() || `Tienda #${tienda.id_tienda}`;
-
-                        // Datos adicionales
-                        if (tienda.ciudad) option.setAttribute('data-ciudad', tienda.ciudad);
-                        if (tienda.estado) option.setAttribute('data-estado', tienda.estado);
-
-                        select.appendChild(option);
-                    });
-
-                    console.log('✅ Tiendas cargadas correctamente');
-
-                } catch (error) {
-                    console.error('❌ Error al cargar tiendas:', error);
-                    const select = document.getElementById('incidencia-tienda');
-                    if (select) {
-                        select.innerHTML = '<option value="">Error al cargar (usa texto libre)</option>';
-                    }
-                }
-            }
-
-            async saveIncidencia() {
-                try {
-                    const promotor = document.getElementById('incidencia-promotor').value;
-                    const tipo = document.getElementById('incidencia-tipo').value;
-                    const prioridad = document.getElementById('incidencia-prioridad').value;
-                    const fechaInicio = document.getElementById('incidencia-fecha-inicio').value;
-                    const descripcion = document.getElementById('incidencia-descripcion').value;
-
-                    // Validar campos uno por uno con mensajes específicos
-                    if (!promotor) {
-                        this.showNotification('warning', 'Campo Requerido', 'Debe seleccionar un promotor');
-                        document.getElementById('incidencia-promotor').focus();
-                        return;
-                    }
-
-                    if (!tipo) {
-                        this.showNotification('warning', 'Campo Requerido', 'Debe seleccionar el tipo de incidencia');
-                        document.getElementById('incidencia-tipo').focus();
-                        return;
-                    }
-
-                    if (!prioridad) {
-                        this.showNotification('warning', 'Campo Requerido', 'Debe seleccionar la prioridad');
-                        document.getElementById('incidencia-prioridad').focus();
-                        return;
-                    }
-
-                    if (!fechaInicio) {
-                        this.showNotification('warning', 'Campo Requerido', 'Debe ingresar la fecha de inicio');
-                        document.getElementById('incidencia-fecha-inicio').focus();
-                        return;
-                    }
-
-                    if (!descripcion || descripcion.trim() === '') {
-                        this.showNotification('warning', 'Campo Requerido', 'Debe ingresar una descripción detallada');
-                        document.getElementById('incidencia-descripcion').focus();
-                        return;
-                    }
-
-                    const formData = {
-                        action: 'crear',
-                        id_promotor: parseInt(promotor),
-                        tipo_incidencia: tipo,
-                        prioridad: prioridad,
-                        fecha_incidencia: fechaInicio,
-                        fecha_fin: document.getElementById('incidencia-fecha-fin').value || null,
-                        descripcion: descripcion,
-                        notas: document.getElementById('incidencia-notas').value || null,
-                        estatus: 'pendiente',
-                        usuario_registro: 'Sistema'
-                    };
-
-                    const tiendaSelect = document.getElementById('incidencia-tienda').value;
-                    const tiendaNombre = document.getElementById('incidencia-tienda-nombre').value;
-                    if (tiendaSelect) formData.id_tienda = parseInt(tiendaSelect);
-                    if (tiendaNombre) formData.tienda_nombre = tiendaNombre;
-
-                    const response = await fetch(API_CONFIG.baseURL + '?action=guardar_incidencia', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(formData)
-                    });
-
-                    const data = await response.json();
-                    if (data.success) {
-                        this.showNotification('success', '✅ Incidencia Reportada', 'Incidencia reportada exitosamente');
-                        this.closeIncidenciaModal();
-                    } else {
-                        this.showNotification('error', 'Error', data.message || 'No se pudo guardar');
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    this.showNotification('error', 'Error', 'Ocurrió un error al guardar');
-                }
-            }
         }
+
+
 
         (function () {
             console.log('📦 Script del módulo zonas cargado');
@@ -3742,10 +3453,9 @@
                 }
 
                 const tabla = document.getElementById('zonas-table');
-                const btnNueva = document.getElementById('btn-nueva-zona');
 
-                if (!tabla || !btnNueva) {
-                    console.error('❌ Elementos del módulo no encontrados');
+                if (!tabla) {
+                    console.error('❌ Elemento tabla no encontrado');
                     setTimeout(initZonasModule, 100);
                     return null;
                 }
@@ -3776,156 +3486,9 @@
                 }
             }, 100);
         })();
+
+
     </script>
-
-    <div id="modal-incidencia" class="modal">
-        <div class="modal-content modal-incidencia-content">
-            <div class="modal-header">
-                <h2 id="modal-incidencia-title">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    Reportar Incidencia
-                </h2>
-                <button class="modal-close" onclick="window.zonasModule && window.zonasModule.closeIncidenciaModal()">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-
-            <div class="modal-body">
-                <form id="form-incidencia"
-                    onsubmit="event.preventDefault(); zonasModule.saveIncidencia(); return false;" novalidate>
-                    <input type="hidden" id="incidencia-id">
-
-                    <!-- Información del Promotor -->
-                    <div class="form-section">
-                        <h3><i class="fas fa-user"></i> Información del Promotor</h3>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="incidencia-promotor">Promotor *</label>
-                                <select id="incidencia-promotor">
-                                    <option value="">Seleccionar promotor...</option>
-                                </select>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="incidencia-tienda">Tienda</label>
-                                <select id="incidencia-tienda">
-                                    <option value="">Seleccionar tienda...</option>
-                                </select>
-                                <small class="form-helper">Opcional - Si no está en la lista, escribe el nombre
-                                    abajo</small>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="incidencia-tienda-nombre">Nombre de Tienda (Texto libre)</label>
-                            <input type="text" id="incidencia-tienda-nombre" maxlength="200"
-                                placeholder="Ej: Walmart Av. Principal Centro">
-                            <small class="form-helper">Usa este campo si la tienda no está en el listado</small>
-                        </div>
-                    </div>
-
-                    <!-- Detalles de la Incidencia -->
-                    <div class="form-section">
-                        <h3><i class="fas fa-clipboard-list"></i> Detalles de la Incidencia</h3>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="incidencia-tipo">Tipo de Incidencia *</label>
-                                <select id="incidencia-tipo">
-                                    <option value="">Seleccionar tipo...</option>
-                                    <option value="falta">❌ Falta Injustificada</option>
-                                    <option value="vacaciones">🏖️ Vacaciones</option>
-                                    <option value="abandono">🚪 Abandono de Puesto</option>
-                                    <option value="salud">🏥 Problemas de Salud</option>
-                                    <option value="imprevisto">⚡ Imprevisto Personal</option>
-                                    <option value="otro">📋 Otro</option>
-                                </select>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="incidencia-prioridad">Prioridad *</label>
-                                <select id="incidencia-prioridad">
-                                    <option value="media" selected>🟡 Media (Normal)</option>
-                                    <option value="baja">🟢 Baja</option>
-                                    <option value="alta">🔴 Alta (Urgente)</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="incidencia-fecha-inicio">Fecha de Inicio *</label>
-                                <input type="date" id="incidencia-fecha-inicio">
-                            </div>
-
-                            <div class="form-group">
-                                <label for="incidencia-fecha-fin">Fecha de Fin</label>
-                                <input type="date" id="incidencia-fecha-fin">
-                                <small class="form-helper">Opcional - Si la incidencia tiene duración específica</small>
-                            </div>
-                        </div>
-
-                        <!-- Días calculados -->
-                        <div id="incidencia-info-calculada" class="info-calculada" style="display: none;">
-                            <div class="info-item">
-                                <i class="fas fa-calendar-days"></i>
-                                <span>Días totales: <strong id="incidencia-dias-totales">0</strong></span>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="incidencia-descripcion">Descripción Detallada *</label>
-                            <textarea id="incidencia-descripcion" rows="4" required placeholder="Describe la incidencia con el mayor detalle posible. Incluye:
-- ¿Qué sucedió?
-- ¿Cuándo ocurrió?
-- ¿Hubo algún aviso previo?
-- Cualquier información relevante..."></textarea>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="incidencia-notas">Notas Adicionales / Seguimiento</label>
-                            <textarea id="incidencia-notas" rows="3"
-                                placeholder="Cualquier información adicional que pueda ser útil para el seguimiento..."></textarea>
-                        </div>
-                    </div>
-
-                    <!-- Información importante -->
-                    <div class="form-section" style="background: #fff3cd; border-left: 4px solid #ffc107;">
-                        <div style="display: flex; align-items: flex-start; gap: 1rem;">
-                            <i class="fas fa-info-circle"
-                                style="color: #ffc107; font-size: 1.5rem; margin-top: 0.25rem;"></i>
-                            <div>
-                                <h4 style="margin: 0 0 0.5rem 0; color: #856404;">Información Importante</h4>
-                                <ul style="margin: 0; padding-left: 1.5rem; color: #856404; font-size: 0.9rem;">
-                                    <li>Esta incidencia será enviada al administrador para su revisión</li>
-                                    <li>Recibirás notificación cuando sea procesada</li>
-                                    <li>Los campos marcados con * son obligatorios</li>
-                                    <li>Asegúrate de proporcionar información detallada y precisa</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-
-                </form>
-            </div>
-
-            <!-- Acciones del Modal -->
-            <div class="modal-actions">
-                <button type="button" class="btn-primary"
-                    onclick="window.zonasModule && window.zonasModule.saveIncidencia()">
-                    <i class="fas fa-paper-plane"></i>
-                    Reportar Incidencia
-                </button>
-                <button type="button" class="btn-secondary"
-                    onclick="window.zonasModule && window.zonasModule.closeIncidenciaModal()">
-                    <i class="fas fa-times"></i>
-                    Cancelar
-                </button>
-            </div>
-        </div>
-    </div>
-
 </body>
 
 </html>

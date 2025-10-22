@@ -1,0 +1,1276 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚨 Reportar Incidencias - Supervisor</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Efecto de partículas en el fondo */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        :root {
+            --primary: #667eea;
+            --primary-hover: #5a67d8;
+            --secondary: #764ba2;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --radius: 16px;
+            --radius-sm: 12px;
+        }
+
+        .module-container {
+            width: 100%;
+            min-height: 100vh;
+            position: relative;
+            z-index: 1;
+            padding: 2rem 1rem;
+        }
+
+        /* Header del módulo con glassmorphism */
+        .module-header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: var(--radius);
+            padding: 2rem;
+            margin: 0 auto 2rem;
+            max-width: 1400px;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .module-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary), var(--primary));
+            background-size: 200% 100%;
+            animation: gradientMove 3s ease infinite;
+        }
+
+        @keyframes gradientMove {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .header-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.8rem;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+            position: relative;
+        }
+
+        .header-icon::after {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            opacity: 0.3;
+            filter: blur(10px);
+            z-index: -1;
+        }
+
+        .header-title h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-subtitle {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        /* Contenido del módulo */
+        .module-content {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Card del formulario con glassmorphism */
+        .form-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+        }
+
+        /* Formulario */
+        .form-section {
+            padding: 2.5rem;
+            position: relative;
+        }
+
+        .form-section:not(:last-of-type)::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 2.5rem;
+            right: 2.5rem;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border), transparent);
+        }
+
+        .form-section h3 {
+            margin-bottom: 2rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.25rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .form-section h3 i {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: white;
+            color: var(--text-primary);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1), var(--shadow);
+            transform: translateY(-2px);
+        }
+
+        .form-group input:hover,
+        .form-group select:hover,
+        .form-group textarea:hover {
+            border-color: #cbd5e1;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+            line-height: 1.6;
+        }
+
+        .form-helper {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .form-helper i {
+            font-size: 0.75rem;
+        }
+
+        .form-required {
+            color: var(--danger);
+        }
+
+        /* Badge de tipo de campo */
+        .field-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 8px;
+            background: rgba(102, 126, 234, 0.1);
+            color: var(--primary);
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Fecha helper mejorado */
+        .fecha-helper {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+            padding: 1rem 1.25rem;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            border-left: 4px solid var(--primary);
+            border-radius: var(--radius-sm);
+            font-size: 0.95rem;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .fecha-helper i {
+            font-size: 1.25rem;
+        }
+
+        /* Botones mejorados */
+        .btn-primary,
+        .btn-secondary {
+            padding: 14px 32px;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-primary:hover:not(:disabled)::before {
+            left: 100%;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+        }
+
+        .btn-primary:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--text-primary);
+            border: 2px solid var(--border);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-secondary:hover {
+            background: #f8fafc;
+            border-color: var(--text-secondary);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            padding: 2.5rem;
+            background: linear-gradient(to bottom, transparent, rgba(102, 126, 234, 0.02));
+        }
+
+        /* Notificaciones mejoradas */
+        .notification {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            padding: 1.25rem 1.5rem;
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 10000;
+            animation: slideInRight 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            max-width: 420px;
+            min-width: 320px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(500px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .notification.success {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+
+        .notification.error {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+        }
+
+        .notification.warning {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+        }
+
+        .notification.info {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+        }
+
+        .notification i {
+            font-size: 1.75rem;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+        }
+
+        .notification span {
+            flex: 1;
+            font-weight: 500;
+            line-height: 1.5;
+        }
+
+        /* Loading mejorado */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .spinner-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        /* Animaciones de entrada */
+        .form-section {
+            animation: fadeInUp 0.5s ease backwards;
+        }
+
+        .form-section:nth-child(1) { animation-delay: 0.1s; }
+        .form-section:nth-child(2) { animation-delay: 0.2s; }
+        .form-section:nth-child(3) { animation-delay: 0.3s; }
+        .form-section:nth-child(4) { animation-delay: 0.4s; }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive mejorado */
+        @media (max-width: 768px) {
+            .module-container {
+                padding: 1rem;
+            }
+
+            .module-header {
+                padding: 1.5rem;
+            }
+
+            .header-content {
+                gap: 1rem;
+            }
+
+            .header-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 1.5rem;
+            }
+
+            .header-title h1 {
+                font-size: 1.5rem;
+            }
+
+            .form-section {
+                padding: 1.5rem;
+            }
+
+            .form-section h3 {
+                font-size: 1.1rem;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .form-actions {
+                flex-direction: column;
+                padding: 1.5rem;
+            }
+
+            .btn-primary,
+            .btn-secondary {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .notification {
+                right: 1rem;
+                left: 1rem;
+                max-width: none;
+                min-width: auto;
+            }
+        }
+
+        /* Mejoras adicionales */
+        select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23667eea' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 40px;
+        }
+
+        input[type="date"] {
+            cursor: pointer;
+        }
+
+        /* Tooltip de ayuda */
+        .help-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: rgba(102, 126, 234, 0.1);
+            color: var(--primary);
+            font-size: 0.7rem;
+            cursor: help;
+            transition: all 0.2s;
+        }
+
+        .help-icon:hover {
+            background: var(--primary);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        /* Scroll suave */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Scrollbar personalizada */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(102, 126, 234, 0.5);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="module-container">
+        <!-- Header del módulo -->
+        <div class="module-header">
+            <div class="header-content">
+                <div class="header-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="header-title">
+                    <h1>Reportar Incidencia</h1>
+                    <p class="header-subtitle">Complete el formulario para registrar una nueva incidencia</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contenido del módulo -->
+        <div class="module-content">
+            <div class="form-card">
+                <form id="form-incidencia">
+                    <!-- Información del Promotor -->
+                    <div class="form-section">
+                        <h3>
+                            <i class="fas fa-user"></i>
+                            Información del Promotor
+                        </h3>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="incidencia-promotor">
+                                    Promotor <span class="form-required">*</span>
+                                </label>
+                                <select id="incidencia-promotor" required>
+                                    <option value="">Seleccionar promotor...</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="incidencia-tienda">
+                                    Tienda
+                                    <span class="field-badge">Opcional</span>
+                                </label>
+                                <select id="incidencia-tienda">
+                                    <option value="">Seleccionar tienda...</option>
+                                </select>
+                                <small class="form-helper">
+                                    <i class="fas fa-info-circle"></i>
+                                    Si no está en la lista, escribe el nombre abajo
+                                </small>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="incidencia-tienda-nombre">
+                                Nombre de Tienda (Texto libre)
+                                <span class="field-badge">Opcional</span>
+                            </label>
+                            <input type="text" id="incidencia-tienda-nombre" maxlength="200"
+                                placeholder="Ej: Walmart Av. Principal Centro">
+                            <small class="form-helper">
+                                <i class="fas fa-lightbulb"></i>
+                                Usa este campo si la tienda no está en el listado
+                            </small>
+                        </div>
+                    </div>
+
+                    <!-- Detalles de la Incidencia -->
+                    <div class="form-section">
+                        <h3>
+                            <i class="fas fa-clipboard-list"></i>
+                            Detalles de la Incidencia
+                        </h3>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="incidencia-tipo">
+                                    Tipo de Incidencia <span class="form-required">*</span>
+                                </label>
+                                <select id="incidencia-tipo" required>
+                                    <option value="">Seleccionar tipo...</option>
+                                    <option value="falta">🚫 Falta</option>
+                                    <option value="vacaciones">🏖️ Vacaciones</option>
+                                    <option value="abandono">🏃 Abandono de Puesto</option>
+                                    <option value="salud">🏥 Incapacidad/Salud</option>
+                                    <option value="imprevisto">⚠️ Imprevisto</option>
+                                    <option value="otro">📝 Otro</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="incidencia-prioridad">
+                                    Prioridad <span class="form-required">*</span>
+                                </label>
+                                <select id="incidencia-prioridad" required>
+                                    <option value="">Seleccionar prioridad...</option>
+                                    <option value="alta">🔴 Alta</option>
+                                    <option value="media">🟡 Media</option>
+                                    <option value="baja">🟢 Baja</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="incidencia-descripcion">
+                                Descripción <span class="form-required">*</span>
+                            </label>
+                            <textarea id="incidencia-descripcion" required
+                                placeholder="Describe detalladamente la incidencia..."></textarea>
+                            <small class="form-helper">
+                                <i class="fas fa-pen"></i>
+                                Proporciona todos los detalles relevantes sobre la incidencia
+                            </small>
+                        </div>
+                    </div>
+
+                    <!-- Fechas -->
+                    <div class="form-section">
+                        <h3>
+                            <i class="fas fa-calendar"></i>
+                            Fechas
+                        </h3>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="incidencia-fecha-inicio">
+                                    Fecha de Inicio <span class="form-required">*</span>
+                                </label>
+                                <input type="date" id="incidencia-fecha-inicio" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="incidencia-fecha-fin">
+                                    Fecha de Fin
+                                    <span class="field-badge">Opcional</span>
+                                </label>
+                                <input type="date" id="incidencia-fecha-fin">
+                                <small class="form-helper">
+                                    <i class="fas fa-calendar-check"></i>
+                                    Deja vacío si es un solo día
+                                </small>
+                            </div>
+                        </div>
+
+                        <div class="fecha-helper" id="dias-calculados" style="display: none;">
+                            <i class="fas fa-clock"></i>
+                            <span id="dias-texto">Duración: X días</span>
+                        </div>
+                    </div>
+
+                    <!-- Notas Adicionales -->
+                    <div class="form-section">
+                        <h3>
+                            <i class="fas fa-sticky-note"></i>
+                            Notas Adicionales
+                            <span class="field-badge">Opcional</span>
+                        </h3>
+
+                        <div class="form-group">
+                            <label for="incidencia-notas">Notas</label>
+                            <textarea id="incidencia-notas" rows="4"
+                                placeholder="Información adicional que consideres relevante..."></textarea>
+                            <small class="form-helper">
+                                <i class="fas fa-comment-dots"></i>
+                                Agrega cualquier comentario o contexto adicional
+                            </small>
+                        </div>
+                    </div>
+
+                    <!-- Botones -->
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary" id="btn-limpiar">
+                            <i class="fas fa-broom"></i> Limpiar Formulario
+                        </button>
+                        <button type="submit" class="btn-primary" id="btn-guardar">
+                            <i class="fas fa-paper-plane"></i> Reportar Incidencia
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner-container">
+            <div class="spinner"></div>
+            <div class="loading-text">Procesando...</div>
+        </div>
+    </div>
+
+    <!-- Container para notificaciones -->
+    <div id="notifications-container"></div>
+
+    <script>
+        // ===== CONFIGURACIÓN =====
+        const API_CONFIG = {
+            baseURL: '../../api'
+        };
+
+        const API_INCIDENCIAS = `${API_CONFIG.baseURL}/incidencias_supervisor.php`;
+
+        // ===== VARIABLES GLOBALES =====
+        let promotores = [];
+        let tiendas = [];
+
+        // ===== ELEMENTOS DOM =====
+        const form = document.getElementById('form-incidencia');
+        const selectPromotor = document.getElementById('incidencia-promotor');
+        const selectTienda = document.getElementById('incidencia-tienda');
+        const inputTiendaNombre = document.getElementById('incidencia-tienda-nombre');
+        const selectTipo = document.getElementById('incidencia-tipo');
+        const selectPrioridad = document.getElementById('incidencia-prioridad');
+        const textareaDescripcion = document.getElementById('incidencia-descripcion');
+        const inputFechaInicio = document.getElementById('incidencia-fecha-inicio');
+        const inputFechaFin = document.getElementById('incidencia-fecha-fin');
+
+        // ✅ HABILITAR FECHAS FUTURAS (Quitar restricción de max)
+        function configurarFechas() {
+            const hoy = new Date().toISOString().split('T')[0];
+
+            // ✅ ELIMINAR TODAS LAS RESTRICCIONES EXISTENTES
+            inputFechaInicio.removeAttribute('min');
+            inputFechaInicio.removeAttribute('max');
+            inputFechaFin.removeAttribute('min');
+            inputFechaFin.removeAttribute('max');
+
+            // Establecer valor por defecto: hoy
+            if (!inputFechaInicio.value) {
+                inputFechaInicio.value = hoy;
+            }
+
+            console.log('📅 Fechas configuradas - SIN restricciones');
+        }
+
+        // Ejecutar al cargar
+        configurarFechas();
+
+        // ✅ FORZAR eliminación de restricciones
+        setTimeout(() => {
+            inputFechaInicio.removeAttribute('min');
+            inputFechaInicio.removeAttribute('max');
+            inputFechaFin.removeAttribute('min');
+            inputFechaFin.removeAttribute('max');
+            console.log('📅 Restricciones eliminadas (timeout)');
+        }, 100);
+
+        setTimeout(() => {
+            inputFechaInicio.removeAttribute('min');
+            inputFechaInicio.removeAttribute('max');
+            inputFechaFin.removeAttribute('min');
+            inputFechaFin.removeAttribute('max');
+            console.log('📅 Restricciones eliminadas (timeout 2)');
+        }, 500);
+
+        const textareaNotas = document.getElementById('incidencia-notas');
+        const btnLimpiar = document.getElementById('btn-limpiar');
+        const btnGuardar = document.getElementById('btn-guardar');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const diasCalculados = document.getElementById('dias-calculados');
+        const diasTexto = document.getElementById('dias-texto');
+
+        // ===== INICIALIZACIÓN =====
+        async function init() {
+            console.log('🚀 Iniciando módulo de incidencias...');
+
+            await cargarPromotores();
+            await cargarTiendas();
+
+            setupEventListeners();
+            setFechaMaxima();
+
+            console.log('✅ Módulo inicializado correctamente');
+        }
+
+        // Función para mostrar loading
+        function showLoading() {
+            const loadingDiv = document.getElementById('loading');
+            if (loadingDiv) {
+                loadingDiv.style.display = 'flex';
+            } else {
+                const loading = document.createElement('div');
+                loading.id = 'loading';
+                loading.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        `;
+                loading.innerHTML = `
+            <div style="background: white; padding: 20px; border-radius: 8px; text-align: center;">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="sr-only">Cargando...</span>
+                </div>
+                <p style="margin-top: 10px; margin-bottom: 0;">Cargando...</p>
+            </div>
+        `;
+                document.body.appendChild(loading);
+            }
+        }
+
+        function hideLoading() {
+            const loadingDiv = document.getElementById('loading');
+            if (loadingDiv) {
+                loadingDiv.style.display = 'none';
+            }
+        }
+
+        function mostrarError(mensaje) {
+            console.error('❌ Error:', mensaje);
+            mostrarNotificacion('❌ ' + mensaje, 'error');
+        }
+
+        function mostrarExito(mensaje) {
+            console.log('✅ Éxito:', mensaje);
+            mostrarNotificacion('✅ ' + mensaje, 'success');
+        }
+
+        function mostrarAdvertencia(mensaje) {
+            console.warn('⚠️ Advertencia:', mensaje);
+            mostrarNotificacion('⚠️ ' + mensaje, 'warning');
+        }
+
+        async function confirmarAccion(titulo, mensaje) {
+            return confirm(mensaje);
+        }
+
+        async function cargarPromotores() {
+            try {
+                console.log('📋 Cargando promotores...');
+                showLoading();
+
+                const response = await fetch('/promotoria/api/incidencias_supervisor.php?accion=promotores');
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const text = await response.text();
+
+                let resultado;
+                try {
+                    resultado = JSON.parse(text);
+                } catch (e) {
+                    console.error('❌ Error parseando JSON:', e);
+                    console.error('Respuesta recibida:', text);
+                    throw new Error('El servidor no devolvió JSON válido. Revisa la consola.');
+                }
+
+                if (resultado.error) {
+                    throw new Error(resultado.mensaje);
+                }
+
+                const selectPromotor = document.getElementById('incidencia-promotor');
+                if (!selectPromotor) {
+                    throw new Error('No se encontró el elemento select con id "incidencia-promotor"');
+                }
+
+                selectPromotor.innerHTML = '<option value="">Seleccione un promotor</option>';
+
+                if (resultado.data && resultado.data.length > 0) {
+                    resultado.data.forEach(promotor => {
+                        const option = document.createElement('option');
+                        option.value = promotor.id_promotor;
+                        option.textContent = promotor.nombre_completo;
+                        selectPromotor.appendChild(option);
+                    });
+                    console.log(`✅ ${resultado.data.length} promotores cargados`);
+                } else {
+                    console.warn('⚠️ No se encontraron promotores');
+                    mostrarAdvertencia('No se encontraron promotores asignados a sus zonas');
+                }
+
+            } catch (error) {
+                console.error('❌ Error cargando promotores:', error);
+                mostrarError('Error al cargar promotores: ' + error.message);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function cargarTiendas() {
+            try {
+                console.log('🏪 Cargando tiendas...');
+                const idPromotor = document.getElementById('incidencia-promotor').value;
+
+                if (!idPromotor) {
+                    console.log('⚠️ No hay promotor seleccionado');
+                    document.getElementById('incidencia-tienda').innerHTML = '<option value="">Primero seleccione un promotor</option>';
+                    return;
+                }
+
+                showLoading();
+
+                const response = await fetch(`/promotoria/api/incidencias_supervisor.php?accion=tiendas&id_promotor=${idPromotor}`);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const text = await response.text();
+
+                let resultado;
+                try {
+                    resultado = JSON.parse(text);
+                } catch (e) {
+                    console.error('❌ Error parseando JSON:', e);
+                    console.error('Respuesta recibida:', text);
+                    throw new Error('El servidor no devolvió JSON válido. Revisa la consola.');
+                }
+
+                if (resultado.error) {
+                    throw new Error(resultado.mensaje);
+                }
+
+                const selectTienda = document.getElementById('incidencia-tienda');
+                if (!selectTienda) {
+                    throw new Error('No se encontró el elemento select con id "incidencia-tienda"');
+                }
+
+                selectTienda.innerHTML = '<option value="">Seleccione una tienda</option>';
+
+                if (resultado.data && resultado.data.length > 0) {
+                    resultado.data.forEach(tienda => {
+                        const option = document.createElement('option');
+                        option.value = tienda.id_tienda;
+                        option.textContent = `${tienda.cadena} - ${tienda.nombre_tienda}`;
+                        selectTienda.appendChild(option);
+                    });
+                    console.log(`✅ ${resultado.data.length} tiendas cargadas`);
+                } else {
+                    console.warn('⚠️ No se encontraron tiendas');
+                    selectTienda.innerHTML = '<option value="">No hay tiendas asignadas</option>';
+                    mostrarAdvertencia('El promotor no tiene tiendas asignadas');
+                }
+
+            } catch (error) {
+                console.error('❌ Error cargando tiendas:', error);
+                mostrarError('Error al cargar tiendas: ' + error.message);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function setupEventListeners() {
+            inputFechaInicio.addEventListener('change', calcularDias);
+            inputFechaFin.addEventListener('change', calcularDias);
+            form.addEventListener('submit', guardarIncidencia);
+            btnLimpiar.addEventListener('click', limpiarFormulario);
+        }
+
+        function setFechaMaxima() {
+            const hoy = new Date().toISOString().split('T')[0];
+            inputFechaInicio.setAttribute('max', hoy);
+            inputFechaFin.setAttribute('max', hoy);
+        }
+
+        function calcularDias() {
+            const fechaInicio = inputFechaInicio.value;
+            const fechaFin = inputFechaFin.value;
+
+            if (fechaInicio && fechaFin) {
+                const inicio = new Date(fechaInicio);
+                const fin = new Date(fechaFin);
+
+                if (fin < inicio) {
+                    inputFechaFin.value = '';
+                    mostrarNotificacion('La fecha de fin debe ser posterior a la fecha de inicio', 'warning');
+                    diasCalculados.style.display = 'none';
+                    return;
+                }
+
+                const diferencia = Math.floor((fin - inicio) / (1000 * 60 * 60 * 24)) + 1;
+                diasTexto.textContent = `Duración: ${diferencia} día${diferencia > 1 ? 's' : ''}`;
+                diasCalculados.style.display = 'flex';
+            } else {
+                diasCalculados.style.display = 'none';
+            }
+        }
+
+        async function guardarIncidencia(e) {
+            e.preventDefault();
+
+            if (!validarFormulario()) {
+                return;
+            }
+
+            const fechaInicio = inputFechaInicio.value;
+            const fechaFin = inputFechaFin.value;
+
+            if (!fechaInicio) {
+                mostrarNotificacion('❌ Fecha de inicio es requerida', 'error');
+                return;
+            }
+
+            const datos = {
+                accion: 'crear',
+                id_promotor: parseInt(selectPromotor.value),
+                id_tienda: selectTienda.value ? parseInt(selectTienda.value) : null,
+                tienda_nombre: inputTiendaNombre.value || (selectTienda.value ? selectTienda.options[selectTienda.selectedIndex].getAttribute('data-nombre') : ''),
+                fecha_incidencia: fechaInicio,
+                fecha_fin: fechaFin || null,
+                tipo_incidencia: selectTipo.value,
+                prioridad: selectPrioridad.value,
+                descripcion: textareaDescripcion.value.trim(),
+                notas: textareaNotas.value.trim() || '',
+                id_supervisor_reporta: 1,
+                usuario_registro: 'Supervisor',
+                estatus: 'pendiente'
+            };
+
+            console.log('📤 Enviando incidencia:', datos);
+
+            try {
+                mostrarLoading(true);
+
+                const response = await fetch(API_INCIDENCIAS, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(datos)
+                });
+
+                const resultado = await response.json();
+                console.log('📥 Respuesta completa:', resultado);
+
+                if (!resultado.success && resultado.debug) {
+                    console.error('🔍 Debug del backend:', resultado.debug);
+                }
+
+                if (resultado.success) {
+                    mostrarNotificacion('✅ Incidencia reportada exitosamente', 'success');
+                    limpiarFormulario();
+                    notificarRoot(resultado.id_incidencia, datos);
+                } else {
+                    throw new Error(resultado.message || 'Error al guardar incidencia');
+                }
+            } catch (error) {
+                console.error('❌ Error:', error);
+                mostrarNotificacion('Error al guardar: ' + error.message, 'error');
+            } finally {
+                mostrarLoading(false);
+            }
+        }
+
+        function notificarRoot(idIncidencia, datos) {
+            const promotorNombre = selectPromotor.options[selectPromotor.selectedIndex]?.text || 'Promotor';
+
+            const notificacion = {
+                id_incidencia: idIncidencia,
+                mensaje: `Promotor: ${promotorNombre} - Prioridad: ${datos.prioridad}`,
+                titulo: `Nueva Incidencia: ${datos.tipo_incidencia}`,
+                prioridad: datos.prioridad,
+                tipo: datos.tipo_incidencia
+            };
+
+            console.log('📢 Disparando evento de notificación:', notificacion);
+
+            window.dispatchEvent(new CustomEvent('nueva_notificacion_root', {
+                detail: notificacion
+            }));
+
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage({
+                    type: 'NUEVA_NOTIFICACION',
+                    data: notificacion
+                }, '*');
+            }
+        }
+
+        function validarFormulario() {
+            if (!selectPromotor.value) {
+                mostrarNotificacion('Selecciona un promotor', 'warning');
+                selectPromotor.focus();
+                return false;
+            }
+
+            if (!selectTipo.value) {
+                mostrarNotificacion('Selecciona el tipo de incidencia', 'warning');
+                selectTipo.focus();
+                return false;
+            }
+
+            if (!selectPrioridad.value) {
+                mostrarNotificacion('Selecciona la prioridad', 'warning');
+                selectPrioridad.focus();
+                return false;
+            }
+
+            if (!textareaDescripcion.value.trim()) {
+                mostrarNotificacion('Escribe una descripción', 'warning');
+                textareaDescripcion.focus();
+                return false;
+            }
+
+            if (!inputFechaInicio.value) {
+                mostrarNotificacion('Selecciona la fecha de inicio', 'warning');
+                inputFechaInicio.focus();
+                return false;
+            }
+
+            return true;
+        }
+
+        function limpiarFormulario() {
+            form.reset();
+            diasCalculados.style.display = 'none';
+            console.log('🧹 Formulario limpiado');
+        }
+
+        function mostrarLoading(mostrar) {
+            loadingOverlay.classList.toggle('active', mostrar);
+            btnGuardar.disabled = mostrar;
+        }
+
+        function mostrarNotificacion(mensaje, tipo = 'info') {
+            const container = document.getElementById('notifications-container');
+
+            const notif = document.createElement('div');
+            notif.className = `notification ${tipo}`;
+
+            const iconos = {
+                success: 'fa-check-circle',
+                error: 'fa-exclamation-circle',
+                warning: 'fa-exclamation-triangle',
+                info: 'fa-info-circle'
+            };
+
+            notif.innerHTML = `
+                <i class="fas ${iconos[tipo]}"></i>
+                <span>${mensaje}</span>
+            `;
+
+            container.appendChild(notif);
+
+            setTimeout(() => {
+                notif.remove();
+            }, 4000);
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    </script>
+</body>
+
+</html>
