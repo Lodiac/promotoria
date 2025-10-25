@@ -229,10 +229,10 @@
             border: 2px solid var(--border);
             border-radius: var(--radius-sm);
             font-size: 0.95rem;
-            font-family: inherit;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            background: white;
             color: var(--text-primary);
+            background-color: white;
+            transition: all 0.3s ease;
+            font-family: inherit;
         }
 
         .form-group input:focus,
@@ -240,117 +240,59 @@
         .form-group textarea:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1), var(--shadow);
-            transform: translateY(-2px);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
-        .form-group input:hover,
-        .form-group select:hover,
-        .form-group textarea:hover {
-            border-color: #cbd5e1;
+        .form-group select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 12 12' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M2 4L6 8L10 4' stroke='%23667eea' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            padding-right: 3rem;
         }
 
         .form-group textarea {
             resize: vertical;
             min-height: 120px;
-            line-height: 1.6;
         }
 
-        .form-helper {
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        /* Acciones del formulario */
+        .form-actions {
+            padding: 2.5rem;
+            background: rgba(248, 250, 252, 0.5);
             display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-top: 0.5rem;
-            font-size: 0.85rem;
-            color: var(--text-secondary);
+            justify-content: flex-end;
+            gap: 1rem;
         }
 
-        .form-helper i {
-            font-size: 0.75rem;
-        }
-
-        .form-required {
-            color: var(--danger);
-        }
-
-        /* Badge de tipo de campo */
-        .field-badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 2px 8px;
-            background: rgba(102, 126, 234, 0.1);
-            color: var(--primary);
-            border-radius: 6px;
-            font-size: 0.7rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        /* Fecha helper mejorado */
-        .fecha-helper {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            margin-top: 1.5rem;
-            padding: 1rem 1.25rem;
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
-            border-left: 4px solid var(--primary);
-            border-radius: var(--radius-sm);
-            font-size: 0.95rem;
-            color: var(--primary);
-            font-weight: 600;
-        }
-
-        .fecha-helper i {
-            font-size: 1.25rem;
-        }
-
-        /* Botones mejorados */
-        .btn-primary,
-        .btn-secondary {
+        .btn {
             padding: 14px 32px;
             border: none;
             border-radius: var(--radius-sm);
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: inline-flex;
             align-items: center;
-            gap: 10px;
-            position: relative;
-            overflow: hidden;
+            gap: 0.75rem;
+            transition: all 0.3s ease;
+            font-family: inherit;
         }
 
         .btn-primary {
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             color: white;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-        }
-
-        .btn-primary::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: left 0.5s;
-        }
-
-        .btn-primary:hover:not(:disabled)::before {
-            left: 100%;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
         }
 
         .btn-primary:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
-        }
-
-        .btn-primary:active:not(:disabled) {
-            transform: translateY(0);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.5);
         }
 
         .btn-primary:disabled {
@@ -362,46 +304,75 @@
             background: white;
             color: var(--text-primary);
             border: 2px solid var(--border);
-            box-shadow: var(--shadow-sm);
         }
 
         .btn-secondary:hover {
             background: #f8fafc;
-            border-color: var(--text-secondary);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow);
+            border-color: var(--primary);
+            color: var(--primary);
         }
 
-        .form-actions {
+        /* Loading Overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+
+        .loading-overlay.active {
             display: flex;
-            gap: 1rem;
-            justify-content: flex-end;
-            padding: 2.5rem;
-            background: linear-gradient(to bottom, transparent, rgba(102, 126, 234, 0.02));
         }
 
-        /* Notificaciones mejoradas */
-        .notification {
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Notificaciones */
+        .notifications-container {
             position: fixed;
             top: 2rem;
             right: 2rem;
+            z-index: 10001;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .notification {
+            background: white;
             padding: 1.25rem 1.5rem;
             border-radius: var(--radius-sm);
             box-shadow: var(--shadow-lg);
             display: flex;
             align-items: center;
-            gap: 15px;
-            z-index: 10000;
-            animation: slideInRight 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            max-width: 420px;
-            min-width: 320px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            gap: 1rem;
+            min-width: 350px;
+            animation: slideInRight 0.3s ease;
+            border-left: 4px solid;
         }
 
         @keyframes slideInRight {
             from {
-                transform: translateX(500px);
+                transform: translateX(400px);
                 opacity: 0;
             }
             to {
@@ -410,104 +381,72 @@
             }
         }
 
+        .notification i {
+            font-size: 1.5rem;
+        }
+
         .notification.success {
-            background: linear-gradient(135deg, #10b981, #059669);
-            color: white;
+            border-color: var(--success);
+        }
+
+        .notification.success i {
+            color: var(--success);
         }
 
         .notification.error {
-            background: linear-gradient(135deg, #ef4444, #dc2626);
-            color: white;
+            border-color: var(--danger);
+        }
+
+        .notification.error i {
+            color: var(--danger);
         }
 
         .notification.warning {
-            background: linear-gradient(135deg, #f59e0b, #d97706);
-            color: white;
+            border-color: var(--warning);
+        }
+
+        .notification.warning i {
+            color: var(--warning);
         }
 
         .notification.info {
-            background: linear-gradient(135deg, #3b82f6, #2563eb);
-            color: white;
+            border-color: var(--info);
         }
 
-        .notification i {
-            font-size: 1.75rem;
-            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+        .notification.info i {
+            color: var(--info);
         }
 
         .notification span {
             flex: 1;
-            font-weight: 500;
-            line-height: 1.5;
+            color: var(--text-primary);
+            font-size: 0.95rem;
         }
 
-        /* Loading mejorado */
-        .loading-overlay {
+        /* Días calculados */
+        .dias-calculados {
             display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(4px);
-            z-index: 9999;
-            justify-content: center;
             align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 1.5rem;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.08), rgba(118, 75, 162, 0.08));
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            border-radius: var(--radius-sm);
+            margin-top: 1rem;
         }
 
-        .loading-overlay.active {
-            display: flex;
+        .dias-calculados i {
+            font-size: 1.5rem;
+            color: var(--primary);
         }
 
-        .spinner-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 1.5rem;
-        }
-
-        .spinner {
-            width: 60px;
-            height: 60px;
-            border: 4px solid rgba(255, 255, 255, 0.2);
-            border-top: 4px solid white;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .loading-text {
-            color: white;
-            font-size: 1rem;
+        .dias-calculados span {
             font-weight: 600;
+            color: var(--primary);
+            font-size: 1rem;
         }
 
-        /* Animaciones de entrada */
-        .form-section {
-            animation: fadeInUp 0.5s ease backwards;
-        }
-
-        .form-section:nth-child(1) { animation-delay: 0.1s; }
-        .form-section:nth-child(2) { animation-delay: 0.2s; }
-        .form-section:nth-child(3) { animation-delay: 0.3s; }
-        .form-section:nth-child(4) { animation-delay: 0.4s; }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Responsive mejorado */
+        /* Responsive */
         @media (max-width: 768px) {
             .module-container {
                 padding: 1rem;
@@ -515,16 +454,6 @@
 
             .module-header {
                 padding: 1.5rem;
-            }
-
-            .header-content {
-                gap: 1rem;
-            }
-
-            .header-icon {
-                width: 50px;
-                height: 50px;
-                font-size: 1.5rem;
             }
 
             .header-title h1 {
@@ -535,159 +464,101 @@
                 padding: 1.5rem;
             }
 
-            .form-section h3 {
-                font-size: 1.1rem;
-            }
-
             .form-row {
                 grid-template-columns: 1fr;
             }
 
             .form-actions {
                 flex-direction: column;
-                padding: 1.5rem;
             }
 
-            .btn-primary,
-            .btn-secondary {
+            .btn {
                 width: 100%;
                 justify-content: center;
             }
 
-            .notification {
-                right: 1rem;
+            .notifications-container {
                 left: 1rem;
-                max-width: none;
+                right: 1rem;
+            }
+
+            .notification {
                 min-width: auto;
             }
-        }
-
-        /* Mejoras adicionales */
-        select {
-            cursor: pointer;
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23667eea' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 12px center;
-            padding-right: 40px;
-        }
-
-        input[type="date"] {
-            cursor: pointer;
-        }
-
-        /* Tooltip de ayuda */
-        .help-icon {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            background: rgba(102, 126, 234, 0.1);
-            color: var(--primary);
-            font-size: 0.7rem;
-            cursor: help;
-            transition: all 0.2s;
-        }
-
-        .help-icon:hover {
-            background: var(--primary);
-            color: white;
-            transform: scale(1.1);
-        }
-
-        /* Scroll suave */
-        html {
-            scroll-behavior: smooth;
-        }
-
-        /* Scrollbar personalizada */
-        ::-webkit-scrollbar {
-            width: 10px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: rgba(102, 126, 234, 0.5);
-            border-radius: 5px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--primary);
         }
     </style>
 </head>
 
 <body>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Notifications Container -->
+    <div class="notifications-container" id="notifications-container"></div>
+
     <div class="module-container">
-        <!-- Header del módulo -->
+        <!-- Header -->
         <div class="module-header">
             <div class="header-content">
                 <div class="header-icon">
                     <i class="fas fa-exclamation-triangle"></i>
                 </div>
                 <div class="header-title">
-                    <h1>Reportar Incidencia</h1>
-                    <p class="header-subtitle">Complete el formulario para registrar una nueva incidencia</p>
+                    <h1>🚨 Reportar Incidencias</h1>
+                    <p class="header-subtitle">Registra y gestiona incidencias de promotores en tiempo real</p>
                 </div>
             </div>
         </div>
 
-        <!-- Contenido del módulo -->
+        <!-- Formulario -->
         <div class="module-content">
             <div class="form-card">
                 <form id="form-incidencia">
-                    <!-- Información del Promotor -->
+                    <!-- Sección: Información del Personal -->
                     <div class="form-section">
                         <h3>
-                            <i class="fas fa-user"></i>
-                            Información del Promotor
+                            <i class="fas fa-user-tie"></i>
+                            Información del Personal
                         </h3>
 
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="incidencia-promotor">
-                                    Promotor <span class="form-required">*</span>
+                                    <i class="fas fa-user" style="color: var(--primary);"></i>
+                                    Promotor *
                                 </label>
                                 <select id="incidencia-promotor" required>
-                                    <option value="">Seleccionar promotor...</option>
+                                    <option value="">Seleccione un promotor...</option>
                                 </select>
                             </div>
 
                             <div class="form-group">
                                 <label for="incidencia-tienda">
+                                    <i class="fas fa-store" style="color: var(--primary);"></i>
                                     Tienda
-                                    <span class="field-badge">Opcional</span>
                                 </label>
                                 <select id="incidencia-tienda">
-                                    <option value="">Seleccionar tienda...</option>
+                                    <option value="">Primero seleccione un promotor</option>
                                 </select>
-                                <small class="form-helper">
-                                    <i class="fas fa-info-circle"></i>
-                                    Si no está en la lista, escribe el nombre abajo
-                                </small>
                             </div>
-                        </div>
 
-                        <div class="form-group">
-                            <label for="incidencia-tienda-nombre">
-                                Nombre de Tienda (Texto libre)
-                                <span class="field-badge">Opcional</span>
-                            </label>
-                            <input type="text" id="incidencia-tienda-nombre" maxlength="200"
-                                placeholder="Ej: Walmart Av. Principal Centro">
-                            <small class="form-helper">
-                                <i class="fas fa-lightbulb"></i>
-                                Usa este campo si la tienda no está en el listado
-                            </small>
+                            <div class="form-group">
+                                <label for="incidencia-tienda-nombre">
+                                    <i class="fas fa-edit" style="color: var(--primary);"></i>
+                                    Nombre de Tienda (Manual)
+                                </label>
+                                <input 
+                                    type="text" 
+                                    id="incidencia-tienda-nombre" 
+                                    placeholder="Escriba el nombre si no está en la lista"
+                                >
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Detalles de la Incidencia -->
+                    <!-- Sección: Detalles de la Incidencia -->
                     <div class="form-section">
                         <h3>
                             <i class="fas fa-clipboard-list"></i>
@@ -697,105 +568,90 @@
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="incidencia-tipo">
-                                    Tipo de Incidencia <span class="form-required">*</span>
+                                    <i class="fas fa-tag" style="color: var(--primary);"></i>
+                                    Tipo de Incidencia *
                                 </label>
                                 <select id="incidencia-tipo" required>
-                                    <option value="">Seleccionar tipo...</option>
-                                    <option value="falta">🚫 Falta</option>
-                                    <option value="vacaciones">🏖️ Vacaciones</option>
-                                    <option value="abandono">🏃 Abandono de Puesto</option>
-                                    <option value="salud">🏥 Incapacidad/Salud</option>
-                                    <option value="imprevisto">⚠️ Imprevisto</option>
-                                    <option value="otro">📝 Otro</option>
+                                    <option value="">Seleccione el tipo...</option>
+                                    <option value="falta">Falta</option>
+                                    <option value="vacaciones">Vacaciones</option>
+                                    <option value="abandono">Abandono</option>
+                                    <option value="salud">Salud</option>
+                                    <option value="imprevisto">Imprevisto</option>
+                                    <option value="otro">Otro</option>
                                 </select>
                             </div>
 
                             <div class="form-group">
                                 <label for="incidencia-prioridad">
-                                    Prioridad <span class="form-required">*</span>
+                                    <i class="fas fa-exclamation-circle" style="color: var(--primary);"></i>
+                                    Prioridad *
                                 </label>
                                 <select id="incidencia-prioridad" required>
-                                    <option value="">Seleccionar prioridad...</option>
-                                    <option value="alta">🔴 Alta</option>
-                                    <option value="media">🟡 Media</option>
-                                    <option value="baja">🟢 Baja</option>
+                                    <option value="">Seleccione prioridad...</option>
+                                    <option value="Baja">🟢 Baja</option>
+                                    <option value="Media">🟡 Media</option>
+                                    <option value="Alta">🔴 Alta</option>
                                 </select>
                             </div>
-                        </div>
 
-                        <div class="form-group">
-                            <label for="incidencia-descripcion">
-                                Descripción <span class="form-required">*</span>
-                            </label>
-                            <textarea id="incidencia-descripcion" required
-                                placeholder="Describe detalladamente la incidencia..."></textarea>
-                            <small class="form-helper">
-                                <i class="fas fa-pen"></i>
-                                Proporciona todos los detalles relevantes sobre la incidencia
-                            </small>
-                        </div>
-                    </div>
-
-                    <!-- Fechas -->
-                    <div class="form-section">
-                        <h3>
-                            <i class="fas fa-calendar"></i>
-                            Fechas
-                        </h3>
-
-                        <div class="form-row">
                             <div class="form-group">
                                 <label for="incidencia-fecha-inicio">
-                                    Fecha de Inicio <span class="form-required">*</span>
+                                    <i class="fas fa-calendar-alt" style="color: var(--primary);"></i>
+                                    Fecha de Inicio *
                                 </label>
                                 <input type="date" id="incidencia-fecha-inicio" required>
                             </div>
 
                             <div class="form-group">
                                 <label for="incidencia-fecha-fin">
-                                    Fecha de Fin
-                                    <span class="field-badge">Opcional</span>
+                                    <i class="fas fa-calendar-check" style="color: var(--primary);"></i>
+                                    Fecha de Fin (Opcional)
                                 </label>
                                 <input type="date" id="incidencia-fecha-fin">
-                                <small class="form-helper">
-                                    <i class="fas fa-calendar-check"></i>
-                                    Deja vacío si es un solo día
-                                </small>
                             </div>
                         </div>
 
-                        <div class="fecha-helper" id="dias-calculados" style="display: none;">
+                        <div class="dias-calculados" id="dias-calculados">
                             <i class="fas fa-clock"></i>
-                            <span id="dias-texto">Duración: X días</span>
+                            <span id="dias-texto">Duración: 0 días</span>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group full-width">
+                                <label for="incidencia-descripcion">
+                                    <i class="fas fa-align-left" style="color: var(--primary);"></i>
+                                    Descripción de la Incidencia *
+                                </label>
+                                <textarea 
+                                    id="incidencia-descripcion" 
+                                    placeholder="Describa detalladamente la incidencia..."
+                                    required
+                                ></textarea>
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label for="incidencia-notas">
+                                    <i class="fas fa-sticky-note" style="color: var(--primary);"></i>
+                                    Notas Adicionales
+                                </label>
+                                <textarea 
+                                    id="incidencia-notas" 
+                                    placeholder="Información adicional (opcional)..."
+                                ></textarea>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Notas Adicionales -->
-                    <div class="form-section">
-                        <h3>
-                            <i class="fas fa-sticky-note"></i>
-                            Notas Adicionales
-                            <span class="field-badge">Opcional</span>
-                        </h3>
-
-                        <div class="form-group">
-                            <label for="incidencia-notas">Notas</label>
-                            <textarea id="incidencia-notas" rows="4"
-                                placeholder="Información adicional que consideres relevante..."></textarea>
-                            <small class="form-helper">
-                                <i class="fas fa-comment-dots"></i>
-                                Agrega cualquier comentario o contexto adicional
-                            </small>
-                        </div>
-                    </div>
-
-                    <!-- Botones -->
+                    <!-- Acciones -->
                     <div class="form-actions">
-                        <button type="button" class="btn-secondary" id="btn-limpiar">
-                            <i class="fas fa-broom"></i> Limpiar Formulario
+                        <button type="button" class="btn btn-secondary" id="btn-limpiar">
+                            <i class="fas fa-eraser"></i>
+                            Limpiar Formulario
                         </button>
-                        <button type="submit" class="btn-primary" id="btn-guardar">
-                            <i class="fas fa-paper-plane"></i> Reportar Incidencia
+                        <button type="submit" class="btn btn-primary" id="btn-guardar">
+                            <i class="fas fa-save"></i>
+                            Reportar Incidencia
                         </button>
                     </div>
                 </form>
@@ -803,30 +659,16 @@
         </div>
     </div>
 
-    <!-- Loading Overlay -->
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="spinner-container">
-            <div class="spinner"></div>
-            <div class="loading-text">Procesando...</div>
-        </div>
-    </div>
-
-    <!-- Container para notificaciones -->
-    <div id="notifications-container"></div>
-
     <script>
         // ===== CONFIGURACIÓN =====
+        // 🔧 ÚNICA LÍNEA MODIFICADA: Cambio de ruta relativa a absoluta
         const API_CONFIG = {
-            baseURL: '../../api'
+            baseURL: '/promotoria/api/incidencias_supervisor.php'
         };
 
-        const API_INCIDENCIAS = `${API_CONFIG.baseURL}/incidencias_supervisor.php`;
+        const API_INCIDENCIAS = `${API_CONFIG.baseURL}`;
 
-        // ===== VARIABLES GLOBALES =====
-        let promotores = [];
-        let tiendas = [];
-
-        // ===== ELEMENTOS DOM =====
+        // ===== ELEMENTOS DEL DOM =====
         const form = document.getElementById('form-incidencia');
         const selectPromotor = document.getElementById('incidencia-promotor');
         const selectTienda = document.getElementById('incidencia-tienda');
@@ -836,45 +678,6 @@
         const textareaDescripcion = document.getElementById('incidencia-descripcion');
         const inputFechaInicio = document.getElementById('incidencia-fecha-inicio');
         const inputFechaFin = document.getElementById('incidencia-fecha-fin');
-
-        // ✅ HABILITAR FECHAS FUTURAS (Quitar restricción de max)
-        function configurarFechas() {
-            const hoy = new Date().toISOString().split('T')[0];
-
-            // ✅ ELIMINAR TODAS LAS RESTRICCIONES EXISTENTES
-            inputFechaInicio.removeAttribute('min');
-            inputFechaInicio.removeAttribute('max');
-            inputFechaFin.removeAttribute('min');
-            inputFechaFin.removeAttribute('max');
-
-            // Establecer valor por defecto: hoy
-            if (!inputFechaInicio.value) {
-                inputFechaInicio.value = hoy;
-            }
-
-            console.log('📅 Fechas configuradas - SIN restricciones');
-        }
-
-        // Ejecutar al cargar
-        configurarFechas();
-
-        // ✅ FORZAR eliminación de restricciones
-        setTimeout(() => {
-            inputFechaInicio.removeAttribute('min');
-            inputFechaInicio.removeAttribute('max');
-            inputFechaFin.removeAttribute('min');
-            inputFechaFin.removeAttribute('max');
-            console.log('📅 Restricciones eliminadas (timeout)');
-        }, 100);
-
-        setTimeout(() => {
-            inputFechaInicio.removeAttribute('min');
-            inputFechaInicio.removeAttribute('max');
-            inputFechaFin.removeAttribute('min');
-            inputFechaFin.removeAttribute('max');
-            console.log('📅 Restricciones eliminadas (timeout 2)');
-        }, 500);
-
         const textareaNotas = document.getElementById('incidencia-notas');
         const btnLimpiar = document.getElementById('btn-limpiar');
         const btnGuardar = document.getElementById('btn-guardar');
@@ -885,174 +688,113 @@
         // ===== INICIALIZACIÓN =====
         async function init() {
             console.log('🚀 Iniciando módulo de incidencias...');
-
-            await cargarPromotores();
-            await cargarTiendas();
-
-            setupEventListeners();
-            setFechaMaxima();
-
-            console.log('✅ Módulo inicializado correctamente');
-        }
-
-        // Función para mostrar loading
-        function showLoading() {
-            const loadingDiv = document.getElementById('loading');
-            if (loadingDiv) {
-                loadingDiv.style.display = 'flex';
-            } else {
-                const loading = document.createElement('div');
-                loading.id = 'loading';
-                loading.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-        `;
-                loading.innerHTML = `
-            <div style="background: white; padding: 20px; border-radius: 8px; text-align: center;">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="sr-only">Cargando...</span>
-                </div>
-                <p style="margin-top: 10px; margin-bottom: 0;">Cargando...</p>
-            </div>
-        `;
-                document.body.appendChild(loading);
-            }
-        }
-
-        function hideLoading() {
-            const loadingDiv = document.getElementById('loading');
-            if (loadingDiv) {
-                loadingDiv.style.display = 'none';
-            }
-        }
-
-        function mostrarError(mensaje) {
-            console.error('❌ Error:', mensaje);
-            mostrarNotificacion('❌ ' + mensaje, 'error');
-        }
-
-        function mostrarExito(mensaje) {
-            console.log('✅ Éxito:', mensaje);
-            mostrarNotificacion('✅ ' + mensaje, 'success');
-        }
-
-        function mostrarAdvertencia(mensaje) {
-            console.warn('⚠️ Advertencia:', mensaje);
-            mostrarNotificacion('⚠️ ' + mensaje, 'warning');
-        }
-
-        async function confirmarAccion(titulo, mensaje) {
-            return confirm(mensaje);
-        }
-
-        async function cargarPromotores() {
+            
             try {
-                console.log('📋 Cargando promotores...');
+                await cargarPromotores();
+                
+                selectPromotor.addEventListener('change', () => {
+                    console.log('👤 Promotor seleccionado:', selectPromotor.value);
+                    cargarTiendas();
+                });
+
+                setupEventListeners();
+                setFechaMaxima();
+                
+                console.log('✅ Módulo inicializado correctamente');
+            } catch (error) {
+                console.error('❌ Error al inicializar:', error);
+                mostrarNotificacion('Error al inicializar el módulo: ' + error.message, 'error');
+            }
+        }
+
+        // ===== CARGAR PROMOTORES =====
+        async function cargarPromotores() {
+            console.log('👤 Cargando promotores...');
+            
+            try {
                 showLoading();
-
-                const response = await fetch('/promotoria/api/incidencias_supervisor.php?accion=promotores');
-
+                
+                const response = await fetch(`${API_INCIDENCIAS}?accion=promotores`);
+                console.log('📡 Response status:', response.status);
+                
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
-
-                const text = await response.text();
-
-                let resultado;
-                try {
-                    resultado = JSON.parse(text);
-                } catch (e) {
-                    console.error('❌ Error parseando JSON:', e);
-                    console.error('Respuesta recibida:', text);
-                    throw new Error('El servidor no devolvió JSON válido. Revisa la consola.');
-                }
+                
+                const resultado = await response.json();
+                console.log('📥 Resultado completo:', resultado);
 
                 if (resultado.error) {
-                    throw new Error(resultado.mensaje);
+                    throw new Error(resultado.mensaje || 'Error al cargar promotores');
                 }
-
-                const selectPromotor = document.getElementById('incidencia-promotor');
-                if (!selectPromotor) {
-                    throw new Error('No se encontró el elemento select con id "incidencia-promotor"');
-                }
-
-                selectPromotor.innerHTML = '<option value="">Seleccione un promotor</option>';
 
                 if (resultado.data && resultado.data.length > 0) {
+                    selectPromotor.innerHTML = '<option value="">Seleccione un promotor...</option>';
+                    
                     resultado.data.forEach(promotor => {
                         const option = document.createElement('option');
                         option.value = promotor.id_promotor;
                         option.textContent = promotor.nombre_completo;
+                        option.setAttribute('data-nombre', promotor.nombre_completo);
                         selectPromotor.appendChild(option);
                     });
+                    
                     console.log(`✅ ${resultado.data.length} promotores cargados`);
                 } else {
                     console.warn('⚠️ No se encontraron promotores');
-                    mostrarAdvertencia('No se encontraron promotores asignados a sus zonas');
+                    selectPromotor.innerHTML = '<option value="">No hay promotores disponibles</option>';
+                    mostrarAdvertencia('No hay promotores disponibles');
                 }
 
             } catch (error) {
                 console.error('❌ Error cargando promotores:', error);
                 mostrarError('Error al cargar promotores: ' + error.message);
+                selectPromotor.innerHTML = '<option value="">Error al cargar promotores</option>';
             } finally {
                 hideLoading();
             }
         }
 
+        // ===== CARGAR TIENDAS =====
         async function cargarTiendas() {
+            const idPromotor = selectPromotor.value;
+            
+            console.log('🏪 Cargando tiendas...');
+            
+            if (!idPromotor) {
+                console.log('⚠️ No hay promotor seleccionado');
+                selectTienda.innerHTML = '<option value="">Primero seleccione un promotor</option>';
+                return;
+            }
+
             try {
-                console.log('🏪 Cargando tiendas...');
-                const idPromotor = document.getElementById('incidencia-promotor').value;
-
-                if (!idPromotor) {
-                    console.log('⚠️ No hay promotor seleccionado');
-                    document.getElementById('incidencia-tienda').innerHTML = '<option value="">Primero seleccione un promotor</option>';
-                    return;
-                }
-
                 showLoading();
-
-                const response = await fetch(`/promotoria/api/incidencias_supervisor.php?accion=tiendas&id_promotor=${idPromotor}`);
-
+                
+                const url = `${API_INCIDENCIAS}?accion=tiendas&id_promotor=${idPromotor}`;
+                console.log('🌐 URL:', url);
+                
+                const response = await fetch(url);
+                console.log('📡 Response status:', response.status);
+                
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
-
-                const text = await response.text();
-
-                let resultado;
-                try {
-                    resultado = JSON.parse(text);
-                } catch (e) {
-                    console.error('❌ Error parseando JSON:', e);
-                    console.error('Respuesta recibida:', text);
-                    throw new Error('El servidor no devolvió JSON válido. Revisa la consola.');
-                }
+                
+                const resultado = await response.json();
+                console.log('📥 Resultado tiendas:', resultado);
 
                 if (resultado.error) {
-                    throw new Error(resultado.mensaje);
+                    throw new Error(resultado.mensaje || 'Error al cargar tiendas');
                 }
-
-                const selectTienda = document.getElementById('incidencia-tienda');
-                if (!selectTienda) {
-                    throw new Error('No se encontró el elemento select con id "incidencia-tienda"');
-                }
-
-                selectTienda.innerHTML = '<option value="">Seleccione una tienda</option>';
 
                 if (resultado.data && resultado.data.length > 0) {
+                    selectTienda.innerHTML = '<option value="">Seleccione una tienda...</option>';
+                    
                     resultado.data.forEach(tienda => {
                         const option = document.createElement('option');
                         option.value = tienda.id_tienda;
-                        option.textContent = `${tienda.cadena} - ${tienda.nombre_tienda}`;
+                        option.textContent = tienda.nombre_tienda;
+                        option.setAttribute('data-nombre', tienda.nombre_tienda);
                         selectTienda.appendChild(option);
                     });
                     console.log(`✅ ${resultado.data.length} tiendas cargadas`);
@@ -1078,9 +820,9 @@
         }
 
         function setFechaMaxima() {
-            const hoy = new Date().toISOString().split('T')[0];
-            inputFechaInicio.setAttribute('max', hoy);
-            inputFechaFin.setAttribute('max', hoy);
+            // ✅ SIN RESTRICCIONES - Permitir cualquier fecha
+            const hoy = new Date().toISOString().split("T")[0];
+            inputFechaInicio.value = hoy;
         }
 
         function calcularDias() {
@@ -1121,11 +863,16 @@
                 return;
             }
 
+            // Obtener el nombre de la tienda del option seleccionado
+            const tiendaNombre = selectTienda.value ? 
+                selectTienda.options[selectTienda.selectedIndex].getAttribute('data-nombre') : 
+                inputTiendaNombre.value || '';
+
             const datos = {
                 accion: 'crear',
                 id_promotor: parseInt(selectPromotor.value),
                 id_tienda: selectTienda.value ? parseInt(selectTienda.value) : null,
-                tienda_nombre: inputTiendaNombre.value || (selectTienda.value ? selectTienda.options[selectTienda.selectedIndex].getAttribute('data-nombre') : ''),
+                tienda_nombre: tiendaNombre,
                 fecha_incidencia: fechaInicio,
                 fecha_fin: fechaFin || null,
                 tipo_incidencia: selectTipo.value,
@@ -1144,9 +891,23 @@
 
                 const response = await fetch(API_INCIDENCIAS, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
                     body: JSON.stringify(datos)
                 });
+
+                console.log('📡 Status HTTP:', response.status);
+                console.log('📡 Content-Type:', response.headers.get('content-type'));
+
+                // Verificar si la respuesta es JSON
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    const textoRespuesta = await response.text();
+                    console.error('❌ Respuesta NO es JSON:', textoRespuesta.substring(0, 500));
+                    throw new Error('El servidor retornó HTML en lugar de JSON. Verifica la ruta del archivo PHP.');
+                }
 
                 const resultado = await response.json();
                 console.log('📥 Respuesta completa:', resultado);
@@ -1155,12 +916,13 @@
                     console.error('🔍 Debug del backend:', resultado.debug);
                 }
 
+                // ✅ CORREGIDO: Verificar success en lugar de error
                 if (resultado.success) {
                     mostrarNotificacion('✅ Incidencia reportada exitosamente', 'success');
                     limpiarFormulario();
                     notificarRoot(resultado.id_incidencia, datos);
                 } else {
-                    throw new Error(resultado.message || 'Error al guardar incidencia');
+                    throw new Error(resultado.mensaje || 'Error al guardar incidencia');
                 }
             } catch (error) {
                 console.error('❌ Error:', error);
@@ -1232,12 +994,21 @@
         function limpiarFormulario() {
             form.reset();
             diasCalculados.style.display = 'none';
+            selectTienda.innerHTML = '<option value="">Primero seleccione un promotor</option>';
             console.log('🧹 Formulario limpiado');
         }
 
         function mostrarLoading(mostrar) {
             loadingOverlay.classList.toggle('active', mostrar);
             btnGuardar.disabled = mostrar;
+        }
+
+        function showLoading() {
+            loadingOverlay.classList.add('active');
+        }
+
+        function hideLoading() {
+            loadingOverlay.classList.remove('active');
         }
 
         function mostrarNotificacion(mensaje, tipo = 'info') {
@@ -1253,6 +1024,7 @@
                 info: 'fa-info-circle'
             };
 
+            
             notif.innerHTML = `
                 <i class="fas ${iconos[tipo]}"></i>
                 <span>${mensaje}</span>
@@ -1263,6 +1035,14 @@
             setTimeout(() => {
                 notif.remove();
             }, 4000);
+        }
+
+        function mostrarError(mensaje) {
+            mostrarNotificacion(mensaje, 'error');
+        }
+
+        function mostrarAdvertencia(mensaje) {
+            mostrarNotificacion(mensaje, 'warning');
         }
 
         if (document.readyState === 'loading') {

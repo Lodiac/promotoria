@@ -1,8 +1,8 @@
 <?php
 /**
- * API DE NOTIFICACIONES - VERSIÓN DEFINITIVA
- * Sistema completo de notificaciones con recordatorios automáticos estilo WhatsApp
- * Compatible con tu base de datos real
+ * API DE NOTIFICACIONES - VERSIÓN CORREGIDA
+ * Compatible con la estructura REAL de la tabla notificaciones
+ * Solo usa columnas que EXISTEN en la base de datos
  */
 
 error_reporting(E_ALL);
@@ -31,107 +31,14 @@ require_once __DIR__ . '/../config/db_connect.php';
 class NotificacionesAPI {
     
     /**
-     * Crear notificación cuando SUPERVISOR reporta incidencia
-     * Esta función se llama desde el API de incidencias
-     */
-    public function crearNotificacionIncidencia($id_incidencia, $id_supervisor_reporta, $tipo_notificacion, $datos_incidencia) {
-        try {
-            error_log("🔔 Creando notificación de incidencia #{$id_incidencia}");
-            
-            // Obtener todos los usuarios ROOT activos
-            $sql_root = "SELECT id, CONCAT(nombre, ' ', apellido) as nombre_completo 
-                         FROM usuarios 
-                         WHERE rol = 'root' AND activo = 1";
-            $usuarios_root = Database::select($sql_root);
-            
-            if (empty($usuarios_root)) {
-                error_log("⚠️ No hay usuarios ROOT activos");
-                return false;
-            }
-            
-            // Construir mensaje según el tipo
-            $mensajes = [
-                'nueva' => "🚨 Nueva incidencia reportada\nPromotor: {$datos_incidencia['promotor_nombre']}\nTipo: " . strtoupper($datos_incidencia['tipo_incidencia']) . "\nPrioridad: " . strtoupper($datos_incidencia['prioridad']),
-                'actualizada' => "📝 Incidencia #{$id_incidencia} actualizada\nPromotor: {$datos_incidencia['promotor_nombre']}\nNuevo estatus: " . strtoupper($datos_incidencia['estatus']),
-                'extension' => "📅 Extensión de incidencia #{$id_incidencia}\nPromotor: {$datos_incidencia['promotor_nombre']}\nNuevos días: {$datos_incidencia['dias_adicionales']}"
-            ];
-            
-            $mensaje = $mensajes[$tipo_notificacion] ?? 'Nueva notificación de incidencia';
-            
-            // Crear notificación para cada ROOT
-            $sql_notif = "INSERT INTO notificaciones 
-                          (id_incidencia, id_destinatario, id_remitente, tipo_notificacion, 
-                           mensaje, leida, fecha_creacion, recordatorios_enviados, 
-                           ultimo_recordatorio, fecha_proximo_recordatorio) 
-                          VALUES 
-                          (:id_incidencia, :id_destinatario, :id_remitente, :tipo_notificacion, 
-                           :mensaje, 0, NOW(), 0, NULL, DATE_ADD(NOW(), INTERVAL 5 MINUTE))";
-            
-            $contador = 0;
-            foreach ($usuarios_root as $root) {
-                $params = [
-                    'id_incidencia' => $id_incidencia,
-                    'id_destinatario' => $root['id'],
-                    'id_remitente' => $id_supervisor_reporta,
-                    'tipo_notificacion' => $tipo_notificacion,
-                    'mensaje' => $mensaje
-                ];
-                
-                Database::execute($sql_notif, $params);
-                $contador++;
-            }
-            
-            error_log("✅ {$contador} notificaciones creadas para ROOT");
-            return true;
-            
-        } catch (Exception $e) {
-            error_log("❌ Error creando notificación: " . $e->getMessage());
-            return false;
-        }
-    }
-    
-    /**
-     * Crear notificación cuando ROOT resuelve incidencia
-     * Para notificar al SUPERVISOR que reportó
-     */
-    public function notificarSupervisorResolucion($id_incidencia, $id_root, $id_supervisor_destino, $datos_incidencia) {
-        try {
-            $mensaje = "✅ Tu reporte de incidencia #{$id_incidencia} ha sido RESUELTO\n" .
-                       "Resuelto por: ROOT\n" .
-                       "Promotor: {$datos_incidencia['promotor_nombre']}\n" .
-                       "Revisa las notas para ver la resolución completa";
-            
-            $sql = "INSERT INTO notificaciones 
-                    (id_incidencia, id_destinatario, id_remitente, tipo_notificacion, 
-                     mensaje, leida, fecha_creacion, recordatorios_enviados, 
-                     ultimo_recordatorio, fecha_proximo_recordatorio) 
-                    VALUES 
-                    (:id_incidencia, :id_destinatario, :id_remitente, 'resuelta', 
-                     :mensaje, 0, NOW(), 0, NULL, NULL)";
-            
-            $params = [
-                'id_incidencia' => $id_incidencia,
-                'id_destinatario' => $id_supervisor_destino,
-                'id_remitente' => $id_root,
-                'mensaje' => $mensaje
-            ];
-            
-            Database::execute($sql, $params);
-            error_log("✅ Notificación de resolución enviada al supervisor #{$id_supervisor_destino}");
-            return true;
-            
-        } catch (Exception $e) {
-            error_log("❌ Error notificando supervisor: " . $e->getMessage());
-            return false;
-        }
-    }
-    
-    /**
      * Obtener notificaciones del usuario logueado
-     * Compatible con los dashboards
+     * SOLO USA COLUMNAS QUE EXISTEN EN LA TABLA
      */
     public function obtenerNotificaciones($id_usuario, $filtros = []) {
         try {
+            error_log("📋 Obteniendo notificaciones para usuario ID: {$id_usuario}");
+            
+            // SQL CORREGIDO - Solo columnas que existen
             $sql = "SELECT 
                         n.id_notificacion,
                         n.id_incidencia,
@@ -142,9 +49,6 @@ class NotificacionesAPI {
                         n.leida,
                         n.fecha_creacion,
                         n.fecha_lectura,
-                        n.recordatorios_enviados,
-                        n.ultimo_recordatorio,
-                        n.fecha_proximo_recordatorio,
                         CONCAT(u_remitente.nombre, ' ', u_remitente.apellido) as remitente_nombre,
                         u_remitente.rol as remitente_rol,
                         i.tipo_incidencia,
@@ -181,6 +85,8 @@ class NotificacionesAPI {
                           WHERE id_destinatario = :id_usuario AND leida = 0";
             $count = Database::selectOne($sql_count, ['id_usuario' => $id_usuario]);
             
+            error_log("✅ Notificaciones obtenidas: " . count($notificaciones) . " total, " . ($count['total'] ?? 0) . " no leídas");
+            
             return [
                 'success' => true,
                 'data' => [
@@ -210,6 +116,8 @@ class NotificacionesAPI {
      */
     public function marcarComoLeida($id_notificacion, $id_usuario) {
         try {
+            error_log("✅ Marcando notificación #{$id_notificacion} como leída");
+            
             // Verificar que la notificación pertenece al usuario
             $sql_verificar = "SELECT id_notificacion 
                               FROM notificaciones 
@@ -225,11 +133,10 @@ class NotificacionesAPI {
                 throw new Exception("Notificación no encontrada o no pertenece al usuario");
             }
             
-            // Marcar como leída
+            // Marcar como leída - SOLO COLUMNAS QUE EXISTEN
             $sql = "UPDATE notificaciones 
                     SET leida = 1, 
-                        fecha_lectura = NOW(),
-                        fecha_proximo_recordatorio = NULL
+                        fecha_lectura = NOW()
                     WHERE id_notificacion = :id_notificacion";
             
             Database::execute($sql, ['id_notificacion' => $id_notificacion]);
@@ -255,10 +162,12 @@ class NotificacionesAPI {
      */
     public function marcarTodasLeidas($id_usuario) {
         try {
+            error_log("✅ Marcando TODAS las notificaciones como leídas para usuario #{$id_usuario}");
+            
+            // SOLO COLUMNAS QUE EXISTEN
             $sql = "UPDATE notificaciones 
                     SET leida = 1, 
-                        fecha_lectura = NOW(),
-                        fecha_proximo_recordatorio = NULL
+                        fecha_lectura = NOW()
                     WHERE id_destinatario = :id_usuario 
                     AND leida = 0";
             
@@ -281,121 +190,6 @@ class NotificacionesAPI {
     }
     
     /**
-     * Procesar recordatorios automáticos (ejecutado por CRON)
-     */
-    public function procesarRecordatorios() {
-        try {
-            error_log("⏰ Iniciando procesamiento de recordatorios automáticos");
-            
-            // Obtener notificaciones NO LEÍDAS con recordatorio pendiente
-            $sql = "SELECT 
-                        n.id_notificacion,
-                        n.id_incidencia,
-                        n.id_destinatario,
-                        n.recordatorios_enviados,
-                        n.tipo_notificacion,
-                        CONCAT(u.nombre, ' ', u.apellido) as destinatario_nombre,
-                        CONCAT(p.nombre, ' ', p.apellido) as promotor_nombre,
-                        i.tipo_incidencia,
-                        i.prioridad,
-                        TIMESTAMPDIFF(MINUTE, n.fecha_creacion, NOW()) as minutos_sin_leer
-                    FROM notificaciones n
-                    INNER JOIN usuarios u ON n.id_destinatario = u.id
-                    INNER JOIN incidencias i ON n.id_incidencia = i.id_incidencia
-                    INNER JOIN promotores p ON i.id_promotor = p.id_promotor
-                    WHERE n.leida = 0 
-                    AND n.fecha_proximo_recordatorio IS NOT NULL
-                    AND n.fecha_proximo_recordatorio <= NOW()
-                    AND n.recordatorios_enviados < 10
-                    AND u.rol = 'root'";
-            
-            $notificaciones_pendientes = Database::select($sql);
-            
-            if (empty($notificaciones_pendientes)) {
-                error_log("✅ No hay recordatorios pendientes en este momento");
-                return [
-                    'success' => true,
-                    'message' => 'No hay recordatorios pendientes',
-                    'procesados' => 0
-                ];
-            }
-            
-            error_log("📋 " . count($notificaciones_pendientes) . " notificaciones pendientes de recordatorio");
-            
-            $contador = 0;
-            foreach ($notificaciones_pendientes as $notif) {
-                $minutos = $notif['minutos_sin_leer'];
-                $nivel_recordatorio = $notif['recordatorios_enviados'] + 1;
-                
-                // Enviar recordatorio (logging, email, push, etc.)
-                $this->enviarRecordatorio($notif, $nivel_recordatorio);
-                
-                // Actualizar contador de recordatorios
-                $sql_update = "UPDATE notificaciones 
-                               SET recordatorios_enviados = :nivel,
-                                   ultimo_recordatorio = NOW(),
-                                   fecha_proximo_recordatorio = DATE_ADD(NOW(), INTERVAL 5 MINUTE)
-                               WHERE id_notificacion = :id_notificacion";
-                
-                Database::execute($sql_update, [
-                    'nivel' => $nivel_recordatorio,
-                    'id_notificacion' => $notif['id_notificacion']
-                ]);
-                
-                $contador++;
-            }
-            
-            error_log("✅ {$contador} recordatorios procesados exitosamente");
-            
-            return [
-                'success' => true,
-                'message' => "{$contador} recordatorios procesados",
-                'procesados' => $contador
-            ];
-            
-        } catch (Exception $e) {
-            error_log("❌ Error procesando recordatorios: " . $e->getMessage());
-            return [
-                'success' => false,
-                'message' => $e->getMessage(),
-                'procesados' => 0
-            ];
-        }
-    }
-    
-    /**
-     * Enviar recordatorio (logging, email, push notification, etc.)
-     */
-    private function enviarRecordatorio($notif, $nivel) {
-        $urgencia = [
-            1 => '⚠️ RECORDATORIO',
-            2 => '🔴 URGENTE',
-            3 => '🚨 CRÍTICO',
-            4 => '🔴🔴 MUY CRÍTICO'
-        ];
-        
-        $titulo = $urgencia[$nivel] ?? '🔴🔴🔴 CRÍTICO';
-        
-        error_log("📢 Recordatorio #{$nivel} enviado:");
-        error_log("   ├─ Usuario: {$notif['destinatario_nombre']}");
-        error_log("   ├─ Incidencia: #{$notif['id_incidencia']}");
-        error_log("   ├─ Promotor: {$notif['promotor_nombre']}");
-        error_log("   ├─ Tipo: {$notif['tipo_incidencia']}");
-        error_log("   ├─ Prioridad: {$notif['prioridad']}");
-        error_log("   ├─ Minutos sin leer: {$notif['minutos_sin_leer']}");
-        error_log("   └─ Nivel: {$titulo}");
-        
-        // AQUÍ puedes agregar lógica adicional:
-        // - Enviar email
-        // - Push notification
-        // - SMS
-        // - Webhook a Slack/Teams
-        // Por ahora solo logueamos
-        
-        return true;
-    }
-    
-    /**
      * Obtener estadísticas de notificaciones
      */
     public function obtenerEstadisticas($id_usuario) {
@@ -404,7 +198,6 @@ class NotificacionesAPI {
                         COUNT(*) as total,
                         SUM(CASE WHEN leida = 0 THEN 1 ELSE 0 END) as no_leidas,
                         SUM(CASE WHEN leida = 1 THEN 1 ELSE 0 END) as leidas,
-                        SUM(CASE WHEN leida = 0 AND recordatorios_enviados >= 1 THEN 1 ELSE 0 END) as con_recordatorios,
                         SUM(CASE WHEN leida = 0 AND TIMESTAMPDIFF(MINUTE, fecha_creacion, NOW()) >= 15 THEN 1 ELSE 0 END) as criticas
                     FROM notificaciones
                     WHERE id_destinatario = :id_usuario";
@@ -453,7 +246,18 @@ try {
     if (session_status() === PHP_SESSION_NONE) {
         session_start();
     }
-    $id_usuario_actual = $_SESSION['user_id'] ?? null;
+    
+    // Buscar ID en todas las claves posibles
+    $id_usuario_actual = null;
+    $posibles_claves = ['user_id', 'id', 'usuario_id', 'id_usuario', 'userId'];
+    
+    foreach ($posibles_claves as $clave) {
+        if (isset($_SESSION[$clave]) && !empty($_SESSION[$clave])) {
+            $id_usuario_actual = $_SESSION[$clave];
+            error_log("✅ Usuario encontrado en sesión: {$clave} = {$id_usuario_actual}");
+            break;
+        }
+    }
     
     $respuesta = null;
     
@@ -499,12 +303,6 @@ try {
             $respuesta = $api->obtenerEstadisticas($id_usuario_actual);
             break;
             
-        case 'procesar_recordatorios':
-            // Esta acción la ejecutará el cron job
-            // NO requiere autenticación porque viene del servidor
-            $respuesta = $api->procesarRecordatorios();
-            break;
-            
         default:
             throw new Exception("Acción no válida: {$accion}");
     }
@@ -539,3 +337,4 @@ try {
     
     ob_end_flush();
 }
+?>

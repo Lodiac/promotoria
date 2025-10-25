@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reportes Tiendas → Promotores + EXPEDIENTES</title>
+    <title>Reportes Tiendas - Promotores + EXPEDIENTES</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 
@@ -17,7 +17,7 @@
             <div class="header-content">
                 <div class="header-title">
                     <i class="fas fa-store header-icon"></i>
-                    <h1>Reportes Tiendas → Promotores</h1>
+                    <h1>Reportes Tiendas - Promotores</h1>
                 </div>
                 <div class="header-actions">
                     <button class="btn-primary" id="btn-descargar-excel">
@@ -151,7 +151,7 @@
             <div class="reporte-content" id="reporte-content" style="display: none;">
                 <div class="reporte-header">
                     <div class="reporte-title">
-                        <h3>Reporte Tiendas → Promotores</h3>
+                        <h3>Reporte Tiendas - Promotores</h3>
                         <p id="reporte-subtitulo" class="text-secondary">Seleccione fechas y haga clic en Consultar
                             Reporte</p>
                     </div>
@@ -195,7 +195,7 @@
                 style="text-align: center; padding: 40px; background: var(--surface); border-radius: var(--radius); margin-bottom: 2rem; border: 1px solid var(--border-color);">
                 <i class="fas fa-play-circle"
                     style="font-size: 3rem; color: var(--primary-color); margin-bottom: 1rem;"></i>
-                <h3>Reporte Tiendas → Promotores</h3>
+                <h3>Reporte Tiendas - Promotores</h3>
                 <p class="text-muted">Seleccione fechas y filtros, luego haga clic en "Consultar Reporte" para generar
                     los datos.</p>
                 <p><small>Por defecto se muestran las fechas de la semana actual.</small></p>
@@ -234,7 +234,8 @@
                 <h2 id="expediente-title">
                     <i class="fas fa-id-card"></i> Expediente del Promotor
                 </h2>
-                <button class="btn-primary" id="btn-descargar-expediente" style="margin-left: auto; margin-right: 15px;">
+                <button class="btn-primary" id="btn-descargar-expediente"
+                    style="margin-left: auto; margin-right: 15px;">
                     <i class="fas fa-download"></i> Descargar Expediente
                 </button>
                 <button class="modal-close" id="modal-close-expediente">
@@ -251,7 +252,7 @@
 
                 <!-- CONTENIDO DEL EXPEDIENTE -->
                 <div id="expediente-data" style="display: none;">
-                    
+
                     <!-- CABECERA CON FOTO Y DATOS PRINCIPALES -->
                     <div class="expediente-header">
                         <div class="expediente-avatar">
@@ -341,7 +342,7 @@
 
                     <!-- CONTENIDO DE LAS TABS -->
                     <div class="expediente-tab-content">
-                        
+
                         <!-- TAB: INFORMACIÓN PERSONAL (🔥 CORREGIDA PARA COINCIDIR CON LA BASE DE DATOS) -->
                         <div class="exp-tab-pane active" id="tab-informacion">
                             <div class="info-grid">
@@ -441,7 +442,7 @@
                             <div class="stats-section">
                                 <h4><i class="fas fa-chart-line"></i> Estadísticas del Período</h4>
                                 <p class="text-muted" id="exp-periodo-texto">Período seleccionado</p>
-                                
+
                                 <div class="stats-grid-full">
                                     <div class="stat-box">
                                         <div class="stat-box-header">
@@ -466,7 +467,8 @@
                                     </div>
                                 </div>
 
-                                <h4 style="margin-top: 2rem;"><i class="fas fa-exclamation-triangle"></i> Desglose de Incidencias</h4>
+                                <h4 style="margin-top: 2rem;"><i class="fas fa-exclamation-triangle"></i> Desglose de
+                                    Incidencias</h4>
                                 <div class="stats-grid-full">
                                     <div class="stat-box stat-box-warning">
                                         <div class="stat-box-header">
@@ -570,7 +572,8 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: var(--background);
+            /* background: var(--background); */
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: var(--text-primary);
             line-height: 1.6;
             padding: 20px;
@@ -1285,7 +1288,7 @@
         }
 
         /* 🆕 ===== ESTILOS ESPECÍFICOS PARA EXPEDIENTE ===== */
-        
+
         /* HEADER DEL EXPEDIENTE CON FOTO */
         .expediente-header {
             display: flex;
@@ -1460,6 +1463,7 @@
                 opacity: 0;
                 transform: translateY(10px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -2073,7 +2077,7 @@
 
         // ===== INICIALIZACIÓN =====
         function init() {
-            console.log('Inicializando módulo Reportes Tiendas → Promotores + EXPEDIENTES...');
+            console.log('Inicializando módulo Reportes Tiendas - Promotores + EXPEDIENTES...');
 
             establecerFechasPorDefecto();
             configurarEventListeners();
@@ -2715,20 +2719,20 @@
         }
 
         // 🆕 ===== FUNCIONES PARA EXPEDIENTE DE PROMOTOR =====
-        
+
         async function verExpedientePromotor(idPromotor) {
             console.log(`Ver expediente del promotor ID: ${idPromotor}`);
-            
+
             modalExpediente.classList.add('active');
             document.body.style.overflow = 'hidden';
-            
+
             document.getElementById('expediente-loading').style.display = 'block';
             document.getElementById('expediente-data').style.display = 'none';
-            
+
             try {
                 const fechaInicioPeriodo = filtrosAplicados.fecha_inicio || document.getElementById('fecha-inicio').value;
                 const fechaFinPeriodo = filtrosAplicados.fecha_fin || document.getElementById('fecha-fin').value;
-                
+
                 const response = await fetch('../../api/reportes.php', {
                     method: 'POST',
                     headers: {
@@ -2741,14 +2745,14 @@
                         fecha_fin: fechaFinPeriodo
                     })
                 });
-                
+
                 if (!response.ok) {
                     throw new Error(`Error HTTP: ${response.status}`);
                 }
-                
+
                 const resultado = await response.json();
                 console.log('Expediente recibido:', resultado);
-                
+
                 if (resultado.success && resultado.data) {
                     expedienteActual = resultado.data;
                     renderizarExpediente(resultado.data);
@@ -2756,18 +2760,18 @@
                 } else {
                     throw new Error(resultado.message || 'Error al cargar expediente');
                 }
-                
+
             } catch (error) {
                 console.error('Error cargando expediente:', error);
                 mostrarNotificacion('Error al cargar expediente: ' + error.message, 'error');
                 cerrarModalExpediente();
             }
         }
-        
+
         // 🔥 FUNCIÓN CORREGIDA PARA RENDERIZAR EXPEDIENTE (SOLO CAMPOS REALES DE LA BD)
         function renderizarExpediente(expediente) {
             console.log('Renderizando expediente:', expediente);
-            
+
             const promotor = expediente.promotor;
             const stats = expediente.estadisticas_generales;
             const statsPeriodo = expediente.estadisticas_periodo;
@@ -2775,7 +2779,7 @@
             const incidencias = expediente.incidencias;
             const historial = expediente.historial_completo;
             const periodo = expediente.periodo;
-            
+
             // HEADER
             document.getElementById('exp-nombre').textContent = promotor.nombre_completo;
             document.getElementById('exp-estatus').textContent = promotor.estatus || 'ACTIVO';
@@ -2783,92 +2787,92 @@
             document.getElementById('exp-telefono').textContent = promotor.telefono || 'No disponible';
             document.getElementById('exp-correo').textContent = promotor.correo || 'No disponible';
             document.getElementById('exp-region').textContent = `Región ${promotor.region || '0'}`;
-            
+
             // ESTADÍSTICAS RÁPIDAS
             document.getElementById('exp-stat-antiguedad').textContent = promotor.antiguedad_texto || 'N/A';
             document.getElementById('exp-stat-tiendas').textContent = stats.total_tiendas_asignadas || 0;
             document.getElementById('exp-stat-asignaciones').textContent = stats.total_periodos_asignacion || 0;
             document.getElementById('exp-stat-incidencias').textContent = statsPeriodo.total_incidencias || 0;
-            
+
             // TAB: INFORMACIÓN PERSONAL (🔥 SOLO CAMPOS REALES)
             document.getElementById('exp-info-nombre').textContent = promotor.nombre_completo;
             document.getElementById('exp-info-rfc').textContent = promotor.rfc || 'N/A';
             document.getElementById('exp-info-nss').textContent = promotor.nss || 'N/A';
-            
+
             // Fecha de ingreso
-            document.getElementById('exp-info-fingreso').textContent = promotor.fecha_ingreso ? 
+            document.getElementById('exp-info-fingreso').textContent = promotor.fecha_ingreso ?
                 new Date(promotor.fecha_ingreso).toLocaleDateString('es-ES') : 'N/A';
-            
+
             // Región
             document.getElementById('exp-info-region').textContent = promotor.region || '0';
-            
+
             // Contacto
             document.getElementById('exp-info-tel').textContent = promotor.telefono || 'N/A';
             document.getElementById('exp-info-email').textContent = promotor.correo || 'N/A';
-            
+
             // Datos Bancarios
             document.getElementById('exp-info-banco').textContent = promotor.banco || 'N/A';
             document.getElementById('exp-info-cuenta').textContent = promotor.numero_cuenta || 'N/A';
-            
+
             // Información Laboral
-            document.getElementById('exp-info-falta').textContent = promotor.fecha_alta ? 
+            document.getElementById('exp-info-falta').textContent = promotor.fecha_alta ?
                 new Date(promotor.fecha_alta).toLocaleDateString('es-ES') : 'N/A';
             document.getElementById('exp-info-antiguedad').textContent = promotor.antiguedad_texto || 'N/A';
             document.getElementById('exp-info-estatus').textContent = promotor.estatus || 'ACTIVO';
             document.getElementById('exp-info-tipo-trabajo').textContent = promotor.tipo_trabajo || 'fijo';
             document.getElementById('exp-info-descanso').textContent = promotor.dia_descanso_nombre || 'No definido';
             document.getElementById('exp-info-vacaciones').textContent = promotor.vacaciones ? 'Sí' : 'No';
-            
+
             const clavesHTML = promotor.claves_array && promotor.claves_array.length > 0 ?
                 promotor.claves_array.map(c => `<span class="promotor-badge">${c}</span>`).join(' ') :
                 'Sin claves';
             document.getElementById('exp-info-claves').innerHTML = clavesHTML;
-            
+
             // TAB: ESTADÍSTICAS
             const fechaInicioPeriodo = new Date(periodo.fecha_inicio).toLocaleDateString('es-ES');
             const fechaFinPeriodo = new Date(periodo.fecha_fin).toLocaleDateString('es-ES');
             document.getElementById('exp-periodo-texto').textContent = `Del ${fechaInicioPeriodo} al ${fechaFinPeriodo} (${periodo.dias_totales} días)`;
-            
+
             document.getElementById('exp-stat-dias-asig').textContent = statsPeriodo.dias_con_asignacion || 0;
             document.getElementById('exp-stat-tiendas-vis').textContent = statsPeriodo.tiendas_visitadas || 0;
             document.getElementById('exp-stat-total-inc').textContent = statsPeriodo.total_incidencias || 0;
-            
+
             document.getElementById('exp-stat-faltas').textContent = statsPeriodo.faltas || 0;
             document.getElementById('exp-stat-retardos').textContent = statsPeriodo.retardos || 0;
             document.getElementById('exp-stat-incapacidades').textContent = statsPeriodo.incapacidades || 0;
             document.getElementById('exp-stat-dias-inc').textContent = statsPeriodo.total_dias_incidencia || 0;
-            
+
             // TAB: ASIGNACIONES
             renderizarAsignacionesExpediente(asignaciones);
-            
+
             // TAB: INCIDENCIAS
             renderizarIncidenciasExpediente(incidencias);
-            
+
             // TAB: HISTORIAL
             renderizarHistorialExpediente(historial);
-            
+
             // Ocultar loading y mostrar datos
             document.getElementById('expediente-loading').style.display = 'none';
             document.getElementById('expediente-data').style.display = 'block';
-            
+
             // Resetear a la primera tab
             cambiarTabExpediente('informacion');
         }
-        
+
         function renderizarAsignacionesExpediente(asignaciones) {
             const container = document.getElementById('exp-asignaciones-lista');
-            
+
             if (!asignaciones || asignaciones.length === 0) {
                 container.innerHTML = '<p class="text-muted">No hay asignaciones en este período</p>';
                 return;
             }
-            
+
             let html = '';
             asignaciones.forEach(asig => {
                 const fechaInicio = new Date(asig.fecha_inicio).toLocaleDateString('es-ES');
                 const fechaFin = asig.fecha_fin ? new Date(asig.fecha_fin).toLocaleDateString('es-ES') : 'Actual';
                 const badgeClass = asig.activo ? 'badge-activo' : 'badge-inactivo';
-                
+
                 html += `
                     <div class="asignacion-item">
                         <div class="asignacion-header">
@@ -2908,29 +2912,29 @@
                     </div>
                 `;
             });
-            
+
             container.innerHTML = html;
         }
-        
+
         function renderizarIncidenciasExpediente(incidencias) {
             const container = document.getElementById('exp-incidencias-lista');
-            
+
             if (!incidencias || incidencias.length === 0) {
                 container.innerHTML = '<p class="text-muted">No hay incidencias registradas en este período</p>';
                 return;
             }
-            
+
             let html = '';
             incidencias.forEach(inc => {
                 const fechaInicio = new Date(inc.fecha_incidencia).toLocaleDateString('es-ES');
                 const fechaFin = inc.fecha_fin ? new Date(inc.fecha_fin).toLocaleDateString('es-ES') : 'N/A';
-                
+
                 let badgeClass = 'badge-falta';
                 if (inc.tipo_incidencia === 'retardo') badgeClass = 'badge-retardo';
                 if (inc.tipo_incidencia === 'salud') badgeClass = 'badge-salud';
-                
+
                 const tipoTexto = inc.tipo_incidencia.charAt(0).toUpperCase() + inc.tipo_incidencia.slice(1);
-                
+
                 html += `
                     <div class="incidencia-item">
                         <div class="incidencia-header">
@@ -2958,24 +2962,24 @@
                     </div>
                 `;
             });
-            
+
             container.innerHTML = html;
         }
-        
+
         function renderizarHistorialExpediente(historial) {
             const container = document.getElementById('exp-historial-lista');
-            
+
             if (!historial || historial.length === 0) {
                 container.innerHTML = '<p class="text-muted">No hay historial disponible</p>';
                 return;
             }
-            
+
             let html = '';
             historial.forEach(item => {
                 const fechaInicio = new Date(item.fecha_inicio).toLocaleDateString('es-ES');
                 const fechaFin = item.fecha_fin ? new Date(item.fecha_fin).toLocaleDateString('es-ES') : 'Actual';
                 const badgeClass = item.activo ? 'badge-activo' : 'badge-inactivo';
-                
+
                 html += `
                     <div class="historial-item">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
@@ -3007,23 +3011,23 @@
                     </div>
                 `;
             });
-            
+
             container.innerHTML = html;
         }
-        
+
         function cambiarTabExpediente(tabName) {
             document.querySelectorAll('.exp-tab').forEach(tab => {
                 tab.classList.remove('active');
             });
-            
+
             document.querySelectorAll('.exp-tab-pane').forEach(pane => {
                 pane.classList.remove('active');
             });
-            
+
             document.querySelector(`.exp-tab[data-tab="${tabName}"]`).classList.add('active');
             document.getElementById(`tab-${tabName}`).classList.add('active');
         }
-        
+
         function cerrarModalExpediente() {
             modalExpediente.classList.remove('active');
             document.body.style.overflow = 'auto';
@@ -3040,31 +3044,31 @@
             try {
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF('p', 'mm', 'a4');
-                
+
                 const promotor = expedienteActual.promotor;
                 const periodo = expedienteActual.periodo;
-                
+
                 // ENCABEZADO
                 doc.setFillColor(39, 174, 96);
                 doc.rect(0, 0, 210, 40, 'F');
-                
+
                 doc.setTextColor(255, 255, 255);
                 doc.setFontSize(24);
                 doc.setFont('helvetica', 'bold');
                 doc.text('EXPEDIENTE DEL PROMOTOR', 105, 15, { align: 'center' });
-                
+
                 doc.setFontSize(16);
                 doc.setFont('helvetica', 'normal');
                 doc.text(promotor.nombre_completo, 105, 25, { align: 'center' });
-                
+
                 doc.setFontSize(10);
                 doc.text(`RFC: ${promotor.rfc || 'N/A'} | Estatus: ${promotor.estatus || 'N/A'}`, 105, 33, { align: 'center' });
-                
+
                 // RESTABLECER COLOR DE TEXTO
                 doc.setTextColor(0, 0, 0);
-                
+
                 let yPos = 50;
-                
+
                 // INFORMACIÓN BÁSICA
                 doc.setFontSize(14);
                 doc.setFont('helvetica', 'bold');
@@ -3072,10 +3076,10 @@
                 doc.text('Información Personal', 15, yPos);
                 doc.setTextColor(0, 0, 0);
                 yPos += 8;
-                
+
                 doc.setFontSize(10);
                 doc.setFont('helvetica', 'normal');
-                
+
                 const infoBasica = [
                     ['Teléfono:', promotor.telefono || 'N/A'],
                     ['Correo:', promotor.correo || 'N/A'],
@@ -3084,7 +3088,7 @@
                     ['NSS:', promotor.nss || 'N/A'],
                     ['Fecha Ingreso:', promotor.fecha_ingreso ? new Date(promotor.fecha_ingreso).toLocaleDateString('es-ES') : 'N/A']
                 ];
-                
+
                 infoBasica.forEach(([label, value]) => {
                     doc.setFont('helvetica', 'bold');
                     doc.text(label, 15, yPos);
@@ -3092,9 +3096,9 @@
                     doc.text(value, 60, yPos);
                     yPos += 6;
                 });
-                
+
                 yPos += 5;
-                
+
                 // ESTADÍSTICAS DEL PERÍODO
                 doc.setFontSize(14);
                 doc.setFont('helvetica', 'bold');
@@ -3102,11 +3106,11 @@
                 doc.text('Estadísticas del Período', 15, yPos);
                 doc.setTextColor(0, 0, 0);
                 yPos += 8;
-                
+
                 doc.setFontSize(10);
                 doc.text(`Período: ${new Date(periodo.fecha_inicio).toLocaleDateString('es-ES')} al ${new Date(periodo.fecha_fin).toLocaleDateString('es-ES')}`, 15, yPos);
                 yPos += 8;
-                
+
                 const statsPeriodo = expedienteActual.estadisticas_periodo;
                 const estadisticas = [
                     ['Días con Asignación:', statsPeriodo.dias_con_asignacion || 0],
@@ -3116,7 +3120,7 @@
                     ['Retardos:', statsPeriodo.retardos || 0],
                     ['Incapacidades:', statsPeriodo.incapacidades || 0]
                 ];
-                
+
                 estadisticas.forEach(([label, value]) => {
                     doc.setFont('helvetica', 'bold');
                     doc.text(label, 15, yPos);
@@ -3124,18 +3128,18 @@
                     doc.text(String(value), 70, yPos);
                     yPos += 6;
                 });
-                
+
                 // NUEVA PÁGINA PARA ASIGNACIONES
                 doc.addPage();
                 yPos = 20;
-                
+
                 doc.setFontSize(14);
                 doc.setFont('helvetica', 'bold');
                 doc.setTextColor(39, 174, 96);
                 doc.text('Asignaciones Actuales', 15, yPos);
                 doc.setTextColor(0, 0, 0);
                 yPos += 10;
-                
+
                 const asignaciones = expedienteActual.asignaciones || [];
                 if (asignaciones.length > 0) {
                     doc.setFontSize(9);
@@ -3144,11 +3148,11 @@
                             doc.addPage();
                             yPos = 20;
                         }
-                        
+
                         doc.setFont('helvetica', 'bold');
-                        doc.text(`${index + 1}. ${asig.nombre_tienda}`, 15, yPos);
+                        doc.text((index + 1) + '. ' + asig.nombre_tienda, 15, yPos);
                         yPos += 5;
-                        
+
                         doc.setFont('helvetica', 'normal');
                         doc.text(`   Ciudad: ${asig.ciudad}, Estado: ${asig.estado}`, 15, yPos);
                         yPos += 5;
@@ -3161,23 +3165,23 @@
                     doc.setFont('helvetica', 'italic');
                     doc.text('No hay asignaciones en este período', 15, yPos);
                 }
-                
+
                 // PIE DE PÁGINA
                 const totalPages = doc.internal.getNumberOfPages();
                 for (let i = 1; i <= totalPages; i++) {
                     doc.setPage(i);
                     doc.setFontSize(8);
                     doc.setTextColor(128, 128, 128);
-                    doc.text(`Página ${i} de ${totalPages}`, 105, 290, { align: 'center' });
+                    doc.text(limpiarTexto('Pag. ' + i + ' de ' + totalPages), 105, 290, { align: 'center' });
                     doc.text(`Generado: ${new Date().toLocaleString('es-ES')}`, 105, 285, { align: 'center' });
                 }
-                
+
                 // DESCARGAR
                 const nombreArchivo = `expediente-${promotor.nombre_completo.replace(/ /g, '-')}-${new Date().toISOString().split('T')[0]}.pdf`;
                 doc.save(nombreArchivo);
-                
+
                 mostrarNotificacion('Expediente descargado exitosamente', 'success');
-                
+
             } catch (error) {
                 console.error('Error generando PDF del expediente:', error);
                 mostrarNotificacion('Error al generar PDF del expediente: ' + error.message, 'error');
@@ -3321,7 +3325,7 @@
 
                         let detalleIncidencias = 'Sin incidencias';
                         if (promotorData.incidencias.length > 0) {
-                            const incidenciasOrdenadas = [...promotorData.incidencias].sort((a, b) => 
+                            const incidenciasOrdenadas = [...promotorData.incidencias].sort((a, b) =>
                                 new Date(a.fecha) - new Date(b.fecha)
                             );
 
@@ -3330,7 +3334,7 @@
 
                             incidenciasOrdenadas.forEach((inc, index) => {
                                 const fechaActual = new Date(inc.fecha + 'T00:00:00');
-                                
+
                                 if (!grupoActual || grupoActual.tipo !== inc.tipo) {
                                     if (grupoActual) grupos.push(grupoActual);
                                     grupoActual = {
@@ -3342,7 +3346,7 @@
                                 } else {
                                     const fechaAnterior = new Date(grupoActual.fechaFin + 'T00:00:00');
                                     const diffDias = Math.floor((fechaActual - fechaAnterior) / (1000 * 60 * 60 * 24));
-                                    
+
                                     if (diffDias === 1) {
                                         grupoActual.fechaFin = inc.fecha;
                                         grupoActual.dias++;
@@ -3356,7 +3360,7 @@
                                         };
                                     }
                                 }
-                                
+
                                 if (index === incidenciasOrdenadas.length - 1) {
                                     grupos.push(grupoActual);
                                 }
@@ -3372,7 +3376,7 @@
                                     'otro': '📝'
                                 };
                                 const emoji = tipoEmoji[grupo.tipo] || '❌';
-                                
+
                                 if (grupo.dias === 1) {
                                     return `${emoji} ${grupo.fechaInicio}: ${grupo.tipo}`;
                                 } else {
@@ -3576,7 +3580,7 @@
         }
 
         // ===== GENERACIÓN DE PDF =====
-        function descargarPDF() {
+        async function descargarPDF() {
             if (!reporteActual || reporteActual.length === 0) {
                 mostrarNotificacion('No hay datos para exportar', 'warning');
                 return;
@@ -3584,15 +3588,94 @@
 
             try {
                 const { jsPDF } = window.jspdf;
-                const doc = new jsPDF('l', 'mm', 'a4');
+                const doc = new jsPDF('portrait', 'mm', 'a4');
+                
+                // CONFIGURACIÓN ESPECIAL PARA EVITAR PROBLEMAS DE CODIFICACIÓN
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'normal');
+                
+                // Función para limpiar texto y evitar caracteres problemáticos
+                const limpiarTexto = function(texto) {
+                    return String(texto)
+                        .replace(/[áàäâã]/g, 'a')
+                        .replace(/[éèëê]/g, 'e')
+                        .replace(/[íìïî]/g, 'i')
+                        .replace(/[óòöôõ]/g, 'o')
+                        .replace(/[úùüû]/g, 'u')
+                        .replace(/[ñ]/g, 'n')
+                        .replace(/[ç]/g, 'c')
+                        .replace(/[→]/g, '-')
+                        .replace(/[°]/g, 'o')
+                        .trim();
+                };
+
+                // ===== LOGO Y MARCA DE AGUA "DAT EVONET" =====
+                // Función para cargar logo desde XAMPP
+                const cargarLogo = async function() {
+                    try {
+                        // CAMBIA 'logo.png' por el nombre real de tu archivo
+                        const response = await fetch('/promotoria/img/logo.png');
+                        const blob = await response.blob();
+                        
+                        return new Promise((resolve) => {
+                            const reader = new FileReader();
+                            reader.onloadend = () => resolve(reader.result);
+                            reader.readAsDataURL(blob);
+                        });
+                    } catch (error) {
+                        console.log('Logo no encontrado, usando logo por defecto');
+                        // Logo por defecto si no encuentra el archivo
+                        return 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+                    }
+                };
+                
+                // Cargar logo
+                const logoBase64 = await cargarLogo();
+                
+                // Función para agregar logo ANTES de dibujar contenido
+                const agregarLogoFondo = function() {
+                    const pageWidth = doc.internal.pageSize.width;
+                    const pageHeight = doc.internal.pageSize.height;
+                    
+                    // Logo de fondo (marca de agua) - MUY SUTIL DETRÁS DEL TEXTO
+                    doc.setGState(new doc.GState({opacity: 0.02})); // Opacidad del 2% - CASI INVISIBLE
+                    doc.addImage(logoBase64, 'PNG', 0, 0, pageWidth, pageHeight);
+                    doc.setGState(new doc.GState({opacity: 1})); // Restaurar opacidad
+                };
+
+                // Función para agregar etiqueta y número de página (SIN logo)
+                const agregarMarcaDeAgua = function(data) {
+                    const pageCount = doc.internal.getNumberOfPages();
+                    const pageWidth = doc.internal.pageSize.width;
+                    const pageHeight = doc.internal.pageSize.height;
+                    
+                    for (let i = 1; i <= pageCount; i++) {
+                        doc.setPage(i);
+                        
+                        // Solo etiqueta "DAT EVONET" - SIN LOGO AQUÍ
+                        doc.setFontSize(10);
+                        doc.setTextColor(39, 174, 96); // Color verde
+                        doc.setFont('helvetica', 'bold');
+                        doc.text(limpiarTexto('DAT EVONET'), pageWidth - 20, 10, {align: 'right'});
+                        
+                        // Número de página
+                        doc.setFontSize(8);
+                        doc.setTextColor(100, 100, 100);
+                        doc.setFont('helvetica', 'normal');
+                        // doc.text(limpiarTexto('Pag. ' + i + ' de ' + pageCount), pageWidth / 2, pageHeight - 4, {align: 'center'});
+                    }
+                };
+
+                // DIBUJAR LOGO DE FONDO PRIMERO (antes de cualquier contenido)
+                agregarLogoFondo();
 
                 doc.setFontSize(16);
                 doc.setFont('helvetica', 'bold');
-                doc.text('Reporte Tiendas → Promotores', 20, 20);
+                doc.text(limpiarTexto('Reporte Tiendas - Promotores'), 20, 20);
 
                 doc.setFontSize(12);
                 doc.setFont('helvetica', 'normal');
-                const subtitulo = document.getElementById('reporte-subtitulo').textContent;
+                const subtitulo = limpiarTexto(document.getElementById('reporte-subtitulo').textContent);
                 doc.text(subtitulo, 20, 30);
 
                 const stats = [
@@ -3694,7 +3777,7 @@
                 });
 
                 doc.autoTable({
-                    head: [['Promotor / Tienda', 'Días Trabajados', 'Total Días', 'Período', 'Claves']],
+                    head: [['Promotor / Tienda', 'Días Trabajados', 'Total Días', 'Periodo', 'Claves']],
                     body: datosPDF,
                     startY: 50,
                     styles: {
@@ -3707,18 +3790,29 @@
                         fontStyle: 'bold'
                     },
                     columnStyles: {
-                        0: { cellWidth: 50 },
-                        1: { cellWidth: 65 },
-                        2: { cellWidth: 20 },
-                        3: { cellWidth: 45 },
-                        4: { cellWidth: 35 }
+                        0: { cellWidth: 35 },
+                        1: { cellWidth: 45 },
+                        2: { cellWidth: 15 },
+                        3: { cellWidth: 40 },
+                        4: { cellWidth: 25 }
                     },
-                    margin: { left: 20, right: 20 }
+                    margin: { left: 10, right: 10 },
+                    didDrawPage: function(data) {
+                        // Agregar logo de fondo en esta página (muy sutil)
+                        const pageWidth = doc.internal.pageSize.width;
+                        const pageHeight = doc.internal.pageSize.height;
+                        doc.setGState(new doc.GState({opacity: 0.07})); // 2% de opacidad
+                        doc.addImage(logoBase64, 'PNG', 0, 0, pageWidth, pageHeight);
+                        doc.setGState(new doc.GState({opacity: 1}));
+                        
+                        // Luego agregar etiquetas encima
+                        agregarMarcaDeAgua(data);
+                    }
                 });
 
                 const fechaGeneracion = new Date().toLocaleString('es-MX');
                 doc.setFontSize(8);
-                doc.text(`Generado el ${fechaGeneracion}`, 20, doc.internal.pageSize.height - 10);
+                doc.text('Generado el ' + fechaGeneracion, 20, doc.internal.pageSize.height - 10);
 
                 const fechaInicioValor = fechaInicio.value;
                 const fechaFinValor = fechaFin.value;
@@ -3782,7 +3876,7 @@
         window.limpiarFiltros = limpiarFiltros;
 
         // ===== INICIALIZACIÓN FINAL =====
-        console.log('🎉 Módulo Tiendas → Promotores + EXPEDIENTES iniciado ✅');
+        console.log('🎉 Módulo Tiendas - Promotores + EXPEDIENTES iniciado ✅');
 
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', init);

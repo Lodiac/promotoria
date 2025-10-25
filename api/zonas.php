@@ -208,6 +208,30 @@ function getZonas($params) {
         $where_conditions = ["z.activa = 1"];
         $where_params = [];
 
+        // 🔍 BÚSQUEDA DINÁMICA
+        if (!empty($params['search_field']) && !empty($params['search_value'])) {
+            $search_field = $params['search_field'];
+            $search_value = trim($params['search_value']);
+            
+            error_log("🔍 Búsqueda activada - Campo: $search_field, Valor: $search_value");
+            
+            // Mapear campo de búsqueda a columna de BD
+            $field_map = [
+                'nombre_zona' => 'z.nombre_zona',
+                'numero_region' => 'r.numero_region',
+                'descripcion' => 'z.descripcion'
+            ];
+            
+            if (isset($field_map[$search_field])) {
+                $db_field = $field_map[$search_field];
+                $where_conditions[] = "$db_field LIKE :search_value";
+                $where_params[':search_value'] = '%' . $search_value . '%';
+                error_log("✅ Condición de búsqueda agregada: $db_field LIKE '%$search_value%'");
+            } else {
+                error_log("⚠️ Campo de búsqueda no válido: $search_field");
+            }
+        }
+
         // 🆕 SI ES SUPERVISOR, FILTRAR SOLO SUS ZONAS
         if ($rol === 'supervisor') {
             if (!$usuario_id) {
@@ -1138,34 +1162,80 @@ function getPromotoresPorTiendas($tiendas_ids) {
     }
 }
 
-// ============================================================================
-// 🆕 FUNCIONES PARA GESTIÓN DE INCIDENCIAS
-// ============================================================================
-
-/**
- * Obtener todos los promotores activos para formulario de incidencias
- */
+// ===== ✅ FUNCIÓN CORREGIDA: OBTENER PROMOTORES CON FILTRO DE ZONA =====
 function obtenerPromotoresTodos() {
     try {
-        error_log("📋 Obteniendo todos los promotores activos para incidencias");
+        error_log("📋 Obteniendo promotores activos para incidencias");
         
-        $sql = "SELECT 
-                    id_promotor,
-                    nombre,
-                    apellido,
-                    telefono,
-                    correo,
-                    rfc,
-                    region,
-                    estatus,
-                    estado,
-                    tipo_trabajo
-                FROM promotores 
-                WHERE estado = 1 
-                AND estatus = 'ACTIVO'
-                ORDER BY nombre ASC, apellido ASC";
+        // 🔐 OBTENER ROL Y ID DEL USUARIO
+        $rol = strtolower($_SESSION['rol'] ?? 'usuario');
+        $usuario_id = $_SESSION['user_id'] ?? null;
         
-        $promotores = Database::select($sql);
+        error_log("👤 Usuario ID: $usuario_id, Rol: $rol");
+        
+        if ($rol === 'root') {
+            // ✅ ROOT: VER TODOS LOS PROMOTORES
+            error_log("👑 Usuario ROOT - Acceso a todos los promotores");
+            
+            $sql = "SELECT 
+                        id_promotor,
+                        nombre,
+                        apellido,
+                        telefono,
+                        correo,
+                        rfc,
+                        region,
+                        estatus,
+                        estado,
+                        tipo_trabajo
+                    FROM promotores 
+                    WHERE estado = 1 
+                    AND estatus = 'ACTIVO'
+                    ORDER BY nombre ASC, apellido ASC";
+            
+            $promotores = Database::select($sql);
+            
+        } else if ($rol === 'supervisor') {
+            // ✅ SUPERVISOR: SOLO PROMOTORES DE SUS ZONAS
+            error_log("👤 Usuario SUPERVISOR - Filtrando por zonas asignadas");
+            
+            if (!$usuario_id) {
+                throw new Exception("ID de supervisor no encontrado en sesión");
+            }
+            
+            $sql = "SELECT DISTINCT
+                        p.id_promotor,
+                        p.nombre,
+                        p.apellido,
+                        p.telefono,
+                        p.correo,
+                        p.rfc,
+                        p.region,
+                        p.estatus,
+                        p.estado,
+                        p.tipo_trabajo
+                    FROM promotores p
+                    INNER JOIN promotor_tienda_asignaciones pta ON p.id_promotor = pta.id_promotor
+                    INNER JOIN tiendas t ON pta.id_tienda = t.id_tienda
+                    INNER JOIN zona_supervisor zs ON t.id_zona = zs.id_zona
+                    WHERE p.estado = 1 
+                    AND p.estatus = 'ACTIVO'
+                    AND pta.activo = 1
+                    AND t.estado_reg = 1
+                    AND zs.id_supervisor = :usuario_id
+                    AND zs.activa = 1
+                    ORDER BY p.nombre ASC, p.apellido ASC";
+            
+            $params = [':usuario_id' => $usuario_id];
+            $promotores = Database::select($sql, $params);
+            
+            error_log("✅ Filtro de zona aplicado - Zonas del supervisor");
+            
+        } else {
+            // ❌ OTROS ROLES: NO TIENEN ACCESO
+            error_log("⚠️ Rol '$rol' sin permisos para ver promotores");
+            $promotores = [];
+        }
         
         error_log("✅ Se obtuvieron " . count($promotores) . " promotores activos");
         
@@ -1174,12 +1244,15 @@ function obtenerPromotoresTodos() {
             'success' => true,
             'data' => $promotores,
             'total' => count($promotores),
-            'message' => 'Promotores obtenidos correctamente'
+            'message' => 'Promotores obtenidos correctamente',
+            'rol' => $rol,
+            'filtrado_por_zona' => ($rol === 'supervisor')
         ], JSON_UNESCAPED_UNICODE);
         
     } catch (Exception $e) {
         error_log("❌ ERROR en obtenerPromotoresTodos: " . $e->getMessage());
         error_log("File: " . $e->getFile() . " Line: " . $e->getLine());
+        error_log("Stack: " . $e->getTraceAsString());
         
         http_response_code(500);
         echo json_encode([
@@ -1199,23 +1272,69 @@ function obtenerPromotoresTodos() {
  */
 function obtenerTiendasTodas() {
     try {
-        error_log("🏪 Obteniendo todas las tiendas activas para incidencias");
+        error_log("🏪 Obteniendo tiendas activas para incidencias");
         
-        $sql = "SELECT 
-                    id_tienda,
-                    cadena,
-                    num_tienda,
-                    nombre_tienda,
-                    ciudad,
-                    estado,
-                    region,
-                    id_zona,
-                    estado_reg
-                FROM tiendas 
-                WHERE estado_reg = 1
-                ORDER BY cadena ASC, num_tienda ASC";
+        // 🔐 OBTENER ROL Y ID DEL USUARIO
+        $rol = strtolower($_SESSION['rol'] ?? 'usuario');
+        $usuario_id = $_SESSION['user_id'] ?? null;
         
-        $tiendas = Database::select($sql);
+        error_log("👤 Usuario ID: $usuario_id, Rol: $rol");
+        
+        if ($rol === 'root') {
+            // ✅ ROOT: VER TODAS LAS TIENDAS
+            error_log("👑 Usuario ROOT - Acceso a todas las tiendas");
+            
+            $sql = "SELECT 
+                        id_tienda,
+                        cadena,
+                        num_tienda,
+                        nombre_tienda,
+                        ciudad,
+                        estado,
+                        region,
+                        id_zona,
+                        estado_reg
+                    FROM tiendas 
+                    WHERE estado_reg = 1
+                    ORDER BY cadena ASC, num_tienda ASC";
+            
+            $tiendas = Database::select($sql);
+            
+        } else if ($rol === 'supervisor') {
+            // ✅ SUPERVISOR: SOLO TIENDAS DE SUS ZONAS
+            error_log("👤 Usuario SUPERVISOR - Filtrando por zonas asignadas");
+            
+            if (!$usuario_id) {
+                throw new Exception("ID de supervisor no encontrado en sesión");
+            }
+            
+            $sql = "SELECT 
+                        t.id_tienda,
+                        t.cadena,
+                        t.num_tienda,
+                        t.nombre_tienda,
+                        t.ciudad,
+                        t.estado,
+                        t.region,
+                        t.id_zona,
+                        t.estado_reg
+                    FROM tiendas t
+                    INNER JOIN zona_supervisor zs ON t.id_zona = zs.id_zona
+                    WHERE t.estado_reg = 1
+                    AND zs.id_supervisor = :usuario_id
+                    AND zs.activa = 1
+                    ORDER BY t.cadena ASC, t.num_tienda ASC";
+            
+            $params = [':usuario_id' => $usuario_id];
+            $tiendas = Database::select($sql, $params);
+            
+            error_log("✅ Filtro de zona aplicado - Zonas del supervisor");
+            
+        } else {
+            // ❌ OTROS ROLES: NO TIENEN ACCESO
+            error_log("⚠️ Rol '$rol' sin permisos para ver tiendas");
+            $tiendas = [];
+        }
         
         error_log("✅ Se obtuvieron " . count($tiendas) . " tiendas activas");
         
@@ -1224,12 +1343,15 @@ function obtenerTiendasTodas() {
             'success' => true,
             'data' => $tiendas,
             'total' => count($tiendas),
-            'message' => 'Tiendas obtenidas correctamente'
+            'message' => 'Tiendas obtenidas correctamente',
+            'rol' => $rol,
+            'filtrado_por_zona' => ($rol === 'supervisor')
         ], JSON_UNESCAPED_UNICODE);
         
     } catch (Exception $e) {
         error_log("❌ ERROR en obtenerTiendasTodas: " . $e->getMessage());
         error_log("File: " . $e->getFile() . " Line: " . $e->getLine());
+        error_log("Stack: " . $e->getTraceAsString());
         
         http_response_code(500);
         echo json_encode([
